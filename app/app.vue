@@ -5,16 +5,15 @@
   <div>
     <NuxtRouteAnnouncer />
     <NuxtLayout>
-            <NuxtPage />
+      <NuxtPage />
     </NuxtLayout>
 
     <ClientOnly>
-    <Toaster
-            rich-colors
-            class="pointer-events-auto"
-        />
+      <Toaster
+        rich-colors
+        class="pointer-events-auto"
+      />
       <LazyGlobalAlertDialog />
-  </ClientOnly>
+    </ClientOnly>
   </div>
-  
 </template>

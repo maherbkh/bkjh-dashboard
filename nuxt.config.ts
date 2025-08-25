@@ -24,6 +24,16 @@ export default defineNuxtConfig({
     rootAttrs: {
       id: "__bkjh_dashboard_app"
     },
+    pageTransition: {
+      name: 'fade',
+      mode: 'out-in',
+      duration: 300
+    },
+    layoutTransition: {
+      name: 'fade',
+      mode: 'out-in',
+      duration: 300
+    }
   },
   vite: {
     plugins: [
