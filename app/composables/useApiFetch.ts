@@ -10,8 +10,14 @@ export function useApiFetch<T = unknown>(
     // Use Record<string, string> instead of `HeadersObject` (nuxt uses Fetch-compatible headers)
     const headers: Record<string, string> = {
         accept: 'application/json',
-        referer: import.meta.client ? window.location.origin : 'https://support.backhaus.de',
+        referer: import.meta.client ? window.location.origin : 'https://dashboard.backhaus.de',
     };    
+
+    // Get CSRF token and add to headers if available
+    const csrfToken = useCookie('XSRF-TOKEN');
+    if (csrfToken.value) {
+        headers['X-XSRF-TOKEN'] = csrfToken.value as string;
+    }
 
     // Get auth token and add to headers if available
     const token = useCookie('BKJH_AUTH_TOKEN');
