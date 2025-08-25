@@ -1,4 +1,5 @@
 import { toast } from 'vue-sonner';
+import { useUserStore } from '~/stores/user';
 
 export const useGlobalErrorHandler = () => {
     const userStore = useUserStore();

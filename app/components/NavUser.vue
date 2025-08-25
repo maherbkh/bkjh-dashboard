@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useSidebar } from '~/components/ui/sidebar';
+import { useUserStore } from '~/stores/user';
 
 const { isMobile } = useSidebar();
 const userStore = useUserStore();

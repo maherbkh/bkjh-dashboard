@@ -3,7 +3,6 @@
 
 <template>
   <div>
-  
     <NuxtRouteAnnouncer />
     <NuxtLayout>
             <NuxtPage />
@@ -14,6 +13,7 @@
             rich-colors
             class="pointer-events-auto"
         />
+      <LazyGlobalAlertDialog />
   </ClientOnly>
   </div>
   

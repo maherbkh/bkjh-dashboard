@@ -2,6 +2,7 @@
 import { toast } from 'vue-sonner'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
+import { useUserStore } from '~/stores/user'
 
 const { t, locale, locales, setLocale } = useI18n()
 const user = useUserStore().user

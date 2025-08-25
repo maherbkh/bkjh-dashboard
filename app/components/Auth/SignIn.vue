@@ -1,9 +1,10 @@
 <script setup lang="ts">
-// Using Nuxt 3 auto-imports for composables and components
+// Using Nuxt 3 auto-imports for composable and components
 import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { z } from 'zod';
 import type { Credentials } from '~/types';
+import {useUserStore} from "~/stores/user";
 
 const { t } = useI18n();
 

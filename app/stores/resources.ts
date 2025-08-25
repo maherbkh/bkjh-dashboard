@@ -122,7 +122,7 @@ export const useResourcesStore = defineStore('resources', () => {
         }
     };
 
-    // Save to localStorage with compression hint
+    // Save to localStorage with a compression hint
     const saveToLocalStorage = () => {
         try {
             const data = {

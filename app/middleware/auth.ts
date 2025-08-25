@@ -1,10 +1,6 @@
-export default defineNuxtRouteMiddleware(async (to, from) => {
-    const tenant = useCurrentTenant()
+import { useUserStore } from "~/stores/user"
 
-    // Only apply authentication logic for dashboard tenant
-    if (tenant !== 'dashboard') {
-        return
-    }
+export default defineNuxtRouteMiddleware(async (to, from) => {
 
     const userStore = useUserStore()
 

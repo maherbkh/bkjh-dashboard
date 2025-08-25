@@ -20,8 +20,8 @@ watchEffect(() => {
         class="relative flex items-center justify-center px-4 h-dvh lg:max-w-none lg:px-0"
         :class="{ 'flex-row-reverse': true }"
     >
-        <div class="relative hidden h-full flex-1 flex-col bg-[url(/images/login-bg.jpg)] bg-muted bg-cover bg-right p-10 text-white lg:flex dark:border-r">
-            <div class="absolute inset-0 from-slate-950 to-transparent bg-gradient-to-t" />
+        <div class="relative hidden h-full flex-1 flex-col bg-[url(/images/login-bg.jpg)] bg-blend-screen bg-muted bg-cover bg-right p-10 text-white lg:flex dark:border-r">
+            <div class="absolute inset-0 from-primary to-transparent bg-gradient-to-b" />
             <div class="relative z-20 flex items-center text-lg font-medium">
                 <AppLogo
                     variant="light"
@@ -29,7 +29,7 @@ watchEffect(() => {
                 />
             </div>
             <div class="relative z-20 mt-auto">
-                <blockquote class="space-y-2">
+                <blockquote class="space-y-2 text-primary-foreground/75">
                     <p class="text-lg font-semibold">
                         &ldquo;{{ $t('quote.work_is_love') }}&rdquo;
                     </p>

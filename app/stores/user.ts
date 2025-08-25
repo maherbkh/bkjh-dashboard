@@ -1,6 +1,7 @@
 import { toast } from 'vue-sonner'
 import type { LocationQueryValue } from '#vue-router'
 import type { Credentials, LoginData, LoginResponse, ResetPasswordForm, User } from '~/types'
+import {useResourcesStore} from "~/stores/resources";
 
 export const useUserStore = defineStore('user', () => {
     const { t } = useNuxtApp().$i18n
@@ -32,7 +33,7 @@ export const useUserStore = defineStore('user', () => {
             setUser(((data.value as LoginResponse).data as LoginData).user)
             setToken(((data.value as LoginResponse).data as LoginData).token)
             const resourcesStore = useResourcesStore()
-            resourcesStore.fetchPermissionsGroup()
+            await resourcesStore.fetchPermissionsGroup()
             toast.success(t('auth.toasts.welcome'), {
                 description: t('auth.toasts.login_success'),
                 duration: 5000,

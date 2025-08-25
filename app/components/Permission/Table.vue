@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Permission } from '~/types';
-import { useResourcesStore } from '../../stores/resources';
+import { useResourcesStore } from '~/stores/resources';
 import { onMounted, onUnmounted } from 'vue';
 
 const { t } = useI18n();
@@ -65,7 +65,7 @@ const visiblePermissions = computed(() => {
     }));
 });
 
-// Loading and error states from store
+// Loading and error states from the store
 const loading = ref(false);
 const error = ref<string | null>(null);
 

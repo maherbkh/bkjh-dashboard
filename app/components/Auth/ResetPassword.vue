@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner';
+import { useUserStore } from '~/stores/user';
 import type { ResetPasswordForm } from '~/types';
 
 const { t } = useI18n();

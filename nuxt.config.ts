@@ -4,7 +4,8 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  ssr: true,
+  ssr: false, // Disable SSR this project uses CSR
+  // Reduce development warnings
   css: ['~/assets/css/main.css', 'vue-sonner/style.css'],
   modules: [
     '@nuxt/eslint',
@@ -21,7 +22,7 @@ export default defineNuxtConfig({
   app: {
     buildAssetsDir: '/static/',
     rootAttrs: {
-      id: "__bkjh_app"
+      id: "__bkjh_dashboard_app"
     },
   },
   vite: {

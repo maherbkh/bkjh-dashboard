@@ -1,4 +1,5 @@
 import { toast } from 'vue-sonner'
+import {useUserStore} from "~/stores/user";
 
 export default defineNuxtPlugin(() => {
     const userStore = useUserStore()
@@ -16,7 +17,7 @@ export default defineNuxtPlugin(() => {
             duration: 5000,
         })
         
-        // Redirect to login page with current path as redirect
+        // Redirect to login page with the current path as redirect
         const route = useRoute()
         navigateTo({
             path: '/login',

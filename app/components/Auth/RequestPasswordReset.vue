@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // Using Nuxt 3 auto-imports for composables and components
 import { toast } from 'vue-sonner';
+import { useUserStore } from '~/stores/user';
 
 const { t } = useI18n();
 const userStore = useUserStore();
