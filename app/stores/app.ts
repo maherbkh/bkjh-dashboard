@@ -1,16 +1,30 @@
-export const useApplicationStore = defineStore('application', () => {
-    // Initialize the slug cookie with a default value if not set where the default value is "support" also values are "support"|"event"|"hr"
-    const slug = useCookie<'support' | 'event' | 'hr'>('BKJH_APP_SLUG', { 
+type AppSlugType = 'support' | 'academy'
+
+export const useAppStore = defineStore('app', () => {
+    // App state stored in cookie
+    const appSlug = useCookie<AppSlugType>('BKJH_APP_SLUG', { 
         default: () => 'support',
-        maxAge: 60 * 60 * 24,
-        sameSite: 'strict'
+        maxAge: 60 * 60 * 24 * 365 // 1 year
     })
 
-    // Ensure the cookie has a valid value, fallback to 'support' if invalid
-    if (!slug.value || !['support', 'event', 'hr'].includes(slug.value)) {
-        slug.value = 'support'
+    // Setters
+    const setAppSlug = (slug: AppSlugType) => {
+        appSlug.value = slug
     }
-    const setApp = (data: 'support' | 'event' | 'hr') => (slug.value = data)
 
-    return { setApp, slug }
+    // Getters
+    const isSupport = computed(() => appSlug.value === 'support')
+    const isAcademy = computed(() => appSlug.value === 'academy')
+
+    return {
+        // State
+        appSlug: readonly(appSlug),
+        
+        // Getters
+        isSupport,
+        isAcademy,
+        
+        // Actions
+        setAppSlug,
+    }
 })

@@ -52,6 +52,7 @@ export type Category = {
     id: number;
     name: string;
     slug?: string;
+    position?: number;
     createdAt?: string;
     updatedAt?: string;
 };
@@ -136,6 +137,7 @@ export type Company = {
     partnerLocation: string;
     partnerRegister: string;
     management: string;
+    position?: number;
     address?: Address;
     groups?: Group[];
     slug?: string;
@@ -158,7 +160,9 @@ export type CompanyForm = {
 export type Group = {
     id: number;
     name: string;
+    displayName?: string;
     slug?: string;
+    position?: number;
     address?: Address;
     companies?: Company[];
     createdAt?: string;
@@ -302,9 +306,50 @@ export type Address = {
     number: string;
     postalCode: string;
     city: string;
+    position?: number;
+    fullAddress?: string;
     createdAt: string;
     updatedAt: string;
 };
+
+export type Occupation = {
+    id: number;
+    name: string;
+    position?: number;
+    slug?: string;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export type PublicDataResponse = {
+    status: string;
+    message: string;
+    data: {
+        categories: Category[];
+        groups: Group[];
+        addresses: Address[];
+        companies: Company[];
+        occupations: Occupation[];
+        meta: {
+            timestamp: string;
+            counts: {
+                categories: number;
+                groups: number;
+                addresses: number;
+                companies: number;
+                occupations: number;
+            };
+        };
+    };
+};
+
+export type PublicData = PublicDataResponse['data'];
+
+// App related types
+export enum AppSlug {
+    SUPPORT = 'support',
+    ACADEMY = 'academy'
+}
 
 export type Permission = {
     id: number;

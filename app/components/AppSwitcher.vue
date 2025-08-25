@@ -1,17 +1,38 @@
 <script setup lang="ts">
-import { useSidebar } from '~/components/ui/sidebar';
+import { useSidebar } from '~/components/ui/sidebar'
+import { useAppStore } from '~/stores/app'
+
+type AppSlugType = 'support' | 'academy'
 
 const props = defineProps<{
-    teams: {
+    apps: {
         name: string;
         logo: string;
-        plan: string;
+        slug: string;
     }[];
 }>();
 
-const { isMobile } = useSidebar();
+const { isMobile } = useSidebar()
+const appStore = useAppStore()
 
-const activeTeam = ref(props.teams?.[0] ?? { name: '', logo: '', plan: '' });
+// Find active app based on current app slug
+const activeApp = computed(() => {
+    const currentApp = props.apps.find(app => app.slug === appStore.appSlug);
+    return currentApp ?? props.apps?.[0] ?? { 
+        name: '', 
+        logo: 'solar:question-circle-linear', // fallback icon
+        slug: 'support' 
+    }
+})
+
+// Handle app switching
+const handleAppClick = (app: typeof props.apps[0]) => {
+    if (app.slug === 'support' || app.slug === 'academy') {
+        appStore.setAppSlug(app.slug as AppSlugType)
+        // Navigate to home dashboard page when app is switched
+        navigateTo('/')
+    }
+}
 </script>
 
 <template>
@@ -25,15 +46,14 @@ const activeTeam = ref(props.teams?.[0] ?? { name: '', logo: '', plan: '' });
                     >
                         <div class="flex aspect-square !size-9 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                             <Icon
-                                :name="activeTeam.logo"
+                                :name="activeApp.logo"
                                 class="!size-5"
                             />
                         </div>
                         <div class="grid flex-1 text-left text-sm leading-tight">
                             <span class="truncate font-semibold">
-                                {{ activeTeam.name }}
+                                {{ activeApp.name }}
                             </span>
-                            <span class="truncate text-xs">{{ activeTeam.plan }}</span>
                         </div>
                         <Icon
                             name="solar:alt-arrow-down-outline"
@@ -51,18 +71,19 @@ const activeTeam = ref(props.teams?.[0] ?? { name: '', logo: '', plan: '' });
                         {{ $t('navigation.projects') }}
                     </DropdownMenuLabel>
                     <DropdownMenuItem
-                        v-for="(team, index) in teams"
-                        :key="team.name"
+                        v-for="(app, index) in apps"
+                        :key="app.name"
                         class="gap-2 px-2 py-1 cursor-pointer"
-                        @click="activeTeam = team"
+                        :class="{ 'bg-accent': app.slug === appStore.appSlug }"
+                        @click="() => handleAppClick(app)"
                     >
                         <div class="flex size-6 items-center justify-center rounded-sm border">
                             <Icon
-                                :name="team.logo"
+                                :name="app.logo"
                                 class="size-5 shrink-0"
                             />
                         </div>
-                        {{ team.name }}
+                        {{ app.name }}
                         <DropdownMenuShortcut>⌘{{ index + 1 }}</DropdownMenuShortcut>
                     </DropdownMenuItem>
                 </DropdownMenuContent>

@@ -13,6 +13,12 @@ export function useApiFetch<T = unknown>(
         referer: import.meta.client ? window.location.origin : 'https://support.backhaus.de',
     };    
 
+    // Get auth token and add to headers if available
+    const token = useCookie('BKJH_AUTH_TOKEN');
+    if (token.value) {
+        headers.Authorization = `Bearer ${token.value}`;
+    }
+
     // Append server-side headers
     if (import.meta.server) {
         Object.assign(headers, useRequestHeaders(['cookie']));

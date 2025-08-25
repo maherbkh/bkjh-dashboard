@@ -12,7 +12,7 @@ const data = useNavigationData();
 <template>
     <Sidebar v-bind="props">
         <SidebarHeader>
-            <TeamSwitcher :teams="data.teams" />
+            <AppSwitcher :apps="data.apps" />
         </SidebarHeader>
         <SidebarContent class="flex flex-col justify-between">
             <NavMain :items="data.navMain" />

@@ -1,6 +1,6 @@
 import { toast } from 'vue-sonner'
 import type { LocationQueryValue } from '#vue-router'
-import type { Credentials, LoginData, LoginResponse, ResetPasswordForm, User } from '~/types'
+import type { Credentials, LoginData, LoginResponse, ResetPasswordForm, User } from '~/types/index'
 import {useResourcesStore} from "~/stores/resources";
 
 export const useUserStore = defineStore('user', () => {
@@ -32,8 +32,7 @@ export const useUserStore = defineStore('user', () => {
         if (data.value) {
             setUser(((data.value as LoginResponse).data as LoginData).user)
             setToken(((data.value as LoginResponse).data as LoginData).token)
-            const resourcesStore = useResourcesStore()
-            await resourcesStore.fetchPermissionsGroup()
+            // Note: Permission fetching removed - using CRUD directly for resources
             toast.success(t('auth.toasts.welcome'), {
                 description: t('auth.toasts.login_success'),
                 duration: 5000,
