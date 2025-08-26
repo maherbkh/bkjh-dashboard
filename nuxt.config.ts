@@ -6,6 +6,25 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: false, // Disable SSR this project uses CSR
   // Reduce development warnings
+  nitro: {
+    experimental: {
+      wasm: false,
+    },
+    compressPublicAssets: true,
+    minify: true,
+    // Suppress middleware warnings in development
+    middleware: {
+      override: true
+    },
+    routeRules: {
+        '/backend/**': {
+            proxy: `${process.env.API_URL ?? 'https://api.backhaus.de'}/**`,
+        },
+        '/get-geoip/**': {
+            proxy: `http://ip-api.com/json/**`,
+        },
+    },
+  },
   css: ['~/assets/css/main.css', 'vue-sonner/style.css'],
   modules: [
     '@nuxt/eslint',
@@ -93,21 +112,5 @@ i18n: {
     storage: 'localStorage', // or 'sessionStorage' or 'cookie'
     storageKey: 'bkjh-erp-color-mode',
   },
-
-  nitro: {
-    routeRules: {
-        '/backend/**': {
-            proxy: `${process.env.API_URL ?? 'https://api.backhaus.de'}/**`,
-        },
-        '/get-geoip/**': {
-            proxy: `http://ip-api.com/json/**`,
-        },
-    },
-    compressPublicAssets: true,
-    minify: true,
-    experimental: {
-        wasm: false,
-    },
-},
 
 })

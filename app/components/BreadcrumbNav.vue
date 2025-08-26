@@ -9,6 +9,13 @@ const translationMap = computed(() => ({
     'categories': t('global.sidebar.categories'),
     'companies': t('global.sidebar.companies'),
     'groups': t('global.sidebar.groups'),
+    'academy': t('global.sidebar.academy'),
+    'event': t('global.sidebar.event'),
+    'list': t('global.sidebar.list'),
+    'speakers': t('global.sidebar.speakers'),
+    'attendee': t('global.sidebar.attendee'),
+    'event-categories': t('global.sidebar.event-categories'),
+    'event-targets': t('global.sidebar.event-targets'),
 }));
 
 const getTranslatedName = (segment: string, fullPath?: string) => {

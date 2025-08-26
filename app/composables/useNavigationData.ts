@@ -116,6 +116,45 @@ export const useNavigationData = (): ComputedRef<{
                     },
                 ],
             },
+            {
+                title: t('sidebar.academy'),
+                url: '#',
+                icon: 'solar:calendar-linear',
+                isActive: false,
+                apps: ['academy'],
+                items: [
+                    {
+                        title: t('sidebar.events'),
+                        url: '/academy/event/list',
+                        icon: 'solar:calendar-outline',
+                        apps: ['academy'],
+                    },
+                    {
+                        title: t('sidebar.speakers'),
+                        url: '/academy/speakers',
+                        icon: 'solar:user-speak-outline',
+                        apps: ['academy'],
+                    },
+                    {
+                        title: t('sidebar.attendees'),
+                        url: '/academy/attendee/list',
+                        icon: 'solar:users-group-rounded-outline',
+                        apps: ['academy'],
+                    },
+                    {
+                        title: t('sidebar.event_categories'),
+                        url: '/academy/event-categories',
+                        icon: 'solar:bookmark-outline',
+                        apps: ['academy'],
+                    },
+                    {
+                        title: t('sidebar.event_targets'),
+                        url: '/academy/event-targets',
+                        icon: 'solar:target-outline',
+                        apps: ['academy'],
+                    },
+                ],
+            },
         ],
         };
 
