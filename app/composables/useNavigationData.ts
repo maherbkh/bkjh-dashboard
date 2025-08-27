@@ -28,51 +28,51 @@ export const useNavigationData = (): ComputedRef<{
         const allNavigation = {
         apps: [
             {
-                name: t('sidebar.it_support'),
+                name: t('it_support.singular'),
                 logo: 'solar:chat-round-call-linear',
                 slug: 'support',
             },
             {
-                name: t('sidebar.event_calendar'),
+                name: t('academy.plural'),
                 logo: 'solar:calendar-linear',
                 slug: 'academy',
             },
         ],
         navMain: [
             {
-                title: t('global.navigation.dashboard'),
+                title: t('global.dashboard'),
                 url: '/',
                 icon: 'solar:chart-2-outline',
                 apps: ['support', 'academy'],
                 items: [],
             },
             {
-                title: t('sidebar.master_data'),
+                title: t('global.master_data'),
                 url: '#',
                 icon: 'solar:server-2-outline',
                 isActive: true,
                 apps: ['support'],
                 items: [
                     {
-                        title: t('sidebar.companies'),
+                        title: t('company.plural'),
                         url: '/master-data/companies',
                         icon: 'solar:buildings-2-outline',
                         apps: ['support'],
                     },
                     {
-                        title: t('sidebar.groups'),
+                        title: t('group.plural'),
                         url: '/master-data/groups',
                         icon: 'solar:buildings-outline',
                         apps: ['support'],
                     },
                     {
-                        title: t('sidebar.addresses'),
+                        title: t('address.plural'),
                         url: '/master-data/addresses',
                         icon: 'solar:map-point-outline',
                         apps: ['support'],
                     },
                     {
-                        title: t('sidebar.categories'),
+                        title: t('category.plural'),
                         url: '/master-data/categories',
                         icon: 'solar:bookmark-linear',
                         apps: ['support'],
@@ -81,14 +81,14 @@ export const useNavigationData = (): ComputedRef<{
                 ],
             },
             {
-                title: t('sidebar.support'),
+                title: t('ticket.plural'),
                 url: '#',
                 icon: 'solar:headphones-round-sound-outline',
                 isActive: false,
                 apps: ['support'],
                 items: [
                     {
-                        title: t('sidebar.support_tickets'),
+                        title: t('ticket.plural'),
                         url: '/support-tickets',
                         icon: 'solar:ticket-outline',
                         apps: ['support'],
@@ -96,20 +96,20 @@ export const useNavigationData = (): ComputedRef<{
                 ],
             },
             {
-                title: t('sidebar.settings'),
+                title: t('setting.plural'),
                 url: '#',
                 icon: 'solar:settings-outline',
                 isActive: false,
                 apps: ['support'],
                 items: [
                     {
-                        title: t('sidebar.users'),
+                        title: t('user.plural'),
                         url: '/settings/users',
                         icon: 'solar:users-group-rounded-outline',
                         apps: ['support'],
                     },
                     {
-                        title: t('sidebar.roles'),
+                        title: t('role.plural'),
                         url: '/settings/roles',
                         icon: 'solar:shield-keyhole-outline',
                         apps: ['support'],
@@ -117,38 +117,38 @@ export const useNavigationData = (): ComputedRef<{
                 ],
             },
             {
-                title: t('sidebar.academy'),
+                title: t('academy.plural'),
                 url: '#',
                 icon: 'solar:calendar-linear',
                 isActive: false,
                 apps: ['academy'],
                 items: [
                     {
-                        title: t('sidebar.events'),
+                        title: t('academy.plural'),
                         url: '/academy/event/list',
                         icon: 'solar:calendar-outline',
                         apps: ['academy'],
                     },
                     {
-                        title: t('sidebar.speakers'),
+                        title: t('speaker.plural'),
                         url: '/academy/speakers',
                         icon: 'solar:user-speak-outline',
                         apps: ['academy'],
                     },
                     {
-                        title: t('sidebar.attendees'),
+                        title: t('attendee.plural'),
                         url: '/academy/attendee/list',
                         icon: 'solar:users-group-rounded-outline',
                         apps: ['academy'],
                     },
                     {
-                        title: t('sidebar.event_categories'),
+                        title: t('event_category.plural'),
                         url: '/academy/event-categories',
                         icon: 'solar:bookmark-outline',
                         apps: ['academy'],
                     },
                     {
-                        title: t('sidebar.event_targets'),
+                        title: t('event_target.plural'),
                         url: '/academy/event-targets',
                         icon: 'solar:target-outline',
                         apps: ['academy'],

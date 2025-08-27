@@ -68,7 +68,7 @@ const handleSelect = (value: string) => {
 </script>
 
 <template>
-    <div :class="cn('space-y-2', props.class)">
+    <div :class="cn('grid w-full items-center gap-2', props.class)">
         <Label
             v-if="title"
             :for="id"
@@ -89,7 +89,7 @@ const handleSelect = (value: string) => {
                     :aria-expanded="open"
                     :disabled="disabled"
                     :class="cn(
-                        'w-full justify-between !bg-background font-normal',
+                        'w-full justify-between !bg-background font-normal h-8',
                         hasErrors && '!border-destructive !focus:ring-destructive',
                         !selectedItem && 'text-muted-foreground',
                     )"
@@ -106,7 +106,7 @@ const handleSelect = (value: string) => {
                 align="start"
             >
                 <Command v-model="selectedValue">
-                    <CommandInput :placeholder="t('global.forms.search_placeholder')" />
+                    <CommandInput :placeholder="t('action.search_placeholder')" />
                     <CommandEmpty v-if="data.length === 0">
                         {{ emptyText }}
                     </CommandEmpty>

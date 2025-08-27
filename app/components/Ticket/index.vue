@@ -9,7 +9,7 @@
                 name="solar:refresh-linear"
                 class="!size-8 shrink-0 animate-spin"
             />
-            <span class="ml-2">{{ $t('global.common.loading') }}</span>
+            <span class="ml-2">{{ $t('global.loading') }}</span>
         </div>
 
         <!-- Ticket Not Found State -->
@@ -24,10 +24,10 @@
                 />
             </div>
             <h2 class="text-2xl font-semibold text-foreground mb-2">
-                {{ $t('tickets.show.not_found_title') }}
+                {{ $t('action.message.not_found_title', { model: $t('ticket.singular') }) }}
             </h2>
             <p class="text-muted-foreground mb-6 max-w-md">
-                {{ $t('tickets.show.not_found_description') }}
+                {{ $t('action.message.not_found_description', { model: $t('ticket.singular') }) }}
             </p>
             <div class="flex items-center gap-3">
                 <Button
@@ -38,14 +38,14 @@
                         name="solar:refresh-linear"
                         class="mr-2 h-4 w-4"
                     />
-                    {{ $t('global.actions.retry') }}
+                    {{ $t('action.retry') }}
                 </Button>
                 <Button @click="() => router.push('/support-tickets')">
                     <Icon
                         name="solar:arrow-left-linear"
                         class="mr-2 h-4 w-4"
                     />
-                    {{ $t('tickets.show.back_to_tickets') }}
+                    {{ $t('action.back') +  ' ' + $t('common.to') + ' ' + $t('ticket.plural') }}
                 </Button>
             </div>
         </div>
@@ -66,7 +66,7 @@
                         <div class="text-lg font-bold flex items-center gap-4">
                             {{ ticket.ticketNumber }}
                             <Badge :variant="getStatusVariant(ticket.actionsHistory[0]?.status || 'pending')">
-                                {{ $t(`tickets.status.${ticket.actionsHistory[0]?.status}`) }}
+                                {{ $t(`common.${ticket.actionsHistory[0]?.status}`) }}
                             </Badge>
                         </div>
                         <div class="mt-1 text-muted-foreground flex items-center gap-2">
@@ -104,7 +104,7 @@
                             name="solar:pen-new-square-outline"
                             class="mr-2 h-4 w-4"
                         />
-                        {{ $t('global.actions.edit') }}
+                        {{ $t('action.edit') }}
                     </Button>
                     <Button
                         v-if="ticket.type === 'ticket'"
@@ -123,13 +123,13 @@
                             name="solar:add-circle-outline"
                             class="mr-2 h-4 w-4"
                         />
-                        {{ $t('global.actions.self_assign') }}
+                        {{ $t('action.self_assign') }}
                     </Button>
                     <DropdownMenu v-else>
                         <DropdownMenuTrigger>
                             <Button
                                 class="group"
-                                :title="$t('global.ui.more')"
+                                :title="$t('common.more')"
                                 variant="outline"
                                 :disabled="isActionLoading"
                             >
@@ -236,7 +236,7 @@
                     <Card>
                         <CardHeader>
                             <CardTitle>
-                                {{ $t('tickets.show.comments') }}
+                                {{ $t('comment.plural') }}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -254,7 +254,7 @@
                         >
                             <template #cell-actionType="{ row }">
                                 <Badge variant="secondary">
-                                    {{ $t(`tickets.actions.${row.actionType}`) }}
+                                    {{ $t(`action.${row.actionType}`) }}
                                 </Badge>
                             </template>
 
@@ -315,7 +315,7 @@
                         v-else
                         class="text-center py-4 text-muted-foreground"
                     >
-                        {{ $t('tickets.show.no_action_history') }}
+                        {{ $t('common.no_action_history') }}
                     </div>
                 </div>
 
@@ -329,20 +329,20 @@
                                     name="solar:info-circle-outline"
                                     class="!size-5 opacity-75 shrink-0"
                                 />
-                                {{ $t('tickets.show.information') }}
+                                {{ $t('common.information') }}
                             </CardTitle>
                         </CardHeader>
                         <CardContent class="flex flex-col divide-y divide-dashed">
                             <AppListItem
-                                :title="$t('tickets.show.type')"
+                                :title="$t('type.singular')"
                                 :value="ticket.type.toUpperCase()"
                             />
                             <AppListItem
-                                :title="$t('tickets.show.created_at')"
+                                :title="$t('common.created_at')"
                                 :value="formatGermanDate(ticket.createdAt)"
                             />
                             <AppListItem
-                                :title="$t('tickets.show.updated_at')"
+                                :title="$t('common.updated_at')"
                                 :value="formatGermanDate(ticket.updatedAt)"
                             />
                         </CardContent>
@@ -356,28 +356,28 @@
                                     name="solar:user-outline"
                                     class="!size-5 opacity-75 shrink-0"
                                 />
-                                {{ $t('tickets.show.contact_info') }}
+                                {{ $t('form.contact_information') }}
                             </CardTitle>
                         </CardHeader>
                         <CardContent class="flex flex-col divide-y divide-dashed">
                             <AppListItem
-                                :title="$t('tickets.show.name')"
+                                :title="$t('global.name')"
                                 :value="ticket.name"
                             />
                             <AppListItem
-                                :title="$t('tickets.show.email')"
+                                :title="$t('form.email')"
                                 :value="ticket.email"
                             />
                             <AppListItem
-                                :title="$t('tickets.show.phone')"
+                                :title="$t('form.phone')"
                                 :value="ticket.phone"
                             />
                             <AppListItem
-                                :title="$t('tickets.show.cell')"
+                                :title="$t('form.cell')"
                                 :value="ticket.cell"
                             />
                             <AppListItem
-                                :title="$t('tickets.show.device_id')"
+                                :title="$t('form.device_id')"
                                 :value="ticket.deviceId"
                             />
                         </CardContent>
@@ -391,22 +391,22 @@
                                     name="solar:users-group-rounded-outline"
                                     class="!size-5 opacity-75 shrink-0"
                                 />
-                                {{ $t('tickets.show.assignment') }}
+                                {{ $t('form.assignment_information') }}
                             </CardTitle>
                         </CardHeader>
                         <CardContent class="flex flex-col divide-y divide-dashed">
                             <AppListItem
-                                :title="$t('tickets.show.category')"
+                                :title="$t('category.singular')"
                                 :value="ticket.category?.name"
                             />
 
                             <AppListItem
-                                :title="$t('tickets.show.group')"
+                                :title="$t('group.singular')"
                                 :value="ticket.group?.name"
                             />
 
                             <AppListItem
-                                :title="$t('tickets.show.transferred_to')"
+                                :title="$t('common.transferred_to')"
                                 :value="ticket.transferredToUser?.name"
                             />
                         </CardContent>
@@ -429,19 +429,19 @@
         <Dialog v-model:open="isTransferDialogOpen">
             <DialogContent class="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>{{ $t('global.dialogs.transfer_ticket.title') }}</DialogTitle>
+                    <DialogTitle>{{ $t('action.transfer') }}</DialogTitle>
                     <DialogDescription>
-                        {{ $t('global.dialogs.transfer_ticket.description') }}
+                        {{ $t('action.transfer_description', { model: $t('ticket.singular') }) }}
                     </DialogDescription>
                 </DialogHeader>
                 <div class="space-y-4">
                     <div class="space-y-2">
-                        <Label for="transfer-user">{{ $t('global.dialogs.transfer_ticket.user_id_label') }}</Label>
+                        <Label for="transfer-user">{{ $t('user.singular') }}</Label>
                         <Input
                             id="transfer-user"
                             v-model.number="transferUserId"
                             type="number"
-                            :placeholder="$t('global.dialogs.transfer_ticket.user_id_placeholder')"
+                            :placeholder="$t('user.singular')"
                             min="1"
                         />
                     </div>
@@ -451,7 +451,7 @@
                         variant="outline"
                         @click="isTransferDialogOpen = false"
                     >
-                        {{ $t('global.ui.cancel') }}
+                        {{ $t('action.cancel') }}
                     </Button>
                     <Button
                         :disabled="!transferUserId || isActionLoading"
@@ -462,7 +462,7 @@
                             name="solar:refresh-linear"
                             class="mr-2 h-4 w-4 animate-spin"
                         />
-                        {{ $t('global.ui.transfer') }}
+                        {{ $t('action.transfer') }}
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -472,18 +472,18 @@
         <Dialog v-model:open="isActionDialogOpen">
             <DialogContent class="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>{{ $t('global.dialogs.add_action.title') }}</DialogTitle>
+                    <DialogTitle>{{ $t('action.add') + ' ' + $t('action.singular') }}</DialogTitle>
                     <DialogDescription>
-                        {{ $t('global.dialogs.add_action.description', { action: $t(`tickets.actions.${selectedActionType}`) }) }}
+                        {{ $t('action.add_description', { action: $t(`action.${selectedActionType}`) }) }}
                     </DialogDescription>
                 </DialogHeader>
                 <div class="space-y-4">
                     <div class="space-y-2">
-                        <Label for="action-note">{{ $t('global.dialogs.add_action.note_label') }}</Label>
+                        <Label for="action-note">{{ $t('form.note.singular') }}</Label>
                         <Textarea
                             id="action-note"
                             v-model="actionNote"
-                            :placeholder="$t('global.dialogs.add_action.note_placeholder')"
+                            :placeholder="$t('form.note.placeholder')"
                             rows="3"
                         />
                     </div>
@@ -493,7 +493,7 @@
                         variant="outline"
                         @click="isActionDialogOpen = false"
                     >
-                        {{ $t('global.ui.cancel') }}
+                        {{ $t('action.cancel') }}
                     </Button>
                     <Button
                         :disabled="isActionLoading"
@@ -504,7 +504,7 @@
                             name="solar:refresh-linear"
                             class="mr-2 h-4 w-4 animate-spin"
                         />
-                        {{ $t('global.ui.add_action') }}
+                        {{ $t('action.add') + ' ' + $t('action.singular') }}
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -528,9 +528,9 @@ const route = useRoute();
 const router = useRouter();
 
 // Page configuration
-const pageTitle = computed(() => t('tickets.show.title'));
+const pageTitle = computed(() => t('action.message.title', { model: t('ticket.singular') }));
 const pageIcon = usePageIcon();
-const pageDescription = computed(() => t('tickets.show.description'));
+const pageDescription = computed(() => t('action.message.description', { model: t('ticket.singular') }));
 const formatGermanDate = (iso: string) => new Date(iso).toLocaleDateString('de-DE');
 const { data: ticketData, pending: isLoading, error, refresh } = await useApiFetch<{
     status: string;
@@ -656,7 +656,7 @@ const assignSelf = async () => {
         });
 
         await refresh();
-        toast.success(t('tickets.actions.assign'));
+        toast.success(t('action.message.assigned_successfully', { model: t('ticket.singular') }));
         // Refresh the page data
         await navigateTo(route.fullPath, { replace: true });
     }
@@ -680,7 +680,7 @@ const transferTicket = async (userId: number) => {
             body: { user_id: userId },
         });
 
-        toast.success(t('tickets.actions.transfer'));
+        toast.success(t('action.message.transferred_successfully', { model: t('ticket.singular') }));
         // Refresh the page data
         await navigateTo(route.fullPath, { replace: true });
     }
@@ -707,7 +707,7 @@ const addTicketAction = async (actionType: string, note?: string) => {
             },
         });
 
-        toast.success(t(`tickets.actions.${actionType}`));
+        toast.success(t(`action.message.${actionType}_added`));
         // Refresh the page data
         await navigateTo(route.fullPath, { replace: true });
     }
@@ -773,27 +773,27 @@ const submitTransfer = async () => {
 const actionHistoryHeaders = computed(() => [
     {
         as: 'th' as const,
-        name: t('tickets.show.action_type'),
+        name: t('action.type'),
         id: 'actionType',
     },
     {
         as: 'th' as const,
-        name: t('tickets.show.action_by'),
+        name: t('action.by'),
         id: 'user',
     },
     {
         as: 'th' as const,
-        name: t('tickets.show.assigned_to'),
+        name: t('action.assigned_to'),
         id: 'targetUser',
     },
     {
         as: 'th' as const,
-        name: t('tickets.show.note'),
+        name: t('form.note.singular'),
         id: 'note',
     },
     {
         as: 'th' as const,
-        name: t('global.table.created_at'),
+        name: t('common.created_at'),
         id: 'createdAt',
     },
 ]);

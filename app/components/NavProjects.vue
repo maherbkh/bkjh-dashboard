@@ -30,7 +30,7 @@ const { isMobile } = useSidebar();
                     <DropdownMenuTrigger as-child>
                         <SidebarMenuAction show-on-hover>
                             <Icon name="solar:menu-dots-linear" />
-                            <span class="sr-only">{{ $t('global.ui.more') }}</span>
+                            <span class="sr-only">{{ $t('global.more') }}</span>
                         </SidebarMenuAction>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent

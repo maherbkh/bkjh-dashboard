@@ -69,33 +69,33 @@ async function onSubmit(event: Event) {
             <FormItemInput
                 id="email"
                 v-model="email"
-                :title="$t('global.table.email')"
+                :title="$t('form.email')"
                 icon="solar:letter-outline"
                 type="email"
                 disabled
                 class="cursor-not-allowed"
-                :placeholder="t('auth.email_placeholder')"
+                :placeholder="t('form.email_placeholder')"
             />
 
             <FormItemInput
                 id="password"
                 v-model="password"
-                :title="$t('auth.new_password')"
+                :title="$t('common.new') + ' ' + $t('form.password')"
                 icon="solar:key-outline"
                 type="password"
                 use-show-password
-                :placeholder="$t('global.ui.password_placeholder')"
+                :placeholder="$t('auth.password_placeholder')"
                 :disabled="isLoading"
             />
 
             <FormItemInput
                 id="password_confirmation"
                 v-model="passwordConfirmation"
-                :title="$t('auth.confirm_password')"
+                :title="$t('common.confirm') + ' ' + $t('form.password')"
                 icon="solar:key-outline"
                 type="password"
                 :use-show-password="true"
-                :placeholder="$t('global.ui.password_placeholder')"
+                :placeholder="$t('form.password_placeholder')"
                 :disabled="isLoading"
             />
             <Button :disabled="isLoading">
@@ -109,7 +109,7 @@ async function onSubmit(event: Event) {
                     name="solar:key-linear"
                     class="mr-2 h-4 w-4"
                 />
-                {{ $t('global.actions.submit') }}
+                {{ $t('action.submit') }}
             </Button>
         </div>
     </form>

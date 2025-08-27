@@ -106,7 +106,7 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     <FormItemInput
                         id="name"
                         v-model="name"
-                        :title="$t('global.table.name')"
+                        :title="$t('global.name')"
                         :placeholder="$t('categories.name_placeholder')"
                         class="col-span-12"
                         :errors="errors.name ? [errors.name] : []"

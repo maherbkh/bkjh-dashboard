@@ -27,7 +27,7 @@ const forwarded = useForwardProps(delegatedProps);
     >
         <slot>
             <Icon name="solar:chevron-left-linear" />
-            <span class="hidden sm:block">{{ $t('global.ui.first') }}</span>
+            <span class="hidden sm:block">{{ $t('global.first') }}</span>
         </slot>
     </PaginationFirst>
 </template>

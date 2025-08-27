@@ -51,7 +51,7 @@ const newDir = computed<SortDirection>(() => {
             <button
                 v-if="sortable"
                 class="size-5 p-1 rounded-sm cursor-pointer hover:bg-muted text-muted-foreground flex items-center justify-center"
-                :aria-label="t('global.table.toggle_sort')"
+                :aria-label="t('global.toggle_sort')"
                 @click="emit('toggleSort', newDir, item.id ?? 'no_id_error')"
             >
                 <Icon

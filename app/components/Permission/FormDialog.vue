@@ -175,8 +175,8 @@ const handleClose = () => {
                         class="md:col-span-6"
                         v-bind="positionAttrs"
                         type="number"
-                        :title="$t('permissions.form.position')"
-                        :placeholder="$t('permissions.form.position_placeholder')"
+                        :title="$t('position.singular')"
+                        :placeholder="$t('position.singular')"
                         :errors="errors.position ? [errors.position] : []"
                     />
                     <FormItemSwitch
@@ -184,9 +184,9 @@ const handleClose = () => {
                         v-model="isActive"
                         class="md:col-span-6"
                         v-bind="isActiveAttrs"
-                        :title="$t('permissions.form.is_active')"
-                        :true-label="$t('global.status.active')"
-                        :false-label="$t('global.status.inactive')"
+                        :title="$t('common.status')"
+                        :true-label="$t('common.active')"
+                        :false-label="$t('common.inactive')"
                         :errors="errors.isActive ? [errors.isActive] : []"
                     />
                 </div>
@@ -197,7 +197,7 @@ const handleClose = () => {
                     variant="outline"
                     @click="handleClose"
                 >
-                    {{ $t('global.actions.cancel') }}
+                    {{ $t('action.cancel') }}
                 </Button>
                 <Button
                     type="button"
@@ -205,14 +205,14 @@ const handleClose = () => {
                     :disabled="isSubmitting"
                     @click="onSubmitAndAddNew"
                 >
-                    {{ $t('global.actions.save_and_add_new') }}
+                    {{ $t('action.save') + ' ' + $t('action.and') + ' ' + $t('action.add') + ' ' + $t('common.new') }}
                 </Button>
                 <Button
                     type="button"
                     :disabled="isSubmitting"
                     @click="onSubmitAndClose"
                 >
-                    {{ $t('global.actions.save') }}
+                    {{ $t('action.save') }}
                 </Button>
             </DialogFooter>
         </DialogContent>

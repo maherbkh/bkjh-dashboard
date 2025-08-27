@@ -90,7 +90,7 @@ const userInitials = computed(() => useInitials(userStore.user?.name ?? ''));
                         @click="handleLogout"
                     >
                         <Icon name="solar:logout-linear" />
-                        {{ $t('user.log_out') }}
+                        {{ $t('auth.log_out') }}
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>

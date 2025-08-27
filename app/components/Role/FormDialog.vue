@@ -162,8 +162,8 @@ const handleClose = () => {
                         class="md:col-span-6"
                         v-bind="isActiveAttrs"
                         :title="$t('roles.form.is_active')"
-                        :true-label="$t('global.status.active')"
-                        :false-label="$t('global.status.inactive')"
+                        :true-label="$t('common.active')"
+                        :false-label="$t('common.inactive')"
                         :errors="errors.isActive ? [errors.isActive] : []"
                     />
                     <div class="md:col-span-12">

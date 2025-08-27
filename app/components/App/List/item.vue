@@ -15,7 +15,7 @@ defineProps<{
             <span
                 v-else
                 class="text-muted-foreground font-light italic text-xs"
-            >{{ $t('global.common.not_assigned') }}</span>
+            >{{ $t('common.not_assigned') }}</span>
         </div>
     </div>
 </template>

@@ -7,8 +7,8 @@ const { t } = useI18n()
 
 watchEffect(() => {
     useSeoMeta({
-        title: t('auth.forgot_password_title'),
-        ogTitle: t('auth.forgot_password_title'),
+        title: t('auth.forgot_password'),
+        ogTitle: t('auth.forgot_password'),
     })
 })
 </script>
@@ -22,7 +22,7 @@ watchEffect(() => {
             <div class="grid mx-auto max-w-sm gap-6">
                 <div class="grid gap-2 text-center">
                     <h1 class="text-2xl font-semibold tracking-tight">
-                        {{ $t('auth.forgot_password_title') }}
+                        {{ $t('auth.forgot_password') }}
                     </h1>
                     <p class="text-balance text-sm text-muted-foreground">
                         {{ $t('auth.forgot_password_description') }}

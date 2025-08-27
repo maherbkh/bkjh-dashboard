@@ -19,19 +19,19 @@ defineProps({
         />
         <div class="text-center">
             <h4 class="text-lg">
-                {{ $t('global.messages.no_records_found') }}
+                {{ $t('global.no_records_found') }}
             </h4>
             <p
                 v-if="searchQuery"
                 class="text-sm font-light"
             >
-                {{ $t('global.messages.no_search_results') }} <span class="text-red-400">{{ searchQuery }}</span>
+                {{ $t('global.no_search_results') }} <span class="text-red-400">{{ searchQuery }}</span>
             </p>
             <p
                 v-else
                 class="text-sm font-light"
             >
-                {{ $t('global.navigation.add_new_hint') }} <span class="font-semibold">{{ addNewText }}</span> {{ $t('global.navigation.button_above') }}
+                {{ $t('global.add_new_hint') }} <span class="font-semibold">{{ addNewText }}</span> {{ $t('global.button_above') }}
             </p>
         </div>
     </div>

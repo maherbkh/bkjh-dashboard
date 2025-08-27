@@ -4,9 +4,9 @@ import type { Category, TableHeaderItem, ServerParamsTypes } from '~/types'
 const { t } = useI18n()
 
 // Page configuration
-const pageTitle = computed(() => t('categories.title'))
+const pageTitle = computed(() => t('category.plural'))
 const pageIcon = usePageIcon()
-const pageDescription = computed(() => t('categories.description'))
+const pageDescription = computed(() => t('category.plural'))
 definePageMeta({
     middleware: 'auth',
 })
@@ -98,12 +98,12 @@ async function handleSortChange(dir: 'asc' | 'desc', id: string) {
 const headerItems = computed(() => [
     {
         as: 'th',
-        name: t('global.table.name'),
+        name: t('global.name'),
         id: 'name',
     },
     {
         as: 'th',
-        name: t('global.table.created_at'),
+        name: t('common.created_at'),
         id: 'created_at',
     },
 ])

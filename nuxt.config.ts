@@ -12,10 +12,6 @@ export default defineNuxtConfig({
     },
     compressPublicAssets: true,
     minify: true,
-    // Suppress middleware warnings in development
-    middleware: {
-      override: true
-    },
     routeRules: {
         '/backend/**': {
             proxy: `${process.env.API_URL ?? 'https://api.backhaus.de'}/**`,

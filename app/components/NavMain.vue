@@ -34,7 +34,7 @@ const hasActiveSubItem = (items?: { url: string }[]) => {
 
 <template>
     <SidebarGroup>
-        <SidebarGroupLabel>{{ $t('global.navigation.overview') }}</SidebarGroupLabel>
+        <SidebarGroupLabel>{{ $t('global.overview') }}</SidebarGroupLabel>
         <SidebarMenu>
             <template
                 v-for="item in items"

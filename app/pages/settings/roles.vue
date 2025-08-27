@@ -51,27 +51,27 @@ const status = computed(() => isLoading.value ? 'pending' : 'success')
 const headerItems = computed(() => [
     {
         as: 'th',
-        name: t('global.table.name'),
+        name: t('global.name'),
         id: 'name',
     },
     {
         as: 'th',
-        name: t('global.table.status'),
+        name: t('common.status'),
         id: 'is_active',
     },
     {
         as: 'th',
-        name: t('roles.table.permissions'),
+        name: t('permission.plural'),
         id: 'permissions',
     },
     {
         as: 'th',
-        name: t('roles.table.users_count'),
+        name: t('user.plural'),
         id: 'users_count',
     },
     {
         as: 'th',
-        name: t('global.table.created_at'),
+        name: t('common.created_at'),
         id: 'created_at',
     },
 ])
@@ -362,7 +362,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                                 :variant="row.isActive ? 'default' : 'secondary'"
                                 class="text-xs"
                             >
-                                {{ row.isActive ? $t('global.status.active') : $t('global.status.inactive') }}
+                                {{ row.isActive ? $t('common.active') : $t('common.inactive') }}
                             </Badge>
                         </template>
 

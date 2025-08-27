@@ -17,12 +17,12 @@ const isLoading = ref(false);
 const schema = toTypedSchema(
     z.object({
         email: z
-            .string({ required_error: t('auth.validation.email_required') })
-            .min(1, t('auth.validation.email_required'))
-            .email(t('auth.validation.email_invalid')),
+            .string({ required_error: t('form.email') + ' ' + t('validation.required') })
+            .min(1, t('form.email') + ' ' + t('validation.required'))
+            .email(t('form.email') + ' ' + t('validation.invalid')),
         password: z
-            .string({ required_error: t('auth.validation.password_required') })
-            .min(6, t('auth.validation.password_min_length')),
+            .string({ required_error: t('form.password') + ' ' + t('validation.required') })
+            .min(6, t('form.password') + ' ' + t('validation.min_length', { min: 6 })),
     }),
 );
 
@@ -39,23 +39,7 @@ const [email, emailAttrs] = defineField('email');
 const [password, passwordAttrs] = defineField('password');
 
 // VeeValidate form submission with proper validation
-const onSubmit = handleSubmit(async (values) => {
-    console.log('VeeValidate onSubmit called with validated values:', values);
-    
-    // Enhanced debugging for production builds
-    console.log('Login environment check:', {
-        isDev: import.meta.env.DEV,
-        isClient: import.meta.client,
-        isServer: import.meta.server,
-        nodeEnv: import.meta.env.NODE_ENV
-    });
-    
-    // Ensure we're on the client side before proceeding
-    if (import.meta.server) {
-        console.warn('Login attempted on server side, skipping');
-        return;
-    }
-    
+const onSubmit = handleSubmit(async (values) => {    
     isLoading.value = true;
     
     const credentials: Credentials = {
@@ -102,10 +86,10 @@ const handleEnterKey = () => {
         <div class="grid gap-4">
             <FormItemInput
                 v-model="email"
-                :title="$t('global.table.email')"
+                :title="$t('form.email')"
                 icon="solar:letter-outline"
                 :disabled="isLoading"
-                :placeholder="t('auth.email_placeholder')"
+                :placeholder="t('form.email_placeholder')"
                 autocomplete="email"
                 type="email"
                 :errors="errors.email ? [errors.email] : []"
@@ -115,10 +99,10 @@ const handleEnterKey = () => {
             />
             <FormItemInput
                 v-model="password"
-                :title="$t('global.forms.password')"
+                :title="$t('form.password')"
                 icon="solar:password-linear"
                 :disabled="isLoading"
-                :placeholder="$t('global.forms.password')"
+                :placeholder="$t('form.password')"
                 autocomplete="current-password"
                 type="password"
                 :errors="errors.password ? [errors.password] : []"

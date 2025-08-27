@@ -24,12 +24,12 @@ const props = withDefaults(defineProps<{
 });
 
 const emit = defineEmits<{
-    (e: 'update:modelValue', value: string): void;
+    (e: 'update:modelValue', value: string | null): void;
 }>();
 
 const inputValue = computed<string>({
     get: () => props.modelValue ?? '',
-    set: val => emit('update:modelValue', val),
+    set: val => emit('update:modelValue', val === '' ? null : val),
 });
 const showPassword = ref(false);
 </script>

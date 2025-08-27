@@ -11,6 +11,7 @@ const [street, streetAttrs] = defineField('street');
 const [number, numberAttrs] = defineField('number');
 const [postalCode, postalCodeAttrs] = defineField('postalCode');
 const [city, cityAttrs] = defineField('city');
+const [position, positionAttrs] = defineField('position');
 
 const props = withDefaults(defineProps<{
     dialogMode?: 'add' | 'edit' | null;
@@ -34,14 +35,14 @@ const emit = defineEmits<{
 
 const dialogTitle = computed(() => {
     return props.dialogMode === 'add'
-        ? t('addresses.add_new')
-        : t('addresses.edit');
+        ? t('action.add')
+        : t('action.edit');
 });
 
 const dialogDescription = computed(() => {
     return props.dialogMode === 'add'
-        ? t('addresses.add_description')
-        : t('addresses.edit_description');
+        ? t('action.message.add_description', { model: t('address.singular') })
+        : t('action.message.edit_description', { model: t('address.singular') });
 });
 
 const isOpen = computed({
@@ -59,6 +60,7 @@ watch(() => props.editingAddress, (address) => {
                 number: address.number,
                 postalCode: address.postalCode,
                 city: address.city,
+                position: address.position,
             });
         });
     }
@@ -75,6 +77,7 @@ watch(() => props.dialogMode, (newMode, oldMode) => {
                     number: '',
                     postalCode: '',
                     city: '',
+                    position: '',
                 },
             });
         });
@@ -92,6 +95,7 @@ watch(() => isOpen.value, (isOpen) => {
                     number: '',
                     postalCode: '',
                     city: '',
+                    position: '',
                 },
             });
         });
@@ -115,12 +119,12 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
     >
         <template #content>
             <form @submit.prevent="submitForm('submitAndClose')">
-                <div class="grid grid-cols-12 gap-4">
+                <div class="grid grid-cols-12 gap-4 items-start">
                     <FormItemInput
                         id="street"
                         v-model="street"
-                        :title="$t('addresses.street')"
-                        :placeholder="$t('addresses.street_placeholder')"
+                        :title="$t('street.singular')"
+                        :placeholder="$t('street.placeholder')"
                         class="col-span-8"
                         :errors="errors.street ? [errors.street] : []"
                         v-bind="streetAttrs"
@@ -129,8 +133,8 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     <FormItemInput
                         id="number"
                         v-model="number"
-                        :title="$t('addresses.number')"
-                        :placeholder="$t('addresses.number_placeholder')"
+                        :title="$t('street_number.singular')"
+                        :placeholder="$t('street_number.placeholder')"
                         class="col-span-4"
                         :errors="errors.number ? [errors.number] : []"
                         v-bind="numberAttrs"
@@ -139,8 +143,8 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     <FormItemInput
                         id="postalCode"
                         v-model="postalCode"
-                        :title="$t('addresses.postal_code')"
-                        :placeholder="$t('addresses.postal_code_placeholder')"
+                        :title="$t('postal_code.singular')"
+                        :placeholder="$t('postal_code.placeholder')"
                         class="col-span-4"
                         :errors="errors.postalCode ? [errors.postalCode] : []"
                         v-bind="postalCodeAttrs"
@@ -149,11 +153,23 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     <FormItemInput
                         id="city"
                         v-model="city"
-                        :title="$t('addresses.city')"
-                        :placeholder="$t('addresses.city_placeholder')"
-                        class="col-span-8"
+                        :title="$t('city.singular')"
+                        :placeholder="$t('city.placeholder')"
+                        class="col-span-4"
                         :errors="errors.city ? [errors.city] : []"
                         v-bind="cityAttrs"
+                        required
+                    />
+                    <FormItemInput
+                        id="position"
+                        v-model="position"
+                        :title="$t('position.singular')"
+                        :placeholder="$t('position.placeholder')"
+                        class="col-span-4"
+                        type="number"
+                        min="0"
+                        :errors="errors.position ? [errors.position] : []"
+                        v-bind="positionAttrs"
                         required
                     />
                 </div>
@@ -166,7 +182,7 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                 :disabled="isSubmitting"
                 @click="emit('closeDialog')"
             >
-                {{ $t('global.actions.cancel') }}
+                {{ $t('action.cancel') }}
             </Button>
             <Button
                 variant="outline"
@@ -178,7 +194,7 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     name="solar:refresh-linear"
                     class="mr-2 h-4 w-4 animate-spin"
                 />
-                {{ dialogMode === 'add' ? $t('global.actions.create_and_add_new') : $t('global.actions.update_and_add_new') }}
+                {{ dialogMode === 'add' ? ($t('action.create') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new')) : ($t('action.update') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new')) }}
             </Button>
             <Button
                 :disabled="isSubmitting"
@@ -189,7 +205,7 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     name="solar:refresh-linear"
                     class="mr-2 h-4 w-4 animate-spin"
                 />
-                {{ dialogMode === 'add' ? $t('global.actions.create') : $t('global.actions.update') }}
+                {{ dialogMode === 'add' ? $t('action.create') : $t('action.update') }}
             </Button>
         </template>
     </FormDialog>

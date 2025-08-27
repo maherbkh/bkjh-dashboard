@@ -51,7 +51,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
                         name="solar:close-circle-linear"
                         class="w-4 h-4"
                     />
-                    <span class="sr-only">{{ $t('global.ui.close') }}</span>
+                    <span class="sr-only">{{ $t('global.close') }}</span>
                 </DialogClose>
             </DialogContent>
         </DialogOverlay>

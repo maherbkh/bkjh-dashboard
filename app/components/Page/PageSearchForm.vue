@@ -24,7 +24,7 @@ const handleReset = () => {
     >
         <FormItemInput
             v-model="internalSearchQuery"
-            :placeholder="$t('global.forms.search_placeholder')"
+            :placeholder="$t('action.search_placeholder')"
             icon="solar:rounded-magnifer-linear"
             class="col-span-8"
         />
@@ -38,7 +38,7 @@ const handleReset = () => {
                 class="shrink-0 w-full"
                 name="solar:rounded-magnifer-linear"
             />
-            {{ $t('global.actions.search') }}
+            {{ $t('action.search') }}
         </Button>
         <Button
             type="reset"
@@ -50,7 +50,7 @@ const handleReset = () => {
                 class="shrink-0 w-full"
                 name="solar:restart-line-duotone"
             />
-            {{ $t('global.actions.reset') }}
+            {{ $t('action.reset') }}
         </Button>
     </form>
 </template>

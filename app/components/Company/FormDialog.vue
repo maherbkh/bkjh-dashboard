@@ -141,8 +141,8 @@ const { data: addresses } = useAddressesList();
                         v-model="name"
                         class="md:col-span-12"
                         v-bind="nameAttrs"
-                        :title="$t('companies.form.name')"
-                        :placeholder="$t('companies.form.name_placeholder')"
+                        :title="$t('global.name')"
+                        :placeholder="$t('global.name')"
                         :errors="errors.name ? [errors.name] : []"
                         required
                     />
@@ -151,8 +151,8 @@ const { data: addresses } = useAddressesList();
                         v-model="location"
                         class="md:col-span-6"
                         v-bind="locationAttrs"
-                        :title="$t('companies.form.location')"
-                        :placeholder="$t('companies.form.location_placeholder')"
+                        :title="$t('location.singular')"
+                        :placeholder="$t('location.singular')"
                         :errors="errors.location ? [errors.location] : []"
                         required
                     />
@@ -162,8 +162,8 @@ const { data: addresses } = useAddressesList();
                         v-model="register"
                         class="md:col-span-6"
                         v-bind="registerAttrs"
-                        :title="$t('companies.form.register')"
-                        :placeholder="$t('companies.form.register_placeholder')"
+                        :title="$t('partner.register')"
+                        :placeholder="$t('partner.register')"
                         :errors="errors.register ? [errors.register] : []"
                         required
                     />
@@ -173,8 +173,8 @@ const { data: addresses } = useAddressesList();
                         v-model="partner"
                         v-bind="partnerAttrs"
                         class="md:col-span-6"
-                        :title="$t('companies.form.partner')"
-                        :placeholder="$t('companies.form.partner_placeholder')"
+                        :title="$t('partner.singular')"
+                        :placeholder="$t('partner.singular')"
                         :errors="errors.partner ? [errors.partner] : []"
                         required
                     />
@@ -183,8 +183,8 @@ const { data: addresses } = useAddressesList();
                         v-model="partnerLocation"
                         class="md:col-span-6"
                         v-bind="partnerLocationAttrs"
-                        :title="$t('companies.form.partner_location')"
-                        :placeholder="$t('companies.form.partner_location_placeholder')"
+                        :title="$t('partner.singular') + ' ' + $t('location.singular')"
+                        :placeholder="$t('partner.singular') + ' ' + $t('location.singular')"
                         :errors="errors.partnerLocation ? [errors.partnerLocation] : []"
                         required
                     />
@@ -194,8 +194,8 @@ const { data: addresses } = useAddressesList();
                         v-model="partnerRegister"
                         class="md:col-span-6"
                         v-bind="partnerRegisterAttrs"
-                        :title="$t('companies.form.partner_register')"
-                        :placeholder="$t('companies.form.partner_register_placeholder')"
+                        :title="$t('partner.register')"
+                        :placeholder="$t('partner.register')"
                         :errors="errors.partnerRegister ? [errors.partnerRegister] : []"
                         required
                     />
@@ -205,16 +205,16 @@ const { data: addresses } = useAddressesList();
                         v-model="management"
                         class="md:col-span-6"
                         v-bind="managementAttrs"
-                        :title="$t('companies.form.management')"
-                        :placeholder="$t('companies.form.management_placeholder')"
+                        :title="$t('global.management')"
+                        :placeholder="$t('global.management')"
                         :errors="errors.management ? [errors.management] : []"
                         required
                     />
                     <FormItemSelect
                         id="address-id"
                         v-model="addressId"
-                        :title="t('groups.address')"
-                        :placeholder="t('groups.select_address')"
+                        :title="t('address.singular')"
+                        :placeholder="t('action.select') + ' ' + t('address.singular')"
                         class="md:col-span-12"
                         :errors="errors.addressId ? [errors.addressId] : []"
                         v-bind="addressIdAttrs"
@@ -231,7 +231,7 @@ const { data: addresses } = useAddressesList();
                     variant="outline"
                     @click="handleClose"
                 >
-                    {{ $t('global.actions.cancel') }}
+                    {{ $t('action.cancel') }}
                 </Button>
                 <Button
                     v-if="dialogMode === 'add'"
@@ -245,7 +245,7 @@ const { data: addresses } = useAddressesList();
                         name="solar:refresh-outline"
                         class="animate-spin mr-2 h-4 w-4"
                     />
-                    {{ $t('global.actions.save_and_add_new') }}
+                    {{ $t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new') }}
                 </Button>
                 <Button
                     type="button"
@@ -257,7 +257,7 @@ const { data: addresses } = useAddressesList();
                         name="solar:refresh-outline"
                         class="animate-spin mr-2 h-4 w-4"
                     />
-                    {{ dialogMode === 'add' ? $t('global.actions.save') : $t('global.actions.update') }}
+                    {{ dialogMode === 'add' ? $t('action.save') : $t('action.update') }}
                 </Button>
             </DialogFooter>
         </DialogContent>

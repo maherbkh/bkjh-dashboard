@@ -29,7 +29,7 @@ const emit = defineEmits(['add-new']);
             <Icon
                 name="solar:clipboard-add-outline"
             />
-            {{ $t('global.forms.add_new') }}
+            {{ $t('action.add') + ' ' + $t('common.new') }}
         </Button>
         <Button
             class="cursor-pointer"
@@ -39,7 +39,7 @@ const emit = defineEmits(['add-new']);
             <Icon
                 name="solar:trash-bin-minimalistic-outline"
             />
-            {{ $t('global.navigation.deleted_items') }}
+            {{ $t('global.deleted_items') }}
         </Button>
     </PageHeader>
 </template>

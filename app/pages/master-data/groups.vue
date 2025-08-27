@@ -3,9 +3,9 @@ const { t } = useI18n()
 const { confirmDelete, confirmBulkDelete } = useConfirmDialog()
 
 // Page configuration
-const pageTitle = computed(() => t('groups.title'))
+const pageTitle = computed(() => t('group.plural'))
 const pageIcon = usePageIcon()
-const pageDescription = computed(() => t('groups.description'))
+const pageDescription = computed(() => t('group.plural'))
 definePageMeta({
     middleware: 'auth',
 })
@@ -49,22 +49,22 @@ const status = computed(() => isLoading.value ? 'pending' : 'success')
 const headerItems = computed(() => [
     {
         as: 'th',
-        name: t('global.table.name'),
+        name: t('global.name'),
         id: 'name',
     },
     {
         as: 'th',
-        name: t('global.table.address'),
+        name: t('address.singular'),
         id: 'address',
     },
     {
         as: 'th',
-        name: t('global.table.companies'),
+        name: t('company.singular'),
         id: 'companies',
     },
     {
         as: 'th',
-        name: t('global.table.created_at'),
+        name: t('common.created_at'),
         id: 'created_at',
     },
 ])

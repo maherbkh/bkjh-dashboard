@@ -2,7 +2,7 @@
 const { t } = useI18n()
 
 // Page configuration
-const pageTitle = computed(() => t('companies.title'))
+const pageTitle = computed(() => t('company.plural'))
 const pageIcon = usePageIcon()
 const pageDescription = computed(() => t('companies.description'))
 definePageMeta({
@@ -48,22 +48,17 @@ const status = computed(() => isLoading.value ? 'pending' : 'success')
 const headerItems = computed(() => [
     {
         as: 'th',
-        name: t('global.table.name'),
+        name: t('global.name'),
         id: 'name',
     },
     {
         as: 'th',
-        name: t('global.table.location'),
-        id: 'location',
-    },
-    {
-        as: 'th',
-        name: t('global.table.address'),
+        name: t('address.singular'),
         id: 'address',
     },
     {
         as: 'th',
-        name: t('global.table.management'),
+        name: t('global.management'),
         id: 'management',
     },
 ])
@@ -298,7 +293,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                     <Icon
                         name="solar:trash-bin-minimalistic-outline"
                     />
-                    {{ $t('global.actions.delete_all') }}
+                    {{ $t('action.delete_all') }}
                 </Button>
             </template>
         </PageHeaderActions>

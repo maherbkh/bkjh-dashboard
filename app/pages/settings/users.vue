@@ -2,9 +2,9 @@
 const { t } = useI18n()
 
 // Page configuration
-const pageTitle = computed(() => t('users.title'))
+const pageTitle = computed(() => t('user.plural'))
 const pageIcon = usePageIcon()
-const pageDescription = computed(() => t('users.description'))
+const pageDescription = computed(() => t('user.plural'))
 definePageMeta({
     middleware: 'auth',
 })
@@ -45,32 +45,32 @@ const sortDir = ref<'asc' | 'desc'>('asc')
 const headerItems = computed(() => [
     {
         as: 'th',
-        name: t('global.table.name'),
+        name: t('global.name'),
         id: 'name',
     },
     {
         as: 'th',
-        name: t('global.table.email'),
+        name: t('form.email'),
         id: 'email',
     },
     {
         as: 'th',
-        name: t('users.table.username'),
+        name: t('user.username'),
         id: 'username',
     },
     {
         as: 'th',
-        name: t('global.table.status'),
+        name: t('common.status'),
         id: 'isActive',
     },
     {
         as: 'th',
-        name: t('users.table.role'),
+        name: t('role.singular'),
         id: 'isSuperAdmin',
     },
     {
         as: 'th',
-        name: t('global.table.created_at'),
+        name: t('common.created_at'),
         id: 'createdAt',
     },
 ])
@@ -87,26 +87,92 @@ const dialogMode = ref<'add' | 'edit'>('add')
 const editingUser = ref<User | null>(null)
 const isSubmitting = ref(false)
 
-const openAddDialog = () => {
+// Roles state
+const roles = ref<Array<{ id: number; name: string; position: number }>>([])
+const isRolesLoading = ref(false)
+
+const openAddDialog = async () => {
     dialogMode.value = 'add'
     resetForm()
     editingUser.value = null
-    isDialogOpen.value = true
+    
+    // Fetch roles when opening dialog
+    if (roles.value.length === 0) {
+        isRolesLoading.value = true
+        try {
+            const { data, status } = await useApiFetch<{
+                status: string;
+                message: string;
+                data: Array<{ id: number; name: string; position: number }>;
+            }>('/api/role-all');
+            
+            // Only proceed if status is not pending
+            if (status.value !== 'pending') {
+                if (data.value?.data) {
+                    roles.value = data.value.data
+                }
+                isDialogOpen.value = true
+            }
+        } catch (error) {
+            console.error('Failed to fetch roles:', error)
+        } finally {
+            isRolesLoading.value = false
+        }
+    } else {
+        // If roles are already loaded, open dialog immediately
+        isDialogOpen.value = true
+    }
 }
 
 const handleEdit = async (user: User) => {
     dialogMode.value = 'edit'
     editingUser.value = user
-    setValues({
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        username: user.username,
-        name: user.name || '',
-        isActive: user.isActive || true,
-        isSuperAdmin: user.isSuperAdmin || false,
-    })
-    isDialogOpen.value = true
+    
+    // Fetch roles when opening dialog if not already loaded
+    if (roles.value.length === 0) {
+        isRolesLoading.value = true
+        try {
+            const { data, status } = await useApiFetch<{
+                status: string;
+                message: string;
+                data: Array<{ id: number; name: string; position: number }>;
+            }>('/api/role-all');
+            
+            // Only proceed if status is not pending
+            if (status.value !== 'pending') {
+                if (data.value?.data) {
+                    roles.value = data.value.data
+                }
+                
+                setValues({
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email,
+                    username: user.username,
+                    name: user.name || '',
+                    isActive: user.isActive || true,
+                    isSuperAdmin: user.isSuperAdmin || false,
+                })
+                isDialogOpen.value = true
+            }
+        } catch (error) {
+            console.error('Failed to fetch roles:', error)
+        } finally {
+            isRolesLoading.value = false
+        }
+    } else {
+        // If roles are already loaded, set values and open dialog immediately
+        setValues({
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            username: user.username,
+            name: user.name || '',
+            isActive: user.isActive || true,
+            isSuperAdmin: user.isSuperAdmin || false,
+        })
+        isDialogOpen.value = true
+    }
 }
 
 const onSubmitAndClose = async (values: UserForm) => {
@@ -371,7 +437,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                                 :variant="row.isActive ? 'default' : 'secondary'"
                                 class="text-xs"
                             >
-                                {{ row.isActive ? $t('users.status.active') : $t('users.status.inactive') }}
+                                {{ row.isActive ? $t('common.active') : $t('common.inactive') }}
                             </Badge>
                         </template>
 
@@ -380,7 +446,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                                 :variant="row.isSuperAdmin ? 'secondary' : 'outline'"
                                 class="text-xs"
                             >
-                                {{ row.isSuperAdmin ? $t('users.role.super_admin') : $t('users.role.user') }}
+                                {{ row.isSuperAdmin ? $t('user.super_admin') : $t('role.singular') }}
                             </Badge>
                         </template>
 
@@ -391,7 +457,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                         <template #cell-actions="{ row }">
                             <div class="flex justify-end gap-2">
                                 <Button
-                                    :title="$t('global.actions.edit')"
+                                    :title="$t('action.edit')"
                                     variant="ghost"
                                     size="icon"
                                     hydrate-on-interaction="mouseover"
@@ -403,7 +469,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                                     />
                                 </Button>
                                 <Button
-                                    :title="$t('global.actions.delete')"
+                                    :title="$t('action.delete')"
                                     variant="ghost"
                                     size="icon"
                                     @click="handleDelete(row.id)"
@@ -437,6 +503,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
             v-model:dialog-mode="dialogMode"
             v-model:editing-user="editingUser"
             :is-submitting="isSubmitting"
+            :roles="roles"
             @submit-and-close="onSubmitAndClose"
             @submit-and-add-new="onSubmitAndAddNew"
             @close-dialog="handleDialogClose"

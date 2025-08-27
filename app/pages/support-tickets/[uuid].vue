@@ -6,9 +6,9 @@ const route = useRoute()
 const uuid = computed(() => route.params.uuid as string)
 
 // Page configuration
-const pageTitle = computed(() => t('tickets.show.title'))
+const pageTitle = computed(() => t('ticket.singular'))
 const pageIcon = usePageIcon()
-const pageDescription = computed(() => t('tickets.show.description'))
+const pageDescription = computed(() => t('ticket.singular'))
 definePageMeta({
     middleware: 'auth',
 })
@@ -16,15 +16,15 @@ definePageMeta({
 // Breadcrumb navigation
 const breadcrumbItems = computed(() => [
     {
-        title: t('global.actions.dashboard'),
+        title: t('global.dashboard'),
         href: '/',
     },
     {
-        title: t('tickets.title'),
+        title: t('ticket.plural'),
         href: '/support-tickets',
     },
     {
-        title: 'Ticket Details',
+        title: t('ticket.details'),
         href: route.fullPath,
     },
 ])

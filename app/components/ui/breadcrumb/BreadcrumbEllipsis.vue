@@ -21,6 +21,6 @@ const props = defineProps<{
                 class="size-4"
             />
         </slot>
-        <span class="sr-only">{{ $t('global.ui.more') }}</span>
+        <span class="sr-only">{{ $t('global.more') }}</span>
     </span>
 </template>

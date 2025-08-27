@@ -5,17 +5,17 @@ const { getTicketNumber, isTicketDetailPage, extractUuidFromPath } = useOpenedTi
 
 // Translation mapping for route segments (reactive)
 const translationMap = computed(() => ({
-    'master-data': t('global.sidebar.master_data'),
-    'categories': t('global.sidebar.categories'),
-    'companies': t('global.sidebar.companies'),
-    'groups': t('global.sidebar.groups'),
-    'academy': t('global.sidebar.academy'),
-    'event': t('global.sidebar.event'),
-    'list': t('global.sidebar.list'),
-    'speakers': t('global.sidebar.speakers'),
-    'attendee': t('global.sidebar.attendee'),
-    'event-categories': t('global.sidebar.event-categories'),
-    'event-targets': t('global.sidebar.event-targets'),
+    'master-data': t('global.master_data'),
+    'categories': t('category.plural'),
+    'companies': t('company.plural'),
+    'groups': t('group.plural'),
+    'academy': t('academy.plural'),
+    'event': t('academy.plural'),
+    'list': t('common.list'),
+    'speakers': t('speaker.plural'),
+    'attendee': t('attendee.plural'),
+    'event-categories': t('event_category.plural'),
+    'event-targets': t('event_target.plural'),
 }));
 
 const getTranslatedName = (segment: string, fullPath?: string) => {
@@ -70,7 +70,7 @@ const formattedPath = computed(() => formatRoutePath(route.fullPath));
                     <BreadcrumbLink
                         :class="[route.fullPath === '/' ? 'opacity-100' : 'hover:opacity-100 opacity-50 ease-in-out duration-300']"
                     >
-                        {{ $t('global.actions.dashboard') }}
+                        {{ $t('global.dashboard') }}
                     </BreadcrumbLink>
                 </NuxtLink>
                 <BreadcrumbSeparator v-if="route.fullPath !== '/'">
@@ -89,7 +89,7 @@ const formattedPath = computed(() => formatRoutePath(route.fullPath));
                     <BreadcrumbItem class="intro-x flex items-center">
                         <template v-if="formattedPath && i === formattedPath.length - 1">
                             <BreadcrumbPage :class="'opacity-75'">
-                                {{ path.name === '__VIEW__' ? $t('global.actions.view') : path.name }}
+                                {{ path.name === '__VIEW__' ? $t('action.view') : path.name }}
                             </BreadcrumbPage>
                         </template>
                         <template v-else>

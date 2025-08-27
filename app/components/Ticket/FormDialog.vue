@@ -43,14 +43,14 @@ const emit = defineEmits<{
 
 const dialogTitle = computed(() => {
     return props.dialogMode === 'add'
-        ? t('tickets.add_new')
-        : t('tickets.edit');
+        ? t('action.add')
+        : t('action.edit');
 });
 
 const dialogDescription = computed(() => {
     return props.dialogMode === 'add'
-        ? t('tickets.add_description')
-        : t('tickets.edit_description');
+        ? t('common.add') + ' ' + t('ticket.singular')
+        : t('common.edit') + ' ' + t('ticket.singular');
 });
 
 const isOpen = computed({
@@ -60,15 +60,15 @@ const isOpen = computed({
 
 // Status options
 const statusOptions = computed(() => [
-    { value: 'pending', label: t('tickets.status.pending') },
-    { value: 'in_progress', label: t('tickets.status.in_progress') },
-    { value: 'resolved', label: t('tickets.status.resolved') },
-    { value: 'closed', label: t('tickets.status.closed') },
+    { value: 'pending', label: t('common.pending') },
+    { value: 'in_progress', label: t('common.in_progress') },
+    { value: 'resolved', label: t('common.resolved') },
+    { value: 'closed', label: t('common.closed') },
 ]);
 
 // Group options
 const groupOptions = computed(() => [
-    { value: null, label: t('global.forms.select_option') },
+    { value: null, label: t('form.select_option') },
     ...groups.value.map(group => ({
         value: group.id,
         label: group.name,
@@ -77,7 +77,7 @@ const groupOptions = computed(() => [
 
 // Category options
 const categoryOptions = computed(() => [
-    { value: null, label: t('global.forms.select_option') },
+    { value: null, label: t('forms.select_option') },
     ...categories.value.map(category => ({
         value: category.id,
         label: category.name,
@@ -170,9 +170,9 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     <!-- Name -->
                     <FormItemInput
                         id="name"
-                        v-model="name"
-                        :title="$t('tickets.form.name')"
-                        :placeholder="$t('tickets.form.name_placeholder')"
+                        v-model="name"  
+                        :title="$t('global.name')"
+                        :placeholder="$t('global.name')"
                         class="col-span-6"
                         :errors="errors.name ? [errors.name] : []"
                         v-bind="nameAttrs"
@@ -183,8 +183,8 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     <FormItemSelect
                         id="status"
                         v-model="status"
-                        :title="$t('tickets.form.status')"
-                        :placeholder="$t('tickets.form.status_placeholder')"
+                        :title="$t('common.status')"
+                        :placeholder="$t('common.status')"
                         class="col-span-6"
                         :options="statusOptions"
                         :errors="errors.status ? [errors.status] : []"
@@ -196,8 +196,8 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     <FormItemTextarea
                         id="message"
                         v-model="message"
-                        :title="$t('tickets.form.message')"
-                        :placeholder="$t('tickets.form.message_placeholder')"
+                        :title="$t('global.message')"
+                        :placeholder="$t('global.message')"
                         class="col-span-12"
                         :errors="errors.message ? [errors.message] : []"
                         v-bind="messageAttrs"
@@ -208,7 +208,7 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     <!-- Contact Information -->
                     <div class="col-span-12">
                         <h4 class="text-sm font-medium mb-3">
-                            {{ $t('tickets.form.contact_information') }}
+                            {{ $t('form.contact_information') }}
                         </h4>
                     </div>
 
@@ -216,8 +216,8 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     <FormItemInput
                         id="email"
                         v-model="email"
-                        :title="$t('tickets.form.email')"
-                        :placeholder="$t('tickets.form.email_placeholder')"
+                        :title="$t('form.email')"
+                        :placeholder="$t('form.email_placeholder')"
                         class="col-span-6"
                         type="email"
                         :errors="errors.email ? [errors.email] : []"
@@ -228,8 +228,8 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     <FormItemInput
                         id="phone"
                         v-model="phone"
-                        :title="$t('tickets.form.phone')"
-                        :placeholder="$t('tickets.form.phone_placeholder')"
+                        :title="$t('form.phone')"
+                        :placeholder="$t('form.phone_placeholder')"
                         class="col-span-6"
                         type="tel"
                         :errors="errors.phone ? [errors.phone] : []"
@@ -240,8 +240,8 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     <FormItemInput
                         id="cell"
                         v-model="cell"
-                        :title="$t('tickets.form.cell')"
-                        :placeholder="$t('tickets.form.cell_placeholder')"
+                        :title="$t('form.cell')"
+                        :placeholder="$t('form.cell_placeholder')"
                         class="col-span-6"
                         type="tel"
                         :errors="errors.cell ? [errors.cell] : []"
@@ -252,8 +252,8 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     <FormItemInput
                         id="deviceId"
                         v-model="deviceId"
-                        :title="$t('tickets.form.device_id')"
-                        :placeholder="$t('tickets.form.device_id_placeholder')"
+                        :title="$t('form.device_id')"
+                        :placeholder="$t('form.device_id_placeholder')"
                         class="col-span-6"
                         :errors="errors.deviceId ? [errors.deviceId] : []"
                         v-bind="deviceIdAttrs"
@@ -262,7 +262,7 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     <!-- Assignment Information -->
                     <div class="col-span-12">
                         <h4 class="text-sm font-medium mb-3">
-                            {{ $t('tickets.form.assignment_information') }}
+                            {{ $t('form.assignment_information') }}
                         </h4>
                     </div>
 
@@ -270,8 +270,8 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     <FormItemSelect
                         id="groupId"
                         v-model="groupId"
-                        :title="$t('tickets.form.group')"
-                        :placeholder="$t('tickets.form.group_placeholder')"
+                        :title="$t('group.singular')"
+                        :placeholder="$t('group.singular')"
                         class="col-span-6"
                         :options="groupOptions"
                         :errors="errors.groupId ? [errors.groupId] : []"
@@ -282,8 +282,8 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     <FormItemSelect
                         id="categoryId"
                         v-model="categoryId"
-                        :title="$t('tickets.form.category')"
-                        :placeholder="$t('tickets.form.category_placeholder')"
+                        :title="$t('category.singular')"
+                        :placeholder="$t('category.singular')"
                         class="col-span-6"
                         :options="categoryOptions"
                         :errors="errors.categoryId ? [errors.categoryId] : []"
@@ -299,7 +299,7 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                 :disabled="isSubmitting"
                 @click="emit('closeDialog')"
             >
-                {{ $t('global.actions.cancel') }}
+                {{ $t('action.cancel') }}
             </Button>
             <Button
                 v-if="dialogMode === 'add'"
@@ -312,7 +312,7 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     name="solar:refresh-linear"
                     class="mr-2 h-4 w-4 animate-spin"
                 />
-                {{ $t('global.actions.create_and_add_new') }}
+                {{ $t('action.create') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new') }}
             </Button>
             <Button
                 :disabled="isSubmitting"
@@ -323,7 +323,7 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     name="solar:refresh-linear"
                     class="mr-2 h-4 w-4 animate-spin"
                 />
-                {{ dialogMode === 'add' ? $t('global.actions.create') : $t('global.actions.update') }}
+                {{ dialogMode === 'add' ? $t('action.create') : $t('action.update') }}
             </Button>
         </template>
     </FormDialog>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { User } from '../../types';
-import type { UserForm } from '../../composables/userSchema';
-
+import { z } from 'zod';
+import type { User } from '~/types';
+import type { UserForm } from '~/composables/userSchema';
 const { t } = useI18n();
 
 const props = withDefaults(defineProps<{
@@ -9,60 +9,52 @@ const props = withDefaults(defineProps<{
     editingUser?: User | null;
     isSubmitting?: boolean;
     isDialogOpen?: boolean;
+    roles?: Array<{ id: number; name: string; position: number }>;
 }>(), {
     dialogMode: null,
     editingUser: null,
     isSubmitting: () => false,
     isDialogOpen: () => false,
+    roles: () => [],
 });
 
-// Use appropriate schema based on dialog mode
-const schemaMode = computed(() => props.dialogMode === 'add' ? 'create' : 'edit');
-const formSchema = computed(() => createUserSchema(t, schemaMode.value));
+// Schema management with reactive ref
+const currentSchema = ref<ReturnType<typeof createUserSchema> | undefined>(undefined);
+
+// Watch for dialog mode changes to reload schema
+watch([() => props.isDialogOpen, () => props.dialogMode], ([isOpen, dialogMode]) => {
+    if (isOpen && dialogMode) {
+        const mode = dialogMode === 'add' ? 'create' : 'edit';
+        currentSchema.value = createUserSchema(t, mode);
+    } else {
+        currentSchema.value = undefined;
+    }
+}, { immediate: false });
 
 const { defineField, errors, setValues, handleSubmit, resetForm } = useCrud<User, UserForm>({
     apiSlug: 'user',
-    formSchema: formSchema.value,
+    formSchema: currentSchema.value,
 });
 
+// Define fields only when schema is available
 const [firstName, firstNameAttrs] = defineField('firstName');
 const [lastName, lastNameAttrs] = defineField('lastName');
 const [email, emailAttrs] = defineField('email');
 const [username, usernameAttrs] = defineField('username');
-const [password, passwordAttrs] = defineField('password');
 const [role_id, role_idAttrs] = defineField('role_id');
 const [isActive, isActiveAttrs] = defineField('isActive');
 const [isSuperAdmin, isSuperAdminAttrs] = defineField('isSuperAdmin');
 
-// Resources store for roles
-const resourcesStore = useResourcesStore();
+// Password field is only defined in add mode
+const [password, passwordAttrs] = defineField('password');
 
-// Initialize store on mount and when dialog opens
-onMounted(async () => {
-    await resourcesStore.initialize();
-});
-
-// Watch for dialog opening to ensure roles are loaded
-watch(() => props.isDialogOpen, async (isOpen) => {
-    if (isOpen) {
-        // Ensure roles are loaded when dialog opens
-        try {
-            console.log('Fetching roles...');
-            await resourcesStore.fetchRoles();
-            console.log('Roles fetched:', resourcesStore.roles.length);
-        }
-        catch (error) {
-            console.error('Failed to fetch roles:', error);
-        }
-    }
-});
+// Roles from props
+const roles = computed(() => props.roles || []);
 
 // Debug computed for roles
 const rolesDebug = computed(() => ({
-    count: resourcesStore.roles.length,
-    loading: resourcesStore.isLoading,
-    error: resourcesStore.error,
-    roles: resourcesStore.roles.slice(0, 3), // Show first 3 roles for debugging
+    count: roles.value.length,
+    roles: roles.value.slice(0, 3), // Show first 3 roles for debugging
 }));
 
 const emit = defineEmits<{
@@ -75,14 +67,14 @@ const emit = defineEmits<{
 
 const dialogTitle = computed(() => {
     return props.dialogMode === 'add'
-        ? t('users.add_new')
-        : t('users.edit');
+        ? t('action.add') + ' ' + t('common.new')
+        : t('action.edit');
 });
 
 const dialogDescription = computed(() => {
     return props.dialogMode === 'add'
-        ? t('users.add_description')
-        : t('users.edit_description');
+        ? t('user.add_description')
+        : t('user.edit_description');
 });
 
 const isOpen = computed({
@@ -98,8 +90,7 @@ watch(() => props.editingUser, (user) => {
             lastName: user.lastName,
             email: user.email,
             username: user.username,
-            password: '', // Don't populate password in edit mode
-            role_id: user.role_id || 0,
+            role_id: user.role_id || null, // Set to null if no role_id
             isActive: user.isActive ?? true,
             isSuperAdmin: user.isSuperAdmin ?? false,
         });
@@ -119,7 +110,7 @@ watch(() => props.dialogMode, (newMode, oldMode) => {
                     username: '',
                     name: '',
                     password: '',
-                    role_id: 0,
+                    role_id: null,
                     isActive: true,
                     isSuperAdmin: false,
                 },
@@ -128,7 +119,7 @@ watch(() => props.dialogMode, (newMode, oldMode) => {
     }
 });
 
-// Clear form when dialog closes
+// Clear form and reset schema when dialog closes
 watch(() => props.isDialogOpen, (isOpen) => {
     if (!isOpen) {
         // Clear form when dialog closes to prevent focus issues
@@ -141,22 +132,28 @@ watch(() => props.isDialogOpen, (isOpen) => {
                     username: '',
                     name: '',
                     password: '',
-                    role_id: 0,
+                    role_id: null,
                     isActive: true,
                     isSuperAdmin: false,
                 },
             });
         });
+        // Force schema recomputation by triggering a reactive update
+        // This ensures the schema is reset when dialog closes
     }
 });
 
 const onSubmitAndClose = handleSubmit((values) => {
-    // Remove password if it's empty in edit mode
-    if (props.dialogMode === 'edit' && !values.password) {
+    console.log('Form submitted with values:', values);
+    console.log('Dialog mode:', props.dialogMode);
+    
+    // Remove password field if it exists in edit mode
+    if (props.dialogMode === 'edit' && 'password' in values) {
         const { password, ...valuesWithoutPassword } = values;
+        console.log('Sending values without password:', valuesWithoutPassword);
         emit('submitAndClose', valuesWithoutPassword);
-    }
-    else {
+    } else {
+        console.log('Sending all values:', values);
         emit('submitAndClose', values);
     }
 });
@@ -173,7 +170,7 @@ const handleClose = () => {
 <template>
     <Dialog v-model:open="isOpen">
         <DialogContent
-            class="sm:max-w-[600px]"
+            class="sm:max-w-4xl"
         >
             <DialogHeader>
                 <DialogTitle>{{ dialogTitle }}</DialogTitle>
@@ -188,8 +185,8 @@ const handleClose = () => {
                         v-model="firstName"
                         class="md:col-span-6"
                         v-bind="firstNameAttrs"
-                        :title="$t('users.form.first_name')"
-                        :placeholder="$t('users.form.first_name_placeholder')"
+                        :title="$t('user.first_name')"
+                        :placeholder="$t('user.first_name_placeholder')"
                         :errors="errors.firstName ? [errors.firstName] : []"
                         required
                     />
@@ -198,8 +195,8 @@ const handleClose = () => {
                         v-model="lastName"
                         class="md:col-span-6"
                         v-bind="lastNameAttrs"
-                        :title="$t('users.form.last_name')"
-                        :placeholder="$t('users.form.last_name_placeholder')"
+                        :title="$t('user.last_name')"
+                        :placeholder="$t('user.last_name_placeholder')"
                         :errors="errors.lastName ? [errors.lastName] : []"
                         required
                     />
@@ -209,8 +206,8 @@ const handleClose = () => {
                         class="md:col-span-6"
                         v-bind="emailAttrs"
                         type="email"
-                        :title="$t('users.form.email')"
-                        :placeholder="$t('users.form.email_placeholder')"
+                        :title="$t('form.email')"
+                        :placeholder="$t('form.email_placeholder')"
                         :errors="errors.email ? [errors.email] : []"
                         required
                     />
@@ -219,44 +216,44 @@ const handleClose = () => {
                         v-model="username"
                         class="md:col-span-6"
                         v-bind="usernameAttrs"
-                        :title="$t('users.form.username')"
-                        :placeholder="$t('users.form.username_placeholder')"
+                        :title="$t('user.username')"
+                        :placeholder="$t('user.username_placeholder')"
                         :errors="errors.username ? [errors.username] : []"
                         required
                     />
                     <FormItemInput
+                        v-if="dialogMode === 'add'"
                         id="password"
                         v-model="password"
                         class="md:col-span-6"
                         v-bind="passwordAttrs"
                         type="password"
                         use-show-password
-                        :title="$t('users.form.password')"
-                        :placeholder="$t('users.form.password_placeholder')"
+                        :title="$t('form.password')"
+                        :placeholder="$t('form.password_placeholder')"
                         :errors="errors.password ? [errors.password] : []"
-                        :required="dialogMode === 'add'"
+                        required
                     />
                     <FormItemSelect
                         id="role_id"
                         v-model="role_id"
                         class="md:col-span-6"
                         v-bind="role_idAttrs"
-                        :title="$t('users.form.role')"
-                        :data="resourcesStore.roles"
+                        :title="$t('role.singular')"
+                        :data="roles"
                         key-value="id"
                         name-value="name"
-                        :placeholder="$t('users.form.role_placeholder')"
+                        :placeholder="$t('role.singular_placeholder')"
                         :errors="errors.role_id ? [errors.role_id] : []"
-                        required
                     />
                     <FormItemSwitch
                         id="isActive"
                         v-model="isActive"
                         class="md:col-span-6"
                         v-bind="isActiveAttrs"
-                        :title="$t('users.form.is_active')"
-                        :true-label="$t('users.status.active')"
-                        :false-label="$t('users.status.inactive')"
+                        :title="$t('common.status')"
+                        :true-label="$t('common.active')"
+                        :false-label="$t('common.inactive')"
                         :errors="errors.isActive ? [errors.isActive] : []"
                     />
                     <FormItemSwitch
@@ -264,9 +261,9 @@ const handleClose = () => {
                         v-model="isSuperAdmin"
                         class="md:col-span-6"
                         v-bind="isSuperAdminAttrs"
-                        :title="$t('users.form.is_super_admin')"
-                        :true-label="$t('users.role.super_admin')"
-                        :false-label="$t('users.role.user')"
+                        :title="$t('user.is_super_admin')"
+                        :true-label="$t('user.super_admin')"
+                        :false-label="$t('user.not_super_admin')"
                         :errors="errors.isSuperAdmin ? [errors.isSuperAdmin] : []"
                     />
                 </div>
@@ -277,7 +274,7 @@ const handleClose = () => {
                     variant="outline"
                     @click="handleClose"
                 >
-                    {{ $t('global.actions.cancel') }}
+                    {{ $t('action.cancel') }}
                 </Button>
                 <Button
                     v-if="dialogMode === 'add'"
@@ -291,7 +288,7 @@ const handleClose = () => {
                         name="solar:refresh-outline"
                         class="animate-spin mr-2 h-4 w-4"
                     />
-                    {{ $t('global.actions.save_and_add_new') }}
+                    {{ $t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new') }}
                 </Button>
                 <Button
                     type="button"
@@ -303,7 +300,7 @@ const handleClose = () => {
                         name="solar:refresh-outline"
                         class="animate-spin mr-2 h-4 w-4"
                     />
-                    {{ dialogMode === 'add' ? $t('global.actions.save') : $t('global.actions.update') }}
+                    {{ dialogMode === 'add' ? $t('action.save') : $t('action.update') }}
                 </Button>
             </DialogFooter>
         </DialogContent>

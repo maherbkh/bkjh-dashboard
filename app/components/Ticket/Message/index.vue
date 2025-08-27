@@ -23,7 +23,7 @@
                     name="solar:chat-round-outline"
                     class="!size-5 opacity-75 shrink-0"
                 />
-                {{ $t('tickets.show.message') }}
+                {{ $t('global.message') }}
             </CardTitle>
         </CardHeader>
         <CardContent>

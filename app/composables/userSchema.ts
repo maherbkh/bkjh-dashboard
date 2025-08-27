@@ -1,61 +1,83 @@
 import { z } from 'zod';
 
-export function createUserSchema(t: (key: string) => string, mode: 'create' | 'edit' = 'create') {
-    const baseSchema = {
-        firstName: z
-            .string({ required_error: t('users.validation.first_name_required') })
-            .min(1, t('users.validation.first_name_min_length'))
-            .max(255, t('users.validation.first_name_max_length')),
+export function createUserSchema(
+  t: (key: string, params?: Record<string, string | number>) => string,
+  mode: 'create' | 'edit' = 'create'
+) {
+  // Shared rules
+  const baseSchema = {
+    firstName: z
+      .string({ required_error: t('user.first_name') + ' ' + t('validation.required') })
+      .min(1, t('user.first_name') + ' ' + t('validation.min_length', { min: 1 }))
+      .max(255, t('user.first_name') + ' ' + t('validation.max_length', { max: 255 })),
 
-        lastName: z
-            .string({ required_error: t('users.validation.last_name_required') })
-            .min(1, t('users.validation.last_name_min_length'))
-            .max(255, t('users.validation.last_name_max_length')),
+    lastName: z
+      .string({ required_error: t('user.last_name') + ' ' + t('validation.required') })
+      .min(1, t('user.last_name') + ' ' + t('validation.min_length', { min: 1 }))
+      .max(255, t('user.last_name') + ' ' + t('validation.max_length', { max: 255 })),
 
-        email: z
-            .string({ required_error: t('users.validation.email_required') })
-            .email(t('users.validation.email_invalid'))
-            .max(255, t('users.validation.email_max_length')),
+    email: z
+      .string({ required_error: t('form.email') + ' ' + t('validation.required') })
+      .email(t('form.email') + ' ' + t('validation.invalid'))
+      .max(255, t('form.email') + ' ' + t('validation.max_length', { max: 255 })),
 
-        username: z
-            .string({ required_error: t('users.validation.username_required') })
-            .min(1, t('users.validation.username_min_length'))
-            .max(255, t('users.validation.username_max_length')),
+    username: z
+      .string({ required_error: t('user.username') + ' ' + t('validation.required') })
+      .min(1, t('user.username') + ' ' + t('validation.min_length', { min: 1 }))
+      .max(255, t('user.username') + ' ' + t('validation.max_length', { max: 255 })),
 
-        role_id: z
-            .number({ required_error: t('users.validation.role_required') })
-            .int(t('users.validation.role_invalid'))
-            .positive(t('users.validation.role_invalid')),
+    role_id: z
+      .union([
+        z.number().int(t('role.singular') + ' ' + t('validation.integer')).positive(t('role.singular') + ' ' + t('validation.invalid')),
+        z.null(),
+        z.undefined(),
+      ])
+      .optional(),
 
-        isActive: z
-            .boolean()
-            .optional(),
+    isActive: z.boolean().optional(),
+    isSuperAdmin: z.boolean().optional(),
+  };
 
-        isSuperAdmin: z
-            .boolean()
-            .optional(),
-    };
+  // Password validation based on mode
+  const getPasswordSchema = () => {
+    console.log('Mode is ', mode)
 
-    // Add password field based on mode
-    if (mode === 'create') {
-        return z.object({
-            ...baseSchema,
-            password: z
-                .string({ required_error: t('users.validation.password_required') })
-                .min(8, t('users.validation.password_min_length'))
-                .max(255, t('users.validation.password_max_length')),
-        });
+    switch (mode) {
+      case 'edit':
+        return {
+          password: z
+            .any()
+            .refine(
+              (val) => {
+                if (val === null || val === undefined || val === "") {
+                  return true;
+                } else if (typeof val !== "string") {
+                  return false;
+                } else {
+                  return val.length >= 8 && val.length <= 255;
+                }
+              },
+              {
+                message: t("form.password") + " " + t("validation.min_length", { min: 8 }),
+              }
+            )
+            .optional()
+        };
+      
+      case 'create':
+      default:
+        return {
+          password: z.string({ required_error: t('form.password') + ' ' + t('validation.required') })
+            .min(8, t('form.password') + ' ' + t('validation.min_length', { min: 8 }))
+            .max(255, t('form.password') + ' ' + t('validation.max_length', { max: 255 }))
+        };
     }
-    else {
-        return z.object({
-            ...baseSchema,
-            password: z
-                .string()
-                .min(8, t('users.validation.password_min_length'))
-                .max(255, t('users.validation.password_max_length'))
-                .optional(),
-        });
-    }
+  };
+
+  return z.object({
+    ...baseSchema,
+    ...getPasswordSchema()
+  });
 }
 
 export type UserForm = z.infer<ReturnType<typeof createUserSchema>>;

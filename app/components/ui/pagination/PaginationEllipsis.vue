@@ -22,7 +22,7 @@ const delegatedProps = reactiveOmit(props, 'class');
                 name="solar:menu-dots-linear"
                 class="size-4"
             />
-            <span class="sr-only">{{ $t('global.ui.more_pages') }}</span>
+            <span class="sr-only">{{ $t('global.more_pages') }}</span>
         </slot>
     </PaginationEllipsis>
 </template>

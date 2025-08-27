@@ -13,8 +13,8 @@ async function onSubmit(event: Event) {
     event.preventDefault();
 
     if (!email.value) {
-        toast.error(t('global.messages.error'), {
-            description: t('auth.please_fill_email'),
+        toast.error(t('global.error'), {
+            description: t('form.email') + ' ' + t('validation.required'),
             duration: 5000,
         });
         return;
@@ -30,7 +30,7 @@ async function onSubmit(event: Event) {
         }
     }
     catch (error) {
-        toast.error(t('global.messages.error'), {
+        toast.error(t('global.error'), {
             description: t('global.messages.something_went_wrong'),
             duration: 5000,
         });
@@ -49,10 +49,10 @@ async function onSubmit(event: Event) {
         <div class="grid gap-4">
             <FormItemInput
                 v-model="email"
-                :title="$t('global.table.email')"
+                :title="$t('form.email')"
                 icon="solar:letter-outline"
                 :disabled="isLoading"
-                :placeholder="t('auth.email_placeholder')"
+                :placeholder="t('form.email_placeholder')"
                 auto-complete="email"
                 type="email"
             />
@@ -76,7 +76,7 @@ async function onSubmit(event: Event) {
                 to="/login"
                 class="text-sm text-muted-foreground hover:text-primary transition-colors underline-offset-4 hover:underline"
             >
-                {{ $t('auth.back_to_login') }}
+                {{ $t('common.back_to') + ' ' + $t('auth.login') + ' ' + $t('common.page') }}
             </NuxtLink>
         </div>
     </form>

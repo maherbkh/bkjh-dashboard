@@ -16,8 +16,8 @@ export const useUserStore = defineStore('user', () => {
         await useApiFetch('/api/auth/logout', { method: 'POST' })
         setToken()
         setUser()
-        toast.success(t('auth.toasts.goodbye'), {
-            description: t('auth.toasts.logout_success'),
+        toast.success(t('global.goodbye'), {
+            description: t('auth.logout_success'),
             duration: 3000,
         })
         navigateTo('/login')
@@ -33,8 +33,8 @@ export const useUserStore = defineStore('user', () => {
             setUser(((data.value as LoginResponse).data as LoginData).user)
             setToken(((data.value as LoginResponse).data as LoginData).token)
             // Note: Permission fetching removed - using CRUD directly for resources
-            toast.success(t('auth.toasts.welcome'), {
-                description: t('auth.toasts.login_success'),
+            toast.success(t('global.welcome'), {
+                description: t('auth.login_success'),
                 duration: 5000,
             })
 
@@ -57,7 +57,7 @@ export const useUserStore = defineStore('user', () => {
                     description = t(description)
                 }
                 else {
-                    description = t('auth.validation.invalid_credentials')
+                    description = t('auth.invalid_credentials')
                 }
             }
             else {
@@ -98,8 +98,8 @@ export const useUserStore = defineStore('user', () => {
         })
         if (data.value) {
             setToken(((data.value as LoginResponse).data as LoginData).token)
-            toast.success(t('auth.toasts.token_refreshed'), {
-                description: t('auth.toasts.session_refreshed'),
+            toast.success(t('auth.token_refreshed'), {
+                description: t('auth.session_refreshed'),
                 duration: 3000,
             })
         }
@@ -119,15 +119,15 @@ export const useUserStore = defineStore('user', () => {
             body: { email },
         })
         if (data.value) {
-            toast.success(t('auth.toasts.email_sent'), {
-                description: t('auth.toasts.reset_link_sent'),
+            toast.success(t('auth.email_sent'), {
+                description: t('auth.reset_link_sent'),
                 duration: 5000,
             })
             return true
         }
         if (error.value) {
             const description = (error.value.data?.message ?? error.value.data?.status) || t('auth.failed_to_send_reset_email')
-            toast.error(t('global.messages.error'), {
+            toast.error(t('global.error'), {
                 description,
                 duration: 5000,
             })
@@ -142,8 +142,8 @@ export const useUserStore = defineStore('user', () => {
             body: resetData,
         })
         if (data.value) {
-            toast.success(t('auth.toasts.password_reset'), {
-                description: t('auth.toasts.password_reset_success'),
+            toast.success(t('auth.password_reset'), {
+                description: t('auth.password_reset_success'),
                 duration: 5000,
             })
             navigateTo('/login')
@@ -151,7 +151,7 @@ export const useUserStore = defineStore('user', () => {
         }
         if (error.value) {
             const description = (error.value.data?.message ?? error.value.data?.status) || t('auth.password_reset_failed')
-            toast.error(t('global.messages.error'), {
+            toast.error(t('global.error'), {
                 description,
                 duration: 5000,
             })

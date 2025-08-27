@@ -28,16 +28,6 @@ watchEffect(() => {
                     class="h-20"
                 />
             </div>
-            <div class="relative z-20 mt-auto">
-                <blockquote class="space-y-2 text-primary-foreground/75">
-                    <p class="text-lg font-semibold">
-                        &ldquo;{{ $t('quote.work_is_love') }}&rdquo;
-                    </p>
-                    <footer class="text-sm font-light">
-                        {{ $t('quote.someone_there') }}
-                    </footer>
-                </blockquote>
-            </div>
         </div>
         <div class="mx-auto flex-1 lg:p-8">
             <div class="grid mx-auto max-w-sm gap-6">
@@ -46,7 +36,7 @@ watchEffect(() => {
                         {{ $t('auth.welcome_back') }}
                     </h1>
                     <p class="text-balance text-sm text-muted-foreground">
-                        {{ $t('auth.admin_area_description') }}
+                        {{ $t('auth.description') }}
                     </p>
                 </div>
                 <AuthSignIn />

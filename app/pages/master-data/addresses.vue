@@ -4,9 +4,9 @@ import type { Address, TableHeaderItem, ServerParamsTypes } from '~/types'
 const { t } = useI18n()
 
 // Page configuration
-const pageTitle = computed(() => t('addresses.title'))
+const pageTitle = computed(() => t('address.plural'))
 const pageIcon = usePageIcon()
-const pageDescription = computed(() => t('addresses.description'))
+const pageDescription = computed(() => t('address.plural'))
 definePageMeta({
     middleware: 'auth',
 })
@@ -98,12 +98,12 @@ async function handleSortChange(dir: 'asc' | 'desc', id: string) {
 const headerItems = computed(() => [
     {
         as: 'th',
-        name: t('global.table.street'),
+        name: t('street.singular'),
         id: 'street',
     },
     {
         as: 'th',
-        name: t('global.table.created_at'),
+        name: t('common.created_at'),
         id: 'created_at',
     },
 ])
@@ -270,7 +270,7 @@ const handleSelectAll = (checked: boolean) => {
                     <Icon
                         name="solar:trash-bin-minimalistic-outline"
                     />
-                    {{ $t('global.actions.delete_all') }}
+                    {{ $t('action.delete') + ' ' + $t('common.all') + ' ' + $t('address.plural') }}
                 </Button>
             </template>
         </PageHeaderActions>
@@ -286,7 +286,7 @@ const handleSelectAll = (checked: boolean) => {
                 <PageEmptyState
                     v-if="addresses.length === 0"
                     :search-query="searchQuery"
-                    :add-new-text="$t('global.forms.add_new')"
+                    :add-new-text="$t('action.add') + $t('common.new') + ' ' + $t('address.singular')"
                 />
                 <template v-else>
                     <PageTable
@@ -330,7 +330,7 @@ const handleSelectAll = (checked: boolean) => {
                         <template #cell-actions="{ row }">
                             <div class="flex justify-end gap-2">
                                 <Button
-                                    :title="$t('global.actions.edit')"
+                                    :title="$t('action.edit')"
                                     variant="ghost"
                                     size="icon"
                                     hydrate-on-interaction="mouseover"
@@ -342,7 +342,7 @@ const handleSelectAll = (checked: boolean) => {
                                     />
                                 </Button>
                                 <Button
-                                    :title="$t('global.actions.delete')"
+                                    :title="$t('action.delete')"
                                     variant="ghost"
                                     size="icon"
                                     @click="handleDelete(row.id)"

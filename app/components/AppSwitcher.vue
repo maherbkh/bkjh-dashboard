@@ -68,12 +68,12 @@ const handleAppClick = (app: typeof props.apps[0]) => {
                     :side-offset="4"
                 >
                     <DropdownMenuLabel class="text-xs text-muted-foreground">
-                        {{ $t('navigation.projects') }}
+                        {{ $t('application.plural') }}
                     </DropdownMenuLabel>
                     <DropdownMenuItem
                         v-for="(app, index) in apps"
                         :key="app.name"
-                        class="gap-2 px-2 py-1 cursor-pointer"
+                        class="gap-2 px-2 py-1 cursor-pointer my-1"
                         :class="{ 'bg-accent': app.slug === appStore.appSlug }"
                         @click="() => handleAppClick(app)"
                     >

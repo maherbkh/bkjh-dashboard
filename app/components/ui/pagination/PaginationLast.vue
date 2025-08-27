@@ -26,7 +26,7 @@ const forwarded = useForwardProps(delegatedProps);
         v-bind="forwarded"
     >
         <slot>
-            <span class="hidden sm:block">{{ $t('global.ui.last') }}</span>
+            <span class="hidden sm:block">{{ $t('global.last') }}</span>
             <Icon name="solar:chevron-right-linear" />
         </slot>
     </PaginationLast>
