@@ -1,196 +1,362 @@
 {
-  "global": {
-    "common": {
-      "active": "Aktiv",
-      "inactive": "Inaktiv",
-      "enabled": "Aktiviert",
-      "disabled": "Deaktiviert",
-      "yes": "Ja",
-      "no": "Nein",
-      "loading": "Lädt...",
-      "saving": "Speichern...",
-      "deleting": "Löschen...",
-      "processing": "Verarbeitung läuft...",
-      "please_wait": "Bitte warten...",
-      "success": "Erfolg",
-      "error": "Fehler",
-      "warning": "Warnung",
-      "info": "Information",
-      "required": "Erforderlich",
-      "optional": "Optional",
-      "selected": "ausgewählt",
-      "operation_successful": "Vorgang erfolgreich abgeschlossen",
-      "operation_failed": "Vorgang fehlgeschlagen",
-      "something_went_wrong": "Etwas ist schief gelaufen, bitte kontaktieren Sie den Support",
-      "please_try_again": "Bitte versuchen Sie es erneut",
-      "no_data": "Keine Daten verfügbar",
-      "no_results": "Keine Ergebnisse gefunden"
-    },
-    "actions": {
-      "add": "Hinzufügen",
-      "new": "Neu",
-      "create": "Erstellen",
-      "edit": "Bearbeiten",
-      "update": "Aktualisieren",
-      "save": "Speichern",
-      "delete": "Löschen",
-      "cancel": "Abbrechen",
-      "confirm": "Bestätigen",
-      "submit": "Absenden",
-      "back": "Zurück",
-      "next": "Weiter",
-      "view": "Anzeigen",
-      "search": "Suchen",
-      "reset": "Zurücksetzen"
-    },
-    "forms": {
-      "add_new": "Neu hinzufügen",
-      "required": "Erforderlich",
-      "optional": "Optional",
-      "select_option": "Option auswählen",
-      "search_placeholder": "Suchen...",
-      "password": "Passwort"
-    },
-    "ui": {
-      "close": "Schließen",
-      "toggle_sidebar": "Seitenleiste umschalten",
-      "sidebar": "Seitenleiste",
-      "are_you_sure": "Sind Sie sicher?"
-    },
-    "messages": {
-      "confirmation": "Sind Sie sicher?",
-      "delete_confirmation": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
-      "confirm_delete_item": "Sind Sie sicher, dass Sie '{item}' löschen möchten?",
-      "required_field": "Dieses Feld ist erforderlich",
-      "invalid_email": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
-      "min_length": "Mindestlänge beträgt {min} Zeichen",
-      "max_length": "Maximale Länge beträgt {max} Zeichen"
-    },
-    "navigation": {
-      "dashboard": "Dashboard",
-      "overview": "Übersicht",
-      "master_data": "Stammdaten",
-      "settings": "Einstellungen",
-      "profile": "Profil"
-    },
-    "sidebar": {
-      "master_data": "Stammdaten",
-      "categories": "Kategorien",
-      "companies": "Unternehmen",
-      "groups": "Gruppen",
-      "addresses": "Adressen",
-      "users": "Benutzer",
-      "roles": "Rollen",
-      "academy": "Akademie",
-      "events": "Veranstaltungen",
-      "speakers": "Referenten",
-      "attendees": "Teilnehmer",
-      "event_categories": "Veranstaltungskategorien",
-      "event_targets": "Veranstaltungsziele",
-      "event": "Veranstaltung",
-      "list": "Liste",
-      "attendee": "Teilnehmer",
-      "event-categories": "Veranstaltungskategorien",
-      "event-targets": "Veranstaltungsziele"
-    },
-    "table": {
-      "id": "ID",
-      "name": "Name",
-      "title": "Titel",
-      "email": "E-Mail",
-      "phone": "Telefon",
-      "address": "Adresse",
-      "status": "Status",
-      "created_at": "Erstellt am",
-      "updated_at": "Aktualisiert am",
-      "actions": "Aktionen"
-    },
-    "app_name": "BKJH"
+  "form": {
+    "email": "E-Mail",
+    "email_placeholder": "Geben Sie Ihre E-Mail-Adresse ein",
+    "password": "Passwort",
+    "password_placeholder": "Passwort eingeben",
+    "phone": "Telefon",
+    "phone_placeholder": "Telefonnummer eingeben",
+    "cell": "Handy",
+    "cell_placeholder": "Handynummer eingeben",
+    "device_id": "Geräte-ID",
+    "device_id_placeholder": "Geräte-ID eingeben",
+    "contact_information": "Kontaktinformationen",
+    "assignment_information": "Zuweisungsinformationen",
+    "select_option": "Option auswählen",
+    "current_password": "Aktuelles Passwort",
+    "current_password_placeholder": "Aktuelles Passwort eingeben",
+    "new_password": "Neues Passwort",
+    "new_password_placeholder": "Neues Passwort eingeben",
+    "confirm_password": "Passwort bestätigen",
+    "confirm_password_placeholder": "Neues Passwort bestätigen",
+    "password_description": "Ihr Kontopasswort ändern",
+    "preferences": "Einstellungen"
+  },
+  "validation": {
+    "required": "ist erforderlich",
+    "invalid": "ist ungültig",
+    "min_length": "muss mindestens {min} Zeichen lang sein",
+    "max_length": "darf maximal {max} Zeichen lang sein",
+    "exact_length": "muss genau {len} Zeichen lang sein",
+    "integer": "muss eine ganze Zahl sein",
+    "min_value": "muss mindestens {min} sein",
+    "positive": "muss eine positive Zahl sein",
+    "slug_format": "darf nur Kleinbuchstaben, Zahlen und Bindestriche enthalten"
   },
   "auth": {
-    "welcome_back": "Willkommen zurück",
+    "login_form": "Anmeldeformular",
     "login": "Anmelden",
+    "log_out": "Abmelden",
+    "welcome_back": "Willkommen zurück",
+    "description": "Geben Sie Ihre Anmeldedaten ein, um auf Ihr Konto zuzugreifen",
     "forgot_password": "Passwort vergessen?",
-    "validation": {
-      "email_required": "E-Mail ist erforderlich",
-      "email_invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
-      "password_required": "Passwort ist erforderlich"
+    "forgot_password_description": "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.",
+    "send_reset_link": "Link zum Zurücksetzen senden",
+    "logout_success": "Sie wurden abgemeldet.",
+    "login_success": "Sie haben sich erfolgreich angemeldet.",
+    "invalid_credentials": "Die angegebenen Anmeldedaten sind ungültig.",
+    "login_failed": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "token_refreshed": "Token aktualisiert",
+    "session_refreshed": "Ihre Sitzung wurde aktualisiert.",
+    "token_refresh_failed": "Token-Aktualisierung fehlgeschlagen.",
+    "email_sent": "E-Mail gesendet",
+    "reset_link_sent": "Ein Link zum Zurücksetzen des Passworts wurde an Ihre E-Mail gesendet.",
+    "failed_to_send_reset_email": "E-Mail zum Zurücksetzen konnte nicht gesendet werden.",
+    "password_reset": "Passwort zurücksetzen",
+    "password_reset_success": "Ihr Passwort wurde erfolgreich zurückgesetzt.",
+    "password_reset_failed": "Passwort-Zurücksetzung fehlgeschlagen."
+  },
+  "global": {
+    "app_name": "BKJH",
+    "app_description": "BKJH ERP",
+    "error": "Fehler",
+    "goodbye": "Auf Wiedersehen",
+    "welcome": "Willkommen zurück",
+    "dashboard": "Dashboard",
+    "master_data": "Stammdaten",
+    "overview": "Übersicht",
+    "deleted_items": "Gelöschte Elemente",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "more": "Mehr",
+    "less": "Weniger",
+    "name": "Name",
+    "slug": "Slug",
+    "message": "Nachricht",
+    "management": "Verwaltung",
+    "loading": "Lädt...",
+    "no_records_found": "Keine Datensätze gefunden",
+    "no_search_results": "Keine Suchergebnisse gefunden für",
+    "add_new_hint": "Klicken Sie auf die",
+    "button_above": "Schaltfläche oben, um einen neuen Datensatz hinzuzufügen",
+    "confirm": "Bestätigen",
+    "are_you_sure": "Sind Sie sicher?",
+    "messages": {
+      "something_went_wrong": "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut.",
+      "error": "Fehler"
     }
   },
-  "companies": {
-    "title": "Unternehmen",
-    "description": "Verwalten Sie Unternehmen",
-    "add_new": "Neues Unternehmen hinzufügen",
-    "add_description": "Neues Unternehmen erstellen",
-    "edit": "Unternehmen bearbeiten",
-    "search_placeholder": "Unternehmen suchen...",
-    "name": "Name",
-    "add_success": "Unternehmen erfolgreich erstellt",
-    "edit_success": "Unternehmen erfolgreich aktualisiert",
-    "delete_success": "Unternehmen erfolgreich gelöscht"
+  "common": {
+    "select_option": "Option auswählen",
+    "back_to": "Zurück zu",
+    "page": "Seite",
+    "title": "Titel",
+    "description": "Beschreibung",
+    "list": "Liste",
+    "and": "und",
+    "new": "Neu",
+    "add": "Hinzufügen",
+    "edit": "Bearbeiten",
+    "number": "Nummer",
+    "status": "Status",
+    "not_assigned": "Nicht zugewiesen",
+    "pending": "Ausstehend",
+    "in_progress": "In Bearbeitung",
+    "resolved": "Gelöst",
+    "closed": "Geschlossen",
+    "created_at": "Erstellt am",
+    "updated_at": "Aktualisiert am",
+    "deleted_at": "Gelöscht am",
+    "more": "Mehr",
+    "to": "bis",
+    "no_action_history": "Keine Aktionshistorie",
+    "information": "Information",
+    "transferred_to": "Übertragen an",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "register": "Registrieren",
+    "details": "Details",
+    "recent_activity": "Letzte Aktivitäten",
+    "quick_actions": "Schnellaktionen",
+    "high_priority": "Hohe Priorität",
+    "awaiting": "wartend",
+    "response": "Antwort",
+    "being": "wird",
+    "processed": "verarbeitet",
+    "this": "diese",
+    "week": "Woche",
+    "performance": "Leistung",
+    "response_time": "Antwortzeit",
+    "resolution_rate": "Lösungsrate",
+    "satisfaction": "Zufriedenheit",
+    "upcoming": "Anstehend",
+    "available": "Verfügbar",
+    "next": "nächste",
+    "analytics": "Analytik",
+    "attendance_rate": "Teilnahmerate",
+    "completion_rate": "Abschlussrate",
+    "featured": "Empfohlen",
+    "app_not_found": "App nicht gefunden",
+    "please_select_app": "Bitte wählen Sie eine App aus dem Switcher"
   },
-  "users": {
-    "title": "Benutzer",
-    "description": "Systembenutzer verwalten",
-    "add_new": "Neuen Benutzer hinzufügen",
-    "search_placeholder": "Benutzer suchen...",
-    "add_success": "Benutzer erfolgreich erstellt"
+  "note": {
+    "singular": "Notiz",
+    "placeholder": "Notiz eingeben..."
   },
-  "groups": {
-    "title": "Gruppen",
-    "description": "Verwalten Sie Gruppen",
-    "add_new": "Neue Gruppe hinzufügen",
-    "search_placeholder": "Gruppen suchen...",
-    "name": "Name"
+  "action": {
+    "all": "Alle",
+    "singular": "Aktion",
+    "plural": "Aktionen",
+    "view": "Anzeigen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "delete_all": "Alle löschen",
+    "create": "Erstellen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "add": "Hinzufügen",
+    "update": "Aktualisieren",
+    "reset": "Zurücksetzen",
+    "search": "Suchen",
+    "search_placeholder": "Suchen...",
+    "back": "Zurück",
+    "submit": "Absenden",
+    "retry": "Wiederholen",
+    "select": "Auswählen",
+    "self_assign": "Selbst zuweisen",
+    "create_and_add_new": "Erstellen & Neu hinzufügen",
+    "update_and_add_new": "Aktualisieren & Neu hinzufügen",
+    "save_and_add_new": "Speichern & Neu hinzufügen",
+    "select_all": "Alle auswählen",
+    "deselect_all": "Alle abwählen",
+    "more": "Mehr",
+    "actions": "Aktionen",
+    "transfer": "Übertragen",
+    "transfer_description": "Dieses {model} an einen anderen Benutzer übertragen",
+    "quick_actions": "Schnellaktionen",
+    "change_status": "Status ändern",
+    "troubleshoot": "Fehlerbehebung",
+    "hardware_actions": "Hardware-Aktionen",
+    "repair_hardware": "Hardware reparieren",
+    "replace": "Ersetzen",
+    "clean": "Reinigen",
+    "software_actions": "Software-Aktionen",
+    "install_software": "Software installieren",
+    "upgrade_software": "Software aktualisieren",
+    "backup": "Backup",
+    "add_description": "Neuen {action} hinzufügen",
+    "type": "Aktionstyp",
+    "by": "Aktion von",
+    "assigned_to": "Zugewiesen an",
+    "message": {
+      "add_description": "Neuen {model} hinzufügen",
+      "edit_description": "Ausgewählten {model} bearbeiten",
+      "not_found_title": "{model} nicht gefunden",
+      "not_found_description": "Der {model}, den Sie suchen, existiert nicht oder wurde entfernt.",
+      "title": "{model} Details",
+      "updated_successfully": "{model} erfolgreich aktualisiert",
+      "update_failed": "{model} Aktualisierung fehlgeschlagen",
+      "description": "{model} Informationen und Historie anzeigen",
+      "contact_info": "Kontaktinformationen",
+      "assigned_successfully": "{model} erfolgreich zugewiesen",
+      "transferred_successfully": "{model} erfolgreich übertragen",
+      "status_changed_successfully": "Status erfolgreich geändert",
+      "troubleshooting_added": "Fehlerbehebungsaktion hinzugefügt",
+      "hardware_repair_added": "Hardware-Reparaturaktion hinzugefügt",
+      "replace_action_added": "Ersetzungsaktion hinzugefügt",
+      "clean_action_added": "Reinigungsaktion hinzugefügt",
+      "software_installation_added": "Software-Installationsaktion hinzugefügt",
+      "software_upgrade_added": "Software-Upgrade-Aktion hinzugefügt",
+      "backup_action_added": "Backup-Aktion hinzugefügt"
+    }
   },
-  "addresses": {
-    "title": "Adressen",
-    "description": "Verwalten Sie Ihre Adressen",
-    "add_new": "Neue Adresse hinzufügen",
-    "search_placeholder": "Adressen suchen...",
-    "street": "Straße",
-    "city": "Stadt",
-    "postal_code": "Postleitzahl"
+  "user": {
+    "singular": "Benutzer",
+    "plural": "Benutzer",
+    "tasks": "Aufgaben",
+    "account": "Konto",
+    "first_name": "Vorname",
+    "first_name_placeholder": "Vorname eingeben",
+    "last_name": "Nachname",
+    "last_name_placeholder": "Nachname eingeben",
+    "username": "Benutzername",
+    "username_placeholder": "Benutzername eingeben",
+    "password_placeholder": "Passwort eingeben",
+    "is_super_admin": "Super-Administrator",
+    "super_admin": "Super-Administrator",
+    "not_super_admin": "Regulärer Benutzer",
+    "add_description": "Neuen Benutzer zum System hinzufügen",
+    "edit_description": "Benutzerinformationen und Berechtigungen bearbeiten"
   },
-  "categories": {
-    "title": "Kategorien",
-    "description": "Verwalten Sie Kategorien...",
-    "add_new": "Neue Kategorie hinzufügen",
-    "search_placeholder": "Kategorien suchen...",
-    "name": "Name"
+  "profile": {
+    "singular": "Profil",
+    "description": "Ihre persönlichen Informationen und Kontoeinstellungen verwalten"
+  },
+  "preference": {
+    "singular": "Einstellung",
+    "plural": "Einstellungen",
+    "description": "Ihre Anwendungseinstellungen verwalten"
+  },
+  "theme": {
+    "singular": "Design",
+    "plural": "Designs",
+    "description": "Wählen Sie Ihr bevorzugtes Farbschema für die Anwendung"
+  },
+  "language": {
+    "singular": "Sprache",
+    "plural": "Sprachen",
+    "description": "Wählen Sie Ihre bevorzugte Sprache für die Anwendung"
+  },
+  "task": {
+    "singular": "Aufgabe",
+    "plural": "Aufgaben"
+  },
+  "it_support": {
+    "plural": "IT-Support",
+    "singular": "IT-Support"
   },
   "academy": {
-    "events": {
-      "title": "Veranstaltungen",
-      "description": "Akademie-Veranstaltungen verwalten",
-      "add_title": "Veranstaltung hinzufügen",
-      "add_description": "Neue Akademie-Veranstaltung erstellen",
-      "edit_title": "Veranstaltung bearbeiten",
-      "edit_description": "Veranstaltungsinformationen aktualisieren",
-      "show_title": "Veranstaltungsdetails",
-      "show_description": "Veranstaltungsinformationen anzeigen",
-      "attendees_title": "Veranstaltungsteilnehmer",
-      "attendees_description": "Veranstaltungsteilnehmer verwalten"
-    },
-    "speakers": {
-      "title": "Referenten",
-      "description": "Akademie-Referenten verwalten"
-    },
-    "attendees": {
-      "title": "Teilnehmer",
-      "description": "Akademie-Teilnehmer verwalten",
-      "details_title": "Teilnehmerdetails",
-      "details_description": "Teilnehmerinformationen anzeigen"
-    },
-    "event_categories": {
-      "title": "Veranstaltungskategorien",
-      "description": "Veranstaltungskategorien verwalten"
-    },
-    "event_targets": {
-      "title": "Veranstaltungsziele",
-      "description": "Veranstaltungszielgruppen verwalten"
-    }
+    "plural": "Akademie-Veranstaltungen",
+    "singular": "Akademie-Veranstaltung",
+    "description": "Akademie-Veranstaltungen und Aktivitäten verwalten"
   },
-  "hello": "Hallo {name}",
-  "welcome": "Willkommen"
+  "company": {
+    "plural": "Unternehmen",
+    "singular": "Unternehmen"
+  },
+  "group": {
+    "plural": "Gruppen",
+    "singular": "Gruppe"
+  },
+  "address": {
+    "plural": "Adressen",
+    "singular": "Adresse",
+    "no_address_found": "Keine Adresse gefunden"
+  },
+  "category": {
+    "plural": "Kategorien",
+    "singular": "Kategorie"
+  },
+  "ticket": {
+    "plural": "Tickets",
+    "singular": "Ticket",
+    "details": "Ticket-Details"
+  },
+  "setting": {
+    "plural": "Einstellungen",
+    "singular": "Einstellung"
+  },
+  "speaker": {
+    "plural": "Referenten",
+    "singular": "Referent",
+    "description": "Veranstaltungsreferenten und Vortragende verwalten"
+  },
+  "attendee": {
+    "plural": "Teilnehmer",
+    "singular": "Teilnehmer",
+    "description": "Veranstaltungsteilnehmer verwalten"
+  },
+  "event_category": {
+    "plural": "Veranstaltungskategorien",
+    "singular": "Veranstaltungskategorie",
+    "description": "Veranstaltungskategorien für Akademie-Veranstaltungen verwalten"
+  },
+  "event_target": {
+    "plural": "Veranstaltungsziele",
+    "singular": "Veranstaltungsziel",
+    "description": "Veranstaltungszielgruppen verwalten"
+  },
+  "application": {
+    "plural": "Anwendungen",
+    "singular": "Anwendung"
+  },
+  "street": {
+    "singular": "Straße",
+    "placeholder": "Straßennamen eingeben"
+  },
+  "street_number": {
+    "singular": "Hausnummer",
+    "placeholder": "Hausnummer eingeben"
+  },
+  "postal_code": {
+    "singular": "Postleitzahl",
+    "placeholder": "Postleitzahl eingeben"
+  },
+  "city": {
+    "singular": "Stadt",
+    "placeholder": "Stadtname eingeben"
+  },
+  "position": {
+    "singular": "Position",
+    "plural": "Positionen",
+    "placeholder": "Position eingeben"
+  },
+  "role": {
+    "singular": "Rolle",
+    "plural": "Rollen",
+    "singular_placeholder": "Rolle auswählen",
+    "no_permission": "Keine Berechtigung"
+  },
+  "permission": {
+    "singular": "Berechtigung",
+    "plural": "Berechtigungen"
+  },
+  "partner": {
+    "singular": "Partner",
+    "plural": "Partner",
+    "location": "Partnerstandort",
+    "register": "Partnerregister"
+  },
+  "location": {
+    "singular": "Standort",
+    "plural": "Standorte"
+  },
+  "comment": {
+    "singular": "Kommentar",
+    "plural": "Kommentare"
+  },
+  "type": {
+    "singular": "Typ",
+    "plural": "Typen"
+  }
 }
