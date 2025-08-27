@@ -35,14 +35,14 @@ const emit = defineEmits<{
 
 const dialogTitle = computed(() => {
     return props.dialogMode === 'add'
-        ? t('roles.add_new')
-        : t('roles.edit');
+        ? t('action.add') + ' ' + t('common.new')
+        : t('action.edit');
 });
 
 const dialogDescription = computed(() => {
     return props.dialogMode === 'add'
-        ? t('roles.add_description')
-        : t('roles.edit_description');
+        ? t('action.add') + ' ' + t('common.new') + ' ' + t('role.singular')
+        : t('action.edit') + ' ' + t('role.singular');
 });
 
 const isOpen = computed({
@@ -130,8 +130,8 @@ const handleClose = () => {
                         v-model="name"
                         class="md:col-span-8"
                         v-bind="nameAttrs"
-                        :title="$t('roles.form.name')"
-                        :placeholder="$t('roles.form.name_placeholder')"
+                        :title="$t('global.name')"
+                        :placeholder="$t('global.name')"
                         :errors="errors.name ? [errors.name] : []"
                         required
                     />
@@ -140,8 +140,8 @@ const handleClose = () => {
                         v-model="slug"
                         class="md:col-span-4"
                         v-bind="slugAttrs"
-                        :title="$t('roles.form.slug')"
-                        :placeholder="$t('roles.form.slug_placeholder')"
+                        :title="$t('global.slug')"
+                        :placeholder="$t('global.slug')"
                         :errors="errors.slug ? [errors.slug] : []"
                         :disabled="dialogMode === 'edit'"
                         :readonly="dialogMode === 'edit'"
@@ -152,8 +152,8 @@ const handleClose = () => {
                         class="md:col-span-6"
                         v-bind="positionAttrs"
                         type="number"
-                        :title="$t('roles.form.position')"
-                        :placeholder="$t('roles.form.position_placeholder')"
+                        :title="$t('position.singular')"
+                        :placeholder="$t('position.singular')"
                         :errors="errors.position ? [errors.position] : []"
                     />
                     <FormItemSwitch
@@ -161,14 +161,14 @@ const handleClose = () => {
                         v-model="isActive"
                         class="md:col-span-6"
                         v-bind="isActiveAttrs"
-                        :title="$t('roles.form.is_active')"
+                        :title="$t('common.status')"
                         :true-label="$t('common.active')"
                         :false-label="$t('common.inactive')"
                         :errors="errors.isActive ? [errors.isActive] : []"
                     />
                     <div class="md:col-span-12">
                         <Label class="text-sm font-medium mb-2 block">
-                            {{ $t('roles.form.permissions') }}
+                            {{ $t('permission.plural') }}
                         </Label>
                         <PermissionLazyTable
                             v-model="permissionIds"
@@ -190,7 +190,7 @@ const handleClose = () => {
                     variant="outline"
                     @click="handleClose"
                 >
-                    {{ $t('global.actions.cancel') }}
+                    {{ $t('action.cancel') }}
                 </Button>
                 <Button
                     type="button"
@@ -198,14 +198,14 @@ const handleClose = () => {
                     :disabled="isSubmitting"
                     @click="onSubmitAndAddNew"
                 >
-                    {{ $t('global.actions.save_and_add_new') }}
+                    {{ $t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new') }}
                 </Button>
                 <Button
                     type="button"
                     :disabled="isSubmitting"
                     @click="onSubmitAndClose"
                 >
-                    {{ $t('global.actions.save') }}
+                    {{ $t('action.save') }}
                 </Button>
             </DialogFooter>
         </DialogContent>

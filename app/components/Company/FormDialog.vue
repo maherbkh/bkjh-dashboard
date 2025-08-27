@@ -36,14 +36,14 @@ const emit = defineEmits<{
 
 const dialogTitle = computed(() => {
     return props.dialogMode === 'add'
-        ? t('companies.add_new')
-        : t('companies.edit');
+        ? t('action.add') + ' ' + t('common.new') + ' ' + t('company.singular')
+        : t('action.edit') + ' ' + t('company.singular');
 });
 
 const dialogDescription = computed(() => {
     return props.dialogMode === 'add'
-        ? t('companies.add_description')
-        : t('companies.edit_description');
+        ? t('company.add')
+        : t('company.edit');
 });
 
 const isOpen = computed({

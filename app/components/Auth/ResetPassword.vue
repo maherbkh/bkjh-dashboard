@@ -12,7 +12,7 @@ const email = computed(() => route.query.email as string || '');
 
 onMounted(async () => {
     if (!token.value || !email.value) {
-        toast.error(t('global.messages.error'), {
+        toast.error(t('global.error'), {
             description: t('auth.invalid_token'),
             duration: 5000,
         });
@@ -30,7 +30,7 @@ async function onSubmit(event: Event) {
     event.preventDefault();
 
     if (!password.value || !passwordConfirmation.value) {
-        toast.error(t('global.messages.error'), {
+        toast.error(t('global.error'), {
             description: t('auth.please_fill_all_fields'),
             duration: 5000,
         });
@@ -38,7 +38,7 @@ async function onSubmit(event: Event) {
     }
 
     if (password.value !== passwordConfirmation.value) {
-        toast.error(t('global.messages.error'), {
+        toast.error(t('global.error'), {
             description: t('auth.passwords_do_not_match'),
             duration: 5000,
         });

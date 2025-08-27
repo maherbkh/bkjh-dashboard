@@ -387,7 +387,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                 <PageEmptyState
                     v-if="users.length === 0"
                     :search-query="searchQuery"
-                    :add-new-text="$t('global.forms.add_new')"
+                    :add-new-text="$t('action.add') + ' ' + $t('common.new') + ' ' + $t('user.singular')"
                 />
                 <template v-else>
                     <PageTable

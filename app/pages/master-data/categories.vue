@@ -270,7 +270,7 @@ const handleSelectAll = (checked: boolean) => {
                     <Icon
                         name="solar:trash-bin-minimalistic-outline"
                     />
-                    {{ $t('global.actions.delete_all') }}
+                    {{ $t('action.delete_all') }}
                 </Button>
             </template>
         </PageHeaderActions>
@@ -286,7 +286,7 @@ const handleSelectAll = (checked: boolean) => {
                 <PageEmptyState
                     v-if="categories.length === 0"
                     :search-query="searchQuery"
-                    :add-new-text="$t('global.forms.add_new')"
+                    :add-new-text="$t('action.add') + ' ' + $t('common.new') + ' ' + $t('category.singular')"
                 />
                 <template v-else>
                     <PageTable
@@ -328,7 +328,7 @@ const handleSelectAll = (checked: boolean) => {
                         <template #cell-actions="{ row }">
                             <div class="flex justify-end gap-2">
                                 <Button
-                                    :title="$t('global.actions.edit')"
+                                    :title="$t('action.edit')"
                                     variant="ghost"
                                     size="icon"
                                     hydrate-on-interaction="mouseover"
@@ -340,7 +340,7 @@ const handleSelectAll = (checked: boolean) => {
                                     />
                                 </Button>
                                 <Button
-                                    :title="$t('global.actions.delete')"
+                                    :title="$t('action.delete')"
                                     variant="ghost"
                                     size="icon"
                                     @click="handleDelete(row.id)"

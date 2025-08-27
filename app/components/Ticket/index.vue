@@ -479,11 +479,11 @@
                 </DialogHeader>
                 <div class="space-y-4">
                     <div class="space-y-2">
-                        <Label for="action-note">{{ $t('form.note.singular') }}</Label>
+                        <Label for="action-note">{{ $t('note.singular') }}</Label>
                         <Textarea
                             id="action-note"
                             v-model="actionNote"
-                            :placeholder="$t('form.note.placeholder')"
+                            :placeholder="$t('note.placeholder')"
                             rows="3"
                         />
                     </div>
@@ -788,7 +788,7 @@ const actionHistoryHeaders = computed(() => [
     },
     {
         as: 'th' as const,
-        name: t('form.note.singular'),
+        name: t('note.singular'),
         id: 'note',
     },
     {

@@ -5,9 +5,9 @@ import type { RoleForm } from '~/composables/roleSchema'
 const { t } = useI18n()
 
 // Page configuration
-const pageTitle = computed(() => t('roles.title'))
+const pageTitle = computed(() => t('role.plural'))
 const pageIcon = usePageIcon()
-const pageDescription = computed(() => t('roles.description'))
+const pageDescription = computed(() => t('role.plural'))
 definePageMeta({
     middleware: 'auth',
 })
@@ -310,7 +310,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                     <Icon
                         name="solar:trash-bin-minimalistic-outline"
                     />
-                    {{ $t('global.actions.delete_all') }}
+                    {{ $t('action.delete_all') }}
                 </Button>
             </template>
         </PageHeaderActions>
@@ -326,7 +326,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                 <PageEmptyState
                     v-if="roles.length === 0"
                     :search-query="searchQuery"
-                    :add-new-text="$t('global.forms.add_new')"
+                    :add-new-text="$t('action.add') + ' ' + $t('common.new')"
                 />
                 <template v-else>
                     <PageTable
@@ -391,14 +391,14 @@ const handleRowSelected = (id: number, checked: boolean) => {
                                     v-else
                                     class="text-muted-foreground text-xs"
                                 >
-                                    {{ $t('roles.no_permissions') }}
+                                    {{ $t('role.no_permissions') }}
                                 </span>
                             </div>
                         </template>
 
                         <template #cell-users_count="{ row }">
                             <div class="text-sm">
-                                {{ row.users_count || 0 }} {{ $t('roles.users') }}
+                                {{ row.users_count || 0 }} {{ $t('user.plural') }}
                             </div>
                         </template>
 
@@ -409,7 +409,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                         <template #cell-actions="{ row }">
                             <div class="flex justify-end gap-2">
                                 <Button
-                                    :title="$t('global.actions.edit')"
+                                    :title="$t('action.edit')"
                                     variant="ghost"
                                     size="icon"
                                     hydrate-on-interaction="mouseover"
@@ -421,7 +421,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                                     />
                                 </Button>
                                 <Button
-                                    :title="$t('global.actions.delete')"
+                                    :title="$t('action.delete')"
                                     variant="ghost"
                                     size="icon"
                                     @click="handleDelete(row.id)"

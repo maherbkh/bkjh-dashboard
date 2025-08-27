@@ -37,14 +37,14 @@ const emit = defineEmits<{
 
 const dialogTitle = computed(() => {
     return props.dialogMode === 'add'
-        ? t('permissions.add_new')
-        : t('permissions.edit');
+        ? t('action.add') + ' ' + t('common.new') + ' ' + t('permission.singular')
+        : t('action.edit') + ' ' + t('permission.singular');
 });
 
 const dialogDescription = computed(() => {
     return props.dialogMode === 'add'
-        ? t('permissions.add_description')
-        : t('permissions.edit_description');
+        ? t('permission.add')
+        : t('permission.edit');
 });
 
 const isOpen = computed({
@@ -135,8 +135,8 @@ const handleClose = () => {
                         v-model="name"
                         class="md:col-span-8"
                         v-bind="nameAttrs"
-                        :title="$t('permissions.form.name')"
-                        :placeholder="$t('permissions.form.name_placeholder')"
+                        :title="$t('global.name')"
+                        :placeholder="$t('global.name')"
                         :errors="errors.name ? [errors.name] : []"
                         required
                     />
@@ -145,8 +145,8 @@ const handleClose = () => {
                         v-model="slug"
                         class="md:col-span-4"
                         v-bind="slugAttrs"
-                        :title="$t('permissions.form.slug')"
-                        :placeholder="$t('permissions.form.slug_placeholder')"
+                        :title="$t('global.slug')"
+                        :placeholder="$t('global.slug')"
                         :errors="errors.slug ? [errors.slug] : []"
                         :disabled="dialogMode === 'edit'"
                         :readonly="dialogMode === 'edit'"
@@ -156,8 +156,8 @@ const handleClose = () => {
                         v-model="group"
                         class="md:col-span-6"
                         v-bind="groupAttrs"
-                        :title="$t('permissions.form.group')"
-                        :placeholder="$t('permissions.form.group_placeholder')"
+                        :title="$t('group.singular')"
+                        :placeholder="$t('action.select') + ' ' + t('group.singular')"
                         :errors="errors.group ? [errors.group] : []"
                     />
                     <FormItemInput
@@ -165,8 +165,8 @@ const handleClose = () => {
                         v-model="module"
                         class="md:col-span-6"
                         v-bind="moduleAttrs"
-                        :title="$t('permissions.form.module')"
-                        :placeholder="$t('permissions.form.module_placeholder')"
+                        :title="$t('module.singular')"
+                        :placeholder="$t('action.select') + ' ' + t('module.singular')"
                         :errors="errors.module ? [errors.module] : []"
                     />
                     <FormItemInput
@@ -205,7 +205,7 @@ const handleClose = () => {
                     :disabled="isSubmitting"
                     @click="onSubmitAndAddNew"
                 >
-                    {{ $t('action.save') + ' ' + $t('action.and') + ' ' + $t('action.add') + ' ' + $t('common.new') }}
+                    {{ $t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new') }}
                 </Button>
                 <Button
                     type="button"

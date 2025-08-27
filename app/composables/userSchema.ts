@@ -40,8 +40,6 @@ export function createUserSchema(
 
   // Password validation based on mode
   const getPasswordSchema = () => {
-    console.log('Mode is ', mode)
-
     switch (mode) {
       case 'edit':
         return {

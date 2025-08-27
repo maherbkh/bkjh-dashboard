@@ -309,7 +309,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                 <PageEmptyState
                     v-if="companies.length === 0"
                     :search-query="searchQuery"
-                    :add-new-text="$t('global.forms.add_new')"
+                    :add-new-text="$t('action.add') + ' ' + $t('common.new') + ' ' + $t('company.singular')"
                 />
                 <template v-else>
                     <PageTable
@@ -363,7 +363,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                                 v-else
                                 class="text-muted-foreground text-sm"
                             >
-                                {{ $t('global.common.no_address') }}
+                                {{ $t('address.no_address_found') }}
                             </div>
                         </template>
 
@@ -380,7 +380,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                         <template #cell-actions="{ row }">
                             <div class="flex justify-end gap-2">
                                 <Button
-                                    :title="$t('global.actions.edit')"
+                                    :title="$t('action.edit')"
                                     variant="ghost"
                                     size="icon"
                                     hydrate-on-interaction="mouseover"
@@ -392,7 +392,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                                     />
                                 </Button>
                                 <Button
-                                    :title="$t('global.actions.delete')"
+                                    :title="$t('action.delete')"
                                     variant="ghost"
                                     size="icon"
                                     @click="handleDelete(row.id)"

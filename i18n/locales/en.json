@@ -13,10 +13,7 @@
     "contact_information": "Contact Information",
     "assignment_information": "Assignment Information",
     "select_option": "Select Option",
-    "note": {
-      "singular": "Note",
-      "placeholder": "Enter note..."
-    }
+
   },
   "validation": {
     "required": "is required",
@@ -25,7 +22,9 @@
     "max_length": "must be at most {max} characters",
     "exact_length": "must be exactly {len} characters",
     "integer": "must be an integer",
-    "min_value": "must be at least {min}"
+    "min_value": "must be at least {min}",
+    "positive": "must be a positive number",
+    "slug_format": "must contain only lowercase letters, numbers, and hyphens"
   },
   "auth": {
     "login_form": "Login Form",
@@ -65,9 +64,14 @@
     "more": "More", 
     "less": "Less",
     "name": "Name",
+    "slug": "Slug",
     "message": "Message",
     "management": "Management",
     "loading": "Loading",
+    "no_records_found": "No records found",
+    "no_search_results": "No search results found for",
+    "add_new_hint": "Click the",
+    "button_above": "button above to add a new record",
 
     
     "messages": {
@@ -102,9 +106,13 @@
     "information": "Information",
     "transferred_to": "Transferred to",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "register": "Register"
   },
-
+  "note": {
+    "singular": "Note",
+    "placeholder": "Enter note..."
+  },
   "action": {
     "all": "All",
     "singular": "Action",
@@ -207,7 +215,8 @@
   },
   "address": {
     "plural": "Addresses",
-    "singular": "Address"
+    "singular": "Address",
+    "no_address_found": "No address found"
   },
   "category": {
     "plural": "Categories",
@@ -267,7 +276,18 @@
   "role": {
     "singular": "Role",
     "plural": "Roles",
-    "singular_placeholder": "Select a role"
+    "singular_placeholder": "Select a role",
+    "no_permission": "No Permission"
+  },
+  "permission": {
+    "singular": "Permission",
+    "plural": "Permissions"
+  },
+  "partner": {
+    "singular": "Partner",
+    "plural": "Partners",
+    "location": "Partner Location",
+    "register": "Partner Register"
   },
   "location": {
     "singular": "Location",

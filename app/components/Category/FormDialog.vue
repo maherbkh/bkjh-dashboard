@@ -30,14 +30,14 @@ const emit = defineEmits<{
 
 const dialogTitle = computed(() => {
     return props.dialogMode === 'add'
-        ? t('categories.add_new')
-        : t('categories.edit');
+        ? t('action.add') + ' ' + t('common.new') + ' ' + t('category.singular')
+        : t('action.edit') + ' ' + t('category.singular');
 });
 
 const dialogDescription = computed(() => {
     return props.dialogMode === 'add'
-        ? t('categories.add_description')
-        : t('categories.edit_description');
+        ? t('category.add')
+        : t('category.edit');
 });
 
 const isOpen = computed({
@@ -107,7 +107,7 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                         id="name"
                         v-model="name"
                         :title="$t('global.name')"
-                        :placeholder="$t('categories.name_placeholder')"
+                        :placeholder="$t('global.name')"
                         class="col-span-12"
                         :errors="errors.name ? [errors.name] : []"
                         v-bind="nameAttrs"
@@ -123,7 +123,7 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                 :disabled="isSubmitting"
                 @click="emit('closeDialog')"
             >
-                {{ $t('global.actions.cancel') }}
+                {{ $t('action.cancel') }}
             </Button>
             <Button
                 variant="outline"
@@ -135,7 +135,7 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     name="solar:refresh-linear"
                     class="mr-2 h-4 w-4 animate-spin"
                 />
-                {{ dialogMode === 'add' ? $t('global.actions.create_and_add_new') : $t('global.actions.update_and_add_new') }}
+                {{ dialogMode === 'add' ? $t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new') : $t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new') }}
             </Button>
             <Button
                 :disabled="isSubmitting"
@@ -146,7 +146,7 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                     name="solar:refresh-linear"
                     class="mr-2 h-4 w-4 animate-spin"
                 />
-                {{ dialogMode === 'add' ? $t('global.actions.create') : $t('global.actions.update') }}
+                {{ dialogMode === 'add' ? $t('action.save') : $t('action.update') }}
             </Button>
         </template>
     </FormDialog>

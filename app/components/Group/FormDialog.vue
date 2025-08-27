@@ -34,14 +34,14 @@ const emit = defineEmits<{
 const dialogMode = computed(() => props.mode);
 const dialogTitle = computed(() => {
     return dialogMode.value === 'add'
-        ? t('groups.add_group')
-        : t('groups.edit_group');
+        ? t('action.add') + ' ' + t('common.new') + ' ' + t('group.singular')
+        : t('action.edit') + ' ' + t('group.singular');
 });
 
 const dialogDescription = computed(() => {
     return dialogMode.value === 'add'
-        ? t('groups.add_group_description')
-        : t('groups.edit_group_description');
+        ? t('group.add')
+        : t('group.edit');
 });
 
 const isOpen = computed({
@@ -137,8 +137,8 @@ const handleClose = () => {
                     <FormItemInput
                         id="name"
                         v-model="name"
-                        :title="t('groups.name')"
-                        :placeholder="t('groups.name_placeholder')"
+                        :title="t('global.name')"
+                        :placeholder="t('global.name')"
                         class="col-span-12"
                         :errors="errors.name ? [errors.name] : []"
                         v-bind="nameAttrs"
@@ -149,8 +149,8 @@ const handleClose = () => {
                     <FormItemSelect
                         id="address_id"
                         v-model="address_id"
-                        :title="t('groups.address')"
-                        :placeholder="t('groups.select_address')"
+                        :title="t('address.singular')"
+                        :placeholder="t('action.select') + ' ' + t('address.singular')"
                         class="col-span-12"
                         :errors="errors.address_id ? [errors.address_id] : []"
                         v-bind="addressIdAttrs"
@@ -164,8 +164,8 @@ const handleClose = () => {
                     <FormItemMultiSelect
                         id="company_ids"
                         v-model="company_ids"
-                        :title="t('groups.companies')"
-                        :placeholder="t('groups.select_companies')"
+                        :title="t('company.plural')"
+                        :placeholder="t('action.select') + ' ' + t('company.plural')"
                         class="col-span-12"
                         :errors="errors.company_ids ? [errors.company_ids] : []"
                         v-bind="companyIdsAttrs"
@@ -185,7 +185,7 @@ const handleClose = () => {
                 :disabled="loading"
                 @click="handleClose"
             >
-                {{ t('global.actions.cancel') }}
+                {{ t('action.cancel') }}
             </Button>
             <Button
                 variant="outline"
@@ -197,7 +197,7 @@ const handleClose = () => {
                     name="solar:refresh-linear"
                     class="mr-2 h-4 w-4 animate-spin"
                 />
-                {{ dialogMode === 'add' ? t('global.actions.create_and_add_new') : t('global.actions.update_and_add_new') }}
+                {{ dialogMode === 'add' ? t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new') : $t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new') }}
             </Button>
             <Button
                 :disabled="loading"
@@ -208,7 +208,7 @@ const handleClose = () => {
                     name="solar:refresh-linear"
                     class="mr-2 h-4 w-4 animate-spin"
                 />
-                {{ dialogMode === 'add' ? t('global.actions.create') : t('global.actions.update') }}
+                {{ dialogMode === 'add' ? t('action.save') : t('action.update') }}
             </Button>
         </template>
     </FormDialog>

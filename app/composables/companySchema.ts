@@ -1,44 +1,44 @@
 import { z } from 'zod';
 
-export function createCompanySchema(t: (key: string) => string) {
+export function createCompanySchema(t: (key: string, params?: Record<string, string | number>) => string) {
     return z.object({
         name: z
-            .string({ required_error: t('companies.validation.name_required') })
-            .min(2, t('companies.validation.name_min_length'))
-            .max(255, t('companies.validation.name_max_length')),
+            .string({ required_error: t('global.name') + ' ' + t('validation.required') })
+            .min(2, t('global.name') + ' ' + t('validation.min_length', { min: 2 }))
+            .max(255, t('global.name') + ' ' + t('validation.max_length', { max: 255 })),
 
         location: z
-            .string({ required_error: t('companies.validation.location_required') })
-            .min(2, t('companies.validation.location_min_length'))
-            .max(100, t('companies.validation.location_max_length')),
+            .string({ required_error: t('location.singular') + ' ' + t('validation.required') })
+            .min(2, t('location.singular') + ' ' + t('validation.min_length', { min: 2 }))
+            .max(100, t('location.singular') + ' ' + t('validation.max_length', { max: 100 })),
 
         register: z
-            .string({ required_error: t('companies.validation.register_required') })
-            .min(5, t('companies.validation.register_min_length'))
-            .max(255, t('companies.validation.register_max_length')),
+            .string({ required_error: t('common.register') + ' ' + t('validation.required') })
+            .min(5, t('common.register') + ' ' + t('validation.min_length', { min: 5 }))
+            .max(255, t('common.register') + ' ' + t('validation.max_length', { max: 255 })),
 
         partner: z
-            .string({ required_error: t('companies.validation.partner_required') })
-            .min(2, t('companies.validation.partner_min_length'))
-            .max(255, t('companies.validation.partner_max_length')),
+            .string({ required_error: t('partner.singular') + ' ' + t('validation.required') })
+            .min(2, t('partner.singular') + ' ' + t('validation.min_length', { min: 2 }))
+            .max(255, t('partner.singular') + ' ' + t('validation.max_length', { max: 255 })),
 
         partnerLocation: z
-            .string({ required_error: t('companies.validation.partner_location_required') })
-            .min(2, t('companies.validation.partner_location_min_length'))
-            .max(100, t('companies.validation.partner_location_max_length')),
+            .string({ required_error: t('partner.location') + ' ' + t('validation.required') })
+            .min(2, t('partner.location') + ' ' + t('validation.min_length', { min: 2 }))
+            .max(100, t('partner.location') + ' ' + t('validation.max_length', { max: 100 })),
 
         partnerRegister: z
-            .string({ required_error: t('companies.validation.partner_register_required') })
-            .min(5, t('companies.validation.partner_register_min_length'))
-            .max(255, t('companies.validation.partner_register_max_length')),
+            .string({ required_error: t('partner.register') + ' ' + t('validation.required') })
+            .min(5, t('partner.register') + ' ' + t('validation.min_length', { min: 5 }))
+            .max(255, t('partner.register') + ' ' + t('validation.max_length', { max: 255 })),
 
         management: z
-            .string({ required_error: t('companies.validation.management_required') })
-            .min(2, t('companies.validation.management_min_length'))
-            .max(100, t('companies.validation.management_max_length')),
+            .string({ required_error: t('global.management') + ' ' + t('validation.required') })
+            .min(2, t('global.management') + ' ' + t('validation.min_length', { min: 2 }))
+            .max(100, t('global.management') + ' ' + t('validation.max_length', { max: 100 })),
 
         addressId: z
-            .number({ required_error: t('companies.validation.address_required') })
+            .number({ required_error: t('address.singular') + ' ' + t('validation.required') })
             .nullable()
             .optional(),
     });
