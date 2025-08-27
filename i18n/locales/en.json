@@ -13,6 +13,14 @@
     "contact_information": "Contact Information",
     "assignment_information": "Assignment Information",
     "select_option": "Select Option",
+    "current_password": "Current Password",
+    "current_password_placeholder": "Enter current password",
+    "new_password": "New Password",
+    "new_password_placeholder": "Enter new password",
+    "confirm_password": "Confirm Password",
+    "confirm_password_placeholder": "Confirm new password",
+    "password_description": "Change your account password",
+    "preferences": "Preferences"
 
   },
   "validation": {
@@ -72,8 +80,8 @@
     "no_search_results": "No search results found for",
     "add_new_hint": "Click the",
     "button_above": "button above to add a new record",
-
-    
+    "confirm": "Confirm",
+    "are_you_sure": "Are you sure?",
     "messages": {
       "something_went_wrong": "Something went wrong. Please try again.",
       "error": "Error"
@@ -107,7 +115,8 @@
     "transferred_to": "Transferred to",
     "active": "Active",
     "inactive": "Inactive",
-    "register": "Register"
+    "register": "Register",
+    "details": "Details"
   },
   "note": {
     "singular": "Note",
@@ -132,6 +141,7 @@
     "back": "Back",
     "submit": "Submit",
     "retry": "Retry",
+    "select": "Select",
     "self_assign": "Self Assign",
     "create_and_add_new": "Create & Add New",
     "update_and_add_new": "Update & Add New",
@@ -163,6 +173,8 @@
       "not_found_title": "{model} Not Found",
       "not_found_description": "The {model} you're looking for doesn't exist or has been removed.",
       "title": "{model} Details",
+      "updated_successfully": "{model} updated successfully",
+      "update_failed": "{model} update failed",
       "description": "View {model} information and history",
       "contact_info": "Contact Information",
       "assigned_successfully": "{model} assigned successfully",
@@ -180,7 +192,6 @@
   "user": {
     "singular": "User",
     "plural": "Users",
-    "tasks": "Tasks",
     "account": "Account",
     "first_name": "First Name",
     "first_name_placeholder": "Enter first name",
@@ -195,6 +206,29 @@
     "add_description": "Add a new user to the system",
     "edit_description": "Edit user information and permissions"
   },
+  "profile": {
+    "singular": "Profile",
+    "description": "Manage your personal information and account settings"
+  },
+  "preference": {
+    "singular": "Preference",
+    "plural": "Preferences",
+    "description": "Manage your application preferences and settings"
+  },
+  "theme": {
+    "singular": "Theme",
+    "plural": "Themes",
+    "description": "Choose your preferred color theme for the application"
+  },
+  "language": {
+    "singular": "Language",
+    "plural": "Languages",
+    "description": "Choose your preferred language for the application"
+  },
+  "task": {
+    "singular": "Task",
+    "plural": "Tasks"
+  },
 
   "it_support": {
     "plural": "IT Support",
@@ -203,7 +237,8 @@
   
   "academy": {
     "plural": "Academy Events",
-    "singular": "Academy Event"
+    "singular": "Academy Event",
+    "description": "Manage academy events and activities"
   },
   "company": {
     "plural": "Companies",
@@ -234,19 +269,23 @@
   },
   "speaker": {
     "plural": "Speakers",
-    "singular": "Speaker"
+    "singular": "Speaker",
+    "description": "Manage event speakers and presenters"
   },
   "attendee": {
     "plural": "Attendees",
-    "singular": "Attendee"
+    "singular": "Attendee",
+    "description": "Manage event attendees"
   },
   "event_category": {
     "plural": "Event Categories",
-    "singular": "Event Category"
+    "singular": "Event Category",
+    "description": "Manage event categories for academy events"
   },
   "event_target": {
     "plural": "Event Targets",
-    "singular": "Event Target"
+    "singular": "Event Target",
+    "description": "Manage event target audiences"
   },
   "application": {
     "plural": "Applications",

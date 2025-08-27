@@ -2,9 +2,9 @@
 const { t } = useI18n()
 
 // Page configuration
-const pageTitle = computed(() => t('academy.speakers.title'))
-const pageIcon = 'solar:user-speak-outline'
-const pageDescription = computed(() => t('academy.speakers.description'))
+const pageTitle = computed(() => t('speaker.plural'))
+const pageIcon = usePageIcon()
+const pageDescription = computed(() => t('speaker.description'))
 
 definePageMeta({
     middleware: 'auth',
@@ -28,7 +28,7 @@ const openAddDialog = () => {
     <div>
         <PageHeaderActions
             :page-title="pageTitle"
-            :page-icon="pageIcon"
+            :page-icon="pageIcon || 'solar:user-speak-outline'"
             @add-new="openAddDialog"
         >
             <template #actions>

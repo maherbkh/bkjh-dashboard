@@ -324,9 +324,9 @@ export function useCategoryCrud() {
     return useCrud<Category>({
         apiSlug: 'category',
         translations: {
-            add_success: t('categories.add_success'),
-            edit_success: t('categories.edit_success'),
-            delete_success: t('categories.delete_success'),
+            add_success: t('action.message.add_successfully', { model: t('category.singular') }),
+            edit_success: t('action.message.edit_successfully', { model: t('category.singular') }),
+            delete_success: t('action.message.delete_successfully', { model: t('category.singular') }),
             error: t('global.error'),
         },
     });

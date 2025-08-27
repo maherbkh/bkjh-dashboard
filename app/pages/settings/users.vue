@@ -371,7 +371,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                     <Icon
                         name="solar:trash-bin-minimalistic-outline"
                     />
-                    {{ $t('global.actions.delete_all') }}
+                    {{ $t('action.delete_all') }}
                 </Button>
             </template>
         </PageHeaderActions>

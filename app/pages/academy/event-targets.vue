@@ -2,9 +2,9 @@
 const { t } = useI18n()
 
 // Page configuration
-const pageTitle = computed(() => t('academy.event_targets.title'))
-const pageIcon = 'solar:target-outline'
-const pageDescription = computed(() => t('academy.event_targets.description'))
+const pageTitle = computed(() => t('event_target.plural'))
+const pageIcon = usePageIcon()
+const pageDescription = computed(() => t('event_target.description'))
 
 definePageMeta({
     middleware: 'auth',
@@ -28,7 +28,7 @@ const openAddDialog = () => {
     <div>
         <PageHeaderActions
             :page-title="pageTitle"
-            :page-icon="pageIcon"
+            :page-icon="pageIcon || 'solar:target-outline'"
             @add-new="openAddDialog"
         >
             <template #actions>

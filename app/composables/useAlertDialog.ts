@@ -28,7 +28,7 @@ export function useAlertDialog() {
             state.title = options.title || t('global.confirm');
             state.description = options.description || t('global.are_you_sure');
             state.confirmText = options.confirmText || t('global.confirm');
-            state.cancelText = options.cancelText || t('global.cancel');
+            state.cancelText = options.cancelText || t('action.cancel');
             state.resolve = resolve;
             state.isOpen = true;
             console.log('State after update:', { ...state });
@@ -78,8 +78,8 @@ export function useConfirmDialog() {
             description: itemName
                 ? (t('global.common.confirm_delete_item', { item: itemName }) || `Are you sure you want to delete '${itemName}'?`)
                 : (t('global.common.delete_confirmation') || 'Are you sure you want to delete this item?'),
-            confirmText: t('global.actions.delete') || 'Delete',
-            cancelText: t('global.cancel') || 'Cancel',
+            confirmText: t('action.delete') || 'Delete',
+            cancelText: t('action.cancel') || 'Cancel',
         };
         console.log('confirmDelete options:', options);
         return show(options);
@@ -89,8 +89,8 @@ export function useConfirmDialog() {
         return show({
             title: t('global.common.confirm_bulk_delete_title') || 'Confirm Bulk Deletion',
             description: t('global.common.confirm_bulk_delete_count', { count }) || `Are you sure you want to delete ${count} selected items?`,
-            confirmText: t('global.actions.delete') || 'Delete',
-            cancelText: t('global.cancel') || 'Cancel',
+            confirmText: t('action.delete') || 'Delete',
+            cancelText: t('action.cancel') || 'Cancel',
         });
     };
 

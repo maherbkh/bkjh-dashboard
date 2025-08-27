@@ -2,9 +2,9 @@
 const { t } = useI18n()
 
 // Page configuration
-const pageTitle = computed(() => t('academy.events.add_title'))
-const pageIcon = 'solar:calendar-add-outline'
-const pageDescription = computed(() => t('academy.events.add_description'))
+const pageTitle = computed(() => t('action.add') + ' ' + t('academy.singular'))
+const pageIcon = usePageIcon()
+const pageDescription = computed(() => t('action.add') + ' ' + t('academy.singular'))
 
 definePageMeta({
     middleware: 'auth',
@@ -22,7 +22,7 @@ useSeoMeta({
     <div>
         <PageHeader
             :title="pageTitle"
-            :icon="pageIcon"
+            :icon="pageIcon || 'solar:calendar-add-outline'"
         >
             <Button
                 variant="outline"
@@ -30,7 +30,7 @@ useSeoMeta({
                 @click="$router.back()"
             >
                 <Icon name="solar:arrow-left-outline" />
-                {{ $t('global.actions.back') }}
+                {{ $t('action.back') }}
             </Button>
         </PageHeader>
         

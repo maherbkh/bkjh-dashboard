@@ -71,7 +71,7 @@ const userInitials = computed(() => useInitials(userStore.user?.name ?? ''));
                         <DropdownMenuItem>
                             <NuxtLink to="/profile/tasks">
                                 <Icon name="solar:clipboard-list-outline" />
-                                {{ $t('user.tasks') }}
+                                {{ $t('task.plural') }}
                             </NuxtLink>
                         </DropdownMenuItem>
                     </DropdownMenuGroup>

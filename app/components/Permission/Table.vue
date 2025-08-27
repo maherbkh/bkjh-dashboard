@@ -222,7 +222,7 @@ onUnmounted(() => {
                     @update:checked="isAllSelected ? deselectAll() : selectAll()"
                 />
                 <Label class="text-sm font-medium">
-                    {{ isAllSelected ? t('global.actions.deselect_all') : t('global.actions.select_all') }}
+                    {{ isAllSelected ? t('action.deselect_all') : t('action.select_all') }}
                 </Label>
             </div>
             <div class="text-sm text-muted-foreground">
@@ -256,7 +256,7 @@ onUnmounted(() => {
                     class="mt-2"
                     @click="refreshPermissions()"
                 >
-                    {{ t('global.actions.retry') }}
+                    {{ t('action.retry') }}
                 </Button>
             </div>
         </div>

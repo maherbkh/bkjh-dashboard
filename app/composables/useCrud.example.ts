@@ -17,9 +17,9 @@ export function useCompanyCrud() {
     return useCrud<Company>({
         apiSlug: 'companies',
         translations: {
-            add_success: t('companies.add_success'),
-            edit_success: t('companies.edit_success'),
-            delete_success: t('companies.delete_success'),
+            add_success: t('action.message.add_successfully', { model: t('company.singular') }),
+            edit_success: t('action.message.edit_successfully', { model: t('company.singular') }),
+            delete_success: t('action.message.delete_successfully', { model: t('company.singular') }),
             error: t('global.error'),
         },
     });

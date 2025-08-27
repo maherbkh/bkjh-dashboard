@@ -3,9 +3,9 @@ const { t } = useI18n()
 const route = useRoute()
 
 // Page configuration
-const pageTitle = computed(() => t('academy.attendees.details_title'))
-const pageIcon = 'solar:user-outline'
-const pageDescription = computed(() => t('academy.attendees.details_description'))
+const pageTitle = computed(() => t('attendee.singular') + ' ' + t('common.details'))
+const pageIcon = usePageIcon()
+const pageDescription = computed(() => t('attendee.singular') + ' ' + t('common.details'))
 
 definePageMeta({
     middleware: 'auth',
@@ -25,7 +25,7 @@ const attendeeId = computed(() => route.params.id as string)
     <div>
         <PageHeader
             :title="pageTitle"
-            :icon="pageIcon"
+            :icon="pageIcon || 'solar:user-outline'"
         >
             <Button
                 variant="outline"
@@ -33,7 +33,7 @@ const attendeeId = computed(() => route.params.id as string)
                 @click="$router.back()"
             >
                 <Icon name="solar:arrow-left-outline" />
-                {{ $t('global.actions.back') }}
+                {{ $t('action.back') }}
             </Button>
             
             <Button
@@ -41,7 +41,7 @@ const attendeeId = computed(() => route.params.id as string)
                 @click="console.log('Edit attendee:', attendeeId)"
             >
                 <Icon name="solar:pen-outline" />
-                {{ $t('global.actions.edit') }}
+                {{ $t('action.edit') }}
             </Button>
         </PageHeader>
         

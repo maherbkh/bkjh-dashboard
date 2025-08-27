@@ -1,11 +1,12 @@
 <script setup lang="ts">
 const { t } = useI18n()
 const route = useRoute()
+const router = useRouter()
 
 // Page configuration
-const pageTitle = computed(() => t('academy.events.attendees_title'))
-const pageIcon = 'solar:users-group-rounded-outline'
-const pageDescription = computed(() => t('academy.events.attendees_description'))
+const pageTitle = computed(() => t('attendee.plural'))
+const pageIcon = usePageIcon()
+const pageDescription = computed(() => t('attendee.plural'))
 
 definePageMeta({
     middleware: 'auth',
@@ -31,17 +32,17 @@ const openAddDialog = () => {
     <div>
         <PageHeaderActions
             :page-title="pageTitle"
-            :page-icon="pageIcon"
+            :page-icon="pageIcon || 'solar:users-group-rounded-outline'"
             @add-new="openAddDialog"
         >
             <template #actions>
                 <Button
                     variant="outline"
                     size="sm"
-                    @click="$router.back()"
+                    @click="router.back()"
                 >
                     <Icon name="solar:arrow-left-outline" />
-                    {{ $t('global.actions.back') }}
+                    {{ $t('action.back') }}
                 </Button>
             </template>
         </PageHeaderActions>

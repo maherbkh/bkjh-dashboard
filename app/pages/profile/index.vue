@@ -12,9 +12,9 @@ definePageMeta({
     middleware: 'auth',
 })
 
-const pageTitle = computed(() => t('profile.title'))
+const pageTitle = computed(() => t('profile.singular'))
 const pageIcon = usePageIcon()
-const pageDescription = computed(() => t('profile.description'))
+const pageDescription = computed(() => t('profile.singular'))
 
 // Profile form with validation
 const profileSchema = toTypedSchema(createProfileEditSchema(t))
@@ -91,12 +91,11 @@ const saveProfile = handleProfileSubmit(async (values) => {
         if (data.value) {
             await userStore.fetchAuthUser()
         }
-        console.log('Profile updated:', data)
-        toast.success(t('profile.toasts.profile_updated'))
+        toast.success(t('action.message.updated_successfully', { model: t('profile.singular') }))
     }
     catch (error) {
         console.error('Profile update error:', error)
-        toast.error(t('profile.toasts.profile_update_failed'))
+        toast.error(t('action.message.update_failed', { model: t('profile.singular') }))
     }
 })
 
@@ -107,13 +106,13 @@ const changePassword = handlePasswordSubmit(async (values) => {
             method: 'POST',
             body: values,
         })
-        toast.success(t('profile.toasts.password_changed'))
+        toast.success(t('action.message.updated_successfully', { model: t('form.password') }))
         // Reset form
         resetPasswordForm()
     }
     catch (error) {
         console.error('Password change error:', error)
-        toast.error(t('profile.toasts.password_change_failed'))
+        toast.error(t('action.message.update_failed', { model: t('form.password') }))
     }
 }, (errors) => {
     console.log('Form validation errors:', errors)
@@ -125,10 +124,10 @@ const savePreferences = async () => {
         colorMode.preference = preferencesForm.value.theme
         // Update language
         setLocale(preferencesForm.value.language)
-        toast.success(t('profile.toasts.preferences_saved'))
+        toast.success(t('action.message.updated_successfully', { model: t('form.preferences') }))
     }
     catch (error) {
-        toast.error(t('profile.toasts.preferences_save_failed'))
+        toast.error(t('action.message.update_failed', { model: t('form.preferences') }))
     }
 }
 
@@ -158,7 +157,7 @@ useSeoMeta({
         />
 
         <div class="font-semibold text-xl">
-            <span class="font-light">{{ t('welcome') }}</span>, {{ user?.firstName }}
+            <span class="font-light">{{ t('auth.welcome_back') }}</span>, {{ user?.firstName }}
         </div>
 
         <Tabs
@@ -175,7 +174,7 @@ useSeoMeta({
                         name="solar:pen-new-round-outline"
                         class="mr-2 !size-4 shrink-0"
                     />
-                    {{ t('profile.tabs.edit_profile') }}
+                    {{ t('profile.singular') }}
                 </TabsTrigger>
                 <TabsTrigger
                     value="change-password"
@@ -185,7 +184,7 @@ useSeoMeta({
                         name="solar:lock-password-outline"
                         class="mr-2 !size-4 shrink-0"
                     />
-                    {{ t('profile.tabs.change_password') }}
+                    {{ t('form.password') }}
                 </TabsTrigger>
                 <TabsTrigger
                     value="preferences"
@@ -195,7 +194,7 @@ useSeoMeta({
                         name="solar:settings-outline"
                         class="mr-2 !size-4 shrink-0"
                     />
-                    {{ t('profile.tabs.preferences') }}
+                    {{ t('preference.singular') }}
                 </TabsTrigger>
             </TabsList>
 
@@ -203,8 +202,8 @@ useSeoMeta({
             <TabsContent value="edit-profile">
                 <Card>
                     <CardHeader>
-                        <CardTitle>{{ t('profile.edit_profile.title') }}</CardTitle>
-                        <CardDescription>{{ t('profile.edit_profile.description') }}</CardDescription>
+                        <CardTitle>{{ t('profile.singular') }}</CardTitle>
+                        <CardDescription>{{ t('profile.description') }}</CardDescription>
                     </CardHeader>
                     <CardContent class="space-y-4">
                         <form
@@ -214,37 +213,37 @@ useSeoMeta({
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormItemInput
                                     v-model="firstName"
-                                    :title="t('profile.edit_profile.first_name')"
-                                    :placeholder="t('profile.edit_profile.first_name')"
+                                    :title="t('user.first_name')"
+                                    :placeholder="t('user.first_name')"
                                     :error="profileErrors.firstName"
                                     required
                                 />
                                 <FormItemInput
                                     v-model="lastName"
-                                    :title="t('profile.edit_profile.last_name')"
-                                    :placeholder="t('profile.edit_profile.last_name')"
+                                    :title="t('user.last_name')"
+                                    :placeholder="t('user.last_name')"
                                     :error="profileErrors.lastName"
                                     required
                                 />
                             </div>
                             <FormItemInput
                                 v-model="email"
-                                :title="t('profile.edit_profile.email')"
-                                :placeholder="t('profile.edit_profile.email')"
+                                :title="t('form.email')"
+                                :placeholder="t('form.email')"
                                 :error="profileErrors.email"
                                 type="email"
                                 required
                             />
                             <FormItemInput
                                 v-model="username"
-                                :title="t('profile.edit_profile.username')"
-                                :placeholder="t('profile.edit_profile.username')"
+                                :title="t('user.username')"
+                                :placeholder="t('user.username')"
                                 :error="profileErrors.username"
                                 required
                             />
                             <div class="flex justify-end">
                                 <Button type="submit">
-                                    {{ t('profile.edit_profile.save_changes') }}
+                                    {{ t('action.save') }}
                                 </Button>
                             </div>
                         </form>
@@ -256,8 +255,8 @@ useSeoMeta({
             <TabsContent value="change-password">
                 <Card>
                     <CardHeader>
-                        <CardTitle>{{ t('profile.change_password.title') }}</CardTitle>
-                        <CardDescription>{{ t('profile.change_password.description') }}</CardDescription>
+                        <CardTitle>{{ t('form.password') }}</CardTitle>
+                        <CardDescription>{{ t('form.password_description') }}</CardDescription>
                     </CardHeader>
                     <CardContent class="space-y-4">
                         <form
@@ -266,8 +265,8 @@ useSeoMeta({
                         >
                             <FormItemInput
                                 v-model="oldPassword"
-                                :title="t('profile.change_password.current_password')"
-                                :placeholder="t('profile.change_password.current_password')"
+                                :title="t('form.current_password')"
+                                :placeholder="t('form.current_password')"
                                 :error="passwordErrors.old_password"
                                 type="password"
                                 required
@@ -275,8 +274,8 @@ useSeoMeta({
                             <FormItemInput
                                 v-model="newPassword"
                                 :use-show-password="true"
-                                :title="t('profile.change_password.new_password')"
-                                :placeholder="t('profile.change_password.new_password')"
+                                :title="t('form.new_password')"
+                                :placeholder="t('form.new_password')"
                                 :error="passwordErrors.new_password"
                                 type="password"
                                 required
@@ -284,15 +283,15 @@ useSeoMeta({
                             <FormItemInput
                                 v-model="newPasswordConfirmation"
                                 :use-show-password="true"
-                                :title="t('profile.change_password.confirm_password')"
-                                :placeholder="t('profile.change_password.confirm_password')"
+                                :title="t('form.confirm_password')"
+                                :placeholder="t('form.confirm_password')"
                                 :error="passwordErrors.new_password_confirmation"
                                 type="password"
                                 required
                             />
                             <div class="flex justify-end">
                                 <Button type="submit">
-                                    {{ t('profile.change_password.update_password') }}
+                                    {{ t('action.update') }}
                                 </Button>
                             </div>
                         </form>
@@ -304,14 +303,14 @@ useSeoMeta({
             <TabsContent value="preferences">
                 <Card>
                     <CardHeader>
-                        <CardTitle>{{ t('profile.preferences.title') }}</CardTitle>
-                        <CardDescription>{{ t('profile.preferences.description') }}</CardDescription>
+                        <CardTitle>{{ t('preference.singular') }}</CardTitle>
+                        <CardDescription>{{ t('preference.description') }}</CardDescription>
                     </CardHeader>
                     <CardContent class="space-y-6">
                         <div class="space-y-2">
-                            <label class="text-sm font-medium">{{ t('profile.preferences.theme') }}</label>
+                            <label class="text-sm font-medium">{{ t('theme.singular') }}</label>
                             <p class="text-sm text-muted-foreground">
-                                {{ t('profile.preferences.theme_description') }}
+                                {{ t('theme.description') }}
                             </p>
                             <FormItemSelect
                                 v-model="preferencesForm.theme"
@@ -319,14 +318,14 @@ useSeoMeta({
                                 :data="themeOptions"
                                 key-value="id"
                                 name-value="name"
-                                :placeholder="t('profile.preferences.theme')"
+                                :placeholder="t('action.select') + ' ' + t('theme.singular')"
                             />
                         </div>
 
                         <div class="space-y-2">
-                            <label class="text-sm font-medium">{{ t('profile.preferences.language') }}</label>
+                            <label class="text-sm font-medium">{{ t('language.singular') }}</label>
                             <p class="text-sm text-muted-foreground">
-                                {{ t('profile.preferences.language_description') }}
+                                {{ t('language.description') }}
                             </p>
                             <FormItemSelect
                                 v-model="preferencesForm.language"
@@ -334,13 +333,13 @@ useSeoMeta({
                                 :data="availableLanguages"
                                 key-value="id"
                                 name-value="name"
-                                :placeholder="t('profile.preferences.language')"
+                                :placeholder="t('action.select') + ' ' + t('language.singular')"
                             />
                         </div>
 
                         <div class="flex justify-end">
                             <Button @click="savePreferences">
-                                {{ t('profile.preferences.save_preferences') }}
+                                {{ t('action.save') }}
                             </Button>
                         </div>
                     </CardContent>

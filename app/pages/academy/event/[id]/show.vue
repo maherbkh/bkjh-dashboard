@@ -3,9 +3,9 @@ const { t } = useI18n()
 const route = useRoute()
 
 // Page configuration
-const pageTitle = computed(() => t('academy.events.show_title'))
-const pageIcon = 'solar:calendar-outline'
-const pageDescription = computed(() => t('academy.events.show_description'))
+const pageTitle = computed(() => t('academy.singular') + ' ' + t('common.details'))
+const pageIcon = usePageIcon()
+const pageDescription = computed(() => t('academy.singular') + ' ' + t('common.details'))
 
 definePageMeta({
     middleware: 'auth',
@@ -25,7 +25,7 @@ const eventId = computed(() => route.params.id as string)
     <div>
         <PageHeader
             :title="pageTitle"
-            :icon="pageIcon"
+            :icon="pageIcon || 'solar:calendar-outline'"
         >
             <Button
                 variant="outline"
@@ -33,7 +33,7 @@ const eventId = computed(() => route.params.id as string)
                 @click="$router.back()"
             >
                 <Icon name="solar:arrow-left-outline" />
-                {{ $t('global.actions.back') }}
+                {{ $t('action.back') }}
             </Button>
             
             <Button
@@ -41,7 +41,7 @@ const eventId = computed(() => route.params.id as string)
                 @click="navigateTo(`/academy/event/${eventId}/edit`)"
             >
                 <Icon name="solar:pen-outline" />
-                {{ $t('global.actions.edit') }}
+                {{ $t('action.edit') }}
             </Button>
         </PageHeader>
         

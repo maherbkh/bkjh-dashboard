@@ -14,7 +14,7 @@ export const useTicketActions = () => {
             });
 
             await refresh();
-            toast.success(t('tickets.actions.assign'));
+            toast.success(t('action.message.assigned_successfully', { model: t('ticket.singular') }));
             // Refresh the page data
             await navigateTo(route.fullPath, { replace: true });
         }
@@ -36,7 +36,7 @@ export const useTicketActions = () => {
                 body: { user_id: userId },
             });
 
-            toast.success(t('tickets.actions.transfer'));
+            toast.success(t('action.message.transferred_successfully', { model: t('ticket.singular') }));
             // Refresh the page data
             await navigateTo(route.fullPath, { replace: true });
         }
@@ -61,7 +61,7 @@ export const useTicketActions = () => {
                 },
             });
 
-            toast.success(t(`tickets.actions.${actionType}`));
+            toast.success(t(`action.message.${actionType}_successfully`, { model: t('ticket.singular') }));
             if (refresh) {
                 await refresh();
             }

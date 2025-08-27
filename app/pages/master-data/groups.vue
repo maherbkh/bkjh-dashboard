@@ -248,7 +248,7 @@ const handleSelectAll = (checked: boolean) => {
                         <Icon
                             name="solar:trash-bin-minimalistic-outline"
                         />
-                        {{ $t('global.actions.delete_all') }}
+                        {{ $t('action.delete_all') }}
                     </Button>
                 </template>
             </PageHeaderActions>
@@ -342,7 +342,7 @@ const handleSelectAll = (checked: boolean) => {
                     <template #cell-actions="{ row }">
                         <div class="flex justify-end gap-2">
                             <Button
-                                :title="$t('global.actions.edit')"
+                                :title="$t('action.edit')"
                                 variant="ghost"
                                 size="icon"
                                 hydrate-on-interaction="mouseover"
@@ -354,7 +354,7 @@ const handleSelectAll = (checked: boolean) => {
                                 />
                             </Button>
                             <Button
-                                :title="$t('global.actions.delete')"
+                                :title="$t('action.delete')"
                                 variant="ghost"
                                 size="icon"
                                 @click="handleDelete(row.id)"

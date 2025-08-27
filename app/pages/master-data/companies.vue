@@ -4,7 +4,7 @@ const { t } = useI18n()
 // Page configuration
 const pageTitle = computed(() => t('company.plural'))
 const pageIcon = usePageIcon()
-const pageDescription = computed(() => t('companies.description'))
+const pageDescription = computed(() => t('company.plural'))
 definePageMeta({
     middleware: 'auth',
 })
