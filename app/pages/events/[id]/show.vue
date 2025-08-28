@@ -38,7 +38,7 @@ const eventId = computed(() => route.params.id as string)
             
             <Button
                 size="sm"
-                @click="navigateTo(`/academy/event/${eventId}/edit`)"
+                @click="navigateTo(`/events/${eventId}/edit`)"
             >
                 <Icon name="solar:pen-outline" />
                 {{ $t('action.edit') }}

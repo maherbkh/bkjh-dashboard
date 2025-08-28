@@ -51,7 +51,7 @@ export const useNavigationData = (): ComputedRef<{
                 url: '#',
                 icon: 'solar:server-2-outline',
                 isActive: true,
-                apps: ['support'],
+                apps: ['support', 'academy'],
                 items: [
                     {
                         title: t('company.plural'),
@@ -77,7 +77,30 @@ export const useNavigationData = (): ComputedRef<{
                         icon: 'solar:bookmark-linear',
                         apps: ['support'],
                     },
-
+                    {
+                        title: t('speaker.plural'),
+                        url: '/master-data/speakers',
+                        icon: 'solar:user-speak-outline',
+                        apps: ['academy'],
+                    },
+                    {
+                        title: t('attendee.plural'),
+                        url: '/master-data/attendee/list',
+                        icon: 'solar:users-group-rounded-outline',
+                        apps: ['academy'],
+                    },
+                    {
+                        title: t('event_category.plural'),
+                        url: '/master-data/event-categories',
+                        icon: 'solar:bookmark-outline',
+                        apps: ['academy'],
+                    },
+                    {
+                        title: t('event_target.plural'),
+                        url: '/master-data/event-targets',
+                        icon: 'solar:target-outline',
+                        apps: ['academy'],
+                    },
                 ],
             },
             {
@@ -125,32 +148,14 @@ export const useNavigationData = (): ComputedRef<{
                 items: [
                     {
                         title: t('academy.plural'),
-                        url: '/academy/event/list',
+                        url: '/events/list',
                         icon: 'solar:calendar-outline',
                         apps: ['academy'],
                     },
                     {
-                        title: t('speaker.plural'),
-                        url: '/academy/speakers',
-                        icon: 'solar:user-speak-outline',
-                        apps: ['academy'],
-                    },
-                    {
-                        title: t('attendee.plural'),
-                        url: '/academy/attendee/list',
-                        icon: 'solar:users-group-rounded-outline',
-                        apps: ['academy'],
-                    },
-                    {
-                        title: t('event_category.plural'),
-                        url: '/academy/event-categories',
-                        icon: 'solar:bookmark-outline',
-                        apps: ['academy'],
-                    },
-                    {
-                        title: t('event_target.plural'),
-                        url: '/academy/event-targets',
-                        icon: 'solar:target-outline',
+                        title: t('action.add') + ' ' + t('academy.singular'),
+                        url: '/events/add',
+                        icon: 'solar:add-circle-outline',
                         apps: ['academy'],
                     },
                 ],

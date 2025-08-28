@@ -19,7 +19,7 @@ useSeoMeta({
 
 // Event handlers
 const openAddDialog = () => {
-    navigateTo('/academy/event/add')
+    navigateTo('/events/add')
 }
 </script>
 

@@ -9,13 +9,18 @@ const translationMap = computed(() => ({
     'categories': t('category.plural'),
     'companies': t('company.plural'),
     'groups': t('group.plural'),
-    'academy': t('academy.plural'),
-    'event': t('academy.plural'),
-    'list': t('common.list'),
+    'addresses': t('address.plural'),
     'speakers': t('speaker.plural'),
     'attendee': t('attendee.plural'),
     'event-categories': t('event_category.plural'),
     'event-targets': t('event_target.plural'),
+    'academy': t('academy.plural'),
+    'events': t('academy.plural'),
+    'list': t('common.list'),
+    'add': t('action.add'),
+    'show': t('common.details'),
+    'edit': t('action.edit'),
+    'attendees': t('attendee.plural'),
 }));
 
 const getTranslatedName = (segment: string, fullPath?: string) => {
