@@ -270,15 +270,38 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
         error.value = null;
 
         try {
-            const { data, status } = await useApiFetch(buildApiPath(), {
-                method: 'DELETE',
+            const { data, status, error: fetchError } = await useApiFetch(buildApiPath('/delete-many'), {
+                method: 'POST',
                 body: { ids },
             });
 
             if (status.value === 'success') {
-                toast.success(defaultTranslations.delete_success);
+                const responseData = (data.value as any).data;
+                const deletedCount = responseData.deletedCount;
+                const notFoundIds = responseData.notFoundIds || [];
+                
+                // Show appropriate success message based on results
+                if (notFoundIds.length === 0) {
+                    // All items deleted successfully
+                    toast.success(t('global.messages.bulk_delete_success', { count: deletedCount }) || `Successfully deleted ${deletedCount} items`);
+                } else {
+                    // Some items not found
+                    const message = t('global.messages.bulk_delete_partial', { 
+                        deleted: deletedCount, 
+                        notFound: notFoundIds.length 
+                    }) || `Deleted ${deletedCount} items. ${notFoundIds.length} items not found.`;
+                    toast.warning(message);
+                }
+                
                 await refresh();
                 return { data: data.value, status: status.value };
+            }
+            else if (fetchError.value) {
+                // Handle validation errors or other backend errors
+                const errorMessage = fetchError.value.data?.message || fetchError.value.message || t('global.messages.something_went_wrong');
+                error.value = errorMessage;
+                toast.error(errorMessage);
+                throw new Error(errorMessage);
             }
         }
         catch (err) {
@@ -288,6 +311,10 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
                 throw err;
             }
 
+            if (err instanceof Error && err.message !== t('global.messages.something_went_wrong')) {
+                // Re-throw if it's already a handled error
+                throw err;
+            }
             error.value = err instanceof Error ? err.message : t('global.messages.something_went_wrong');
             toast.error(defaultTranslations.error);
             throw err;
