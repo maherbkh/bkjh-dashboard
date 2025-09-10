@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import type { Ticket } from '~/types';
+import { useResourcesStore } from '~/stores/resources'
 
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm } = useCrud<Ticket, TicketCrudForm>({
-    apiSlug: 'tickets',
+    crudPath: 'ticket',
+    tenant: 'support',
     formSchema: createTicketCrudSchema(t),
 });
 
-// Load list data for dropdowns
-const { groups } = useGroupsList();
-const { categories } = useCategoriesList();
+// Load list data for dropdowns from resources store
+const resourcesStore = useResourcesStore();
+const groups = computed(() => resourcesStore.groups);
+const categories = computed(() => resourcesStore.ticketCategories);
 
 const [name, nameAttrs] = defineField('name');
 const [message, messageAttrs] = defineField('message');

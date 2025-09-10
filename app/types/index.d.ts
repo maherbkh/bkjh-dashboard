@@ -256,7 +256,7 @@ export type CrudItem = {
 };
 
 export type PaginatedResponse<T> = {
-    status: string;
+    status: boolean;
     message: string;
     data: {
         data: T[];

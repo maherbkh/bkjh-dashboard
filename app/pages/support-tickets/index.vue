@@ -31,7 +31,8 @@ const {
     resetForm,
     setValues,
 } = useCrud<Ticket, TicketCrudForm>({
-    apiSlug: 'ticket',
+    crudPath: 'ticket',
+    tenant: 'support',
     formSchema: createTicketCrudSchema(t),
 })
 

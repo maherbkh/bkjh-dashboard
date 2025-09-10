@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { useResourcesStore } from '~/stores/resources'
+
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm } = useCrud<Company, CompanyForm>({
-    apiSlug: 'company',
+    crudPath: 'company',
+    tenant: 'shared',
     formSchema: createCompanySchema(t),
 });
 
@@ -121,8 +124,9 @@ const handleClose = () => {
     emit('closeDialog');
 };
 
-// Get addresses for the select dropdown
-const { data: addresses } = useAddressesList();
+// Get addresses for the select dropdown from resources store
+const resourcesStore = useResourcesStore();
+const addresses = computed(() => resourcesStore.addresses);
 </script>
 
 <template>

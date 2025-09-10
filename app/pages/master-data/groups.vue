@@ -30,7 +30,8 @@ const {
     resetForm,
     setValues,
 } = useCrud<Group, GroupForm>({
-    apiSlug: 'group',
+    crudPath: 'group',
+    tenant: 'shared',
     formSchema: createGroupSchema(t),
 })
 

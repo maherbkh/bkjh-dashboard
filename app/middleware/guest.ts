@@ -1,13 +1,6 @@
 import { useUserStore } from '~/stores/user'
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
-    const tenant = useCurrentTenant()
-
-    // Only apply guest middleware logic for dashboard tenant
-    if (tenant !== 'dashboard') {
-        return
-    }
-
     const userStore = useUserStore()
 
     // If we have an access token but no user data, try to fetch user to verify authentication

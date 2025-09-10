@@ -5,7 +5,8 @@ import { toast } from 'vue-sonner';
 import type { CrudItem, PaginatedResponse, Category } from '~/types';
 
 type CrudOptions = {
-    apiSlug: string;
+    crudPath: string;
+    tenant: 'shared' | 'academy' | 'support';
     translations?: {
         add_success?: string;
         edit_success?: string;
@@ -17,7 +18,12 @@ type CrudOptions = {
 
 export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(options: CrudOptions) => {
     const { t } = useI18n();
-    const { apiSlug, translations, formSchema } = options;
+    const { crudPath, tenant, translations, formSchema } = options;
+
+    // Build API path with tenant and crud path
+    const buildApiPath = (endpoint: string = '') => {
+        return `/api/v1/dashboard/${tenant}/${crudPath}${endpoint}`;
+    };
 
     // VeeValidate form
     const { handleSubmit, defineField, errors, resetForm, setValues } = useForm({
@@ -57,9 +63,9 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
                 ...additionalParams,
             };
 
-            const { data, status } = await useApiFetch<PaginatedResponse<T>>(`/api/${apiSlug}`, {
+            const { data, status } = await useApiFetch<PaginatedResponse<T>>(buildApiPath(), {
                 query: params,
-                key: `${apiSlug}-list-${page}-${perPage}-${JSON.stringify(additionalParams)}`,
+                key: `${tenant}-${crudPath}-list-${page}-${perPage}-${JSON.stringify(additionalParams)}`,
             });
 
             if (status.value === 'success' && data.value) {
@@ -98,8 +104,8 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
         error.value = null;
 
         try {
-            const { data, status } = await useApiFetch<T>(`/api/${apiSlug}/${id}`, {
-                key: `${apiSlug}-item-${id}`,
+            const { data, status } = await useApiFetch<T>(buildApiPath(`/${id}`), {
+                key: `${tenant}-${crudPath}-item-${id}`,
             });
 
             return { data: data.value, status: status.value };
@@ -128,7 +134,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
         error.value = null;
 
         try {
-            const { status, error: fetchError } = await useApiFetch<T>(`/api/${apiSlug}`, {
+            const { status, error: fetchError } = await useApiFetch<T>(buildApiPath(), {
                 method: 'POST',
                 body: itemData as any,
             });
@@ -173,7 +179,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
         error.value = null;
 
         try {
-            const { status, error: fetchError } = await useApiFetch(`/api/${apiSlug}/${id}`, {
+            const { status, error: fetchError } = await useApiFetch(buildApiPath(`/${id}`), {
                 method: 'PUT',
                 body: itemData as any,
             });
@@ -221,7 +227,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
         error.value = null;
 
         try {
-            const { status } = await useApiFetch(`/api/${apiSlug}/${id}`, {
+            const { status } = await useApiFetch(buildApiPath(`/${id}`), {
                 method: 'DELETE',
             });
 
@@ -254,7 +260,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
         error.value = null;
 
         try {
-            const { status } = await useApiFetch(`/api/${apiSlug}`, {
+            const { status } = await useApiFetch(buildApiPath(), {
                 method: 'DELETE',
                 body: { ids },
             });
@@ -318,11 +324,12 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
 // Category type is now imported from ~/types
 
 // Convenience function for categories
-export function useCategoryCrud() {
+export function useCategoryCrud(tenant: 'shared' | 'academy' | 'support' = 'shared') {
     const { t } = useI18n();
 
     return useCrud<Category>({
-        apiSlug: 'category',
+        crudPath: 'category',
+        tenant,
         translations: {
             add_success: t('action.message.add_successfully', { model: t('category.singular') }),
             edit_success: t('action.message.edit_successfully', { model: t('category.singular') }),

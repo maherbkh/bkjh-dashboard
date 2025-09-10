@@ -29,9 +29,12 @@ const {
     resetForm,
     setValues,
 } = useCrud<Company, CompanyForm>({
-    apiSlug: 'company',
+    crudPath: 'compnaies',
+    tenant: 'shared',
     formSchema: createCompanySchema(t),
 })
+
+// /api/v1/dashboard/shared/companies
 
 const selectedRows = ref<number[]>([])
 

@@ -31,7 +31,8 @@ const {
     resetForm,
     setValues,
 } = useCrud<Address, AddressForm>({
-    apiSlug: 'address',
+    crudPath: 'address',
+    tenant: 'shared',
     formSchema: createAddressSchema(t),
 })
 

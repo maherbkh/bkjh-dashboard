@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { useResourcesStore } from '~/stores/resources'
+
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm, loading } = useCrud<Group, GroupForm>({
-    apiSlug: 'group',
+    crudPath: 'group',
+    tenant: 'shared',
     formSchema: createGroupSchema(t),
 });
 
@@ -9,9 +12,10 @@ const [name, nameAttrs] = defineField('name');
 const [address_id, addressIdAttrs] = defineField('address_id');
 const [company_ids, companyIdsAttrs] = defineField('company_ids');
 
-// Fetch companies and addresses data from API
-const { data: companiesData } = useCompaniesList();
-const { data: addressesData } = useAddressesList();
+// Get companies and addresses data from resources store
+const resourcesStore = useResourcesStore();
+const companiesData = computed(() => resourcesStore.companies);
+const addressesData = computed(() => resourcesStore.addresses);
 
 type Props = {
     open: boolean;

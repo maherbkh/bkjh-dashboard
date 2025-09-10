@@ -31,7 +31,8 @@ const {
     resetForm,
     setValues,
 } = useCrud<Category, CategoryForm>({
-    apiSlug: 'category',
+    crudPath: 'category',
+    tenant: 'shared',
     formSchema: createCategorySchema(t),
 })
 
