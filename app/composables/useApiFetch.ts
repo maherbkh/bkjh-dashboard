@@ -75,7 +75,16 @@ export function useApiFetch<T = unknown>(
         onResponseError({ response, error }) {
             // Use global error handler for all error responses
             if (import.meta.client) {
-                handleError(error);
+                try {
+                    handleError(error);
+                } catch (err) {
+                    console.error('Error in global error handler:', err);
+                    // Fallback error handling
+                    if (response.status === 401) {
+                        const userStore = useUserStore();
+                        userStore.logout();
+                    }
+                }
             }
         },
         async onRequest({ request, options: requestOptions }) {

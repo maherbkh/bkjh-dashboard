@@ -13,7 +13,13 @@ export const useUserStore = defineStore('user', () => {
     // Resources store instance - declared once for reuse
     const resourcesStore = useResourcesStore()
 
-    const setAccessToken = (data?: string) => (accessToken.value = data)
+    const setAccessToken = (data?: string) => {
+        console.log('setAccessToken called with:', data)
+        console.log('Current accessToken.value before setting:', accessToken.value)
+        accessToken.value = data
+        console.log('Current accessToken.value after setting:', accessToken.value)
+        return accessToken.value
+    }
     const setRefreshToken = (data?: string) => (refreshToken.value = data)
     const setUser = (data?: User) => (user.value = data)
     const updateAuthValidation = () => (lastAuthValidation.value = Date.now().toString())
@@ -45,7 +51,7 @@ export const useUserStore = defineStore('user', () => {
         }
         
         // Clear CSRF token cookie
-        const csrfToken = useCookie('XSRF-TOKEN')
+        const csrfToken = useCookie('XSRF-TOKEN-DASHBOARD')
         csrfToken.value = null
         
         // Clear auth validation timestamp
@@ -69,15 +75,35 @@ export const useUserStore = defineStore('user', () => {
         })
         if (data.value) {
             const loginData = (data.value as any).data
+            console.log('Login data received:', loginData)
+            console.log('Access token from response:', loginData.tokens.accessToken)
+            console.log('Access token BEFORE setting:', accessToken.value)
+            console.log('Access token cookie object:', accessToken)
+            
             setUser(loginData.admin)
             setAccessToken(loginData.tokens.accessToken)
             setRefreshToken(loginData.tokens.refreshToken)
             
+            console.log('Access token AFTER setting:', accessToken.value)
+            console.log('Access token cookie object after:', accessToken)
+            
+            // Force a small delay and check again
+            setTimeout(() => {
+                console.log('Access token after timeout:', accessToken.value)
+            }, 100)
+            
             // Fetch admin data after successful login
             try {
+                console.log('About to fetch admin data...')
+                console.log('Access token before admin data fetch:', accessToken.value)
+                // Wait a bit to ensure cookie is set
+                await new Promise(resolve => setTimeout(resolve, 50))
                 await resourcesStore.fetchAdminData()
+                console.log('Admin data fetched successfully')
+                console.log('Access token after admin data fetch:', accessToken.value)
             } catch (error) {
                 console.warn('Failed to fetch admin data after login:', error)
+                console.log('Access token after admin data fetch error:', accessToken.value)
                 // Don't block login if admin data fetch fails
             }
             
@@ -94,6 +120,7 @@ export const useUserStore = defineStore('user', () => {
             
             // Let middleware handle navigation - just ensure state is updated
             await nextTick()
+            await navigateTo(path as string ? path : '/')
             console.log('Login successful - middleware will handle navigation')
         }
         if (error.value) {

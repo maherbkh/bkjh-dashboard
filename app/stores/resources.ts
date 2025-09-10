@@ -119,7 +119,17 @@ export const useResourcesStore = defineStore('resources', () => {
       // Check if we have an access token before making the request
       const accessToken = useCookie('BKJH_ACCESS_TOKEN');
       if (!accessToken.value) {
-        throw new Error('No access token available for admin data request');
+        console.warn('No access token available for admin data request, skipping fetch');
+        return {
+          categories: {
+            ticketCategories: [],
+            eventCategories: [],
+          },
+          groups: [],
+          addresses: [],
+          companies: [],
+          occupations: [],
+        };
       }
       
       const { data: response, error } = await useApiFetch<AdminDataResponse>('/api/v1/dashboard/auth/admin-data');
