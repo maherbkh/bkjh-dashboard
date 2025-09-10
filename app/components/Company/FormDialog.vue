@@ -11,9 +11,9 @@ const { defineField, errors, setValues, handleSubmit, resetForm } = useCrud<Comp
 const [name, nameAttrs] = defineField('name');
 const [location, locationAttrs] = defineField('location');
 const [register, registerAttrs] = defineField('register');
-const [partner, partnerAttrs] = defineField('partner');
-const [partnerLocation, partnerLocationAttrs] = defineField('partnerLocation');
-const [partnerRegister, partnerRegisterAttrs] = defineField('partnerRegister');
+const [partnerName, partnerNameAttrs] = defineField('partner.name');
+const [partnerLocation, partnerLocationAttrs] = defineField('partner.location');
+const [partnerRegister, partnerRegisterAttrs] = defineField('partner.register');
 const [management, managementAttrs] = defineField('management');
 const [addressId, addressIdAttrs] = defineField('addressId');
 
@@ -61,9 +61,11 @@ watch(() => props.editingCompany, (company) => {
             name: company.name,
             location: company.location,
             register: company.register,
-            partner: company.partner,
-            partnerLocation: company.partnerLocation,
-            partnerRegister: company.partnerRegister,
+            partner: {
+                name: company.partner.name,
+                location: company.partner.location,
+                register: company.partner.register,
+            },
             management: company.management,
             addressId: company.address?.id || null,
         });
@@ -80,9 +82,11 @@ watch(() => props.dialogMode, (newMode, oldMode) => {
                     name: '',
                     location: '',
                     register: '',
-                    partner: '',
-                    partnerLocation: '',
-                    partnerRegister: '',
+                    partner: {
+                        name: '',
+                        location: '',
+                        register: '',
+                    },
                     management: '',
                     addressId: null,
                 },
@@ -101,9 +105,11 @@ watch(() => props.isDialogOpen, (isOpen) => {
                     name: '',
                     location: '',
                     register: '',
-                    partner: '',
-                    partnerLocation: '',
-                    partnerRegister: '',
+                    partner: {
+                        name: '',
+                        location: '',
+                        register: '',
+                    },
                     management: '',
                     addressId: null,
                 },
@@ -131,7 +137,7 @@ const addresses = computed(() => resourcesStore.addresses);
 
 <template>
     <Dialog v-model:open="isOpen">
-        <DialogContent class="sm:max-w-[600px]">
+        <DialogContent class="sm:max-w-[1024px]">
             <DialogHeader>
                 <DialogTitle>{{ dialogTitle }}</DialogTitle>
                 <DialogDescription>
@@ -173,13 +179,13 @@ const addresses = computed(() => resourcesStore.addresses);
                     />
 
                     <FormItemInput
-                        id="partner"
-                        v-model="partner"
-                        v-bind="partnerAttrs"
+                        id="partnerName"
+                        v-model="partnerName"
+                        v-bind="partnerNameAttrs"
                         class="md:col-span-6"
                         :title="$t('partner.singular')"
                         :placeholder="$t('partner.singular')"
-                        :errors="errors.partner ? [errors.partner] : []"
+                        :errors="errors['partner.name'] ? [errors['partner.name']] : []"
                         required
                     />
                     <FormItemInput
@@ -189,7 +195,7 @@ const addresses = computed(() => resourcesStore.addresses);
                         v-bind="partnerLocationAttrs"
                         :title="$t('partner.singular') + ' ' + $t('location.singular')"
                         :placeholder="$t('partner.singular') + ' ' + $t('location.singular')"
-                        :errors="errors.partnerLocation ? [errors.partnerLocation] : []"
+                        :errors="errors['partner.location'] ? [errors['partner.location']] : []"
                         required
                     />
 
@@ -200,7 +206,7 @@ const addresses = computed(() => resourcesStore.addresses);
                         v-bind="partnerRegisterAttrs"
                         :title="$t('partner.register')"
                         :placeholder="$t('partner.register')"
-                        :errors="errors.partnerRegister ? [errors.partnerRegister] : []"
+                        :errors="errors['partner.register'] ? [errors['partner.register']] : []"
                         required
                     />
 

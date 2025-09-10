@@ -29,14 +29,14 @@ const {
     resetForm,
     setValues,
 } = useCrud<Company, CompanyForm>({
-    crudPath: 'compnaies',
+    crudPath: 'companies',
     tenant: 'shared',
     formSchema: createCompanySchema(t),
 })
 
 // /api/v1/dashboard/shared/companies
 
-const selectedRows = ref<number[]>([])
+const selectedRows = ref<string[]>([])
 
 // Search and pagination state
 const searchQuery = ref('')
@@ -92,9 +92,11 @@ const handleEdit = async (company: Company) => {
         name: company.name,
         location: company.location,
         register: company.register,
-        partner: company.partner,
-        partnerLocation: company.partnerLocation,
-        partnerRegister: company.partnerRegister,
+        partner: {
+            name: company.partner.name,
+            location: company.partner.location,
+            register: company.partner.register,
+        },
         management: company.management,
         addressId: company.address?.id || null,
     })
@@ -171,7 +173,7 @@ const handleDialogClose = () => {
 // Delete handlers
 const { confirmDelete, confirmBulkDelete } = useConfirmDialog()
 
-async function handleDelete(companyId: number) {
+async function handleDelete(companyId: string) {
     const confirmed = await confirmDelete()
     if (!confirmed) return
 
@@ -268,7 +270,7 @@ const handleSelectAll = (checked: boolean) => {
     }
 }
 
-const handleRowSelected = (id: number, checked: boolean) => {
+const handleRowSelected = (id: string, checked: boolean) => {
     if (checked) {
         selectedRows.value.push(id)
     }
@@ -334,8 +336,8 @@ const handleRowSelected = (id: number, checked: boolean) => {
                         }"
                         :model-value="isAllSelected"
                         @toggle-sort="handleSortChange"
-                        @row-selected="(id: number | string, checked: boolean) => handleRowSelected(Number(id), checked)"
-                        @update:selected-rows="(rows: (string | number)[]) => selectedRows = rows.map(Number)"
+                        @row-selected="(id: number | string, checked: boolean) => handleRowSelected(String(id), checked)"
+                        @update:selected-rows="(rows: (string | number)[]) => selectedRows = rows.map(String)"
                         @update:model-value="handleSelectAll"
                     >
                         <template #cell-name="{ row }">
@@ -356,7 +358,7 @@ const handleRowSelected = (id: number, checked: boolean) => {
                                 class="text-sm"
                             >
                                 <div class="font-medium">
-                                    {{ row.address.street }} {{ row.address.number }}
+                                    {{ row.address.streetName }} {{ row.address.buildingNumber }}
                                 </div>
                                 <div class="text-muted-foreground">
                                     {{ row.address.postalCode }} {{ row.address.city }}

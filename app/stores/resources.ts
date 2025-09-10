@@ -8,6 +8,8 @@ interface Address {
   buildingNumber: string;
   postalCode: string;
   city: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface TicketCategory {
@@ -36,8 +38,18 @@ interface Company {
   name: string;
   location: string;
   register: string;
+  partner: {
+    name: string;
+    location: string;
+    register: string;
+  };
+  management: string;
+  addressId: string | null;
   position: number;
-  address: Address;
+  createdAt: string;
+  updatedAt: string;
+  address: Address | null;
+  groups: any[]; // CompanyGroup[] - simplified for now
 }
 
 interface Occupation {

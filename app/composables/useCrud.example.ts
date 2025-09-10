@@ -2,20 +2,30 @@ import type { Address, CrudItem, User } from '~/types';
 
 // Example 1: Using the generic useCrud for companies
 export type Company = CrudItem & {
-    id: number;
+    id: string;
     name: string;
-    email?: string;
-    phone?: string;
-    address?: Address;
-    created_at?: string;
-    updated_at?: string;
+    location: string;
+    register: string;
+    partner: {
+        name: string;
+        location: string;
+        register: string;
+    };
+    management: string;
+    addressId: string | null;
+    position: number;
+    createdAt: string;
+    updatedAt: string;
+    address: Address | null;
+    groups: any[];
 };
 
 export function useCompanyCrud() {
     const { t } = useI18n();
 
     return useCrud<Company>({
-        apiSlug: 'companies',
+        crudPath: 'companies',
+        tenant: 'shared',
         translations: {
             add_success: t('action.message.add_successfully', { model: t('company.singular') }),
             edit_success: t('action.message.edit_successfully', { model: t('company.singular') }),

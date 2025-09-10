@@ -138,32 +138,51 @@ export type TicketCrudForm = z.infer<ReturnType<typeof createTicketCrudSchema>>;
 export type TicketSubmissionForm = z.infer<ReturnType<typeof createTicketSubmissionSchema>>;
 
 export type Company = {
-    id: number;
+    id: string;
     name: string;
     location: string;
     register: string;
-    partner: string;
-    partnerLocation: string;
-    partnerRegister: string;
+    partner: {
+        name: string;
+        location: string;
+        register: string;
+    };
     management: string;
-    position?: number;
-    address?: Address;
-    groups?: Group[];
-    slug?: string;
-    logo?: string;
+    addressId: string | null;
+    position: number;
+    createdAt: string; // ISO date string
+    updatedAt: string; // ISO date string
+    address: Address | null;
+    groups: CompanyGroup[];
+};
+
+export type CompanyGroup = {
+    id: string;
+    companyId: string;
+    groupId: string;
     createdAt: string;
     updatedAt: string;
+    group: {
+        id: string;
+        name: string;
+        isActive: boolean;
+        addressId: string | null;
+        createdAt: string;
+        updatedAt: string;
+    };
 };
 
 export type CompanyForm = {
     name: string;
     location: string;
     register: string;
-    partner: string;
-    partnerLocation: string;
-    partnerRegister: string;
+    partner: {
+        name: string;
+        location: string;
+        register: string;
+    };
     management: string;
-    addressId?: number | null;
+    addressId?: string | null;
 };
 
 export type Group = {
@@ -310,13 +329,11 @@ export type NavigationData = {
 };
 
 export type Address = {
-    id: number;
-    street: string;
-    number: string;
+    id: string;
+    streetName: string;
+    buildingNumber: string;
     postalCode: string;
     city: string;
-    position?: number;
-    fullAddress?: string;
     createdAt: string;
     updatedAt: string;
 };

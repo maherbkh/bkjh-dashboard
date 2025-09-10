@@ -63,18 +63,19 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
                 ...additionalParams,
             };
 
-            const { data, status } = await useApiFetch<PaginatedResponse<T>>(buildApiPath(), {
+            const { data, status } = await useApiFetch(buildApiPath(), {
                 query: params,
                 key: `${tenant}-${crudPath}-list-${page}-${perPage}-${JSON.stringify(additionalParams)}`,
             });
 
             if (status.value === 'success' && data.value) {
-                items.value = data.value.data.data;
+                const responseData = (data.value as any).data;
+                items.value = responseData.data;
                 pagination.value = {
-                    currentPage: data.value.data.meta.currentPage,
-                    lastPage: data.value.data.meta.lastPage,
-                    perPage: data.value.data.meta.perPage,
-                    total: data.value.data.meta.total,
+                    currentPage: responseData.meta.currentPage,
+                    lastPage: responseData.meta.lastPage,
+                    perPage: responseData.meta.perPage,
+                    total: responseData.meta.total,
                 };
             }
 
@@ -104,9 +105,14 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
         error.value = null;
 
         try {
-            const { data, status } = await useApiFetch<T>(buildApiPath(`/${id}`), {
+            const { data, status } = await useApiFetch(buildApiPath(`/${id}`), {
                 key: `${tenant}-${crudPath}-item-${id}`,
             });
+
+            if (status.value === 'success' && data.value) {
+                const responseData = (data.value as any).data;
+                return { data: responseData, status: status.value };
+            }
 
             return { data: data.value, status: status.value };
         }
@@ -134,7 +140,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
         error.value = null;
 
         try {
-            const { status, error: fetchError } = await useApiFetch<T>(buildApiPath(), {
+            const { data, status, error: fetchError } = await useApiFetch(buildApiPath(), {
                 method: 'POST',
                 body: itemData as any,
             });
@@ -142,6 +148,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
             if (status.value === 'success') {
                 toast.success(defaultTranslations.add_success);
                 await refresh();
+                return { data: data.value, status: status.value };
             }
             else if (fetchError.value) {
                 // Handle validation errors or other backend errors
@@ -179,14 +186,15 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
         error.value = null;
 
         try {
-            const { status, error: fetchError } = await useApiFetch(buildApiPath(`/${id}`), {
-                method: 'PUT',
+            const { data, status, error: fetchError } = await useApiFetch(buildApiPath(`/${id}`), {
+                method: 'PATCH',
                 body: itemData as any,
             });
 
             if (status.value === 'success') {
                 toast.success(defaultTranslations.edit_success);
                 await refresh();
+                return { data: data.value, status: status.value };
             }
             else if (fetchError.value) {
                 // Handle validation errors or other backend errors
@@ -219,21 +227,19 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
     /**
    * Delete an item
    */
-    /**
-   * Delete an item
-   */
     const deleteItem = async (id: string | number) => {
         loading.value = true;
         error.value = null;
 
         try {
-            const { status } = await useApiFetch(buildApiPath(`/${id}`), {
+            const { data, status } = await useApiFetch(buildApiPath(`/${id}`), {
                 method: 'DELETE',
             });
 
             if (status.value === 'success') {
                 toast.success(defaultTranslations.delete_success);
                 await refresh();
+                return { data: data.value, status: status.value };
             }
         }
         catch (err) {
@@ -260,7 +266,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
         error.value = null;
 
         try {
-            const { status } = await useApiFetch(buildApiPath(), {
+            const { data, status } = await useApiFetch(buildApiPath(), {
                 method: 'DELETE',
                 body: { ids },
             });
@@ -268,6 +274,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
             if (status.value === 'success') {
                 toast.success(defaultTranslations.delete_success);
                 await refresh();
+                return { data: data.value, status: status.value };
             }
         }
         catch (err) {
@@ -308,10 +315,10 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
         pagination,
         fetchItems,
         fetchItem,
-        createItem: createItem as (itemData: FormType) => Promise<void>,
-        updateItem: updateItem as (id: string | number, itemData: FormType) => Promise<void>,
-        deleteItem,
-        deleteManyItems,
+        createItem: createItem as (itemData: FormType) => Promise<{ data: any; status: string }>,
+        updateItem: updateItem as (id: string | number, itemData: FormType) => Promise<{ data: any; status: string }>,
+        deleteItem: deleteItem as (id: string | number) => Promise<{ data: any; status: string }>,
+        deleteManyItems: deleteManyItems as (ids: (string | number)[]) => Promise<{ data: any; status: string }>,
         refresh,
         handleSubmit,
         defineField,
