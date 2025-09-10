@@ -12,8 +12,10 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
     if (userStore.accessToken && shouldValidate) {
         try {
+            console.log('Auth middleware: Validating authentication for', to.fullPath)
             const isAuthenticated = await userStore.fetchAuthUser()
             if (!isAuthenticated) {
+                console.log('Auth middleware: Authentication failed, redirecting to login')
                 // Authentication failed, clear tokens and redirect to login
                 userStore.setAccessToken()
                 userStore.setRefreshToken()
@@ -23,15 +25,18 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
                     query: { redirect: to.fullPath },
                 })
             } else {
-                // Update last validation timestamp
-                lastValidation.value = now.toString()
+                console.log('Auth middleware: Authentication successful')
+                // Auth validation timestamp is now managed by user store
             }
         }
         catch (err) {
+            console.log('Auth middleware: Auth check error, redirecting to login:', err)
             // Clear invalid tokens and redirect to login
             userStore.setAccessToken()
             userStore.setRefreshToken()
             userStore.setUser()
+            // Update validation timestamp to prevent infinite retries
+            lastValidation.value = now.toString()
             return navigateTo({
                 path: '/login',
                 query: { redirect: to.fullPath },
@@ -41,11 +46,14 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
     // If still no user or access token, redirect to login
     if (!userStore.user || !userStore.accessToken) {
+        console.log('Auth middleware: No user or token, redirecting to login')
         return navigateTo({
             path: '/login',
             query: { redirect: to.fullPath },
         })
     }
+    
+    console.log('Auth middleware: User authenticated, allowing access to', to.fullPath)
 
     // User is authenticated, allow access
 })

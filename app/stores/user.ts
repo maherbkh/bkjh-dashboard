@@ -9,6 +9,7 @@ export const useUserStore = defineStore('user', () => {
     const user = ref<User | undefined>()
     const accessToken = useCookie('BKJH_ACCESS_TOKEN', { maxAge: 60 * 60 * 24 })
     const refreshToken = useCookie('BKJH_REFRESH_TOKEN', { maxAge: 60 * 60 * 24 * 7 }) // 7 days for refresh token
+    const lastAuthValidation = useCookie('last_auth_validation', { maxAge: 60 * 5 }) // 5 minutes
     
     // Resources store instance - declared once for reuse
     const resourcesStore = useResourcesStore()
@@ -16,6 +17,8 @@ export const useUserStore = defineStore('user', () => {
     const setAccessToken = (data?: string) => (accessToken.value = data)
     const setRefreshToken = (data?: string) => (refreshToken.value = data)
     const setUser = (data?: User) => (user.value = data)
+    const updateAuthValidation = () => (lastAuthValidation.value = Date.now().toString())
+    const clearAuthValidation = () => (lastAuthValidation.value = null)
     
     // Legacy token getter for backward compatibility
     const token = computed(() => accessToken.value)
@@ -45,6 +48,9 @@ export const useUserStore = defineStore('user', () => {
         // Clear CSRF token cookie
         const csrfToken = useCookie('XSRF-TOKEN')
         csrfToken.value = null
+        
+        // Clear auth validation timestamp
+        clearAuthValidation()
         toast.success(t('global.goodbye'), {
             description: t('auth.logout_success'),
             duration: 3000,
@@ -80,6 +86,9 @@ export const useUserStore = defineStore('user', () => {
                 duration: 5000,
             })
 
+            // Update auth validation timestamp
+            updateAuthValidation()
+            
             // Wait 200ms to ensure cookies are properly set
             await new Promise(resolve => setTimeout(resolve, 200))
             
@@ -154,11 +163,16 @@ export const useUserStore = defineStore('user', () => {
                 // Don't block auth check if admin data fetch fails
             }
             
+            // Update auth validation timestamp on successful check
+            updateAuthValidation()
+            
             return true
         }
         if (error && error.value) {
+            // Clear user data but don't call logout() to avoid unwanted redirects
             setUser()
-            await logout()
+            setAccessToken()
+            setRefreshToken()
             return false
         }
         return false
@@ -279,6 +293,9 @@ export const useUserStore = defineStore('user', () => {
         setAccessToken()
         setRefreshToken()
         setUser()
+        
+        // Clear auth validation timestamp
+        clearAuthValidation()
         
         // Clear all resources data
         try {

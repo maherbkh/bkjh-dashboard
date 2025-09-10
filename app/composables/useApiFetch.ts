@@ -120,14 +120,6 @@ export function useApiFetch<T = unknown>(
             if (csrfToken && requestOptions.headers) {
                 (requestOptions.headers as unknown as Record<string, string>)['X-CSRF-TOKEN'] = csrfToken;
             }
-            
-            if (process.env.NODE_ENV === 'development') {
-                console.log('API Request:', {
-                    url: request,
-                    headers: requestOptions.headers,
-                    method: requestOptions.method || 'GET'
-                });
-            }
         },
     });
 }
