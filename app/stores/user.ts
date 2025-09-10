@@ -9,6 +9,9 @@ export const useUserStore = defineStore('user', () => {
     const user = ref<User | undefined>()
     const accessToken = useCookie('BKJH_ACCESS_TOKEN', { maxAge: 60 * 60 * 24 })
     const refreshToken = useCookie('BKJH_REFRESH_TOKEN', { maxAge: 60 * 60 * 24 * 7 }) // 7 days for refresh token
+    
+    // Resources store instance - declared once for reuse
+    const resourcesStore = useResourcesStore()
 
     const setAccessToken = (data?: string) => (accessToken.value = data)
     const setRefreshToken = (data?: string) => (refreshToken.value = data)
@@ -31,6 +34,13 @@ export const useUserStore = defineStore('user', () => {
         setAccessToken()
         setRefreshToken()
         setUser()
+        
+        // Clear all resources data
+        try {
+            resourcesStore.clearAll()
+        } catch (error) {
+            console.warn('Failed to clear resources data:', error)
+        }
         
         // Clear CSRF token cookie
         const csrfToken = useCookie('XSRF-TOKEN')
@@ -56,7 +66,15 @@ export const useUserStore = defineStore('user', () => {
             setUser(loginData.admin)
             setAccessToken(loginData.tokens.accessToken)
             setRefreshToken(loginData.tokens.refreshToken)
-            // Note: Permission fetching removed - using CRUD directly for resources
+            
+            // Fetch admin data after successful login
+            try {
+                await resourcesStore.fetchAdminData()
+            } catch (error) {
+                console.warn('Failed to fetch admin data after login:', error)
+                // Don't block login if admin data fetch fails
+            }
+            
             toast.success(t('global.welcome'), {
                 description: t('auth.login_success'),
                 duration: 5000,
@@ -118,6 +136,14 @@ export const useUserStore = defineStore('user', () => {
             // Update access token if a new one is provided
             if (responseData.admin.currentToken) {
                 setAccessToken(responseData.admin.currentToken)
+            }
+            
+            // Fetch admin data after successful auth check
+            try {
+                await resourcesStore.fetchAdminData()
+            } catch (error) {
+                console.warn('Failed to fetch admin data after auth check:', error)
+                // Don't block auth check if admin data fetch fails
             }
             
             return true
@@ -245,6 +271,14 @@ export const useUserStore = defineStore('user', () => {
         setAccessToken()
         setRefreshToken()
         setUser()
+        
+        // Clear all resources data
+        try {
+            resourcesStore.clearAll()
+        } catch (error) {
+            console.warn('Failed to clear resources data:', error)
+        }
+        
         toast.success(t('global.goodbye'), {
             description: t('auth.logout_all_success'),
             duration: 3000,
