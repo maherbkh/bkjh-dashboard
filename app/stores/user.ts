@@ -83,11 +83,19 @@ export const useUserStore = defineStore('user', () => {
             // Wait 200ms to ensure cookies are properly set
             await new Promise(resolve => setTimeout(resolve, 200))
             
+            // Force navigation after login - use nextTick to ensure state is updated
+            await nextTick()
+            
+            console.log('Login successful, attempting navigation...')
+            
+            // Force a full page reload to ensure all state is properly initialized
             if (path) {
-                navigateTo(path)
+                console.log('Navigating to custom path:', path)
+                window.location.href = path as string
             }
             else {
-                navigateTo('/')
+                console.log('Navigating to home page')
+                window.location.href = '/'
             }
         }
         if (error.value) {

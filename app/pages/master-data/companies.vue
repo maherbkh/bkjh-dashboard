@@ -179,11 +179,7 @@ async function handleDelete(companyId: string) {
 
     try {
         await deleteItem(companyId)
-        await fetchItems(currentPage.value, perPage.value, {
-            search: searchQuery.value,
-            sort_by: sortBy.value,
-            sort_dir: sortDir.value,
-        })
+        // No need to manually refresh - useCrud handles it automatically
     }
     catch (error) {
         console.error('Error deleting company:', error)
@@ -199,11 +195,7 @@ async function handleBulkDelete() {
     try {
         await deleteManyItems(selectedRows.value)
         selectedRows.value = []
-        await fetchItems(currentPage.value, perPage.value, {
-            search: searchQuery.value,
-            sort_by: sortBy.value,
-            sort_dir: sortDir.value,
-        })
+        // No need to manually refresh - useCrud handles it automatically
     }
     catch (error) {
         console.error('Error deleting companies:', error)
