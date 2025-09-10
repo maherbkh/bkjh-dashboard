@@ -131,12 +131,6 @@ export const useNavigationData = (): ComputedRef<{
                         icon: 'solar:users-group-rounded-outline',
                         apps: ['support'],
                     },
-                    {
-                        title: t('role.plural'),
-                        url: '/settings/roles',
-                        icon: 'solar:shield-keyhole-outline',
-                        apps: ['support'],
-                    },
                 ],
             },
             {

@@ -260,7 +260,7 @@ const handleSelectAll = (checked: boolean) => {
             @add-new="openAddDialog"
         >
             <template #actions>
-                <Button
+                <LazyButton
                     v-if="selectedRows.length > 0"
                     class="cursor-pointer"
                     variant="destructive"
@@ -271,7 +271,7 @@ const handleSelectAll = (checked: boolean) => {
                         name="solar:trash-bin-minimalistic-outline"
                     />
                     {{ $t('action.delete_all') }}
-                </Button>
+                </LazyButton>
             </template>
         </PageHeaderActions>
         <div>
@@ -327,7 +327,7 @@ const handleSelectAll = (checked: boolean) => {
 
                         <template #cell-actions="{ row }">
                             <div class="flex justify-end gap-2">
-                                <Button
+                                <LazyButton
                                     :title="$t('action.edit')"
                                     variant="ghost"
                                     size="icon"
@@ -338,8 +338,8 @@ const handleSelectAll = (checked: boolean) => {
                                         name="solar:pen-new-square-outline"
                                         class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
                                     />
-                                </Button>
-                                <Button
+                                </LazyButton>
+                                <LazyButton
                                     :title="$t('action.delete')"
                                     variant="ghost"
                                     size="icon"
@@ -349,7 +349,7 @@ const handleSelectAll = (checked: boolean) => {
                                         name="solar:trash-bin-trash-outline"
                                         class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
                                     />
-                                </Button>
+                                </LazyButton>
                             </div>
                         </template>
                     </PageTable>

@@ -84,7 +84,7 @@ const userStore = useUserStore()
 // Form submission handlers
 const saveProfile = handleProfileSubmit(async (values) => {
     try {
-        const { data } = await useApiFetch('/api/auth/profile', {
+        const { data } = await useApiFetch('/api/v1/auth/profile', {
             method: 'PUT',
             body: values,
         })
@@ -102,7 +102,7 @@ const saveProfile = handleProfileSubmit(async (values) => {
 const changePassword = handlePasswordSubmit(async (values) => {
     console.log('Form submitted with values:', values)
     try {
-        const { data } = await useApiFetch('/api/auth/change-password', {
+        const { data } = await useApiFetch('/api/v1/auth/change-password', {
             method: 'POST',
             body: values,
         })

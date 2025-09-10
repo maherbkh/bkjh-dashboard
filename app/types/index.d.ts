@@ -11,33 +11,42 @@ export type Credentials = {
 };
 
 export type User = {
-    id: number;
+    id: string; // UUID from API
+    email: string;
     firstName: string;
     lastName: string;
-    email: string;
-    username: string;
-    name: string;
-    isActive: boolean;
     isSuperAdmin: boolean;
-    role_id?: number;
+    isActive: boolean;
+    lastLoginAt?: string; // From login response
+    occupation?: string | null; // From login response
+    apps: string[]; // Available apps: 'support', 'academy', etc.
+    name?: string;
     avatar?: string;
-    role?: string;
-    status?: 'active' | 'inactive';
-    createdAt: string;
-    updatedAt: string;
-    created_at?: string;
-    updated_at?: string;
+    lastLoginAt?: string; // From login response
+    occupation?: string | null; // From login response
 };
 
 export type LoginData = {
-    user: User;
-    token?: string;
+    tokens: {
+        accessToken: string;
+        refreshToken: string;
+        expiresIn?: number;
+    };
+    admin: User; // The admin object is the user data
 };
 
 export type LoginResponse = {
-    status: string;
+    status: boolean;
     message: string;
-    data: LoginData | User;
+    data: LoginData;
+};
+
+export type CheckAuthResponse = {
+    status: boolean;
+    message: string;
+    data: {
+        admin: User;
+    };
 };
 
 export type ResetPasswordForm = {

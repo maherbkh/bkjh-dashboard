@@ -32,7 +32,7 @@
     "embla-carousel-vue": "^8.6.0",
     "eslint": "^9.34.0",
     "lucide-vue-next": "^0.542.0",
-    "nuxt": "^4.0.3",
+    "nuxt": "^4.1.1",
     "pinia": "^3.0.3",
     "reka-ui": "^2.4.1",
     "shadcn-nuxt": "^2.2.0",
@@ -48,8 +48,10 @@
   "devDependencies": {
     "@iconify-json/hugeicons": "^1.2.14",
     "@iconify-json/solar": "^1.2.4",
+    "@types/node": "^24.3.1",
     "cross-env": "^10.0.0",
     "rimraf": "^6.0.1",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vue-tsc": "^3.0.6"
   }
 }

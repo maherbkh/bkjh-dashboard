@@ -1,4 +1,4 @@
-type AppSlugType = 'support' | 'academy'
+type AppSlugType = 'support' | 'academy' | 'dashboard'
 
 export const useAppStore = defineStore('app', () => {
     // App state stored in cookie
@@ -15,6 +15,7 @@ export const useAppStore = defineStore('app', () => {
     // Getters
     const isSupport = computed(() => appSlug.value === 'support')
     const isAcademy = computed(() => appSlug.value === 'academy')
+    const isDashboard = computed(() => appSlug.value === 'dashboard')
 
     return {
         // State
@@ -23,6 +24,7 @@ export const useAppStore = defineStore('app', () => {
         // Getters
         isSupport,
         isAcademy,
+        isDashboard,
         
         // Actions
         setAppSlug,

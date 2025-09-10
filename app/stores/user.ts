@@ -7,37 +7,64 @@ export const useUserStore = defineStore('user', () => {
     const { t } = useNuxtApp().$i18n
 
     const user = ref<User | undefined>()
-    const token = useCookie('BKJH_AUTH_TOKEN', { maxAge: 60 * 60 * 24 })
+    const accessToken = useCookie('BKJH_ACCESS_TOKEN', { maxAge: 60 * 60 * 24 })
+    const refreshToken = useCookie('BKJH_REFRESH_TOKEN', { maxAge: 60 * 60 * 24 * 7 }) // 7 days for refresh token
 
-    const setToken = (data?: string) => (token.value = data)
+    const setAccessToken = (data?: string) => (accessToken.value = data)
+    const setRefreshToken = (data?: string) => (refreshToken.value = data)
     const setUser = (data?: User) => (user.value = data)
+    
+    // Legacy token getter for backward compatibility
+    const token = computed(() => accessToken.value)
+    
+    // Legacy setToken function for backward compatibility
+    const setToken = (data?: string) => setAccessToken(data)
 
     const logout = async () => {
-        await useApiFetch('/api/auth/logout', { method: 'POST' })
-        setToken()
+        try {
+            await useApiFetch('/api/v1/dashboard/auth/logout', { method: 'POST' })
+        } catch (error) {
+            // Continue with logout even if API call fails
+            console.warn('Logout API call failed:', error)
+        }
+        
+        setAccessToken()
+        setRefreshToken()
         setUser()
+        
+        // Clear CSRF token cookie
+        const csrfToken = useCookie('XSRF-TOKEN')
+        csrfToken.value = null
         toast.success(t('global.goodbye'), {
             description: t('auth.logout_success'),
             duration: 3000,
         })
+        
+        // Wait 200ms to ensure cookies are properly cleared
+        await new Promise(resolve => setTimeout(resolve, 200))
+        
         navigateTo('/login')
     }
 
     async function login(credentials: Credentials, path?: LocationQueryValue) {
-        await useApiFetch('/sanctum/csrf-cookie')
-        const { data, error } = await useApiFetch(`/api/auth/login`, {
+        const { data, error } = await useApiFetch(`/api/v1/dashboard/auth/login`, {
             method: 'POST',
             body: credentials,
         })
         if (data.value) {
-            setUser(((data.value as LoginResponse).data as LoginData).user)
-            setToken(((data.value as LoginResponse).data as LoginData).token)
+            const loginData = (data.value as any).data
+            setUser(loginData.admin)
+            setAccessToken(loginData.tokens.accessToken)
+            setRefreshToken(loginData.tokens.refreshToken)
             // Note: Permission fetching removed - using CRUD directly for resources
             toast.success(t('global.welcome'), {
                 description: t('auth.login_success'),
                 duration: 5000,
             })
 
+            // Wait 200ms to ensure cookies are properly set
+            await new Promise(resolve => setTimeout(resolve, 200))
+            
             if (path) {
                 navigateTo(path)
             }
@@ -79,25 +106,41 @@ export const useUserStore = defineStore('user', () => {
         }
     }
     const fetchAuthUser = async () => {
-        const { data: res, error } = await useApiFetch(`/api/auth/user`, {
+        // Use the auth check endpoint to verify authentication and get updated user data
+        const { data: res, error } = await useApiFetch(`/api/v1/dashboard/auth/check`, {
             lazy: true,
-            transform: res => (res as LoginResponse).data as User,
         })
         if (res.value) {
-            setUser(res.value as User)
+            const responseData = (res.value as any).data
+            // Update user data with fresh information from server
+            setUser(responseData.admin)
+            
+            // Update access token if a new one is provided
+            if (responseData.admin.currentToken) {
+                setAccessToken(responseData.admin.currentToken)
+            }
+            
+            return true
         }
         if (error && error.value) {
             setUser()
             await logout()
+            return false
         }
+        return false
     }
 
     const refresh = async () => {
-        const { data, error } = await useApiFetch('/api/auth/refresh', {
+        const { data, error } = await useApiFetch('/api/v1/dashboard/auth/refresh', {
             method: 'POST',
+            body: {
+                refreshToken: refreshToken.value
+            }
         })
         if (data.value) {
-            setToken(((data.value as LoginResponse).data as LoginData).token)
+            const refreshData = (data.value as any).data
+            setAccessToken(refreshData.tokens.accessToken)
+            setRefreshToken(refreshData.tokens.refreshToken)
             toast.success(t('auth.token_refreshed'), {
                 description: t('auth.session_refreshed'),
                 duration: 3000,
@@ -114,7 +157,7 @@ export const useUserStore = defineStore('user', () => {
     }
 
     const forgotPassword = async (email: string) => {
-        const { data, error } = await useApiFetch('/api/auth/forgot-password', {
+        const { data, error } = await useApiFetch('/api/v1/dashboard/auth/request-reset', {
             method: 'POST',
             body: { email },
         })
@@ -137,16 +180,25 @@ export const useUserStore = defineStore('user', () => {
     }
 
     const resetPassword = async (resetData: ResetPasswordForm) => {
-        const { data, error } = await useApiFetch('/api/auth/reset-password', {
+        const { data, error } = await useApiFetch('/api/v1/dashboard/auth/verify-reset', {
             method: 'POST',
             body: resetData,
         })
         if (data.value) {
+            const resetResponse = (data.value as any).data
+            // Reset password API returns admin and tokens in nested structure
+            if (resetResponse.admin) {
+                setUser(resetResponse.admin)
+            }
+            if (resetResponse.tokens) {
+                setAccessToken(resetResponse.tokens.accessToken)
+                setRefreshToken(resetResponse.tokens.refreshToken)
+            }
             toast.success(t('auth.password_reset'), {
                 description: t('auth.password_reset_success'),
                 duration: 5000,
             })
-            navigateTo('/login')
+            navigateTo('/')
             return true
         }
         if (error.value) {
@@ -160,5 +212,141 @@ export const useUserStore = defineStore('user', () => {
         return false
     }
 
-    return { user, token, setToken, setUser, fetchAuthUser, logout, login, refresh, forgotPassword, resetPassword }
+    // Get CSRF token for forms
+    const getCsrfToken = async () => {
+        try {
+            const { data: csrfData } = await useApiFetch('/api/v1/dashboard/auth/csrf-token')
+            return (csrfData.value as any)?.data?.csrfToken
+        } catch (error) {
+            console.warn('Failed to fetch CSRF token:', error)
+            return null
+        }
+    }
+
+    // Get comprehensive admin data
+    const getAdminData = async () => {
+        try {
+            const { data: adminData } = await useApiFetch('/api/v1/dashboard/auth/admin-data')
+            return (adminData.value as any)?.data
+        } catch (error) {
+            console.error('Failed to fetch admin data:', error)
+            throw error
+        }
+    }
+
+    // Logout all sessions
+    const logoutAll = async () => {
+        try {
+            await useApiFetch('/api/v1/dashboard/auth/logout-all', { method: 'POST' })
+        } catch (error) {
+            console.warn('Logout all API call failed:', error)
+        }
+        
+        setAccessToken()
+        setRefreshToken()
+        setUser()
+        toast.success(t('global.goodbye'), {
+            description: t('auth.logout_all_success'),
+            duration: 3000,
+        })
+        
+        // Wait 200ms to ensure cookies are properly cleared
+        await new Promise(resolve => setTimeout(resolve, 200))
+        
+        navigateTo('/login')
+    }
+
+    // Change password
+    const changePassword = async (currentPassword: string, newPassword: string) => {
+        try {
+            const { data, error } = await useApiFetch('/api/v1/dashboard/auth/change-password', {
+                method: 'POST',
+                body: { currentPassword, newPassword }
+            })
+            
+            if (data.value) {
+                toast.success(t('auth.password_changed'), {
+                    description: t('auth.password_change_success'),
+                    duration: 5000,
+                })
+                return true
+            }
+            
+            if (error.value) {
+                const description = error.value.data?.message || error.value.message || t('auth.password_change_failed')
+                toast.error(t('global.error'), {
+                    description,
+                    duration: 5000,
+                })
+                return false
+            }
+        } catch (error) {
+            toast.error(t('global.error'), {
+                description: t('auth.password_change_failed'),
+                duration: 5000,
+            })
+            return false
+        }
+        return false
+    }
+
+    // Update profile
+    const updateProfile = async (profileData: any) => {
+        try {
+            const { data, error } = await useApiFetch('/api/v1/dashboard/auth/profile', {
+                method: 'PUT',
+                body: profileData
+            })
+            
+            if (data.value) {
+                const updatedUser = (data.value as any).data?.admin
+                if (updatedUser) {
+                    setUser(updatedUser)
+                }
+                toast.success(t('auth.profile_updated'), {
+                    description: t('auth.profile_update_success'),
+                    duration: 5000,
+                })
+                return true
+            }
+            
+            if (error.value) {
+                const description = error.value.data?.message || error.value.message || t('auth.profile_update_failed')
+                toast.error(t('global.error'), {
+                    description,
+                    duration: 5000,
+                })
+                return false
+            }
+        } catch (error) {
+            toast.error(t('global.error'), {
+                description: t('auth.profile_update_failed'),
+                duration: 5000,
+            })
+            return false
+        }
+        return false
+    }
+
+    return { 
+        user, 
+        token, 
+        accessToken, 
+        refreshToken,
+        setToken, 
+        setAccessToken,
+        setRefreshToken,
+        setUser, 
+        fetchAuthUser, 
+        logout, 
+        login, 
+        refresh, 
+        forgotPassword, 
+        resetPassword,
+        getCsrfToken,
+        getAdminData,
+        logoutAll,
+        changePassword,
+        updateProfile
+    }
 })

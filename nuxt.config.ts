@@ -5,6 +5,11 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   ssr: false, // Disable SSR this project uses CSR
+  runtimeConfig: {
+    public: {
+      apiUrl: process.env.NUXT_PUBLIC_API_URL || 'http://api.backhaus.test:3055'
+    }
+  },
   // Reduce development warnings
   nitro: {
     experimental: {
@@ -13,9 +18,6 @@ export default defineNuxtConfig({
     compressPublicAssets: true,
     minify: true,
     routeRules: {
-        '/backend/**': {
-            proxy: `${process.env.API_URL ?? 'https://api.backhaus.de'}/**`,
-        },
         '/get-geoip/**': {
             proxy: `http://ip-api.com/json/**`,
         },
