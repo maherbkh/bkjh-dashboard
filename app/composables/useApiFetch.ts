@@ -1,12 +1,15 @@
 import { useRequestHeaders, useFetch, useCookie } from 'nuxt/app';
 import { toast } from 'vue-sonner';
 import type { UseFetchOptions } from 'nuxt/app';
+import { useUserStore } from '~/stores/user';
+import { useGlobalErrorHandler } from '~/composables/useGlobalErrorHandler';
 
 export function useApiFetch<T = unknown>(
     path: string,
     options: UseFetchOptions<T> = {},
 ) {
     const config = useRuntimeConfig()
+    const { handleError } = useGlobalErrorHandler()
     // Helper function to get CSRF token for state-changing requests
     const getCSRFToken = async () => {
         const method = String(options.method || 'GET').toUpperCase();
@@ -20,8 +23,8 @@ export function useApiFetch<T = unknown>(
                     headers: {
                         'accept': 'application/json',
                         'x-requested-with': 'XMLHttpRequest',
-                        'referer': process.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
-                        'origin': process.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
+                        'referer': import.meta.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
+                        'origin': import.meta.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
                     }
                 });
                 return (csrfData as any)?.data?.csrfToken;
@@ -37,8 +40,8 @@ export function useApiFetch<T = unknown>(
     const headers: Record<string, string> = {
         accept: 'application/json',
         'x-requested-with': 'XMLHttpRequest',
-        referer: process.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
-        origin: process.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
+        referer: import.meta.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
+        origin: import.meta.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
     };
 
     // Add Content-Type header for requests with body
@@ -56,7 +59,7 @@ export function useApiFetch<T = unknown>(
     }
 
     // Append server-side headers
-    if (process.server) {
+    if (import.meta.server) {
         Object.assign(headers, useRequestHeaders(['cookie']));
     }
     
@@ -69,49 +72,10 @@ export function useApiFetch<T = unknown>(
             ...headers,
             ...(options.headers as Record<string, string>),
         },
-        onResponseError({ response }) {
-            // Handle 401 Unauthorized - attempt token refresh
-            if (response.status === 401 && process.client) {
-                const refreshToken = useCookie('BKJH_REFRESH_TOKEN');
-                if (refreshToken.value) {
-                    // Attempt to refresh token
-                    useApiFetch('/api/v1/dashboard/auth/refresh', {
-                        method: 'POST',
-                        body: { refreshToken: refreshToken.value }
-                    }).then(({ data: refreshData, error: refreshError }) => {
-                        if (refreshData.value && !refreshError.value) {
-                            const refreshResponse = refreshData.value as any;
-                            if (refreshResponse.data && refreshResponse.data.tokens) {
-                                const accessToken = useCookie('BKJH_ACCESS_TOKEN');
-                                const newRefreshToken = useCookie('BKJH_REFRESH_TOKEN');
-                                accessToken.value = refreshResponse.data.tokens.accessToken;
-                                newRefreshToken.value = refreshResponse.data.tokens.refreshToken;
-                                
-                                // Show success notification
-                                toast.success('Session refreshed', {
-                                    description: 'Your session has been automatically renewed',
-                                    duration: 3000,
-                                });
-                            }
-                        } else {
-                            // Refresh failed, redirect to login
-                            toast.error('Session expired', {
-                                description: 'Please login again',
-                                duration: 4000,
-                            });
-                            navigateTo('/login');
-                        }
-                    }).catch(() => {
-                        toast.error('Session expired', {
-                            description: 'Please login again',
-                            duration: 4000,
-                        });
-                        navigateTo('/login');
-                    });
-                } else {
-                    // No refresh token, redirect to login
-                    navigateTo('/login');
-                }
+        onResponseError({ response, error }) {
+            // Use global error handler for all error responses
+            if (import.meta.client) {
+                handleError(error);
             }
         },
         async onRequest({ request, options: requestOptions }) {

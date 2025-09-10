@@ -242,9 +242,9 @@ useSeoMeta({
                                 required
                             />
                             <div class="flex justify-end">
-                                <Button type="submit">
+                                <LazyButton type="submit">
                                     {{ t('action.save') }}
-                                </Button>
+                                </LazyButton>
                             </div>
                         </form>
                     </CardContent>
@@ -290,9 +290,9 @@ useSeoMeta({
                                 required
                             />
                             <div class="flex justify-end">
-                                <Button type="submit">
+                                <LazyButton type="submit">
                                     {{ t('action.update') }}
-                                </Button>
+                                </LazyButton>
                             </div>
                         </form>
                     </CardContent>
@@ -338,9 +338,9 @@ useSeoMeta({
                         </div>
 
                         <div class="flex justify-end">
-                            <Button @click="savePreferences">
+                            <LazyButton @click="savePreferences">
                                 {{ t('action.save') }}
-                            </Button>
+                            </LazyButton>
                         </div>
                     </CardContent>
                 </Card>
