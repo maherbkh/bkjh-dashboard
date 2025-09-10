@@ -22,8 +22,6 @@ export function useAlertDialog() {
     const state = globalState;
 
     const showAlertDialog = (options: AlertDialogOptions = {}): Promise<boolean> => {
-        console.log('showAlertDialog called', options);
-        console.log('Current state before update:', { ...state });
         return new Promise((resolve) => {
             state.title = options.title || t('global.confirm');
             state.description = options.description || t('global.are_you_sure');
@@ -31,7 +29,6 @@ export function useAlertDialog() {
             state.cancelText = options.cancelText || t('action.cancel');
             state.resolve = resolve;
             state.isOpen = true;
-            console.log('State after update:', { ...state });
         });
     };
 
@@ -41,7 +38,6 @@ export function useAlertDialog() {
     };
 
     const confirmAlertDialog = () => {
-        console.log('confirmAlertDialog called');
         if (state.resolve) {
             state.resolve(true);
         }
@@ -49,7 +45,6 @@ export function useAlertDialog() {
     };
 
     const cancelAlertDialog = () => {
-        console.log('cancelAlertDialog called');
         if (state.resolve) {
             state.resolve(false);
         }
@@ -72,7 +67,6 @@ export function useConfirmDialog() {
     const { show } = useAlertDialog();
 
     const confirmDelete = (itemName?: string): Promise<boolean> => {
-        console.log('confirmDelete called with itemName:', itemName);
         const options = {
             title: t('global.common.confirm_delete_title') || 'Confirm Deletion',
             description: itemName
@@ -81,7 +75,6 @@ export function useConfirmDialog() {
             confirmText: t('action.delete') || 'Delete',
             cancelText: t('action.cancel') || 'Cancel',
         };
-        console.log('confirmDelete options:', options);
         return show(options);
     };
 

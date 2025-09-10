@@ -5,7 +5,6 @@ import {useResourcesStore} from "~/stores/resources";
 
 export const useUserStore = defineStore('user', () => {
     const { t } = useNuxtApp().$i18n
-
     const user = ref<User | undefined>()
     const accessToken = useCookie('BKJH_ACCESS_TOKEN', { maxAge: 60 * 60 * 24 })
     const refreshToken = useCookie('BKJH_REFRESH_TOKEN', { maxAge: 60 * 60 * 24 * 7 }) // 7 days for refresh token
@@ -63,6 +62,7 @@ export const useUserStore = defineStore('user', () => {
     }
 
     async function login(credentials: Credentials, path?: LocationQueryValue) {
+        console.log('Login function called')
         const { data, error } = await useApiFetch(`/api/v1/dashboard/auth/login`, {
             method: 'POST',
             body: credentials,
@@ -92,20 +92,9 @@ export const useUserStore = defineStore('user', () => {
             // Wait 200ms to ensure cookies are properly set
             await new Promise(resolve => setTimeout(resolve, 200))
             
-            // Force navigation after login - use nextTick to ensure state is updated
+            // Let middleware handle navigation - just ensure state is updated
             await nextTick()
-            
-            console.log('Login successful, attempting navigation...')
-            
-            // Force a full page reload to ensure all state is properly initialized
-            if (path) {
-                console.log('Navigating to custom path:', path)
-                window.location.href = path as string
-            }
-            else {
-                console.log('Navigating to home page')
-                window.location.href = '/'
-            }
+            console.log('Login successful - middleware will handle navigation')
         }
         if (error.value) {
             // Handle different types of login errors

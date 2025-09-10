@@ -52,7 +52,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
     /**
    * Fetch all items with optional pagination
    */
-    const fetchItems = async (page = 1, perPage = 25, additionalParams: Record<string, any> = {}) => {
+    const fetchItems = async (page = 1, perPage = 25, additionalParams: Record<string, any> = {}, forceRefresh?: number) => {
         loading.value = true;
         error.value = null;
 
@@ -63,9 +63,13 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
                 ...additionalParams,
             };
 
+            const cacheKey = forceRefresh 
+                ? `${tenant}-${crudPath}-list-${page}-${perPage}-${JSON.stringify(additionalParams)}-${forceRefresh}`
+                : `${tenant}-${crudPath}-list-${page}-${perPage}-${JSON.stringify(additionalParams)}`;
+            
             const { data, status } = await useApiFetch(buildApiPath(), {
                 query: params,
-                key: `${tenant}-${crudPath}-list-${page}-${perPage}-${JSON.stringify(additionalParams)}`,
+                key: cacheKey,
             });
 
             if (status.value === 'success' && data.value) {
@@ -294,7 +298,9 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
     };
 
     const refresh = async () => {
-        await fetchItems(pagination.value.currentPage, pagination.value.perPage);
+        // Force refresh by adding timestamp to cache key
+        const timestamp = Date.now();
+        await fetchItems(pagination.value.currentPage, pagination.value.perPage, {}, timestamp);
     };
 
     const reset = () => {

@@ -1,59 +1,55 @@
-import { useUserStore } from "~/stores/user"
+// middleware/auth.ts
+import { useUserStore } from '~/stores/user'
 
-export default defineNuxtRouteMiddleware(async (to, from) => {
+/**
+ * Protects routes that require authentication.
+ * - Requires accessToken
+ * - Verifies via fetchAuthUser() (throttled by last_auth_validation)
+ * - On failure, clears state and redirects to /login?redirect=...
+ */
+export default defineNuxtRouteMiddleware(async (to) => {
 
-    const userStore = useUserStore()
+    console.log('Auth middleware: Starting for', to.fullPath)
 
-    // Always validate authentication if we have an access token
-    // Add throttling to avoid too many requests (optional)
-    const lastValidation = useCookie('last_auth_validation', { maxAge: 60 * 5 }) // 5 minutes
-    const now = Date.now()
-    const shouldValidate = !lastValidation.value || (now - parseInt(lastValidation.value)) > 60000 // 1 minute
+  const userStore = useUserStore()
 
-    if (userStore.accessToken && shouldValidate) {
-        try {
-            console.log('Auth middleware: Validating authentication for', to.fullPath)
-            const isAuthenticated = await userStore.fetchAuthUser()
-            if (!isAuthenticated) {
-                console.log('Auth middleware: Authentication failed, redirecting to login')
-                // Authentication failed, clear tokens and redirect to login
-                userStore.setAccessToken()
-                userStore.setRefreshToken()
-                userStore.setUser()
-                return navigateTo({
-                    path: '/login',
-                    query: { redirect: to.fullPath },
-                })
-            } else {
-                console.log('Auth middleware: Authentication successful')
-                // Auth validation timestamp is now managed by user store
-            }
-        }
-        catch (err) {
-            console.log('Auth middleware: Auth check error, redirecting to login:', err)
-            // Clear invalid tokens and redirect to login
-            userStore.setAccessToken()
-            userStore.setRefreshToken()
-            userStore.setUser()
-            // Update validation timestamp to prevent infinite retries
-            lastValidation.value = now.toString()
-            return navigateTo({
-                path: '/login',
-                query: { redirect: to.fullPath },
-            })
-        }
+  // 1) No access token -> go to login
+  if (!userStore.accessToken) {
+    return navigateTo({
+      path: '/login',
+      query: { redirect: to.fullPath },
+      replace: true,
+    })
+  }
+
+  // 2) Throttle server validation to 1 minute using the same cookie key you already use
+  const lastValidation = useCookie<string | null>('last_auth_validation', { maxAge: 60 * 5 })
+  const now = Date.now()
+  const last = lastValidation.value ? Number(lastValidation.value) : 0
+  const shouldValidate =
+    !Number.isFinite(last) || (now - (last || 0)) > 60_000 // 1 minute
+
+  // 3) If no user yet (fresh tab/SSR) OR stale check -> verify session
+  if (!userStore.user || shouldValidate) {
+    try {
+      const ok = await userStore.fetchAuthUser()
+      if (!ok) throw new Error('auth check failed')
+      lastValidation.value = String(now)
+    } catch {
+      // Hard reset to avoid half-authenticated state
+      userStore.setAccessToken()
+      userStore.setRefreshToken()
+      userStore.setUser()
+      // Prevent tight retry loop
+      lastValidation.value = String(now)
+
+      return navigateTo({
+        path: '/login',
+        query: { redirect: to.fullPath },
+        replace: true,
+      })
     }
+  }
 
-    // If still no user or access token, redirect to login
-    if (!userStore.user || !userStore.accessToken) {
-        console.log('Auth middleware: No user or token, redirecting to login')
-        return navigateTo({
-            path: '/login',
-            query: { redirect: to.fullPath },
-        })
-    }
-    
-    console.log('Auth middleware: User authenticated, allowing access to', to.fullPath)
-
-    // User is authenticated, allow access
+  // 4) Auth OK -> allow navigation
 })

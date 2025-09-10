@@ -50,16 +50,12 @@ const onSubmit = handleSubmit(async (values) => {
     console.log('Attempting login with validated credentials for:', credentials.email);
     
     try {
-        console.log('Starting login process...');
         if (redirectPath) {
-            console.log('Login with redirect path:', redirectPath);
             await useUserStore().login(credentials, redirectPath as string);
         }
         else {
-            console.log('Login without redirect path');
             await useUserStore().login(credentials);
         }
-        console.log('Login process completed');
     }
     catch (error) {
         console.error('Login error:', error);

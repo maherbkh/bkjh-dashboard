@@ -110,7 +110,7 @@ const showPassword = ref(false);
         </div>
         <div
             v-if="errors.length"
-            class="text-destructive text-xs mt-0.5"
+            class="text-destructive text-sm mt-0.5"
         >
             <div
                 v-for="(err, i) in errors"

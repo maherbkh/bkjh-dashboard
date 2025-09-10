@@ -3,7 +3,7 @@ import { useResourcesStore } from '~/stores/resources'
 
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm } = useCrud<Company, CompanyForm>({
-    crudPath: 'company',
+    crudPath: 'companies',
     tenant: 'shared',
     formSchema: createCompanySchema(t),
 });
