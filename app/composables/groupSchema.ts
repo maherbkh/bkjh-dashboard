@@ -6,12 +6,12 @@ export function createGroupSchema(t: (key: string, params?: Record<string, strin
             .string({ required_error: t('global.name') + ' ' + t('validation.required') })
             .min(2, t('global.name') + ' ' + t('validation.min_length', { min: 2 }))
             .max(100, t('global.name') + ' ' + t('validation.max_length', { max: 100 })),
-        address_id: z
-            .number()
+        addressId: z
+            .string()
             .optional()
             .nullable(),
-        company_ids: z
-            .array(z.number())
+        companyIds: z
+            .array(z.string())
             .optional()
             .default([]),
     });

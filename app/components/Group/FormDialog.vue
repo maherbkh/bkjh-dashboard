@@ -3,14 +3,14 @@ import { useResourcesStore } from '~/stores/resources'
 
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm, loading } = useCrud<Group, GroupForm>({
-    crudPath: 'group',
+    crudPath: 'groups',
     tenant: 'shared',
     formSchema: createGroupSchema(t),
 });
 
 const [name, nameAttrs] = defineField('name');
-const [address_id, addressIdAttrs] = defineField('address_id');
-const [company_ids, companyIdsAttrs] = defineField('company_ids');
+const [addressId, addressIdAttrs] = defineField('addressId');
+const [companyIds, companyIdsAttrs] = defineField('companyIds');
 
 // Get companies and addresses data from resources store
 const resourcesStore = useResourcesStore();
@@ -18,50 +18,54 @@ const companiesData = computed(() => resourcesStore.companies);
 const addressesData = computed(() => resourcesStore.addresses);
 
 type Props = {
-    open: boolean;
-    editingGroup?: Group | null;
-    mode?: 'add' | 'edit';
+    isDialogOpen: boolean;
+    dialogMode: 'add' | 'edit';
+    editingGroup: Group | null;
+    isSubmitting: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
     editingGroup: null,
-    mode: 'add',
+    dialogMode: 'add',
+    isSubmitting: false,
 });
 
 const emit = defineEmits<{
-    'update:open': [value: boolean];
-    'group-created': [group: Group];
-    'group-updated': [group: Group];
+    'update:is-dialog-open': [value: boolean];
+    'update:dialog-mode': [value: 'add' | 'edit'];
+    'update:editing-group': [value: Group | null];
+    'submit-and-close': [values: GroupForm];
+    'submit-and-add-new': [values: GroupForm];
+    'close-dialog': [];
 }>();
 
 // Computed properties
-const dialogMode = computed(() => props.mode);
 const dialogTitle = computed(() => {
-    return dialogMode.value === 'add'
+    return props.dialogMode === 'add'
         ? t('action.add') + ' ' + t('common.new') + ' ' + t('group.singular')
         : t('action.edit') + ' ' + t('group.singular');
 });
 
 const dialogDescription = computed(() => {
-    return dialogMode.value === 'add'
+    return props.dialogMode === 'add'
         ? t('group.add')
         : t('group.edit');
 });
 
 const isOpen = computed({
-    get: () => props.open,
-    set: (value: boolean) => emit('update:open', value),
+    get: () => props.isDialogOpen,
+    set: (value: boolean) => emit('update:is-dialog-open', value),
 });
 
 // Watchers
 watch(
     () => props.editingGroup,
     (newGroup) => {
-        if (newGroup && dialogMode.value === 'edit') {
+        if (newGroup && props.dialogMode === 'edit') {
             setValues({
                 name: newGroup.name,
-                address_id: newGroup.address_id,
-                company_ids: newGroup.company_ids,
+                addressId: newGroup.addressId,
+                companyIds: newGroup.companies?.map(c => c.company.id) || [],
             });
         }
     },
@@ -69,7 +73,7 @@ watch(
 );
 
 watch(
-    () => props.open,
+    () => props.isDialogOpen,
     (isOpen) => {
         if (!isOpen) {
             resetForm();
@@ -78,54 +82,16 @@ watch(
 );
 
 // Methods
-const onSubmitAndClose = handleSubmit(async (values) => {
-    try {
-        if (dialogMode.value === 'add') {
-            const newGroup = await $fetch<Group>('/api/groups', {
-                method: 'POST',
-                body: values,
-            });
-            emit('group-created', newGroup);
-        }
-        else {
-            const updatedGroup = await $fetch<Group>(`/api/groups/${props.editingGroup?.id}`, {
-                method: 'PUT',
-                body: values,
-            });
-            emit('group-updated', updatedGroup);
-        }
-        handleClose();
-    }
-    catch (error) {
-        console.error('Error submitting group:', error);
-    }
+const onSubmitAndClose = handleSubmit((values) => {
+    emit('submit-and-close', values);
 });
 
-const onSubmitAndAddNew = handleSubmit(async (values) => {
-    try {
-        if (dialogMode.value === 'add') {
-            const newGroup = await $fetch<Group>('/api/groups', {
-                method: 'POST',
-                body: values,
-            });
-            emit('group-created', newGroup);
-        }
-        else {
-            const updatedGroup = await $fetch<Group>(`/api/groups/${props.editingGroup?.id}`, {
-                method: 'PUT',
-                body: values,
-            });
-            emit('group-updated', updatedGroup);
-        }
-        resetForm();
-    }
-    catch (error) {
-        console.error('Error submitting group:', error);
-    }
+const onSubmitAndAddNew = handleSubmit((values) => {
+    emit('submit-and-add-new', values);
 });
 
 const handleClose = () => {
-    emit('update:open', false);
+    emit('close-dialog');
 };
 </script>
 
@@ -151,31 +117,31 @@ const handleClose = () => {
 
                     <!-- Address Selection -->
                     <FormItemSelect
-                        id="address_id"
-                        v-model="address_id"
+                        id="addressId"
+                        v-model="addressId"
                         :title="t('address.singular')"
                         :placeholder="t('action.select') + ' ' + t('address.singular')"
                         class="col-span-12"
-                        :errors="errors.address_id ? [errors.address_id] : []"
+                        :errors="errors.addressId ? [errors.addressId] : []"
                         v-bind="addressIdAttrs"
                         :data="addressesData"
                         key-value="id"
-                        name-value="street"
+                        name-value="fullAddress"
                         empty-text="No addresses found"
                     />
 
                     <!-- Company Selection -->
                     <FormItemMultiSelect
-                        id="company_ids"
-                        v-model="company_ids"
+                        id="companyIds"
+                        v-model="companyIds"
                         :title="t('company.plural')"
                         :placeholder="t('action.select') + ' ' + t('company.plural')"
                         class="col-span-12"
-                        :errors="errors.company_ids ? [errors.company_ids] : []"
+                        :errors="errors.companyIds ? [errors.companyIds] : []"
                         v-bind="companyIdsAttrs"
                         :data="companiesData"
                         key-value="id"
-                        name-value="street"
+                        name-value="name"
                         :search-placeholder="t('groups.search_companies')"
                         :empty-text="t('groups.no_companies_found')"
                     />
@@ -186,33 +152,33 @@ const handleClose = () => {
         <template #footer>
             <Button
                 variant="outline"
-                :disabled="loading"
+                :disabled="isSubmitting"
                 @click="handleClose"
             >
                 {{ t('action.cancel') }}
             </Button>
             <Button
                 variant="outline"
-                :disabled="loading"
+                :disabled="isSubmitting"
                 @click="onSubmitAndAddNew"
             >
                 <Icon
-                    v-if="loading"
+                    v-if="isSubmitting"
                     name="solar:refresh-linear"
                     class="mr-2 h-4 w-4 animate-spin"
                 />
-                {{ dialogMode === 'add' ? t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new') : $t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new') }}
+                {{ props.dialogMode === 'add' ? t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new') : $t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new') }}
             </Button>
             <Button
-                :disabled="loading"
+                :disabled="isSubmitting"
                 @click="onSubmitAndClose"
             >
                 <Icon
-                    v-if="loading"
+                    v-if="isSubmitting"
                     name="solar:refresh-linear"
                     class="mr-2 h-4 w-4 animate-spin"
                 />
-                {{ dialogMode === 'add' ? t('action.save') : t('action.update') }}
+                {{ props.dialogMode === 'add' ? t('action.save') : t('action.update') }}
             </Button>
         </template>
     </FormDialog>
