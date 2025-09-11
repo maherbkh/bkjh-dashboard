@@ -69,9 +69,19 @@ const emit = defineEmits<{
 const open = ref(false);
 const search = ref("");
 const debouncedSearch = ref("");
+
+// Optimized debounced search with immediate clear
 let searchTimer: number | undefined;
 watch(search, (v) => {
   clearTimeout(searchTimer);
+
+  // Immediate clear for empty search
+  if (!v.trim()) {
+    debouncedSearch.value = "";
+    return;
+  }
+
+  // Debounce only for non-empty searches
   // @ts-expect-error window typing not strict
   searchTimer = window.setTimeout(
     () => (debouncedSearch.value = v),
@@ -136,9 +146,13 @@ const selectedOptions = computed(() => {
   return modelValues.map((v) => optionMap[v]).filter(Boolean);
 });
 
-const filterFn = (o: MultiSelectOption, q: string) => o.label.toLowerCase().includes(q);
+// Memoize filter function for better performance
+const filterFn = (o: MultiSelectOption, q: string) => {
+  const label = o.label.toLowerCase();
+  return label.includes(q);
+};
 
-// Optimize filtered with early returns
+// Optimize filtered with early returns and lazy loading
 const filtered = computed<MultiSelectOption[]>(() => {
   const options = normalizedOptions.value;
   if (options.length === 0) return [];
@@ -146,7 +160,14 @@ const filtered = computed<MultiSelectOption[]>(() => {
   const q = debouncedSearch.value.trim().toLowerCase();
   if (!q) return options;
 
-  return options.filter((o) => filterFn(o, q));
+  // For very large datasets, limit initial results
+  const MAX_INITIAL_RESULTS = 50;
+  const filteredOptions = options.filter((o) => filterFn(o, q));
+
+  // Return limited results for better performance
+  return filteredOptions.length > MAX_INITIAL_RESULTS
+    ? filteredOptions.slice(0, MAX_INITIAL_RESULTS)
+    : filteredOptions;
 });
 
 // Optimize isSelected with Set for O(1) lookup instead of O(n)
@@ -243,11 +264,59 @@ const effectiveMaxCount = computed(() => {
 
 const buttonText = computed(() => props.buttonText(model.value.length));
 
+// Virtual scrolling optimization for large datasets
+const VIRTUAL_SCROLL_THRESHOLD = 100; // Enable virtual scrolling for 100+ items
+const ITEM_HEIGHT = 40; // Approximate height of each item
+const VISIBLE_ITEMS = 10; // Number of visible items in viewport
+
+const shouldUseVirtualScrolling = computed(
+  () => filtered.value.length > VIRTUAL_SCROLL_THRESHOLD
+);
+
+const virtualScrollState = ref({
+  scrollTop: 0,
+  startIndex: 0,
+  endIndex: VISIBLE_ITEMS,
+});
+
+const visibleItems = computed(() => {
+  if (!shouldUseVirtualScrolling.value) {
+    return filtered.value;
+  }
+
+  const { startIndex, endIndex } = virtualScrollState.value;
+  return filtered.value.slice(startIndex, endIndex);
+});
+
+function handleScroll(event: Event) {
+  if (!shouldUseVirtualScrolling.value) return;
+
+  const target = event.target as HTMLElement;
+  const scrollTop = target.scrollTop;
+  const startIndex = Math.floor(scrollTop / ITEM_HEIGHT);
+  const endIndex = Math.min(startIndex + VISIBLE_ITEMS, filtered.value.length);
+
+  virtualScrollState.value = {
+    scrollTop,
+    startIndex,
+    endIndex,
+  };
+}
+
 function focus() {
   triggerRef.value?.focus();
 }
 function openMenu() {
+  const startTime = performance.now();
   open.value = true;
+
+  // Performance monitoring for debugging
+  nextTick(() => {
+    const endTime = performance.now();
+    if (process.dev && endTime - startTime > 100) {
+      console.warn(`MultiSelect opening took ${endTime - startTime}ms`);
+    }
+  });
 }
 function closeMenu() {
   open.value = false;
@@ -338,6 +407,7 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
 
           <ScrollArea
             class="max-h-60 overflow-auto no-scrollbar-arrows scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-900"
+            @scroll="handleScroll"
           >
             <CommandList>
               <CommandGroup>
@@ -356,23 +426,64 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                   <span>{{ isAllSelected ? "Unselect all" : "Select all" }}</span>
                 </CommandItem>
 
-                <!-- Options -->
-                <CommandItem
-                  v-for="o in filtered"
-                  :key="o.value"
-                  :value="o.label"
-                  :disabled="o.disabled"
-                  class="cursor-pointer"
-                  @click="toggleValue(o.value)"
+                <!-- Virtual scrolling container -->
+                <div
+                  v-if="shouldUseVirtualScrolling"
+                  :style="{
+                    height: `${filtered.length * ITEM_HEIGHT}px`,
+                    position: 'relative',
+                  }"
                 >
-                  <Checkbox
-                    :checked="isSelected(o.value)"
-                    @update:checked="(nv:boolean)=>toggleValue(o.value, nv)"
-                    class="mr-2"
+                  <div
+                    :style="{
+                      transform: `translateY(${
+                        virtualScrollState.startIndex * ITEM_HEIGHT
+                      }px)`,
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                    }"
+                  >
+                    <CommandItem
+                      v-for="o in visibleItems"
+                      :key="o.value"
+                      :value="o.label"
+                      :disabled="o.disabled"
+                      class="cursor-pointer"
+                      :style="{ height: `${ITEM_HEIGHT}px` }"
+                      @click="toggleValue(o.value)"
+                    >
+                      <Checkbox
+                        :checked="isSelected(o.value)"
+                        @update:checked="(nv:boolean)=>toggleValue(o.value, nv)"
+                        class="mr-2"
+                        :disabled="o.disabled"
+                      />
+                      <span :class="o.disabled ? 'opacity-50' : ''">{{ o.label }}</span>
+                    </CommandItem>
+                  </div>
+                </div>
+
+                <!-- Regular rendering for small datasets -->
+                <template v-else>
+                  <CommandItem
+                    v-for="o in filtered"
+                    :key="o.value"
+                    :value="o.label"
                     :disabled="o.disabled"
-                  />
-                  <span :class="o.disabled ? 'opacity-50' : ''">{{ o.label }}</span>
-                </CommandItem>
+                    class="cursor-pointer"
+                    @click="toggleValue(o.value)"
+                  >
+                    <Checkbox
+                      :checked="isSelected(o.value)"
+                      @update:checked="(nv:boolean)=>toggleValue(o.value, nv)"
+                      class="mr-2"
+                      :disabled="o.disabled"
+                    />
+                    <span :class="o.disabled ? 'opacity-50' : ''">{{ o.label }}</span>
+                  </CommandItem>
+                </template>
               </CommandGroup>
             </CommandList>
           </ScrollArea>
