@@ -58,12 +58,15 @@ export type ResetPasswordForm = {
 
 // Entity types
 export type Category = {
-    id: number;
+    id: string; // UUID from API
     name: string;
-    slug?: string;
-    position?: number;
-    createdAt?: string;
-    updatedAt?: string;
+    position: number;
+    isActive: boolean;
+    parentId: string | null;
+    createdAt: string;
+    updatedAt: string;
+    parent: Category | null;
+    children: Category[];
 };
 
 // Component types

@@ -3,11 +3,15 @@ import type { Category } from '~/types';
 
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm } = useCrud<Category, CategoryForm>({
-    apiSlug: 'category',
+    crudPath: 'ticket-categories',
+    tenant: 'support',
     formSchema: createCategorySchema(t),
 });
 
 const [name, nameAttrs] = defineField('name');
+const [position, positionAttrs] = defineField('position');
+const [isActive, isActiveAttrs] = defineField('isActive');
+const [parentId, parentIdAttrs] = defineField('parentId');
 const props = withDefaults(defineProps<{
     dialogMode?: 'add' | 'edit' | null;
     editingCategory?: Category | null;
@@ -52,6 +56,9 @@ watch(() => props.editingCategory, (category) => {
         nextTick(() => {
             setValues({
                 name: category.name,
+                position: category.position,
+                isActive: category.isActive,
+                parentId: category.parentId,
             });
         });
     }
@@ -65,6 +72,9 @@ watch(() => props.dialogMode, (newMode, oldMode) => {
             resetForm({
                 values: {
                     name: '',
+                    position: 0,
+                    isActive: true,
+                    parentId: null,
                 },
             });
         });
@@ -79,6 +89,9 @@ watch(() => props.isDialogOpen, (isOpen) => {
             resetForm({
                 values: {
                     name: '',
+                    position: 0,
+                    isActive: true,
+                    parentId: null,
                 },
             });
         });
@@ -108,10 +121,41 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
                         v-model="name"
                         :title="$t('global.name')"
                         :placeholder="$t('global.name')"
-                        class="col-span-12"
+                        class="col-span-8"
                         :errors="errors.name ? [errors.name] : []"
                         v-bind="nameAttrs"
                         required
+                    />
+                    <FormItemInput
+                        id="position"
+                        v-model="position"
+                        :title="$t('position.singular')"
+                        :placeholder="$t('position.placeholder')"
+                        type="number"
+                        class="col-span-4"
+                        :errors="errors.position ? [errors.position] : []"
+                        v-bind="positionAttrs"
+                        required
+                    />
+                    <FormItemSwitch
+                        id="isActive"
+                        v-model="isActive"
+                        :title="$t('status.singular')"
+                        :description="$t('status.description')"
+                        class="col-span-6"
+                        :errors="errors.isActive ? [errors.isActive] : []"
+                        v-bind="isActiveAttrs"
+                    />
+                    <FormItemSelect
+                        id="parentId"
+                        v-model="parentId"
+                        :title="$t('parent.singular')"
+                        :placeholder="$t('parent.placeholder')"
+                        class="col-span-6"
+                        :errors="errors.parentId ? [errors.parentId] : []"
+                        v-bind="parentIdAttrs"
+                        :options="[]"
+                        clearable
                     />
                 </div>
             </form>
