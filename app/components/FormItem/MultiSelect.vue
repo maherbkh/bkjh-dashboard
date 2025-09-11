@@ -1,23 +1,4 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onBeforeUnmount, defineExpose } from "vue";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandItem,
-  CommandEmpty,
-  CommandGroup,
-} from "@/components/ui/command";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
-
-/**
- * Nuxt 4 + shadcn-vue + Tailwind v4
- */
-
 type Primitive = string | number;
 export type MultiSelectOption<T extends Primitive = string> = {
   value: T;
@@ -27,15 +8,12 @@ export type MultiSelectOption<T extends Primitive = string> = {
 
 const props = withDefaults(
   defineProps<{
-    /** v-model for selected values */
     modelValue: Primitive[];
-    /** Data array - any shape; keys map fields */
     data: any[];
     itemKey?: string;
     itemLabel?: string;
     itemDisabled?: string;
 
-    /** UI */
     id?: string;
     label?: string;
     placeholder?: string;
@@ -43,27 +21,21 @@ const props = withDefaults(
     emptyText?: string;
     hint?: string;
 
-    /** Behavior */
     disabled?: boolean;
-    max?: number; // 0 = unlimited
+    max?: number;
     clearable?: boolean;
     selectAll?: boolean;
-    required?: boolean; // visual only
+    required?: boolean;
     closeOnSelect?: boolean;
 
-    /** Layout */
     singleLine?: boolean;
     autoSize?: boolean;
     contentClass?: string;
 
-    /** Badges */
-    maxCount?: number; // visible badges before +N
+    maxCount?: number;
     responsiveMaxCount?: Partial<{ mobile: number; tablet: number; desktop: number }>;
 
-    /** Custom button text formatter */
     buttonText?: (count: number) => string;
-
-    /** Debounce ms for search */
     searchDebounce?: number;
   }>(),
   {
@@ -107,7 +79,6 @@ watch(search, (v) => {
   );
 });
 
-// Normalize -> flat list of options
 const normalizedOptions = computed<MultiSelectOption[]>(() => {
   const arr = props.data ?? [];
   if (!Array.isArray(arr) || arr.length === 0) return [];
@@ -115,7 +86,7 @@ const normalizedOptions = computed<MultiSelectOption[]>(() => {
   const lab = props.itemLabel!;
   const dis = props.itemDisabled!;
   return arr.map((item: any) => ({
-    value: item?.[key],
+    value: String(item?.[key]),
     label: String(item?.[lab] ?? ""),
     disabled: Boolean(item?.[dis]),
   }));
@@ -127,8 +98,17 @@ const optionByValue = computed<Record<string, MultiSelectOption>>(() => {
   return map;
 });
 
-const model = computed<Primitive[]>({
-  get: () => props.modelValue ?? [],
+const model = computed<string[]>({
+  get: () => {
+    const modelValue = props.modelValue ?? [];
+    // Handle both UUID arrays and object arrays
+    return modelValue.map((v) => {
+      if (typeof v === "object" && v !== null && "id" in v) {
+        return String(v.id);
+      }
+      return String(v);
+    });
+  },
   set: (val) => {
     emit("update:modelValue", val);
     emit("change", val);
@@ -136,8 +116,9 @@ const model = computed<Primitive[]>({
 });
 
 const selectedOptions = computed(() =>
-  model.value.map((v) => optionByValue.value[String(v)]).filter(Boolean)
+  model.value.map((v) => optionByValue.value[v]).filter(Boolean)
 );
+
 const filterFn = (o: MultiSelectOption, q: string) => o.label.toLowerCase().includes(q);
 
 const filtered = computed<MultiSelectOption[]>(() => {
@@ -146,15 +127,20 @@ const filtered = computed<MultiSelectOption[]>(() => {
   return normalizedOptions.value.filter((o) => filterFn(o, q));
 });
 
-const isSelected = (v: Primitive) => model.value.some((x) => String(x) === String(v));
+const isSelected = (v: Primitive) => model.value.includes(String(v));
 
-function toggleValue(v: Primitive) {
-  if (isSelected(v)) {
-    model.value = model.value.filter((x) => String(x) !== String(v));
-  } else {
+function toggleValue(v: Primitive, force?: boolean) {
+  const val = String(v);
+  const currently = isSelected(val);
+  const shouldSelect = force !== undefined ? force : !currently;
+
+  if (shouldSelect && !currently) {
     if (props.max > 0 && model.value.length >= props.max) return;
-    model.value = [...model.value, v];
+    model.value = [...model.value, val];
+  } else if (!shouldSelect && currently) {
+    model.value = model.value.filter((x) => x !== val);
   }
+
   if (props.closeOnSelect) open.value = false;
 }
 
@@ -163,7 +149,7 @@ function clear() {
 }
 
 const filteredEnabledValues = computed(() =>
-  filtered.value.filter((o) => !o.disabled).map((o) => o.value)
+  filtered.value.filter((o) => !o.disabled).map((o) => String(o.value))
 );
 const isAllSelected = computed(
   () =>
@@ -171,24 +157,25 @@ const isAllSelected = computed(
     filteredEnabledValues.value.every((v) => isSelected(v))
 );
 
-function toggleSelectAll() {
+function toggleSelectAll(force?: boolean) {
   if (!props.selectAll) return;
   const pool = filteredEnabledValues.value;
-  if (isAllSelected.value) {
-    const remove = new Set(pool.map((v) => String(v)));
-    model.value = model.value.filter((v) => !remove.has(String(v)));
-  } else {
-    const existing = new Set(model.value.map((v) => String(v)));
-    const toAdd: Primitive[] = [];
+  const shouldSelect = force !== undefined ? force : !isAllSelected.value;
+
+  if (shouldSelect) {
+    const existing = new Set(model.value);
+    const toAdd: string[] = [];
     for (const v of pool) {
       if (props.max > 0 && existing.size + toAdd.length >= props.max) break;
-      if (!existing.has(String(v))) toAdd.push(v);
+      if (!existing.has(v)) toAdd.push(v);
     }
     model.value = [...model.value, ...toAdd];
+  } else {
+    const remove = new Set(pool);
+    model.value = model.value.filter((v) => !remove.has(v));
   }
 }
 
-// Width sync for content
 const triggerRef = ref<HTMLElement | null>(null);
 const contentStyle = ref<string>("");
 function updateWidth() {
@@ -203,7 +190,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => window.removeEventListener("resize", updateWidth));
 
-// Responsive maxCount
 const viewport = ref<"mobile" | "tablet" | "desktop">("desktop");
 function updateViewport() {
   const w = window.innerWidth;
@@ -226,7 +212,6 @@ const effectiveMaxCount = computed(() => {
 
 const buttonText = computed(() => props.buttonText(model.value.length));
 
-// Programmatic API
 function focus() {
   triggerRef.value?.focus();
 }
@@ -237,7 +222,7 @@ function closeMenu() {
   open.value = false;
 }
 function setValues(vals: Primitive[]) {
-  model.value = [...vals];
+  model.value = vals.map((v) => String(v));
 }
 function getValues() {
   return [...model.value];
@@ -252,13 +237,12 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
       {{ label }}<span v-if="required" class="text-destructive"> *</span>
     </label>
 
-    <!-- Selected badges -->
     <div
       v-if="selectedOptions.length"
       class="mb-2 flex gap-2"
       :class="singleLine ? 'overflow-x-auto whitespace-nowrap no-scrollbar' : 'flex-wrap'"
     >
-      <template v-for="(opt, idx) in selectedOptions" :key="String(opt.value)">
+      <template v-for="(opt, idx) in selectedOptions" :key="opt.value">
         <Badge v-if="idx < effectiveMaxCount" class="gap-1 mr-1">
           <span class="truncate max-w-[12rem]">{{ opt.label }}</span>
           <Button
@@ -266,7 +250,7 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
             variant="ghost"
             size="icon"
             class="h-4 w-4 p-0"
-            @click.stop="toggleValue(opt.value)"
+            @click.stop="toggleValue(opt.value, false)"
             >×</Button
           >
         </Badge>
@@ -321,29 +305,38 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
             emptyText
           }}</CommandEmpty>
 
-          <ScrollArea class="max-h-60">
+          <ScrollArea
+            class="max-h-60 overflow-auto no-scrollbar-arrows scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-900"
+          >
             <CommandList>
               <CommandGroup>
+                <!-- Select all -->
                 <CommandItem
                   v-if="selectAll"
                   value="__select_all__"
                   class="gap-2"
-                  @select="toggleSelectAll"
+                  @click="toggleSelectAll()"
                 >
-                  <Checkbox :checked="isAllSelected" class="mr-2" />
+                  <Checkbox
+                    :checked="isAllSelected"
+                    @update:checked="(nv:boolean)=>toggleSelectAll(nv)"
+                    class="mr-2"
+                  />
                   <span>{{ isAllSelected ? "Unselect all" : "Select all" }}</span>
                 </CommandItem>
 
+                <!-- Options -->
                 <CommandItem
                   v-for="o in filtered"
-                  :key="String(o.value)"
+                  :key="o.value"
                   :value="o.label"
                   :disabled="o.disabled"
                   class="cursor-pointer"
-                  @select="toggleValue(o.value)"
+                  @click="toggleValue(o.value)"
                 >
                   <Checkbox
                     :checked="isSelected(o.value)"
+                    @update:checked="(nv:boolean)=>toggleValue(o.value, nv)"
                     class="mr-2"
                     :disabled="o.disabled"
                   />
