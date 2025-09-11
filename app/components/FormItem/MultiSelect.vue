@@ -146,10 +146,28 @@ const selectedOptions = computed(() => {
   return modelValues.map((v) => optionMap[v]).filter(Boolean);
 });
 
-// Memoize filter function for better performance
+// Memoized filter function with caching for better performance
+const filterCache = new Map<string, boolean>();
+
 const filterFn = (o: MultiSelectOption, q: string) => {
+  const cacheKey = `${o.value}-${q}`;
+
+  if (filterCache.has(cacheKey)) {
+    return filterCache.get(cacheKey)!;
+  }
+
   const label = o.label.toLowerCase();
-  return label.includes(q);
+  const result = label.includes(q);
+
+  // Cache result for reuse
+  filterCache.set(cacheKey, result);
+
+  // Limit cache size to prevent memory leaks
+  if (filterCache.size > 1000) {
+    filterCache.clear();
+  }
+
+  return result;
 };
 
 // Optimize filtered with early returns and lazy loading
@@ -174,19 +192,34 @@ const filtered = computed<MultiSelectOption[]>(() => {
 const selectedValuesSet = computed(() => new Set(model.value));
 const isSelected = (v: Primitive) => selectedValuesSet.value.has(String(v));
 
+// Optimized toggleValue with early returns and better performance
 function toggleValue(v: Primitive, force?: boolean) {
   const val = String(v);
+
+  // Early return for invalid values
+  if (!val) return;
+
   const currently = isSelected(val);
   const shouldSelect = force !== undefined ? force : !currently;
 
-  if (shouldSelect && !currently) {
+  // Early return if no change needed
+  if (shouldSelect === currently) return;
+
+  if (shouldSelect) {
+    // Check max limit before adding
     if (props.max > 0 && model.value.length >= props.max) return;
     model.value = [...model.value, val];
-  } else if (!shouldSelect && currently) {
+  } else {
+    // Use filter for removal
     model.value = model.value.filter((x) => x !== val);
   }
 
-  if (props.closeOnSelect) open.value = false;
+  // Close on select if enabled
+  if (props.closeOnSelect) {
+    nextTick(() => {
+      open.value = false;
+    });
+  }
 }
 
 function clear() {
@@ -262,7 +295,11 @@ const effectiveMaxCount = computed(() => {
   return typeof byVp === "number" ? byVp : props.maxCount;
 });
 
-const buttonText = computed(() => props.buttonText(model.value.length));
+// Memoized button text to prevent unnecessary recalculations
+const buttonText = computed(() => {
+  const count = model.value.length;
+  return props.buttonText(count);
+});
 
 // Virtual scrolling optimization for large datasets
 const VIRTUAL_SCROLL_THRESHOLD = 100; // Enable virtual scrolling for 100+ items
@@ -313,8 +350,14 @@ function openMenu() {
   // Performance monitoring for debugging
   nextTick(() => {
     const endTime = performance.now();
-    if (process.dev && endTime - startTime > 100) {
-      console.warn(`MultiSelect opening took ${endTime - startTime}ms`);
+    const duration = endTime - startTime;
+
+    if (process.dev) {
+      if (duration > 100) {
+        console.warn(`MultiSelect opening took ${duration.toFixed(2)}ms`);
+      } else if (duration > 50) {
+        console.log(`MultiSelect opening took ${duration.toFixed(2)}ms`);
+      }
     }
   });
 }
@@ -337,12 +380,16 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
       {{ label }}<span v-if="required" class="text-destructive"> *</span>
     </label>
 
+    <!-- Selected badges - Only render when there are selections -->
     <div
-      v-if="selectedOptions.length"
+      v-if="selectedOptions.length > 0"
       class="mb-2 flex gap-2"
       :class="singleLine ? 'overflow-x-auto whitespace-nowrap no-scrollbar' : 'flex-wrap'"
     >
-      <template v-for="(opt, idx) in selectedOptions" :key="opt.value">
+      <template
+        v-for="(opt, idx) in selectedOptions"
+        :key="`selected-${opt.value}-${idx}`"
+      >
         <Badge v-if="idx < effectiveMaxCount" class="gap-1 mr-1">
           <span class="truncate max-w-[12rem]">{{ opt.label }}</span>
           <Button
@@ -446,8 +493,8 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                     }"
                   >
                     <CommandItem
-                      v-for="o in visibleItems"
-                      :key="o.value"
+                      v-for="(o, index) in visibleItems"
+                      :key="`virtual-${o.value}-${virtualScrollState.startIndex + index}`"
                       :value="o.label"
                       :disabled="o.disabled"
                       class="cursor-pointer"
@@ -468,8 +515,8 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                 <!-- Regular rendering for small datasets -->
                 <template v-else>
                   <CommandItem
-                    v-for="o in filtered"
-                    :key="o.value"
+                    v-for="(o, index) in filtered"
+                    :key="`regular-${o.value}-${index}`"
                     :value="o.label"
                     :disabled="o.disabled"
                     class="cursor-pointer"
@@ -491,7 +538,10 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
       </PopoverContent>
     </Popover>
 
-    <p v-if="hint" class="mt-2 text-xs text-muted-foreground">{{ hint }}</p>
+    <!-- Hint text - Only render when hint exists -->
+    <p v-if="hint && hint.trim()" class="mt-2 text-xs text-muted-foreground">
+      {{ hint }}
+    </p>
   </div>
 </template>
 
