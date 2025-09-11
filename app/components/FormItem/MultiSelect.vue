@@ -79,22 +79,34 @@ watch(search, (v) => {
   );
 });
 
+// Memoize normalizedOptions to prevent unnecessary recalculations
 const normalizedOptions = computed<MultiSelectOption[]>(() => {
-  const arr = props.data ?? [];
+  const arr = props.data;
   if (!Array.isArray(arr) || arr.length === 0) return [];
+
   const key = props.itemKey!;
   const lab = props.itemLabel!;
   const dis = props.itemDisabled!;
+
+  // Early return for empty data
+  if (arr.length === 0) return [];
+
   return arr.map((item: any) => ({
-    value: String(item?.[key]),
+    value: String(item?.[key] ?? ""),
     label: String(item?.[lab] ?? ""),
     disabled: Boolean(item?.[dis]),
   }));
 });
 
+// Optimize optionByValue with early returns
 const optionByValue = computed<Record<string, MultiSelectOption>>(() => {
+  const options = normalizedOptions.value;
+  if (options.length === 0) return {};
+
   const map: Record<string, MultiSelectOption> = {};
-  for (const o of normalizedOptions.value) map[String(o.value)] = o;
+  for (const o of options) {
+    map[String(o.value)] = o;
+  }
   return map;
 });
 
@@ -115,19 +127,31 @@ const model = computed<string[]>({
   },
 });
 
-const selectedOptions = computed(() =>
-  model.value.map((v) => optionByValue.value[v]).filter(Boolean)
-);
+// Optimize selectedOptions with early returns
+const selectedOptions = computed(() => {
+  const modelValues = model.value;
+  if (modelValues.length === 0) return [];
+
+  const optionMap = optionByValue.value;
+  return modelValues.map((v) => optionMap[v]).filter(Boolean);
+});
 
 const filterFn = (o: MultiSelectOption, q: string) => o.label.toLowerCase().includes(q);
 
+// Optimize filtered with early returns
 const filtered = computed<MultiSelectOption[]>(() => {
+  const options = normalizedOptions.value;
+  if (options.length === 0) return [];
+
   const q = debouncedSearch.value.trim().toLowerCase();
-  if (!q) return normalizedOptions.value;
-  return normalizedOptions.value.filter((o) => filterFn(o, q));
+  if (!q) return options;
+
+  return options.filter((o) => filterFn(o, q));
 });
 
-const isSelected = (v: Primitive) => model.value.includes(String(v));
+// Optimize isSelected with Set for O(1) lookup instead of O(n)
+const selectedValuesSet = computed(() => new Set(model.value));
+const isSelected = (v: Primitive) => selectedValuesSet.value.has(String(v));
 
 function toggleValue(v: Primitive, force?: boolean) {
   const val = String(v);
@@ -148,9 +172,13 @@ function clear() {
   model.value = [];
 }
 
-const filteredEnabledValues = computed(() =>
-  filtered.value.filter((o) => !o.disabled).map((o) => String(o.value))
-);
+// Optimize filteredEnabledValues with early returns
+const filteredEnabledValues = computed(() => {
+  const filteredOptions = filtered.value;
+  if (filteredOptions.length === 0) return [];
+
+  return filteredOptions.filter((o) => !o.disabled).map((o) => String(o.value));
+});
 const isAllSelected = computed(
   () =>
     filteredEnabledValues.value.length > 0 &&
@@ -183,25 +211,28 @@ function updateWidth() {
     contentStyle.value = `--trigger-width:${triggerRef.value.offsetWidth}px;`;
 }
 
-onMounted(() => {
-  updateWidth();
-  window.addEventListener("resize", updateWidth);
-});
-
-onBeforeUnmount(() => window.removeEventListener("resize", updateWidth));
-
+// Combine all event listeners into single onMounted/onBeforeUnmount
 const viewport = ref<"mobile" | "tablet" | "desktop">("desktop");
+
 function updateViewport() {
   const w = window.innerWidth;
   viewport.value = w <= 768 ? "mobile" : w <= 1024 ? "tablet" : "desktop";
 }
 
-onMounted(() => {
+function handleResize() {
+  updateWidth();
   updateViewport();
-  window.addEventListener("resize", updateViewport);
+}
+
+onMounted(() => {
+  updateWidth();
+  updateViewport();
+  window.addEventListener("resize", handleResize);
 });
 
-onBeforeUnmount(() => window.removeEventListener("resize", updateViewport));
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", handleResize);
+});
 
 const effectiveMaxCount = computed(() => {
   const r = props.responsiveMaxCount;
