@@ -69,6 +69,15 @@ export type Category = {
     children: Category[];
 };
 
+export type Occupation = {
+    id: string; // UUID from API
+    name: string;
+    position: number;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+};
+
 // Component types
 export type SelectOption = {
     [key: string]: any;
