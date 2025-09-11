@@ -1,205 +1,374 @@
 <script setup lang="ts">
-import { cn } from '@/lib/utils';
+import { computed, ref, watch, onMounted, onBeforeUnmount, defineExpose } from "vue";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandItem,
+  CommandEmpty,
+  CommandGroup,
+} from "@/components/ui/command";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
 
-type DataItem = {
-    [key: string]: any;
+/**
+ * Nuxt 4 + shadcn-vue + Tailwind v4
+ */
+
+type Primitive = string | number;
+export type MultiSelectOption<T extends Primitive = string> = {
+  value: T;
+  label: string;
+  disabled?: boolean;
 };
 
-type Props = {
-    data?: DataItem[];
-    modelValue?: any[];
+const props = withDefaults(
+  defineProps<{
+    /** v-model for selected values */
+    modelValue: Primitive[];
+    /** Data array - any shape; keys map fields */
+    data: any[];
+    itemKey?: string;
+    itemLabel?: string;
+    itemDisabled?: string;
+
+    /** UI */
+    id?: string;
+    label?: string;
     placeholder?: string;
     searchPlaceholder?: string;
     emptyText?: string;
-    label?: string;
-    keyValue: string;
-    nameValue: string;
-    imgValue?: string;
-    disabled?: boolean;
-    required?: boolean;
-    error?: string;
-    errors?: string[];
-    readonly?: boolean;
-    title?: string;
-    id?: string;
-    icon?: string;
-};
+    hint?: string;
 
-const props = withDefaults(defineProps<Props>(), {
+    /** Behavior */
+    disabled?: boolean;
+    max?: number; // 0 = unlimited
+    clearable?: boolean;
+    selectAll?: boolean;
+    required?: boolean; // visual only
+    closeOnSelect?: boolean;
+
+    /** Layout */
+    singleLine?: boolean;
+    autoSize?: boolean;
+    contentClass?: string;
+
+    /** Badges */
+    maxCount?: number; // visible badges before +N
+    responsiveMaxCount?: Partial<{ mobile: number; tablet: number; desktop: number }>;
+
+    /** Custom button text formatter */
+    buttonText?: (count: number) => string;
+
+    /** Debounce ms for search */
+    searchDebounce?: number;
+  }>(),
+  {
+    itemKey: "id",
+    itemLabel: "name",
+    itemDisabled: "disabled",
+    placeholder: "Select…",
+    searchPlaceholder: "Search…",
+    emptyText: "No results found",
     disabled: false,
-    readonly: false,
+    max: 0,
+    clearable: true,
+    selectAll: false,
     required: false,
-    errors: () => [],
-    data: () => [],
-    imgValue: undefined,
-    searchPlaceholder: 'Search...',
-    emptyText: 'No items found',
-    modelValue: () => [],
-});
+    closeOnSelect: false,
+    singleLine: false,
+    autoSize: false,
+    contentClass: "w-[320px] p-0",
+    maxCount: 4,
+    responsiveMaxCount: undefined,
+    buttonText: (count: number) => (count > 0 ? `${count} selected` : "Select…"),
+    searchDebounce: 120,
+  }
+);
 
 const emit = defineEmits<{
-    (e: 'update:modelValue', value: any[]): void;
+  (e: "update:modelValue" | "change", value: Primitive[]): void;
+  (e: "open-change", value: boolean): void;
 }>();
 
-const selectedItems = computed<any[]>({
-    get: () => props.modelValue ?? [],
-    set: val => emit('update:modelValue', val),
+const open = ref(false);
+const search = ref("");
+const debouncedSearch = ref("");
+let searchTimer: number | undefined;
+watch(search, (v) => {
+  clearTimeout(searchTimer);
+  // @ts-expect-error window typing not strict
+  searchTimer = window.setTimeout(
+    () => (debouncedSearch.value = v),
+    props.searchDebounce
+  );
 });
 
-const searchTerm = ref('');
-const isOpen = ref(false);
-
-// Get selected items with their full data
-const selectedItemsData = computed(() => {
-    return selectedItems.value.map((selectedValue) => {
-        const item = props.data.find(dataItem => dataItem[props.keyValue] === selectedValue);
-        return item || { [props.keyValue]: selectedValue, [props.nameValue]: selectedValue };
-    });
+// Normalize -> flat list of options
+const normalizedOptions = computed<MultiSelectOption[]>(() => {
+  const arr = props.data ?? [];
+  if (!Array.isArray(arr) || arr.length === 0) return [];
+  const key = props.itemKey!;
+  const lab = props.itemLabel!;
+  const dis = props.itemDisabled!;
+  return arr.map((item: any) => ({
+    value: item?.[key],
+    label: String(item?.[lab] ?? ""),
+    disabled: Boolean(item?.[dis]),
+  }));
 });
 
-// Filter available items (exclude already selected)
-const filteredItems = computed(() => {
-    const selectedKeys = selectedItems.value;
-    return props.data.filter((item) => {
-        const matchesSearch = item[props.nameValue]?.toLowerCase().includes(searchTerm.value.toLowerCase());
-        const notSelected = !selectedKeys.includes(item[props.keyValue]);
-        return matchesSearch && notSelected;
-    });
+const optionByValue = computed<Record<string, MultiSelectOption>>(() => {
+  const map: Record<string, MultiSelectOption> = {};
+  for (const o of normalizedOptions.value) map[String(o.value)] = o;
+  return map;
 });
 
-const addItem = (item: DataItem) => {
-    const newValue = [...selectedItems.value, item[props.keyValue]];
-    selectedItems.value = newValue;
-    searchTerm.value = '';
-    isOpen.value = false;
-};
+const model = computed<Primitive[]>({
+  get: () => props.modelValue ?? [],
+  set: (val) => {
+    emit("update:modelValue", val);
+    emit("change", val);
+  },
+});
 
-const removeItem = (itemToRemove: any) => {
-    const newValue = selectedItems.value.filter(item => item !== itemToRemove);
-    selectedItems.value = newValue;
-};
+const selectedOptions = computed(() =>
+  model.value.map((v) => optionByValue.value[String(v)]).filter(Boolean)
+);
+const filterFn = (o: MultiSelectOption, q: string) => o.label.toLowerCase().includes(q);
 
-const handleInputKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Backspace' && searchTerm.value === '' && selectedItems.value.length > 0) {
-        // Remove last item when backspace is pressed on empty input
-        const newValue = [...selectedItems.value];
-        newValue.pop();
-        selectedItems.value = newValue;
+const filtered = computed<MultiSelectOption[]>(() => {
+  const q = debouncedSearch.value.trim().toLowerCase();
+  if (!q) return normalizedOptions.value;
+  return normalizedOptions.value.filter((o) => filterFn(o, q));
+});
+
+const isSelected = (v: Primitive) => model.value.some((x) => String(x) === String(v));
+
+function toggleValue(v: Primitive) {
+  if (isSelected(v)) {
+    model.value = model.value.filter((x) => String(x) !== String(v));
+  } else {
+    if (props.max > 0 && model.value.length >= props.max) return;
+    model.value = [...model.value, v];
+  }
+  if (props.closeOnSelect) open.value = false;
+}
+
+function clear() {
+  model.value = [];
+}
+
+const filteredEnabledValues = computed(() =>
+  filtered.value.filter((o) => !o.disabled).map((o) => o.value)
+);
+const isAllSelected = computed(
+  () =>
+    filteredEnabledValues.value.length > 0 &&
+    filteredEnabledValues.value.every((v) => isSelected(v))
+);
+
+function toggleSelectAll() {
+  if (!props.selectAll) return;
+  const pool = filteredEnabledValues.value;
+  if (isAllSelected.value) {
+    const remove = new Set(pool.map((v) => String(v)));
+    model.value = model.value.filter((v) => !remove.has(String(v)));
+  } else {
+    const existing = new Set(model.value.map((v) => String(v)));
+    const toAdd: Primitive[] = [];
+    for (const v of pool) {
+      if (props.max > 0 && existing.size + toAdd.length >= props.max) break;
+      if (!existing.has(String(v))) toAdd.push(v);
     }
-};
+    model.value = [...model.value, ...toAdd];
+  }
+}
+
+// Width sync for content
+const triggerRef = ref<HTMLElement | null>(null);
+const contentStyle = ref<string>("");
+function updateWidth() {
+  if (triggerRef.value && !props.autoSize)
+    contentStyle.value = `--trigger-width:${triggerRef.value.offsetWidth}px;`;
+}
+
+onMounted(() => {
+  updateWidth();
+  window.addEventListener("resize", updateWidth);
+});
+
+onBeforeUnmount(() => window.removeEventListener("resize", updateWidth));
+
+// Responsive maxCount
+const viewport = ref<"mobile" | "tablet" | "desktop">("desktop");
+function updateViewport() {
+  const w = window.innerWidth;
+  viewport.value = w <= 768 ? "mobile" : w <= 1024 ? "tablet" : "desktop";
+}
+
+onMounted(() => {
+  updateViewport();
+  window.addEventListener("resize", updateViewport);
+});
+
+onBeforeUnmount(() => window.removeEventListener("resize", updateViewport));
+
+const effectiveMaxCount = computed(() => {
+  const r = props.responsiveMaxCount;
+  if (!r) return props.maxCount;
+  const byVp = r[viewport.value];
+  return typeof byVp === "number" ? byVp : props.maxCount;
+});
+
+const buttonText = computed(() => props.buttonText(model.value.length));
+
+// Programmatic API
+function focus() {
+  triggerRef.value?.focus();
+}
+function openMenu() {
+  open.value = true;
+}
+function closeMenu() {
+  open.value = false;
+}
+function setValues(vals: Primitive[]) {
+  model.value = [...vals];
+}
+function getValues() {
+  return [...model.value];
+}
+
+defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getValues });
 </script>
 
 <template>
-    <div class="grid w-full items-center gap-1.5">
-        <Label
-            v-if="title"
-            :for="id"
-        >
-            {{ title }}
-            <span
-                v-if="required"
-                class="text-destructive font-semibold"
-            >*</span>
-        </Label>
+  <div class="w-full" :class="singleLine ? 'space-y-1' : ''">
+    <label v-if="label" :for="id" class="mb-2 block text-sm font-medium">
+      {{ label }}<span v-if="required" class="text-destructive"> *</span>
+    </label>
 
-        <div class="relative w-full">
-            <Combobox
-                v-model:open="isOpen"
-                v-model:search-term="searchTerm"
-            >
-                <ComboboxAnchor as-child>
-                    <TagsInput
-                        :id="id"
-                        :model-value="selectedItemsData.map((item: DataItem) => item[nameValue])"
-                        :class="cn(
-                            'min-h-10 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
-                            (icon && 'pl-8'),
-                            errors.length > 0 && 'border-destructive focus-within:ring-destructive',
-                        )"
-                        :disabled="disabled"
-                        :readonly="readonly"
-                        :aria-invalid="errors.length > 0"
-                    >
-                        <div class="flex flex-wrap gap-1">
-                            <TagsInputItem
-                                v-for="item in selectedItemsData"
-                                :key="item[keyValue]"
-                                :value="item[nameValue]"
-                                class="flex items-center gap-1"
-                            >
-                                <img
-                                    v-if="imgValue && item[imgValue]"
-                                    :src="item[imgValue]"
-                                    :alt="item[nameValue]"
-                                    class="w-4 h-4 rounded-full object-cover"
-                                >
-                                <TagsInputItemText />
-                                <TagsInputItemDelete
-                                    v-if="!disabled && !readonly"
-                                    @click="removeItem(item[keyValue])"
-                                />
-                            </TagsInputItem>
-                        </div>
-
-                        <ComboboxInput
-                            v-if="!disabled && !readonly"
-                            :placeholder="selectedItems.length === 0 ? placeholder : ''"
-                            class="flex-1 bg-transparent border-0 outline-none focus:ring-0 px-0"
-                            @keydown="handleInputKeydown"
-                        />
-                    </TagsInput>
-                </ComboboxAnchor>
-
-                <span
-                    v-if="icon"
-                    class="absolute start-0 inset-y-0 flex items-center justify-center px-2 pointer-events-none z-10"
-                >
-                    <Icon
-                        :name="icon"
-                        class="size-4 text-muted-foreground"
-                    />
-                </span>
-
-                <ComboboxList
-                    v-if="!disabled && !readonly"
-                    class="mt-1 max-h-60 overflow-auto border rounded-md bg-popover p-1 shadow-md"
-                >
-                    <ComboboxViewport>
-                        <ComboboxEmpty class="py-2 px-3 text-sm text-muted-foreground">
-                            {{ emptyText }}
-                        </ComboboxEmpty>
-
-                        <ComboboxItem
-                            v-for="item in filteredItems"
-                            :key="item[keyValue]"
-                            :value="item[nameValue]"
-                            class="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-sm"
-                            @select="addItem(item)"
-                        >
-                            <img
-                                v-if="imgValue && item[imgValue]"
-                                :src="item[imgValue]"
-                                :alt="item[nameValue]"
-                                class="w-4 h-4 rounded-full object-cover"
-                            >
-                            <span>{{ item[nameValue] }}</span>
-                        </ComboboxItem>
-                    </ComboboxViewport>
-                </ComboboxList>
-            </Combobox>
-        </div>
-
-        <div
-            v-if="errors.length"
-            class="text-destructive text-xs mt-0.5"
-        >
-            <div
-                v-for="(err, i) in errors"
-                :key="i"
-                :class="[(icon && 'pl-8')]"
-            >
-                - {{ err }}
-            </div>
-        </div>
+    <!-- Selected badges -->
+    <div
+      v-if="selectedOptions.length"
+      class="mb-2 flex gap-2"
+      :class="singleLine ? 'overflow-x-auto whitespace-nowrap no-scrollbar' : 'flex-wrap'"
+    >
+      <template v-for="(opt, idx) in selectedOptions" :key="String(opt.value)">
+        <Badge v-if="idx < effectiveMaxCount" class="gap-1 mr-1">
+          <span class="truncate max-w-[12rem]">{{ opt.label }}</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            class="h-4 w-4 p-0"
+            @click.stop="toggleValue(opt.value)"
+            >×</Button
+          >
+        </Badge>
+      </template>
+      <Badge v-if="selectedOptions.length > effectiveMaxCount" variant="secondary"
+        >+{{ selectedOptions.length - effectiveMaxCount }}</Badge
+      >
     </div>
+
+    <Popover v-model:open="open" @update:open="(v:boolean)=>emit('open-change', v)">
+      <PopoverTrigger as-child>
+        <Button
+          :id="id"
+          ref="triggerRef"
+          type="button"
+          variant="outline"
+          :disabled="disabled"
+          class="justify-between"
+          :class="autoSize ? 'w-auto' : 'w-full'"
+          aria-haspopup="listbox"
+          :aria-expanded="open"
+        >
+          <span class="truncate">{{ buttonText }}</span>
+          <span aria-hidden>▼</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        :style="contentStyle"
+        :class="[contentClass, autoSize ? '' : 'popover-content']"
+      >
+        <Command>
+          <div class="flex items-center gap-2 p-2 border-b">
+            <div class="relative flex-1">
+              <CommandInput
+                v-model="search"
+                :placeholder="searchPlaceholder"
+                class="pl-0"
+              />
+            </div>
+            <Button
+              v-if="clearable && model.length"
+              variant="ghost"
+              size="sm"
+              type="button"
+              class="gap-2"
+              @click="clear"
+              >Clear</Button
+            >
+          </div>
+
+          <CommandEmpty class="p-3 text-sm text-muted-foreground">{{
+            emptyText
+          }}</CommandEmpty>
+
+          <ScrollArea class="max-h-60">
+            <CommandList>
+              <CommandGroup>
+                <CommandItem
+                  v-if="selectAll"
+                  value="__select_all__"
+                  class="gap-2"
+                  @select="toggleSelectAll"
+                >
+                  <Checkbox :checked="isAllSelected" class="mr-2" />
+                  <span>{{ isAllSelected ? "Unselect all" : "Select all" }}</span>
+                </CommandItem>
+
+                <CommandItem
+                  v-for="o in filtered"
+                  :key="String(o.value)"
+                  :value="o.label"
+                  :disabled="o.disabled"
+                  class="cursor-pointer"
+                  @select="toggleValue(o.value)"
+                >
+                  <Checkbox
+                    :checked="isSelected(o.value)"
+                    class="mr-2"
+                    :disabled="o.disabled"
+                  />
+                  <span :class="o.disabled ? 'opacity-50' : ''">{{ o.label }}</span>
+                </CommandItem>
+              </CommandGroup>
+            </CommandList>
+          </ScrollArea>
+        </Command>
+      </PopoverContent>
+    </Popover>
+
+    <p v-if="hint" class="mt-2 text-xs text-muted-foreground">{{ hint }}</p>
+  </div>
 </template>
+
+<style scoped>
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.popover-content {
+  width: var(--trigger-width, 20rem);
+}
+</style>
