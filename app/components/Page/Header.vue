@@ -20,7 +20,7 @@ const displayTitle = computed(() => props.title || t('page.page_title'));
                 class="!size-5"
                 :name="icon"
             />
-            <div class="font-medium">
+            <div class="text-h4">
                 {{ displayTitle }}
             </div>
         </div>

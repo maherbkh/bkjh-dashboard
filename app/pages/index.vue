@@ -4,10 +4,10 @@
     <div v-else class="flex flex-col gap-6">
         <!-- Fallback for unknown app type -->
         <div class="flex flex-col gap-2">
-            <h1 class="text-3xl font-bold tracking-tight">
+            <h1 class="text-h1">
                 {{ $t('auth.welcome_back') }}, {{ userStore.user?.firstName || userStore.user?.name || 'User' }}
             </h1>
-            <p class="text-muted-foreground">
+            <p class="text-body text-muted-foreground">
                 {{ $t('global.dashboard') }} - {{ $t('global.overview') }}
             </p>
         </div>
@@ -15,8 +15,8 @@
         <Card>
             <CardContent class="flex flex-col items-center justify-center py-12">
                 <Icon name="solar:question-circle-outline" class="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 class="text-lg font-semibold mb-2">{{ $t('common.app_not_found') }}</h3>
-                <p class="text-muted-foreground text-center">
+                <h3 class="text-h3 mb-2">{{ $t('common.app_not_found') }}</h3>
+                <p class="text-body text-muted-foreground text-center">
                     {{ $t('common.please_select_app') }}
                 </p>
             </CardContent>
