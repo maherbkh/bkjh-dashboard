@@ -78,12 +78,6 @@ export const useNavigationData = (): ComputedRef<{
                         apps: ['support'],
                     },
                     {
-                        title: t('occupation.plural'),
-                        url: '/master-data/occupations',
-                        icon: 'solar:briefcase-outline',
-                        apps: ['support', 'academy'],
-                    },
-                    {
                         title: t('speaker.plural'),
                         url: '/master-data/speakers',
                         icon: 'solar:user-speak-outline',
@@ -106,6 +100,12 @@ export const useNavigationData = (): ComputedRef<{
                         url: '/master-data/event-targets',
                         icon: 'solar:target-outline',
                         apps: ['academy'],
+                    },
+                    {
+                        title: t('occupation.plural'),
+                        url: '/master-data/occupations',
+                        icon: 'solar:case-round-minimalistic-line-duotone',
+                        apps: ['support', 'academy'],
                     },
                 ],
             },
