@@ -106,15 +106,6 @@ const normalizedOptions = computed<MultiSelectOption[]>(() => {
     disabled: Boolean(item?.[dis]),
   }));
 
-  if (process.dev) {
-    console.log("🔍 MultiSelect normalizedOptions debug:", {
-      rawData: arr,
-      itemKey: key,
-      itemLabel: lab,
-      normalizedOptions: options,
-      modelValue: model.value,
-    });
-  }
 
   return options;
 });
@@ -205,16 +196,6 @@ const selectedValuesSet = computed(() => new Set(model.value));
 const isSelected = (v: Primitive) => {
   const stringValue = String(v);
   const result = selectedValuesSet.value.has(stringValue);
-  if (process.dev) {
-    console.log("✅ MultiSelect isSelected check:", {
-      inputValue: v,
-      stringValue,
-      result,
-      currentSelections: Array.from(selectedValuesSet.value),
-      modelValue: model.value,
-      selectedValuesSetSize: selectedValuesSet.value.size,
-    });
-  }
   return result;
 };
 
@@ -525,13 +506,6 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                         class="mr-2"
                         :disabled="o.disabled"
                       />
-                      <!-- Debug info for checkbox -->
-                      <span
-                        class="text-xs ml-2"
-                        :class="isSelected(o.value) ? 'text-green-500' : 'text-red-500'"
-                      >
-                        {{ isSelected(o.value) ? "✓" : "✗" }}
-                      </span>
                       <span :class="o.disabled ? 'opacity-50' : ''">{{ o.label }}</span>
                     </CommandItem>
                   </div>
@@ -553,13 +527,6 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                       class="mr-2"
                       :disabled="o.disabled"
                     />
-                    <!-- Debug info for checkbox -->
-                    <span
-                      class="text-xs ml-2"
-                      :class="isSelected(o.value) ? 'text-green-500' : 'text-red-500'"
-                    >
-                      {{ isSelected(o.value) ? "✓" : "✗" }}
-                    </span>
                     <span :class="o.disabled ? 'opacity-50' : ''">{{ o.label }}</span>
                   </CommandItem>
                 </template>
