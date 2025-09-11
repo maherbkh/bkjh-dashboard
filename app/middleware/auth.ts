@@ -8,9 +8,6 @@ import { useUserStore } from '~/stores/user'
  * - On failure, clears state and redirects to /login?redirect=...
  */
 export default defineNuxtRouteMiddleware(async (to) => {
-
-    console.log('Auth middleware: Starting for', to.fullPath)
-
   const userStore = useUserStore()
 
   // 1) No access token -> go to login

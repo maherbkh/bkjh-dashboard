@@ -1,5 +1,4 @@
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div>
@@ -9,11 +8,9 @@
     </NuxtLayout>
 
     <ClientOnly>
-      <Toaster
-        rich-colors
-        class="pointer-events-auto"
-      />
+      <Toaster rich-colors class="pointer-events-auto" />
       <LazyGlobalAlertDialog />
+      <!-- <A11yAssist /> -->
     </ClientOnly>
   </div>
 </template>

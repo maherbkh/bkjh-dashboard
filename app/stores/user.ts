@@ -14,10 +14,7 @@ export const useUserStore = defineStore('user', () => {
     const resourcesStore = useResourcesStore()
 
     const setAccessToken = (data?: string) => {
-        console.log('setAccessToken called with:', data)
-        console.log('Current accessToken.value before setting:', accessToken.value)
         accessToken.value = data
-        console.log('Current accessToken.value after setting:', accessToken.value)
         return accessToken.value
     }
     const setRefreshToken = (data?: string) => (refreshToken.value = data)
@@ -36,7 +33,6 @@ export const useUserStore = defineStore('user', () => {
             await useApiFetch('/api/v1/dashboard/auth/logout', { method: 'POST' })
         } catch (error) {
             // Continue with logout even if API call fails
-            console.warn('Logout API call failed:', error)
         }
         
         setAccessToken()
@@ -47,7 +43,7 @@ export const useUserStore = defineStore('user', () => {
         try {
             resourcesStore.clearAll()
         } catch (error) {
-            console.warn('Failed to clear resources data:', error)
+            // Failed to clear resources data
         }
         
         // Clear CSRF token cookie
@@ -68,42 +64,23 @@ export const useUserStore = defineStore('user', () => {
     }
 
     async function login(credentials: Credentials, path?: LocationQueryValue) {
-        console.log('Login function called')
         const { data, error } = await useApiFetch(`/api/v1/dashboard/auth/login`, {
             method: 'POST',
             body: credentials,
         })
         if (data.value) {
             const loginData = (data.value as any).data
-            console.log('Login data received:', loginData)
-            console.log('Access token from response:', loginData.tokens.accessToken)
-            console.log('Access token BEFORE setting:', accessToken.value)
-            console.log('Access token cookie object:', accessToken)
             
             setUser(loginData.admin)
             setAccessToken(loginData.tokens.accessToken)
             setRefreshToken(loginData.tokens.refreshToken)
             
-            console.log('Access token AFTER setting:', accessToken.value)
-            console.log('Access token cookie object after:', accessToken)
-            
-            // Force a small delay and check again
-            setTimeout(() => {
-                console.log('Access token after timeout:', accessToken.value)
-            }, 100)
-            
             // Fetch admin data after successful login
             try {
-                console.log('About to fetch admin data...')
-                console.log('Access token before admin data fetch:', accessToken.value)
                 // Wait a bit to ensure cookie is set
                 await new Promise(resolve => setTimeout(resolve, 50))
                 await resourcesStore.fetchAdminData()
-                console.log('Admin data fetched successfully')
-                console.log('Access token after admin data fetch:', accessToken.value)
             } catch (error) {
-                console.warn('Failed to fetch admin data after login:', error)
-                console.log('Access token after admin data fetch error:', accessToken.value)
                 // Don't block login if admin data fetch fails
             }
             
@@ -121,7 +98,6 @@ export const useUserStore = defineStore('user', () => {
             // Let middleware handle navigation - just ensure state is updated
             await nextTick()
             await navigateTo(path as string ? path : '/')
-            console.log('Login successful - middleware will handle navigation')
         }
         if (error.value) {
             // Handle different types of login errors
@@ -175,7 +151,6 @@ export const useUserStore = defineStore('user', () => {
             try {
                 await resourcesStore.fetchAdminData()
             } catch (error) {
-                console.warn('Failed to fetch admin data after auth check:', error)
                 // Don't block auth check if admin data fetch fails
             }
             
@@ -282,7 +257,6 @@ export const useUserStore = defineStore('user', () => {
             const { data: csrfData } = await useApiFetch('/api/v1/dashboard/auth/csrf-token')
             return (csrfData.value as any)?.data?.csrfToken
         } catch (error) {
-            console.warn('Failed to fetch CSRF token:', error)
             return null
         }
     }
@@ -293,7 +267,6 @@ export const useUserStore = defineStore('user', () => {
             const { data: adminData } = await useApiFetch('/api/v1/dashboard/auth/admin-data')
             return (adminData.value as any)?.data
         } catch (error) {
-            console.error('Failed to fetch admin data:', error)
             throw error
         }
     }
@@ -303,7 +276,7 @@ export const useUserStore = defineStore('user', () => {
         try {
             await useApiFetch('/api/v1/dashboard/auth/logout-all', { method: 'POST' })
         } catch (error) {
-            console.warn('Logout all API call failed:', error)
+            // Logout all API call failed
         }
         
         setAccessToken()
@@ -317,7 +290,7 @@ export const useUserStore = defineStore('user', () => {
         try {
             resourcesStore.clearAll()
         } catch (error) {
-            console.warn('Failed to clear resources data:', error)
+            // Failed to clear resources data
         }
         
         toast.success(t('global.goodbye'), {

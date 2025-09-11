@@ -82,7 +82,6 @@ watch(search, (v) => {
   }
 
   // Debounce only for non-empty searches
-  // @ts-expect-error window typing not strict
   searchTimer = window.setTimeout(
     () => (debouncedSearch.value = v),
     props.searchDebounce
@@ -101,11 +100,23 @@ const normalizedOptions = computed<MultiSelectOption[]>(() => {
   // Early return for empty data
   if (arr.length === 0) return [];
 
-  return arr.map((item: any) => ({
+  const options = arr.map((item: any) => ({
     value: String(item?.[key] ?? ""),
     label: String(item?.[lab] ?? ""),
     disabled: Boolean(item?.[dis]),
   }));
+
+  if (process.dev) {
+    console.log("🔍 MultiSelect normalizedOptions debug:", {
+      rawData: arr,
+      itemKey: key,
+      itemLabel: lab,
+      normalizedOptions: options,
+      modelValue: model.value,
+    });
+  }
+
+  return options;
 });
 
 // Optimize optionByValue with early returns
@@ -190,7 +201,22 @@ const filtered = computed<MultiSelectOption[]>(() => {
 
 // Optimize isSelected with Set for O(1) lookup instead of O(n)
 const selectedValuesSet = computed(() => new Set(model.value));
-const isSelected = (v: Primitive) => selectedValuesSet.value.has(String(v));
+
+const isSelected = (v: Primitive) => {
+  const stringValue = String(v);
+  const result = selectedValuesSet.value.has(stringValue);
+  if (process.dev) {
+    console.log("✅ MultiSelect isSelected check:", {
+      inputValue: v,
+      stringValue,
+      result,
+      currentSelections: Array.from(selectedValuesSet.value),
+      modelValue: model.value,
+      selectedValuesSetSize: selectedValuesSet.value.size,
+    });
+  }
+  return result;
+};
 
 // Optimized toggleValue with early returns and better performance
 function toggleValue(v: Primitive, force?: boolean) {
@@ -351,14 +377,6 @@ function openMenu() {
   nextTick(() => {
     const endTime = performance.now();
     const duration = endTime - startTime;
-
-    if (process.dev) {
-      if (duration > 100) {
-        console.warn(`MultiSelect opening took ${duration.toFixed(2)}ms`);
-      } else if (duration > 50) {
-        console.log(`MultiSelect opening took ${duration.toFixed(2)}ms`);
-      }
-    }
   });
 }
 function closeMenu() {
@@ -388,16 +406,16 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
     >
       <template
         v-for="(opt, idx) in selectedOptions"
-        :key="`selected-${opt.value}-${idx}`"
+        :key="`selected-${opt?.value}-${idx}`"
       >
-        <Badge v-if="idx < effectiveMaxCount" class="gap-1 mr-1">
-          <span class="truncate max-w-[12rem]">{{ opt.label }}</span>
+        <Badge v-if="opt && idx < effectiveMaxCount" class="gap-1 mr-1">
+          <span class="truncate max-w-[12rem]">{{ opt?.label }}</span>
           <Button
             type="button"
             variant="ghost"
             size="icon"
             class="h-4 w-4 p-0"
-            @click.stop="toggleValue(opt.value, false)"
+            @click.stop="opt && toggleValue(opt.value, false)"
             >×</Button
           >
         </Badge>
@@ -434,7 +452,7 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
               <CommandInput
                 v-model="search"
                 :placeholder="searchPlaceholder"
-                class="pl-0"
+                class="pl-0 !border-transparent"
               />
             </div>
             <Button
@@ -502,11 +520,18 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                       @click="toggleValue(o.value)"
                     >
                       <Checkbox
-                        :checked="isSelected(o.value)"
+                        :model-value="isSelected(o.value)"
                         @update:checked="(nv:boolean)=>toggleValue(o.value, nv)"
                         class="mr-2"
                         :disabled="o.disabled"
                       />
+                      <!-- Debug info for checkbox -->
+                      <span
+                        class="text-xs ml-2"
+                        :class="isSelected(o.value) ? 'text-green-500' : 'text-red-500'"
+                      >
+                        {{ isSelected(o.value) ? "✓" : "✗" }}
+                      </span>
                       <span :class="o.disabled ? 'opacity-50' : ''">{{ o.label }}</span>
                     </CommandItem>
                   </div>
@@ -523,11 +548,18 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                     @click="toggleValue(o.value)"
                   >
                     <Checkbox
-                      :checked="isSelected(o.value)"
+                      :model-value="isSelected(o.value)"
                       @update:checked="(nv:boolean)=>toggleValue(o.value, nv)"
                       class="mr-2"
                       :disabled="o.disabled"
                     />
+                    <!-- Debug info for checkbox -->
+                    <span
+                      class="text-xs ml-2"
+                      :class="isSelected(o.value) ? 'text-green-500' : 'text-red-500'"
+                    >
+                      {{ isSelected(o.value) ? "✓" : "✗" }}
+                    </span>
                     <span :class="o.disabled ? 'opacity-50' : ''">{{ o.label }}</span>
                   </CommandItem>
                 </template>
