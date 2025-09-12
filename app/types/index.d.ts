@@ -78,6 +78,82 @@ export type Occupation = {
     updatedAt: string;
 };
 
+export type SupportTicket = {
+    id: string; // UUID from API
+    ticketNumber: string;
+    requester: {
+        name: string;
+        email: string;
+        phone: string;
+        cell: string | null;
+    };
+    groupId: string;
+    ticketCategoryId: string;
+    message: string;
+    type: 'TICKET' | 'TASK';
+    adminId: string;
+    deviceId: string;
+    createdAt: string;
+    updatedAt: string;
+    group: {
+        id: string;
+        name: string;
+    };
+    ticketCategory: {
+        id: string;
+        name: string;
+    };
+    admin: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+    };
+    statuses: TicketStatus[];
+    actions?: TicketAction[];
+    attachments?: TicketAttachment[];
+};
+
+export type TicketStatus = {
+    id: string;
+    status: 'PENDING' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED' | 'CANCELLED';
+    note: string | null;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type TicketAction = {
+    id: string;
+    ticketId: string;
+    issuerId: string;
+    targetId: string;
+    note: string;
+    actionType: 'CREATE' | 'ASSIGN' | 'UPDATE' | 'RESOLVE' | 'CLOSE' | 'REOPEN';
+    createdAt: string;
+    updatedAt: string;
+    issuer: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+    };
+    target: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+    };
+};
+
+export type TicketAttachment = {
+    id: string;
+    uuid: string;
+    filename: string;
+    mimeType: string;
+    size: string;
+    url: string;
+};
+
 // Component types
 export type SelectOption = {
     [key: string]: any;
