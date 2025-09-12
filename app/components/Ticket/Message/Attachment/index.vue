@@ -10,7 +10,7 @@
 
     <!-- Attachment List -->
     <ul
-      class="flex flex-col items-start gap-2 divide-y divide-dashed border rounded-xl p-4 mt-3 bg-muted/50"
+      class="flex flex-col items-start gap-2 p-4"
     >
       <TicketMessageAttachmentItem
         v-for="attachment in attachments"

@@ -150,8 +150,14 @@ export type TicketAttachment = {
     uuid: string;
     filename: string;
     mimeType: string;
-    size: string;
-    url: string;
+    size: number;
+    title: string | null;
+    description: string | null;
+    altText: string | null;
+    urls: {
+        internal: string;
+    };
+    createdAt: string;
 };
 
 // Component types

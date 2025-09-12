@@ -282,6 +282,15 @@
     "singular": "Ticket",
     "details": "Ticket-Details"
   },
+  "requester": {
+    "plural": "Antragsteller",
+    "singular": "Antragsteller",
+    "name": "Antragsteller Name",
+    "email": "Antragsteller E-Mail",
+    "phone": "Antragsteller Telefon",
+    "cell": "Antragsteller Handy",
+    "information": "Antragsteller Informationen"
+  },
   "setting": {
     "plural": "Einstellungen",
     "singular": "Einstellung"

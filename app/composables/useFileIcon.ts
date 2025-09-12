@@ -61,11 +61,11 @@ export const useFileIcon = () => {
     const handleAttachmentClick = (attachment: TicketAttachment) => {
         if (attachment.mimeType?.startsWith('image/')) {
             // Open image in new window
-            window.open(attachment.url, '_blank');
+            window.open(attachment.urls.internal, '_blank');
         }
         else {
             // Download file
-            window.open(attachment.url, '_blank');
+            window.open(attachment.urls.internal, '_blank');
         }
     };
 

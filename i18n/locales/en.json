@@ -284,6 +284,15 @@
     "singular": "Ticket",
     "details": "Ticket Details"
   },
+  "requester": {
+    "plural": "Requesters",
+    "singular": "Requester",
+    "name": "Requester Name",
+    "email": "Requester Email",
+    "phone": "Requester Phone",
+    "cell": "Requester Cell",
+    "information": "Requester Information"
+  },
 
   "setting": {
     "plural": "Settings",

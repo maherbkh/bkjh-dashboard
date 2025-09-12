@@ -15,7 +15,7 @@
 
 <template>
   <li
-    class="flex items-center gap-4 py-2 grow w-full cursor-pointer hover:bg-muted/50 rounded-lg p-2 transition-colors"
+    class="flex items-center gap-4 grow w-full cursor-pointer hover:bg-muted/50 bg-background rounded-lg py-2 px-4 transition-colors"
     @click="handleClick"
   >
     <!-- Thumbnail or Icon -->
@@ -25,7 +25,7 @@
         class="size-10 rounded-lg border bg-muted overflow-hidden flex items-center justify-center"
       >
         <img
-          :src="attachment.url"
+          :src="attachment.urls.internal"
           :alt="attachment.filename"
           class="object-cover w-full h-full"
           loading="lazy"
@@ -33,9 +33,9 @@
       </div>
       <div
         v-else
-        class="size-10 rounded-lg border bg-muted flex items-center justify-center"
+        class="size-8 rounded-lg border bg-muted flex items-center justify-center"
       >
-        <Icon :name="fileIcon" class="size-6 text-muted-foreground" />
+        <Icon :name="fileIcon" class="!size-6 text-muted-foreground" />
       </div>
     </div>
 
@@ -46,15 +46,7 @@
           {{ attachment.filename }}
         </span>
         <span class="text-xs text-muted-foreground ml-2 flex-shrink-0">
-          {{ formatFileSize(parseInt(attachment.size)) }}
-        </span>
-      </div>
-      <div class="flex items-center gap-2 mt-1">
-        <span class="text-xs text-muted-foreground">
-          {{ getFileExtension(attachment.filename)?.toUpperCase() }}
-        </span>
-        <span class="text-xs text-muted-foreground">
-          {{ fileTypeLabel }}
+          {{ formatFileSize(attachment.size) }}
         </span>
       </div>
     </div>

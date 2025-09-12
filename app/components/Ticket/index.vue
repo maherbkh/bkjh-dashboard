@@ -51,7 +51,7 @@
               >
                 {{
                   $t(
-                    `ticket.status.${getLatestStatus(
+                    `common.${getLatestStatus(
                       ticket.statuses
                     )?.status?.toLowerCase()}`
                   )
@@ -168,7 +168,7 @@
       <!-- Ticket Details Grid -->
       <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
         <!-- Main Content -->
-        <div class="xl:col-span-9 space-y-6">
+        <div class="xl:col-span-8 space-y-6">
           <!-- Message Card -->
           <TicketMessage
             :message="ticket.message"
@@ -243,7 +243,7 @@
         </div>
 
         <!-- Sidebar -->
-        <div class="xl:col-span-3 space-y-6">
+        <div class="xl:col-span-4 space-y-6">
           <!-- Ticket Information -->
           <Card>
             <CardHeader>
@@ -277,7 +277,7 @@
               </CardTitle>
             </CardHeader>
             <CardContent class="flex flex-col divide-y divide-dashed">
-              <AppListItem :title="$t('global.name')" :value="ticket.requester.name" />
+              <AppListItem :title="$t('requester.singular')" :value="ticket.requester.name" />
               <AppListItem :title="$t('form.email')" :value="ticket.requester.email" />
               <AppListItem :title="$t('form.phone')" :value="ticket.requester.phone" />
               <AppListItem :title="$t('form.cell')" :value="ticket.requester.cell" />

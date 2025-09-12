@@ -401,7 +401,7 @@ const getStatusVariant = (status: string) => {
               >
                 {{
                   $t(
-                    `ticket.status.${getLatestStatus(
+                    `common.${getLatestStatus(
                       row.statuses
                     )?.status?.toLowerCase()}`
                   )
