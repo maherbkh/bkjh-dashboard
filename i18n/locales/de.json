@@ -31,7 +31,9 @@
     "integer": "muss eine ganze Zahl sein",
     "min_value": "muss mindestens {min} sein",
     "positive": "muss eine positive Zahl sein",
-    "slug_format": "darf nur Kleinbuchstaben, Zahlen und Bindestriche enthalten"
+    "slug_format": "darf nur Kleinbuchstaben, Zahlen und Bindestriche enthalten",
+    "code_format": "darf nur Großbuchstaben, Zahlen und Unterstriche enthalten",
+    "uuid": "muss eine gültige UUID sein"
   },
   "auth": {
     "login_form": "Anmeldeformular",
@@ -233,6 +235,32 @@
     "plural": "Administratoren",
     "description": "Systemadministrator mit vollständigem Zugriff auf alle Funktionen"
   },
+  "event_category": {
+    "singular": "Veranstaltungskategorie",
+    "plural": "Veranstaltungskategorien",
+    "description": "Veranstaltungskategorien für die Organisation von Akademieveranstaltungen verwalten",
+    "name": "Kategoriename",
+    "name_placeholder": "Kategoriename eingeben",
+    "position": "Position",
+    "position_placeholder": "Positionsnummer eingeben",
+    "parent": "Übergeordnete Kategorie",
+    "parent_placeholder": "Übergeordnete Kategorie auswählen"
+  },
+  "event_target": {
+    "singular": "Veranstaltungszielgruppe",
+    "plural": "Veranstaltungszielgruppen",
+    "description": "Veranstaltungszielgruppen für die Definition von Veranstaltungszielgruppen verwalten",
+    "code": "Code",
+    "code_placeholder": "Eindeutigen Code eingeben (z.B. EMP)",
+    "code_help": "Nur Großbuchstaben, Zahlen und Unterstriche",
+    "name": "Zielgruppenname",
+    "name_placeholder": "Zielgruppenname eingeben",
+    "slug": "Slug",
+    "slug_placeholder": "URL-freundlichen Slug eingeben",
+    "slug_help": "Nur Kleinbuchstaben, Zahlen und Bindestriche",
+    "position": "Position",
+    "position_placeholder": "Positionsnummer eingeben"
+  },
   "profile": {
     "singular": "Profil",
     "description": "Ihre persönlichen Informationen und Kontoeinstellungen verwalten"
@@ -310,16 +338,7 @@
     "singular": "Teilnehmer",
     "description": "Veranstaltungsteilnehmer verwalten"
   },
-  "event_category": {
-    "plural": "Veranstaltungskategorien",
-    "singular": "Veranstaltungskategorie",
-    "description": "Veranstaltungskategorien für Akademie-Veranstaltungen verwalten"
-  },
-  "event_target": {
-    "plural": "Veranstaltungsziele",
-    "singular": "Veranstaltungsziel",
-    "description": "Veranstaltungszielgruppen verwalten"
-  },
+
   "application": {
     "plural": "Anwendungen",
     "singular": "Anwendung"

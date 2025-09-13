@@ -78,6 +78,45 @@ export type Occupation = {
     updatedAt: string;
 };
 
+export type EventCategory = {
+    id: string;
+    name: string;
+    isActive: boolean;
+    position: number;
+    parentId: string | null;
+    parent?: EventCategory | null;
+    children?: EventCategory[];
+    eventsCount?: number;
+    childrenCount?: number;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type EventTarget = {
+    id: string;
+    code: string;
+    name: string;
+    slug: string;
+    position: number;
+    eventsCount?: number;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type EventCategoryForm = {
+    name: string;
+    isActive: boolean;
+    position: number;
+    parentId: string | null;
+};
+
+export type EventTargetForm = {
+    code: string;
+    name: string;
+    slug?: string;
+    position: number;
+};
+
 export type SupportTicket = {
     id: string; // UUID from API
     ticketNumber: string;

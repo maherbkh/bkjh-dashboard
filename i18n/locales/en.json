@@ -32,7 +32,9 @@
     "integer": "must be an integer",
     "min_value": "must be at least {min}",
     "positive": "must be a positive number",
-    "slug_format": "must contain only lowercase letters, numbers, and hyphens"
+    "slug_format": "must contain only lowercase letters, numbers, and hyphens",
+    "code_format": "must contain only uppercase letters, numbers, and underscores",
+    "uuid": "must be a valid UUID"
   },
   "auth": {
     "login_form": "Login Form",
@@ -233,6 +235,32 @@
     "plural": "Admins",
     "description": "System administrator with full access to all features"
   },
+  "event_category": {
+    "singular": "Event Category",
+    "plural": "Event Categories",
+    "description": "Manage event categories for organizing academy events",
+    "name": "Category Name",
+    "name_placeholder": "Enter category name",
+    "position": "Position",
+    "position_placeholder": "Enter position number",
+    "parent": "Parent Category",
+    "parent_placeholder": "Select parent category"
+  },
+  "event_target": {
+    "singular": "Event Target",
+    "plural": "Event Targets",
+    "description": "Manage event targets for defining event audiences",
+    "code": "Code",
+    "code_placeholder": "Enter unique code (e.g., EMP)",
+    "code_help": "Uppercase letters, numbers, and underscores only",
+    "name": "Target Name",
+    "name_placeholder": "Enter target name",
+    "slug": "Slug",
+    "slug_placeholder": "Enter URL-friendly slug",
+    "slug_help": "Lowercase letters, numbers, and hyphens only",
+    "position": "Position",
+    "position_placeholder": "Enter position number"
+  },
   "profile": {
     "singular": "Profile",
     "description": "Manage your personal information and account settings"
@@ -313,16 +341,7 @@
     "singular": "Attendee",
     "description": "Manage event attendees"
   },
-  "event_category": {
-    "plural": "Event Categories",
-    "singular": "Event Category",
-    "description": "Manage event categories for academy events"
-  },
-  "event_target": {
-    "plural": "Event Targets",
-    "singular": "Event Target",
-    "description": "Manage event target audiences"
-  },
+
   "application": {
     "plural": "Applications",
     "singular": "Application"
