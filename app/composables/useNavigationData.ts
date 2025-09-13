@@ -84,12 +84,6 @@ export const useNavigationData = (): ComputedRef<{
                         apps: ['academy'],
                     },
                     {
-                        title: t('attendee.plural'),
-                        url: '/master-data/attendee/list',
-                        icon: 'solar:users-group-rounded-outline',
-                        apps: ['academy'],
-                    },
-                    {
                         title: t('event_category.plural'),
                         url: '/master-data/event-categories',
                         icon: 'solar:bookmark-outline',
@@ -148,7 +142,7 @@ export const useNavigationData = (): ComputedRef<{
                 items: [
                     {
                         title: t('academy.plural'),
-                        url: '/events/list',
+                        url: '/events',
                         icon: 'solar:calendar-outline',
                         apps: ['academy'],
                     },
@@ -156,6 +150,12 @@ export const useNavigationData = (): ComputedRef<{
                         title: t('action.add') + ' ' + t('academy.singular'),
                         url: '/events/add',
                         icon: 'solar:add-circle-outline',
+                        apps: ['academy'],
+                    },
+                    {
+                        title: t('attendee.plural'),
+                        url: '/events/attendees',
+                        icon: 'solar:users-group-rounded-outline',
                         apps: ['academy'],
                     },
                 ],
