@@ -92,8 +92,8 @@ const handleReset = async () => {
   sortDir.value = "asc";
   await fetchItems(currentPage.value, perPage.value, {
     search: searchQuery.value,
-    sort_by: sortBy.value,
-    sort_dir: sortDir.value,
+    sortBy: sortBy.value,
+    sortDir: sortDir.value,
   });
   selectedRows.value = [];
 };
@@ -102,8 +102,8 @@ const handleSearchSubmit = async () => {
   currentPage.value = 1;
   await fetchItems(currentPage.value, perPage.value, {
     search: searchQuery.value,
-    sort_by: sortBy.value,
-    sort_dir: sortDir.value,
+    sortBy: sortBy.value,
+    sortDir: sortDir.value,
   });
   selectedRows.value = [];
 };
@@ -112,8 +112,8 @@ const handlePageChange = async (page: number) => {
   currentPage.value = page;
   await fetchItems(currentPage.value, perPage.value, {
     search: searchQuery.value,
-    sort_by: sortBy.value,
-    sort_dir: sortDir.value,
+    sortBy: sortBy.value,
+    sortDir: sortDir.value,
   });
   selectedRows.value = [];
 };
@@ -124,8 +124,8 @@ async function handleSortChange(dir: "asc" | "desc", id: string) {
   currentPage.value = 1;
   await fetchItems(currentPage.value, perPage.value, {
     search: searchQuery.value,
-    sort_by: sortBy.value,
-    sort_dir: sortDir.value,
+    sortBy: sortBy.value,
+    sortDir: sortDir.value,
   });
   selectedRows.value = [];
 }

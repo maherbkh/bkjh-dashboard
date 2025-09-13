@@ -394,5 +394,17 @@
   "type": {
     "singular": "Type",
     "plural": "Types"
+  },
+  "speaker": {
+    "singular": "Speaker",
+    "plural": "Speakers",
+    "description": "Manage speakers for academy events and workshops",
+    "name": "Speaker Name",
+    "name_placeholder": "Enter speaker name",
+    "qualification": "Qualification",
+    "qualification_placeholder": "Enter speaker qualification (e.g., PhD in Computer Science)",
+    "qualification_help": "Optional: Describe the speaker's expertise and credentials",
+    "add_description": "Add a new speaker to the academy system",
+    "edit_description": "Edit speaker information and qualifications"
   }
 }

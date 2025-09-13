@@ -63,14 +63,14 @@ Retrieves all event targets with filtering and pagination.
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
 | `page` | number | No | 1 | Page number (minimum: 1) |
-| `limit` | number | No | 10 | Items per page (1-100) |
+| `length` | number | No | 25 | Items per page (1-100) |
 | `search` | string | No | - | Search term to filter results |
-| `sortBy` | string | No | name | Sort field (code, name, slug, createdAt, updatedAt) |
-| `sortOrder` | string | No | desc | Sort order (asc, desc) |
+| `sort_by` | string | No | name | Sort field (code, name, slug, createdAt, updatedAt) |
+| `sort_dir` | string | No | asc | Sort order (asc, desc) |
 
 #### Example Request
 ```
-GET /api/v1/dashboard/academy/event-targets?page=1&limit=10&search=emp&sortBy=name&sortOrder=asc
+GET /api/v1/dashboard/academy/event-targets?page=1&length=25&search=emp&sort_by=name&sort_dir=asc
 ```
 
 #### Response
@@ -90,7 +90,7 @@ GET /api/v1/dashboard/academy/event-targets?page=1&limit=10&search=emp&sortBy=na
   ],
   "meta": {
     "page": 1,
-    "limit": 10,
+    "length": 25,
     "total": 1,
     "totalPages": 1,
     "hasNext": false,

@@ -83,7 +83,7 @@
             @click="handleSubmitAndAddNew"
             :disabled="isSubmitting"
           >
-            {{ $t("action.save_and_add_new") }}
+            {{ $t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new') }}
           </Button>
           <Button type="submit" :disabled="isSubmitting">
             <Icon

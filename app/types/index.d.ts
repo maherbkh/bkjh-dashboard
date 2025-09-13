@@ -117,6 +117,23 @@ export type EventTargetForm = {
     position: number;
 };
 
+export type Speaker = {
+    id: string;
+    name: string;
+    qualification: string;
+    isActive: boolean;
+    eventsCount?: number;
+    events?: Event[];
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type SpeakerForm = {
+    name: string;
+    qualification?: string;
+    isActive: boolean;
+};
+
 export type SupportTicket = {
     id: string; // UUID from API
     ticketNumber: string;

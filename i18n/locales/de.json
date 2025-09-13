@@ -391,5 +391,17 @@
   "type": {
     "singular": "Typ",
     "plural": "Typen"
+  },
+  "speaker": {
+    "singular": "Referent",
+    "plural": "Referenten",
+    "description": "Verwalten Sie Referenten für Akademie-Veranstaltungen und Workshops",
+    "name": "Referentenname",
+    "name_placeholder": "Referentenname eingeben",
+    "qualification": "Qualifikation",
+    "qualification_placeholder": "Qualifikation eingeben (z.B. PhD in Computer Science)",
+    "qualification_help": "Optional: Beschreiben Sie die Expertise und Qualifikationen des Referenten",
+    "add_description": "Einen neuen Referenten zum Akademie-System hinzufügen",
+    "edit_description": "Referenteninformationen und Qualifikationen bearbeiten"
   }
 }

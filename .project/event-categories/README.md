@@ -65,15 +65,15 @@ Retrieves all event categories with filtering and pagination.
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
 | `page` | number | No | 1 | Page number (minimum: 1) |
-| `limit` | number | No | 10 | Items per page (1-100) |
+| `length` | number | No | 25 | Items per page (1-100) |
 | `search` | string | No | - | Search term to filter results |
 | `isActive` | boolean | No | - | Filter by active status |
-| `sortBy` | string | No | name | Sort field (name, isActive, createdAt, updatedAt) |
-| `sortOrder` | string | No | desc | Sort order (asc, desc) |
+| `sort_by` | string | No | name | Sort field (name, isActive, createdAt, updatedAt) |
+| `sort_dir` | string | No | asc | Sort order (asc, desc) |
 
 #### Example Request
 ```
-GET /api/v1/dashboard/academy/event-categories?page=1&limit=10&search=tech&isActive=true&sortBy=name&sortOrder=asc
+GET /api/v1/dashboard/academy/event-categories?page=1&length=25&search=tech&isActive=true&sort_by=name&sort_dir=asc
 ```
 
 #### Response
@@ -93,7 +93,7 @@ GET /api/v1/dashboard/academy/event-categories?page=1&limit=10&search=tech&isAct
   ],
   "meta": {
     "page": 1,
-    "limit": 10,
+    "length": 25,
     "total": 1,
     "totalPages": 1,
     "hasNext": false,
