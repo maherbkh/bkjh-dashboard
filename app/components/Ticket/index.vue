@@ -102,9 +102,9 @@
             {{ $t("action.self_assign") }}
           </Button>
           <DropdownMenu v-else>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger class="lg:w-fit w-full">
               <Button
-                class="group"
+                class="group lg:w-fit w-full"
                 :title="$t('common.more')"
                 variant="outline"
                 :disabled="isActionLoading"

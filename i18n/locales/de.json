@@ -228,6 +228,11 @@
     "add_description": "Neuen Benutzer zum System hinzufügen",
     "edit_description": "Benutzerinformationen und Berechtigungen bearbeiten"
   },
+  "admin": {
+    "singular": "Administrator",
+    "plural": "Administratoren",
+    "description": "Systemadministrator mit vollständigem Zugriff auf alle Funktionen"
+  },
   "profile": {
     "singular": "Profil",
     "description": "Ihre persönlichen Informationen und Kontoeinstellungen verwalten"

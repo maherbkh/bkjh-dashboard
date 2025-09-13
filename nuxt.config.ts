@@ -21,6 +21,15 @@ export default defineNuxtConfig({
         '/get-geoip/**': {
             proxy: `http://ip-api.com/json/**`,
         },
+        '/api/media/**': {
+            proxy: 'http://api.backhaus.test:3055/api/v1/media/**',
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+                'Access-Control-Expose-Headers': 'Content-Disposition, Content-Length, Content-Type'
+            }
+        },
     },
   },
   css: ['~/assets/css/main.css', 'vue-sonner/style.css'],

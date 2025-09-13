@@ -5,6 +5,8 @@
 import type { TicketAttachment } from '~/types';
 
 export const useFileIcon = () => {
+    // Get media proxy utility
+    const { getProxyUrl } = useMediaProxy();
     /**
      * Get the appropriate icon for a file based on its properties
      */
@@ -58,14 +60,80 @@ export const useFileIcon = () => {
     /**
      * Handle attachment click (preview or download)
      */
-    const handleAttachmentClick = (attachment: TicketAttachment) => {
+    const handleAttachmentClick = async (attachment: TicketAttachment) => {
+        // Transform URL to use proxy (bypasses CORS)
+        const proxyUrl = getProxyUrl(attachment.urls.internal);
+        const filename = attachment.filename || 'download';
+        
+        console.log('Using proxy URL for download:', proxyUrl);
+        console.log('Downloading file with filename:', filename);
+        
         if (attachment.mimeType?.startsWith('image/')) {
-            // Open image in new window
-            window.open(attachment.urls.internal, '_blank');
+            // Open image in new tab for preview using proxy URL
+            window.open(proxyUrl, '_blank');
         }
         else {
-            // Download file
-            window.open(attachment.urls.internal, '_blank');
+            // Use proxy URL for downloads - this should work without CORS issues
+            try {
+                // Method 1: Direct download with proxy URL
+                const link = document.createElement('a');
+                link.href = proxyUrl;
+                link.download = filename;
+                link.setAttribute('download', filename);
+                link.target = '_blank';
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                console.log('Direct download initiated with proxy URL');
+                
+            } catch (error) {
+                console.error('Direct download failed:', error);
+                
+                // Method 2: Fetch with proxy URL as fallback
+                try {
+                    const response = await fetch(proxyUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': '*/*',
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    
+                    console.log('Downloading blob with filename:', filename);
+                    
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename;
+                    link.setAttribute('download', filename);
+                    link.style.display = 'none';
+                    link.target = '_blank';
+                    
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Cleanup blob URL
+                    setTimeout(() => {
+                        window.URL.revokeObjectURL(url);
+                    }, 100);
+                    
+                } catch (fetchError) {
+                    console.error('Fetch download failed:', fetchError);
+                    
+                    // Method 3: Final fallback - open in new tab
+                    console.log('Opening file in new tab as fallback');
+                    window.open(proxyUrl, '_blank');
+                }
+            }
         }
     };
 

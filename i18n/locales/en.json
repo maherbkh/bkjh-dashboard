@@ -228,6 +228,11 @@
     "add_description": "Add a new user to the system",
     "edit_description": "Edit user information and permissions"
   },
+  "admin": {
+    "singular": "Admin",
+    "plural": "Admins",
+    "description": "System administrator with full access to all features"
+  },
   "profile": {
     "singular": "Profile",
     "description": "Manage your personal information and account settings"

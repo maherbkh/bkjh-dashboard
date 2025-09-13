@@ -15,7 +15,11 @@
 
 <template>
   <li
-    class="flex items-center gap-4 grow w-full cursor-pointer hover:bg-muted/50 bg-background rounded-lg py-2 px-4 transition-colors"
+    class="flex items-center gap-4 grow w-full rounded-lg py-2 px-4 transition-colors"
+    :class="{
+      'cursor-pointer hover:bg-muted/50 bg-background': !isDownloading,
+      'cursor-not-allowed opacity-50 bg-muted/30': isDownloading
+    }"
     @click="handleClick"
   >
     <!-- Thumbnail or Icon -->
@@ -25,7 +29,7 @@
         class="size-10 rounded-lg border bg-muted overflow-hidden flex items-center justify-center"
       >
         <img
-          :src="attachment.urls.internal"
+          :src="getProxyUrl(attachment.urls.internal)"
           :alt="attachment.filename"
           class="object-cover w-full h-full"
           loading="lazy"
@@ -53,7 +57,16 @@
 
     <!-- Action Icon -->
     <div class="flex-shrink-0">
-      <Icon :name="actionIcon" class="!size-5 shrink-0 text-muted-foreground" />
+      <Icon 
+        v-if="!isDownloading"
+        :name="actionIcon" 
+        class="!size-5 shrink-0 text-muted-foreground" 
+      />
+      <Icon 
+        v-else
+        name="solar:refresh-linear" 
+        class="!size-5 shrink-0 text-muted-foreground animate-spin" 
+      />
     </div>
   </li>
 </template>
@@ -72,6 +85,12 @@ const {
   getActionIcon,
   handleAttachmentClick,
 } = useFileIcon();
+
+// Use the media proxy utility
+const { getProxyUrl } = useMediaProxy();
+
+// Loading state for downloads
+const isDownloading = ref(false);
 
 // Helper function to format file size
 const formatFileSize = (bytes: number): string => {
@@ -98,7 +117,14 @@ const fileTypeLabel = computed(() => getFileTypeLabel(props.attachment));
 const actionIcon = computed(() => getActionIcon(props.attachment));
 
 // Handle click event
-const handleClick = () => {
-  handleAttachmentClick(props.attachment);
+const handleClick = async () => {
+  if (isDownloading.value) return; // Prevent multiple clicks
+  
+  isDownloading.value = true;
+  try {
+    await handleAttachmentClick(props.attachment);
+  } finally {
+    isDownloading.value = false;
+  }
 };
 </script>
