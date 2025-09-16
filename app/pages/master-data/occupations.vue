@@ -61,7 +61,7 @@ const headerItems = computed(() => [
   },
   {
     as: "th",
-    name: t("status.singular"),
+    name: t("common.status"),
     id: "isActive",
   },
   {
@@ -340,7 +340,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
 
             <template #cell-isActive="{ row }">
               <Badge :variant="row.isActive ? 'default' : 'secondary'">
-                {{ row.isActive ? $t("status.active") : $t("status.inactive") }}
+                {{ row.isActive ? $t("common.active") : $t("common.inactive") }}
               </Badge>
             </template>
 

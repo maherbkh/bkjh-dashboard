@@ -34,7 +34,7 @@ function getValueByPath(obj: any, path: string): any {
             <tr
                 v-for="skeletonRow in (props.skeletonRows || 25)"
                 :key="`skeleton-${skeletonRow}`"
-                class="text-sm"
+                class="text-sm "
             >
                 <td
                     v-if="selectable"

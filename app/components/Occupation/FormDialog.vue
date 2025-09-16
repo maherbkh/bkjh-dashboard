@@ -147,7 +147,7 @@ const submitForm = (action: "submitAndClose" | "submitAndAddNew") => {
           <FormItemSwitch
             id="isActive"
             v-model="isActive"
-            :title="$t('status.singular')"
+            :title="$t('common.status')"
             :description="$t('status.description')"
             class="col-span-12"
             :errors="errors.isActive ? [errors.isActive] : []"

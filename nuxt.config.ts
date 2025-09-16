@@ -45,6 +45,16 @@ export default defineNuxtConfig({
     '@nuxtjs/i18n',
     '@pinia/nuxt',
   ],
+  fonts: {
+    families: [
+      {
+        name: 'Roboto',
+        provider: 'google',
+        weights: ['100 900'],
+        styles: ['normal', 'italic'],
+      },
+    ],
+  },
   app: {
     buildAssetsDir: '/static/',
     rootAttrs: {

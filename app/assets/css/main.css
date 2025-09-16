@@ -40,6 +40,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+	--font-family-sans: 'Roboto', 'Museo', ui-sans-serif, system-ui, sans-serif;
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -168,7 +169,7 @@
 	}
 
 	body {
-		font-family: 'Museo', sans-serif;
+		font-family: 'Roboto', 'Museo', sans-serif;
 		@apply bg-background text-foreground;
 	}
 
@@ -305,7 +306,7 @@
 			}
 
 			td {
-				@apply border border-l-0 border-r-0 bg-sidebar/65 first:border-l last:border-r;
+				@apply border border-l-0 border-r-0 bg-sidebar first:border-l last:border-r;
 
 				&:first-child {
 					@apply rounded-l-md;

@@ -11,7 +11,7 @@ export function createOccupationSchema(t: (key: string, params?: Record<string, 
             .min(0, t('position.singular') + ' ' + t('validation.min_value', { min: 0 }))
             .max(9999, t('position.singular') + ' ' + t('validation.max_value', { max: 9999 })),
         isActive: z
-            .boolean({ required_error: t('status.singular') + ' ' + t('validation.required') })
+            .boolean({ required_error: t('common.status') + ' ' + t('validation.required') })
             .default(true),
     });
 }
