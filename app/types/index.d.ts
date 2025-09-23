@@ -27,11 +27,8 @@ export type User = {
 };
 
 export type LoginData = {
-    tokens: {
-        accessToken: string;
-        refreshToken: string;
-        expiresIn?: number;
-    };
+    accessToken: string;
+    expiresIn: number;
     admin: User; // The admin object is the user data
 };
 

@@ -43,7 +43,7 @@
     "embla-carousel-vue": "^8.6.0",
     "eslint": "^9.34.0",
     "lucide-vue-next": "^0.543.0",
-    "nuxt": "^4.1.1",
+    "nuxt": "^4.1.2",
     "pinia": "^3.0.3",
     "reka-ui": "^2.5.0",
     "shadcn-nuxt": "^2.2.0",

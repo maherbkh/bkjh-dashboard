@@ -31,7 +31,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
             catch {
                 // If hydration fails, clear broken tokens and remain on guest page
                 userStore.setAccessToken();
-                userStore.setRefreshToken();
                 userStore.setUser();
                 lastValidation.value = String(now);
                 return;

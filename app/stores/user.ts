@@ -6,8 +6,7 @@ import { useResourcesStore } from '~/stores/resources';
 export const useUserStore = defineStore('user', () => {
     const { t } = useNuxtApp().$i18n;
     const user = ref<User | undefined>();
-    const accessToken = useCookie('BKJH_ACCESS_TOKEN', { maxAge: 60 * 60 * 24 });
-    const refreshToken = useCookie('BKJH_REFRESH_TOKEN', { maxAge: 60 * 60 * 24 * 7 }); // 7 days for refresh token
+    const accessToken = useCookie('BKJH_ACCESS_TOKEN', { maxAge: 60 * 15 }); // 15 minutes to match backend
     const lastAuthValidation = useCookie('last_auth_validation', { maxAge: 60 * 5 }); // 5 minutes
 
     // Resources store instance - declared once for reuse
@@ -17,7 +16,6 @@ export const useUserStore = defineStore('user', () => {
         accessToken.value = data;
         return accessToken.value;
     };
-    const setRefreshToken = (data?: string) => (refreshToken.value = data);
     const setUser = (data?: User) => (user.value = data);
     const updateAuthValidation = () => (lastAuthValidation.value = Date.now().toString());
     const clearAuthValidation = () => (lastAuthValidation.value = null);
@@ -37,7 +35,6 @@ export const useUserStore = defineStore('user', () => {
         }
 
         setAccessToken();
-        setRefreshToken();
         setUser();
 
         // Clear all resources data
@@ -74,8 +71,7 @@ export const useUserStore = defineStore('user', () => {
             const loginData = (data.value as any).data;
 
             setUser(loginData.admin);
-            setAccessToken(loginData.tokens.accessToken);
-            setRefreshToken(loginData.tokens.refreshToken);
+            setAccessToken(loginData.accessToken);
 
             // Fetch admin data after successful login
             try {
@@ -167,37 +163,11 @@ export const useUserStore = defineStore('user', () => {
             // Clear user data but don't call logout() to avoid unwanted redirects
             setUser();
             setAccessToken();
-            setRefreshToken();
             return false;
         }
         return false;
     };
 
-    const refresh = async () => {
-        const { data, error } = await useApiFetch('/api/v1/dashboard/auth/refresh', {
-            method: 'POST',
-            body: {
-                refreshToken: refreshToken.value,
-            },
-        });
-        if (data.value) {
-            const refreshData = (data.value as any).data;
-            setAccessToken(refreshData.tokens.accessToken);
-            setRefreshToken(refreshData.tokens.refreshToken);
-            toast.success(t('auth.token_refreshed'), {
-                description: t('auth.session_refreshed'),
-                duration: 3000,
-            });
-        }
-        if (error.value) {
-            const description = (error.value.data?.message ?? error.value.data?.status) || t('auth.token_refresh_failed');
-            toast.error(t('global.messages.error'), {
-                description,
-                duration: 5000,
-            });
-            await logout();
-        }
-    };
 
     const forgotPassword = async (email: string) => {
         const { data, error } = await useApiFetch('/api/v1/dashboard/auth/request-reset', {
@@ -229,13 +199,12 @@ export const useUserStore = defineStore('user', () => {
         });
         if (data.value) {
             const resetResponse = (data.value as any).data;
-            // Reset password API returns admin and tokens in nested structure
+            // Reset password API returns admin and accessToken directly
             if (resetResponse.admin) {
                 setUser(resetResponse.admin);
             }
-            if (resetResponse.tokens) {
-                setAccessToken(resetResponse.tokens.accessToken);
-                setRefreshToken(resetResponse.tokens.refreshToken);
+            if (resetResponse.accessToken) {
+                setAccessToken(resetResponse.accessToken);
             }
             toast.success(t('auth.password_reset'), {
                 description: t('auth.password_reset_success'),
@@ -287,7 +256,6 @@ export const useUserStore = defineStore('user', () => {
         }
 
         setAccessToken();
-        setRefreshToken();
         setUser();
 
         // Clear auth validation timestamp
@@ -390,15 +358,12 @@ export const useUserStore = defineStore('user', () => {
         user,
         token,
         accessToken,
-        refreshToken,
         setToken,
         setAccessToken,
-        setRefreshToken,
         setUser,
         fetchAuthUser,
         logout,
         login,
-        refresh,
         forgotPassword,
         resetPassword,
         getCsrfToken,

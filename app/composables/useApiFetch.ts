@@ -73,6 +73,16 @@ export function useApiFetch<T = unknown>(
             ...headers,
             ...(options.headers as Record<string, string>),
         },
+        onResponse({ response }) {
+            // Extend access token cookie expiration on successful responses
+            // Only for logged-in users (when access token exists)
+            if (import.meta.client && response.ok && accessToken.value) {
+                // Use setAccessToken to extend cookie expiration by another 15 minutes
+                const userStore = useUserStore();
+                const currentToken = accessToken.value;
+                userStore.setAccessToken(currentToken); // This will reset the cookie with new maxAge
+            }
+        },
         onResponseError({ response, error }) {
             // Use global error handler for all error responses
             if (import.meta.client) {
@@ -81,7 +91,7 @@ export function useApiFetch<T = unknown>(
                 }
                 catch (err) {
                     console.error('Error in global error handler:', err);
-                    // Fallback error handling
+                    // Fallback error handling - redirect to login on 401
                     if (response.status === 401) {
                         const userStore = useUserStore();
                         userStore.logout();

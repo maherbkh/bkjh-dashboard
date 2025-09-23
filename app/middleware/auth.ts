@@ -36,7 +36,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
         catch {
             // Hard reset to avoid half-authenticated state
             userStore.setAccessToken();
-            userStore.setRefreshToken();
             userStore.setUser();
             // Prevent tight retry loop
             lastValidation.value = String(now);
