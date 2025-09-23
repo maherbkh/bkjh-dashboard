@@ -63,10 +63,10 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
                 ...additionalParams,
             };
 
-            const cacheKey = forceRefresh 
+            const cacheKey = forceRefresh
                 ? `${tenant}-${crudPath}-list-${page}-${perPage}-${JSON.stringify(additionalParams)}-${forceRefresh}`
                 : `${tenant}-${crudPath}-list-${page}-${perPage}-${JSON.stringify(additionalParams)}`;
-            
+
             const { data, status } = await useApiFetch(buildApiPath(), {
                 query: params,
                 key: cacheKey,
@@ -279,20 +279,21 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
                 const responseData = (data.value as any).data;
                 const deletedCount = responseData.deletedCount;
                 const notFoundIds = responseData.notFoundIds || [];
-                
+
                 // Show appropriate success message based on results
                 if (notFoundIds.length === 0) {
                     // All items deleted successfully
                     toast.success(t('global.messages.bulk_delete_success', { count: deletedCount }) || `Successfully deleted ${deletedCount} items`);
-                } else {
+                }
+                else {
                     // Some items not found
-                    const message = t('global.messages.bulk_delete_partial', { 
-                        deleted: deletedCount, 
-                        notFound: notFoundIds.length 
+                    const message = t('global.messages.bulk_delete_partial', {
+                        deleted: deletedCount,
+                        notFound: notFoundIds.length,
                     }) || `Deleted ${deletedCount} items. ${notFoundIds.length} items not found.`;
                     toast.warning(message);
                 }
-                
+
                 await refresh();
                 return { data: data.value, status: status.value };
             }

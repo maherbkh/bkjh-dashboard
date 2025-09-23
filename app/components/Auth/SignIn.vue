@@ -4,7 +4,7 @@ import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { z } from 'zod';
 import type { Credentials } from '~/types';
-import {useUserStore} from "~/stores/user";
+import { useUserStore } from '~/stores/user';
 
 const { t } = useI18n();
 
@@ -39,16 +39,16 @@ const [email, emailAttrs] = defineField('email');
 const [password, passwordAttrs] = defineField('password');
 
 // VeeValidate form submission with proper validation
-const onSubmit = handleSubmit(async (values) => {    
+const onSubmit = handleSubmit(async (values) => {
     isLoading.value = true;
-    
+
     const credentials: Credentials = {
         email: values.email,
-        password: values.password
+        password: values.password,
     };
-    
+
     console.log('Attempting login with validated credentials for:', credentials.email);
-    
+
     try {
         if (redirectPath) {
             await useUserStore().login(credentials, redirectPath as string);
@@ -64,7 +64,7 @@ const onSubmit = handleSubmit(async (values) => {
             console.error('Error details:', {
                 message: error.message,
                 stack: error.stack,
-                name: error.name
+                name: error.name,
             });
         }
     }
@@ -81,7 +81,10 @@ const handleEnterKey = () => {
 </script>
 
 <template>
-    <form class="grid gap-6" @submit="onSubmit">
+    <form
+        class="grid gap-6"
+        @submit="onSubmit"
+    >
         <Separator :label="$t('auth.login_form')" />
         <div class="grid gap-4">
             <FormItemInput

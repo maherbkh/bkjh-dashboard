@@ -16,26 +16,29 @@
 -->
 
 <template>
-  <Card>
-    <CardHeader>
-      <CardTitle class="flex items-center gap-2">
-        <Icon name="solar:chat-round-outline" class="!size-5 opacity-75 shrink-0" />
-        {{ $t("global.message") }}
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <p class="whitespace-pre-wrap font-mono">
-        {{ message }}
-      </p>
+    <Card>
+        <CardHeader>
+            <CardTitle class="flex items-center gap-2">
+                <Icon
+                    name="solar:chat-round-outline"
+                    class="!size-5 opacity-75 shrink-0"
+                />
+                {{ $t("global.message") }}
+            </CardTitle>
+        </CardHeader>
+        <CardContent>
+            <p class="whitespace-pre-wrap font-mono">
+                {{ message }}
+            </p>
 
-      <!-- Attachment List Component -->
-      <TicketMessageAttachment :attachments="attachments" />
-    </CardContent>
-  </Card>
+            <!-- Attachment List Component -->
+            <TicketMessageAttachment :attachments="attachments" />
+        </CardContent>
+    </Card>
 </template>
 
 <script lang="ts" setup>
-import type { TicketAttachment } from "~/types";
+import type { TicketAttachment } from '~/types';
 
 defineProps<{ message: string; attachments?: TicketAttachment[] }>();
 </script>

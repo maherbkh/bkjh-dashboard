@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useSidebar } from '~/components/ui/sidebar'
-import { useAppStore } from '~/stores/app'
+import { useSidebar } from '~/components/ui/sidebar';
+import { useAppStore } from '~/stores/app';
 
-type AppSlugType = 'support' | 'academy'
+type AppSlugType = 'support' | 'academy';
 
 const props = defineProps<{
     apps: {
@@ -12,27 +12,27 @@ const props = defineProps<{
     }[];
 }>();
 
-const { isMobile } = useSidebar()
-const appStore = useAppStore()
+const { isMobile } = useSidebar();
+const appStore = useAppStore();
 
 // Find active app based on current app slug
 const activeApp = computed(() => {
     const currentApp = props.apps.find(app => app.slug === appStore.appSlug);
-    return currentApp ?? props.apps?.[0] ?? { 
-        name: '', 
+    return currentApp ?? props.apps?.[0] ?? {
+        name: '',
         logo: 'solar:question-circle-linear', // fallback icon
-        slug: 'support' 
-    }
-})
+        slug: 'support',
+    };
+});
 
 // Handle app switching
 const handleAppClick = (app: typeof props.apps[0]) => {
     if (app.slug === 'support' || app.slug === 'academy') {
-        appStore.setAppSlug(app.slug as AppSlugType)
+        appStore.setAppSlug(app.slug as AppSlugType);
         // Navigate to home dashboard page when app is switched
-        navigateTo('/')
+        navigateTo('/');
     }
-}
+};
 </script>
 
 <template>

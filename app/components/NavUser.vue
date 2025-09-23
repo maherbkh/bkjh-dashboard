@@ -19,7 +19,7 @@ const userInitials = computed(() => useInitials(userStore.user?.name ?? ''));
                 <DropdownMenuTrigger as-child>
                     <SidebarMenuButton
                         size="lg"
-                        class="cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground bg-muted"
+                        class="cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground bg-background border"
                     >
                         <Avatar class="h-8 w-8 rounded-full border">
                             <AvatarImage

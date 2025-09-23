@@ -2,15 +2,15 @@
 definePageMeta({
     layout: false,
     middleware: 'guest',
-})
-const { t } = useI18n()
+});
+const { t } = useI18n();
 
 watchEffect(() => {
     useSeoMeta({
         title: t('auth.forgot_password'),
         ogTitle: t('auth.forgot_password'),
-    })
-})
+    });
+});
 </script>
 
 <template>

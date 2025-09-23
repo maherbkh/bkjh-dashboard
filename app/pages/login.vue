@@ -2,21 +2,20 @@
 definePageMeta({
     layout: false,
     middleware: 'guest',
-})
+});
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 // Make SEO meta reactive to language changes
 watchEffect(() => {
     useSeoMeta({
         title: t('auth.login'),
         ogTitle: t('auth.login'),
-    })
-})
+    });
+});
 const colorMode = useColorMode();
 
 const logoVariant = computed(() => colorMode.preference === 'light' ? 'dark' : 'light');
-
 </script>
 
 <template>
@@ -31,7 +30,6 @@ const logoVariant = computed(() => colorMode.preference === 'light' ? 'dark' : '
                     :variant="logoVariant as 'dark' | 'light'"
                     class="h-20"
                 />
-                
             </div>
         </div>
         <div class="mx-auto flex-1 lg:p-8">

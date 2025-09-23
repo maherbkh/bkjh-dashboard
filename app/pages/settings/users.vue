@@ -1,20 +1,20 @@
 <script setup lang="ts">
-const { t } = useI18n()
+const { t } = useI18n();
 
 // Page configuration
-const pageTitle = computed(() => t('user.plural'))
-const pageIcon = usePageIcon()
-const pageDescription = computed(() => t('user.plural'))
+const pageTitle = computed(() => t('user.plural'));
+const pageIcon = usePageIcon();
+const pageDescription = computed(() => t('user.plural'));
 definePageMeta({
     middleware: 'auth',
-})
+});
 
 useSeoMeta({
     title: pageTitle,
     ogTitle: pageTitle,
     description: pageDescription,
     ogDescription: pageDescription,
-})
+});
 
 // CRUD operations
 const {
@@ -31,16 +31,16 @@ const {
 } = useCrud<User, UserForm>({
     apiSlug: 'user',
     formSchema: createUserSchema(t),
-})
+});
 
-const selectedRows = ref<number[]>([])
+const selectedRows = ref<number[]>([]);
 
 // Search and pagination state
-const searchQuery = ref('')
-const currentPage = ref(1)
-const perPage = ref(25)
-const sortBy = ref('name')
-const sortDir = ref<'asc' | 'desc'>('asc')
+const searchQuery = ref('');
+const currentPage = ref(1);
+const perPage = ref(25);
+const sortBy = ref('name');
+const sortDir = ref<'asc' | 'desc'>('asc');
 
 const headerItems = computed(() => [
     {
@@ -73,77 +73,80 @@ const headerItems = computed(() => [
         name: t('common.created_at'),
         id: 'createdAt',
     },
-])
+]);
 
 // Initialize data
 await fetchItems(currentPage.value, perPage.value, {
     sort_by: sortBy.value,
     sort_dir: sortDir.value,
-})
+});
 
 // Dialog state management
-const isDialogOpen = ref(false)
-const dialogMode = ref<'add' | 'edit'>('add')
-const editingUser = ref<User | null>(null)
-const isSubmitting = ref(false)
+const isDialogOpen = ref(false);
+const dialogMode = ref<'add' | 'edit'>('add');
+const editingUser = ref<User | null>(null);
+const isSubmitting = ref(false);
 
 // Roles state
-const roles = ref<Array<{ id: number; name: string; position: number }>>([])
-const isRolesLoading = ref(false)
+const roles = ref<Array<{ id: number; name: string; position: number }>>([]);
+const isRolesLoading = ref(false);
 
 const openAddDialog = async () => {
-    dialogMode.value = 'add'
-    resetForm()
-    editingUser.value = null
-    
+    dialogMode.value = 'add';
+    resetForm();
+    editingUser.value = null;
+
     // Fetch roles when opening dialog
     if (roles.value.length === 0) {
-        isRolesLoading.value = true
+        isRolesLoading.value = true;
         try {
             const { data, status } = await useApiFetch<{
                 status: string;
                 message: string;
                 data: Array<{ id: number; name: string; position: number }>;
             }>('/api/role-all');
-            
+
             // Only proceed if status is not pending
             if (status.value !== 'pending') {
                 if (data.value?.data) {
-                    roles.value = data.value.data
+                    roles.value = data.value.data;
                 }
-                isDialogOpen.value = true
+                isDialogOpen.value = true;
             }
-        } catch (error) {
-            console.error('Failed to fetch roles:', error)
-        } finally {
-            isRolesLoading.value = false
         }
-    } else {
-        // If roles are already loaded, open dialog immediately
-        isDialogOpen.value = true
+        catch (error) {
+            console.error('Failed to fetch roles:', error);
+        }
+        finally {
+            isRolesLoading.value = false;
+        }
     }
-}
+    else {
+        // If roles are already loaded, open dialog immediately
+        isDialogOpen.value = true;
+    }
+};
 
 const handleEdit = async (user: User) => {
-    dialogMode.value = 'edit'
-    editingUser.value = user
-    
+    dialogMode.value = 'edit';
+    editingUser.value = user;
+
     // Fetch roles when opening dialog if not already loaded
     if (roles.value.length === 0) {
-        isRolesLoading.value = true
+        isRolesLoading.value = true;
         try {
             const { data, status } = await useApiFetch<{
                 status: string;
                 message: string;
                 data: Array<{ id: number; name: string; position: number }>;
             }>('/api/role-all');
-            
+
             // Only proceed if status is not pending
             if (status.value !== 'pending') {
                 if (data.value?.data) {
-                    roles.value = data.value.data
+                    roles.value = data.value.data;
                 }
-                
+
                 setValues({
                     firstName: user.firstName,
                     lastName: user.lastName,
@@ -152,15 +155,18 @@ const handleEdit = async (user: User) => {
                     name: user.name || '',
                     isActive: user.isActive || true,
                     isSuperAdmin: user.isSuperAdmin || false,
-                })
-                isDialogOpen.value = true
+                });
+                isDialogOpen.value = true;
             }
-        } catch (error) {
-            console.error('Failed to fetch roles:', error)
-        } finally {
-            isRolesLoading.value = false
         }
-    } else {
+        catch (error) {
+            console.error('Failed to fetch roles:', error);
+        }
+        finally {
+            isRolesLoading.value = false;
+        }
+    }
+    else {
         // If roles are already loaded, set values and open dialog immediately
         setValues({
             firstName: user.firstName,
@@ -170,187 +176,187 @@ const handleEdit = async (user: User) => {
             name: user.name || '',
             isActive: user.isActive || true,
             isSuperAdmin: user.isSuperAdmin || false,
-        })
-        isDialogOpen.value = true
+        });
+        isDialogOpen.value = true;
     }
-}
+};
 
 const onSubmitAndClose = async (values: UserForm) => {
-    isSubmitting.value = true
+    isSubmitting.value = true;
     try {
         if (editingUser.value) {
             // Edit existing user
-            await updateItem(editingUser.value.id, values)
+            await updateItem(editingUser.value.id, values);
         }
         else {
             // Add new user
-            await createItem(values)
+            await createItem(values);
         }
-        selectedRows.value = []
+        selectedRows.value = [];
 
         // Close dialog on success
-        isDialogOpen.value = false
-        editingUser.value = null
-        resetForm()
+        isDialogOpen.value = false;
+        editingUser.value = null;
+        resetForm();
     }
     catch (error) {
-        console.error('Error submitting form:', error)
+        console.error('Error submitting form:', error);
         // Keep the dialog open to show errors - error handling is done in the CRUD composable
         // The dialog will remain open, so users can see validation errors or try again
     }
     finally {
-        isSubmitting.value = false
+        isSubmitting.value = false;
     }
-}
+};
 
 const onSubmitAndAddNew = async (values: UserForm) => {
-    isSubmitting.value = true
+    isSubmitting.value = true;
     try {
         if (editingUser.value) {
             // Edit existing user
-            await updateItem(editingUser.value.id, values)
+            await updateItem(editingUser.value.id, values);
             // After the update, switch to add mode
-            editingUser.value = null
-            dialogMode.value = 'add'
+            editingUser.value = null;
+            dialogMode.value = 'add';
         }
         else {
             // Add new user
-            await createItem(values)
+            await createItem(values);
             // Force form reset by temporarily changing dialogMode to trigger the watcher
-            dialogMode.value = 'edit'
-            await nextTick()
-            dialogMode.value = 'add'
+            dialogMode.value = 'edit';
+            await nextTick();
+            dialogMode.value = 'add';
         }
-        selectedRows.value = []
+        selectedRows.value = [];
 
         // Reset form but keep the dialog open for adding new item
-        resetForm()
+        resetForm();
     }
     catch (error) {
-        console.error('Error submitting form:', error)
+        console.error('Error submitting form:', error);
         // Keep the dialog open to show errors - error handling is done in the CRUD composable
         // The dialog will remain open, so users can see validation errors or try again
     }
     finally {
-        isSubmitting.value = false
+        isSubmitting.value = false;
     }
-}
+};
 
 const handleDialogClose = () => {
-    isDialogOpen.value = false
-    resetForm()
-    editingUser.value = null
-}
+    isDialogOpen.value = false;
+    resetForm();
+    editingUser.value = null;
+};
 
 // Delete handlers
-const { confirmDelete, confirmBulkDelete } = useConfirmDialog()
+const { confirmDelete, confirmBulkDelete } = useConfirmDialog();
 
 async function handleDelete(userId: number) {
-  console.log('handleDelete called with userId:', userId)
-    const confirmed = await confirmDelete()
-    if (!confirmed) return
-console.log('handleDelete confirmed')
+    console.log('handleDelete called with userId:', userId);
+    const confirmed = await confirmDelete();
+    if (!confirmed) return;
+    console.log('handleDelete confirmed');
     try {
-        await deleteItem(userId)
+        await deleteItem(userId);
         await fetchItems(currentPage.value, perPage.value, {
             search: searchQuery.value,
             sort_by: sortBy.value,
             sort_dir: sortDir.value,
-        })
+        });
     }
     catch (error) {
-        console.error('Error deleting user:', error)
+        console.error('Error deleting user:', error);
     }
 }
 
 async function handleBulkDelete() {
-    if (selectedRows.value.length === 0) return
+    if (selectedRows.value.length === 0) return;
 
-    const confirmed = await confirmBulkDelete(selectedRows.value.length)
-    if (!confirmed) return
+    const confirmed = await confirmBulkDelete(selectedRows.value.length);
+    if (!confirmed) return;
 
     try {
-        await deleteManyItems(selectedRows.value)
-        selectedRows.value = []
+        await deleteManyItems(selectedRows.value);
+        selectedRows.value = [];
         await fetchItems(currentPage.value, perPage.value, {
             search: searchQuery.value,
             sort_by: sortBy.value,
             sort_dir: sortDir.value,
-        })
+        });
     }
     catch (error) {
-        console.error('Error deleting users:', error)
+        console.error('Error deleting users:', error);
     }
 }
 
 // Search and pagination handlers
 const handleReset = async () => {
-    searchQuery.value = ''
-    currentPage.value = 1
-    sortBy.value = 'name'
-    sortDir.value = 'asc'
+    searchQuery.value = '';
+    currentPage.value = 1;
+    sortBy.value = 'name';
+    sortDir.value = 'asc';
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    })
-    selectedRows.value = []
-}
+    });
+    selectedRows.value = [];
+};
 
 const handleSearchSubmit = async () => {
-    currentPage.value = 1
+    currentPage.value = 1;
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    })
-    selectedRows.value = []
-}
+    });
+    selectedRows.value = [];
+};
 
 const handlePageChange = async (page: number) => {
-    currentPage.value = page
+    currentPage.value = page;
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    })
-    selectedRows.value = []
-}
+    });
+    selectedRows.value = [];
+};
 
 async function handleSortChange(dir: 'asc' | 'desc', id: string) {
-    sortDir.value = dir
-    sortBy.value = id
-    currentPage.value = 1
+    sortDir.value = dir;
+    sortBy.value = id;
+    currentPage.value = 1;
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    })
-    selectedRows.value = []
+    });
+    selectedRows.value = [];
 }
 
 // Row selection handlers
 const isAllSelected = computed(() => {
-    return users.value.length > 0 && selectedRows.value.length === users.value.length
-})
+    return users.value.length > 0 && selectedRows.value.length === users.value.length;
+});
 
 const handleSelectAll = (checked: boolean) => {
     if (checked) {
-        selectedRows.value = users.value.map(user => user.id)
+        selectedRows.value = users.value.map(user => user.id);
     }
     else {
-        selectedRows.value = []
+        selectedRows.value = [];
     }
-}
+};
 
 const handleRowSelected = (id: number, checked: boolean) => {
     if (checked) {
-        selectedRows.value.push(id)
+        selectedRows.value.push(id);
     }
     else {
-        selectedRows.value = selectedRows.value.filter(rowId => rowId !== id)
+        selectedRows.value = selectedRows.value.filter(rowId => rowId !== id);
     }
-}
+};
 </script>
 
 <template>
@@ -416,7 +422,11 @@ const handleRowSelected = (id: number, checked: boolean) => {
                         <template #cell-name="{ row }">
                             <div class="font-medium flex items-center gap-2">
                                 <div>{{ row.name || `${row.firstName} ${row.lastName}` }}</div>
-                                <Icon v-if="row.meta?.isOnline" name="solar:user-circle-outline" class="!size-4 rounded-full shrink-0 text-success"/>
+                                <Icon
+                                    v-if="row.meta?.isOnline"
+                                    name="solar:user-circle-outline"
+                                    class="!size-4 rounded-full shrink-0 text-success"
+                                />
                             </div>
                         </template>
 

@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { toast } from 'vue-sonner'
-import { useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
-import { useUserStore } from '~/stores/user'
+import { toast } from 'vue-sonner';
+import { useForm } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/zod';
+import { useUserStore } from '~/stores/user';
 
-const { t, locale, locales, setLocale } = useI18n()
-const user = useUserStore().user
-const colorMode = useColorMode()
+const { t, locale, locales, setLocale } = useI18n();
+const user = useUserStore().user;
+const colorMode = useColorMode();
 
 definePageMeta({
     middleware: 'auth',
-})
+});
 
-const pageTitle = computed(() => t('profile.singular'))
-const pageIcon = usePageIcon()
-const pageDescription = computed(() => t('profile.singular'))
+const pageTitle = computed(() => t('profile.singular'));
+const pageIcon = usePageIcon();
+const pageDescription = computed(() => t('profile.singular'));
 
 // Profile form with validation
-const profileSchema = toTypedSchema(createProfileEditSchema(t))
+const profileSchema = toTypedSchema(createProfileEditSchema(t));
 const {
     handleSubmit: handleProfileSubmit,
     errors: profileErrors,
@@ -31,15 +31,15 @@ const {
         email: user?.email || '',
         username: user?.username || '',
     },
-})
+});
 
-const [firstName] = defineProfileField('firstName')
-const [lastName] = defineProfileField('lastName')
-const [email] = defineProfileField('email')
-const [username] = defineProfileField('username')
+const [firstName] = defineProfileField('firstName');
+const [lastName] = defineProfileField('lastName');
+const [email] = defineProfileField('email');
+const [username] = defineProfileField('username');
 
 // Password form with validation
-const passwordSchema = toTypedSchema(createPasswordChangeSchema(t))
+const passwordSchema = toTypedSchema(createPasswordChangeSchema(t));
 const {
     handleSubmit: handlePasswordSubmit,
     errors: passwordErrors,
@@ -53,33 +53,33 @@ const {
         new_password: '',
         new_password_confirmation: '',
     },
-})
+});
 
-const [oldPassword] = definePasswordField('old_password')
-const [newPassword] = definePasswordField('new_password')
-const [newPasswordConfirmation] = definePasswordField('new_password_confirmation')
+const [oldPassword] = definePasswordField('old_password');
+const [newPassword] = definePasswordField('new_password');
+const [newPasswordConfirmation] = definePasswordField('new_password_confirmation');
 
 // Preferences form data
 const preferencesForm = ref({
     theme: colorMode.preference,
     language: locale.value,
-})
+});
 
 // Available languages for select
 const availableLanguages = computed(() => {
     return (locales.value).map(l => ({
         id: l.code,
         name: l.name || l.code,
-    }))
-})
+    }));
+});
 
 // Theme options
 const themeOptions = [
     { id: 'light', name: 'Light' },
     { id: 'dark', name: 'Dark' },
     { id: 'system', name: 'System' },
-]
-const userStore = useUserStore()
+];
+const userStore = useUserStore();
 
 // Form submission handlers
 const saveProfile = handleProfileSubmit(async (values) => {
@@ -87,66 +87,66 @@ const saveProfile = handleProfileSubmit(async (values) => {
         const { data } = await useApiFetch('/api/v1/auth/profile', {
             method: 'PUT',
             body: values,
-        })
+        });
         if (data.value) {
-            await userStore.fetchAuthUser()
+            await userStore.fetchAuthUser();
         }
-        toast.success(t('action.message.updated_successfully', { model: t('profile.singular') }))
+        toast.success(t('action.message.updated_successfully', { model: t('profile.singular') }));
     }
     catch (error) {
-        console.error('Profile update error:', error)
-        toast.error(t('action.message.update_failed', { model: t('profile.singular') }))
+        console.error('Profile update error:', error);
+        toast.error(t('action.message.update_failed', { model: t('profile.singular') }));
     }
-})
+});
 
 const changePassword = handlePasswordSubmit(async (values) => {
-    console.log('Form submitted with values:', values)
+    console.log('Form submitted with values:', values);
     try {
         const { data } = await useApiFetch('/api/v1/auth/change-password', {
             method: 'POST',
             body: values,
-        })
-        toast.success(t('action.message.updated_successfully', { model: t('form.password') }))
+        });
+        toast.success(t('action.message.updated_successfully', { model: t('form.password') }));
         // Reset form
-        resetPasswordForm()
+        resetPasswordForm();
     }
     catch (error) {
-        console.error('Password change error:', error)
-        toast.error(t('action.message.update_failed', { model: t('form.password') }))
+        console.error('Password change error:', error);
+        toast.error(t('action.message.update_failed', { model: t('form.password') }));
     }
 }, (errors) => {
-    console.log('Form validation errors:', errors)
-})
+    console.log('Form validation errors:', errors);
+});
 
 const savePreferences = async () => {
     try {
         // Update theme
-        colorMode.preference = preferencesForm.value.theme
+        colorMode.preference = preferencesForm.value.theme;
         // Update language
-        setLocale(preferencesForm.value.language)
-        toast.success(t('action.message.updated_successfully', { model: t('form.preferences') }))
+        setLocale(preferencesForm.value.language);
+        toast.success(t('action.message.updated_successfully', { model: t('form.preferences') }));
     }
     catch (error) {
-        toast.error(t('action.message.update_failed', { model: t('form.preferences') }))
+        toast.error(t('action.message.update_failed', { model: t('form.preferences') }));
     }
-}
+};
 
 // Watch for theme changes
 watch(() => colorMode.preference, (newTheme) => {
-    preferencesForm.value.theme = newTheme
-})
+    preferencesForm.value.theme = newTheme;
+});
 
 // Watch for language changes
 watch(() => locale.value, (newLocale) => {
-    preferencesForm.value.language = newLocale
-})
+    preferencesForm.value.language = newLocale;
+});
 
 useSeoMeta({
     title: pageTitle,
     ogTitle: pageTitle,
     description: pageDescription,
     ogDescription: pageDescription,
-})
+});
 </script>
 
 <template>

@@ -524,7 +524,7 @@ export type PublicData = PublicDataResponse['data'];
 // App related types
 export enum AppSlug {
     SUPPORT = 'support',
-    ACADEMY = 'academy'
+    ACADEMY = 'academy',
 }
 
 export type Permission = {
@@ -568,61 +568,42 @@ export type PermissionForm = {
     position?: number;
 };
 
-// Academy Event types
-export type EventDate = {
-    id: number;
-    eventId: number;
-    startDate: string;
-    endDate: string;
-    startTime?: string;
-    endTime?: string;
-};
-
-export type EventSpeaker = {
-    id: number;
-    firstName: string;
-    lastName: string;
-};
-
-export type EventTargetAttendee = {
-    id: number;
-    name: string;
-    color: string;
-};
-
-export type EventTargetGroup = {
-    id: number;
-    name: string;
-    code: string;
-};
-
-export type EventCategory = {
-    id: number;
-    name: string;
-    slug: string;
-};
-
-export type EventData = {
-    id: number;
-    title: string;
-    type: 'in_person' | 'online' | 'hybrid' | string;
-    shortDescription?: string;
-    description: string;
-    note?: string | null;
-    maxTrainee?: number;
-    categoryId: number;
-    targetGroupId: number;
-    conferenceRoom?: string;
-    location?: string;
-    isActive: boolean;
+// Academy Event types (Dashboard list)
+export type EventSpeakerLite = {
+    id: string;
+    eventId: string;
+    speakerId: string;
     createdAt: string;
     updatedAt: string;
-    deletedAt?: string | null;
-    category?: EventCategory;
-    targetGroup?: EventTargetGroup;
-    targetAttendees?: EventTargetAttendee[];
-    speakers?: EventSpeaker[];
-    dates?: EventDate[];
+    speaker: { id: string; name: string; qualification?: string | null };
+};
+
+export type EventListCategory = { id: string; name: string };
+export type EventListTarget = { id: string; name: string };
+
+export type EventData = {
+    id: string; // UUID
+    title: string;
+    slug: string;
+    type: 'ONLINE' | 'IN_PERSON' | 'HYBRID' | string;
+    shortDescription?: string;
+    description?: string;
+    note?: string | null;
+    maxCapacity: number;
+    room?: string | null;
+    location?: string | null;
+    isActive: boolean;
+    eventCategoryId: string | null;
+    eventTargetId: string | null;
+    adminId: string;
+    createdAt: string;
+    updatedAt: string;
+    eventCategory?: EventListCategory | null;
+    eventTarget?: EventListTarget | null;
+    speakers?: EventSpeakerLite[];
+    registrationsCount?: number;
+    schedulesCount?: number;
+    availableSpots?: number;
 };
 
 // Attachment types for ticket messages

@@ -1,24 +1,24 @@
 <script setup lang="ts">
-const { t } = useI18n()
-const route = useRoute()
+const { t } = useI18n();
+const route = useRoute();
 
 // Page configuration
-const pageTitle = computed(() => t('attendee.singular') + ' ' + t('common.details'))
-const pageIcon = usePageIcon()
-const pageDescription = computed(() => t('attendee.singular') + ' ' + t('common.details'))
+const pageTitle = computed(() => t('attendee.singular') + ' ' + t('common.details'));
+const pageIcon = usePageIcon();
+const pageDescription = computed(() => t('attendee.singular') + ' ' + t('common.details'));
 
 definePageMeta({
     middleware: 'auth',
-})
+});
 
 useSeoMeta({
     title: pageTitle,
     ogTitle: pageTitle,
     description: pageDescription,
     ogDescription: pageDescription,
-})
+});
 
-const attendeeId = computed(() => route.params.id as string)
+const attendeeId = computed(() => route.params.id as string);
 </script>
 
 <template>
@@ -35,7 +35,7 @@ const attendeeId = computed(() => route.params.id as string)
                 <Icon name="solar:arrow-left-outline" />
                 {{ $t('action.back') }}
             </Button>
-            
+
             <Button
                 size="sm"
                 @click="console.log('Edit attendee:', attendeeId)"
@@ -44,7 +44,7 @@ const attendeeId = computed(() => route.params.id as string)
                 {{ $t('action.edit') }}
             </Button>
         </PageHeader>
-        
+
         <!-- Attendee details content will go here -->
         <div class="text-center text-muted-foreground mt-8">
             Attendee Details Content for ID: {{ attendeeId }}

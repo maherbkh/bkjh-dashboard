@@ -5,11 +5,11 @@ export default defineNuxtPlugin(() => {
             configurable: false,
             enumerable: false,
             get() {
-                return undefined
+                return undefined;
             },
             set() {
                 // Prevent mutation
             },
-        })
+        });
     }
-})
+});

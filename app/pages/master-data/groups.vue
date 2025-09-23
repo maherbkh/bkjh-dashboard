@@ -1,21 +1,21 @@
 <script setup lang="ts">
-const { t } = useI18n()
-const { confirmDelete, confirmBulkDelete } = useConfirmDialog()
+const { t } = useI18n();
+const { confirmDelete, confirmBulkDelete } = useConfirmDialog();
 
 // Page configuration
-const pageTitle = computed(() => t('group.plural'))
-const pageIcon = usePageIcon()
-const pageDescription = computed(() => t('group.plural'))
+const pageTitle = computed(() => t('group.plural'));
+const pageIcon = usePageIcon();
+const pageDescription = computed(() => t('group.plural'));
 definePageMeta({
     middleware: 'auth',
-})
+});
 
 useSeoMeta({
     title: pageTitle,
     ogTitle: pageTitle,
     description: pageDescription,
     ogDescription: pageDescription,
-})
+});
 
 // CRUD operations
 const {
@@ -33,19 +33,19 @@ const {
     crudPath: 'groups',
     tenant: 'shared',
     formSchema: createGroupSchema(t),
-})
+});
 
-const selectedRows = ref<string[]>([])
+const selectedRows = ref<string[]>([]);
 
 // Search and pagination state
-const searchQuery = ref('')
-const currentPage = ref(1)
-const perPage = ref(25)
-const sortBy = ref('name')
-const sortDir = ref<'asc' | 'desc'>('asc')
+const searchQuery = ref('');
+const currentPage = ref(1);
+const perPage = ref(25);
+const sortBy = ref('name');
+const sortDir = ref<'asc' | 'desc'>('asc');
 
 // Computed properties
-const status = computed(() => isLoading.value ? 'pending' : 'success')
+const status = computed(() => isLoading.value ? 'pending' : 'success');
 
 const headerItems = computed(() => [
     {
@@ -68,202 +68,202 @@ const headerItems = computed(() => [
         name: t('common.created_at'),
         id: 'created_at',
     },
-])
+]);
 
 // Initialize data
 await fetchItems(currentPage.value, perPage.value, {
     sort_by: sortBy.value,
     sort_dir: sortDir.value,
-})
+});
 
 // Dialog state management
-const isDialogOpen = ref(false)
-const dialogMode = ref<'add' | 'edit'>('add')
-const editingGroup = ref<Group | null>(null)
-const isSubmitting = ref(false)
+const isDialogOpen = ref(false);
+const dialogMode = ref<'add' | 'edit'>('add');
+const editingGroup = ref<Group | null>(null);
+const isSubmitting = ref(false);
 
 const openAddDialog = () => {
-    dialogMode.value = 'add'
-    resetForm()
-    editingGroup.value = null
-    isDialogOpen.value = true
-}
+    dialogMode.value = 'add';
+    resetForm();
+    editingGroup.value = null;
+    isDialogOpen.value = true;
+};
 
 const handleEdit = async (group: Group) => {
-    dialogMode.value = 'edit'
-    editingGroup.value = group
+    dialogMode.value = 'edit';
+    editingGroup.value = group;
     setValues({
         name: group.name,
         addressId: group.address?.id || null,
-    })
-    isDialogOpen.value = true
-}
+    });
+    isDialogOpen.value = true;
+};
 
 const onSubmitAndClose = async (values: GroupForm) => {
-    isSubmitting.value = true
+    isSubmitting.value = true;
     try {
         if (editingGroup.value) {
             // Edit existing group
-            await updateItem(editingGroup.value.id, values)
+            await updateItem(editingGroup.value.id, values);
         }
         else {
             // Add new group
-            await createItem(values)
+            await createItem(values);
         }
-        selectedRows.value = []
+        selectedRows.value = [];
 
         // Close dialog on success
-        isDialogOpen.value = false
-        editingGroup.value = null
-        resetForm()
+        isDialogOpen.value = false;
+        editingGroup.value = null;
+        resetForm();
     }
     catch (error) {
-        console.error('Error submitting form:', error)
+        console.error('Error submitting form:', error);
         // Keep dialog open to show errors - error handling is done in the CRUD composable
         // The dialog will remain open so users can see validation errors or try again
     }
     finally {
-        isSubmitting.value = false
+        isSubmitting.value = false;
     }
-}
+};
 
 const onSubmitAndAddNew = async (values: GroupForm) => {
-    isSubmitting.value = true
+    isSubmitting.value = true;
     try {
         if (editingGroup.value) {
             // Edit existing group
-            await updateItem(editingGroup.value.id, values)
+            await updateItem(editingGroup.value.id, values);
             // After update, switch to add mode
-            editingGroup.value = null
-            dialogMode.value = 'add'
+            editingGroup.value = null;
+            dialogMode.value = 'add';
         }
         else {
             // Add new group
-            await createItem(values)
+            await createItem(values);
             // Force form reset by temporarily changing dialogMode to trigger watcher
-            dialogMode.value = 'edit'
-            await nextTick()
-            dialogMode.value = 'add'
+            dialogMode.value = 'edit';
+            await nextTick();
+            dialogMode.value = 'add';
         }
-        selectedRows.value = []
+        selectedRows.value = [];
 
         // Reset form but keep dialog open for adding new item
-        resetForm()
+        resetForm();
     }
     catch (error) {
-        console.error('Error submitting form:', error)
+        console.error('Error submitting form:', error);
         // Keep dialog open to show errors - error handling is done in the CRUD composable
         // The dialog will remain open so users can see validation errors or try again
     }
     finally {
-        isSubmitting.value = false
+        isSubmitting.value = false;
     }
-}
+};
 
 const handleDialogClose = () => {
-    isDialogOpen.value = false
-    resetForm()
-    editingGroup.value = null
-}
+    isDialogOpen.value = false;
+    resetForm();
+    editingGroup.value = null;
+};
 
 // Delete handlers
 async function handleDelete(groupId: string) {
-    const confirmed = await confirmDelete()
-    if (!confirmed) return
+    const confirmed = await confirmDelete();
+    if (!confirmed) return;
 
     try {
-        await deleteItem(groupId)
+        await deleteItem(groupId);
         // No need to manually refresh - useCrud handles it automatically
     }
     catch (error) {
-        console.error('Error deleting group:', error)
+        console.error('Error deleting group:', error);
     }
 }
 
 async function handleBulkDelete() {
-    if (selectedRows.value.length === 0) return
+    if (selectedRows.value.length === 0) return;
 
-    const confirmed = await confirmBulkDelete(selectedRows.value.length)
-    if (!confirmed) return
+    const confirmed = await confirmBulkDelete(selectedRows.value.length);
+    if (!confirmed) return;
 
     try {
-        await deleteManyItems(selectedRows.value)
-        selectedRows.value = []
+        await deleteManyItems(selectedRows.value);
+        selectedRows.value = [];
         // No need to manually refresh - useCrud handles it automatically
     }
     catch (error) {
-        console.error('Error deleting groups:', error)
+        console.error('Error deleting groups:', error);
     }
 }
 
 // Search and pagination handlers
 const handleReset = async () => {
-    searchQuery.value = ''
-    currentPage.value = 1
-    sortBy.value = 'name'
-    sortDir.value = 'asc'
+    searchQuery.value = '';
+    currentPage.value = 1;
+    sortBy.value = 'name';
+    sortDir.value = 'asc';
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    })
-    selectedRows.value = []
-}
+    });
+    selectedRows.value = [];
+};
 
 const handleSearchSubmit = async () => {
-    currentPage.value = 1
+    currentPage.value = 1;
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    })
-    selectedRows.value = []
-}
+    });
+    selectedRows.value = [];
+};
 
 const handlePageChange = async (page: number) => {
-    currentPage.value = page
+    currentPage.value = page;
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    })
-    selectedRows.value = []
-}
+    });
+    selectedRows.value = [];
+};
 
 async function handleSortChange(dir: 'asc' | 'desc', id: string) {
-    sortDir.value = dir
-    sortBy.value = id
-    currentPage.value = 1
+    sortDir.value = dir;
+    sortBy.value = id;
+    currentPage.value = 1;
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    })
-    selectedRows.value = []
+    });
+    selectedRows.value = [];
 }
 
 // Row selection handlers
 const isAllSelected = computed(() => {
-    return groups.value.length > 0 && selectedRows.value.length === groups.value.length
-})
+    return groups.value.length > 0 && selectedRows.value.length === groups.value.length;
+});
 
 const handleSelectAll = (checked: boolean) => {
     if (checked) {
-        selectedRows.value = groups.value.map(group => group.id)
+        selectedRows.value = groups.value.map(group => group.id);
     }
     else {
-        selectedRows.value = []
+        selectedRows.value = [];
     }
-}
+};
 
 const handleRowSelected = (id: string, checked: boolean) => {
     if (checked) {
-        selectedRows.value.push(id)
+        selectedRows.value.push(id);
     }
     else {
-        selectedRows.value = selectedRows.value.filter(rowId => rowId !== id)
+        selectedRows.value = selectedRows.value.filter(rowId => rowId !== id);
     }
-}
+};
 </script>
 
 <template>
@@ -326,11 +326,11 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         @update:selected-rows="(rows: (string | number)[]) => selectedRows = rows.map(String)"
                         @update:model-value="handleSelectAll"
                     >
-                    <template #cell-name="{ row }">
-                        <div class="font-medium">
-                            {{ row.name }}
-                        </div>
-                    </template>
+                        <template #cell-name="{ row }">
+                            <div class="font-medium">
+                                {{ row.name }}
+                            </div>
+                        </template>
 
                         <template #cell-address="{ row }">
                             <div

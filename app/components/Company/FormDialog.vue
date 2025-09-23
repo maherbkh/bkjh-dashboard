@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useResourcesStore } from '~/stores/resources'
+import { useResourcesStore } from '~/stores/resources';
 
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm } = useCrud<Company, CompanyForm>({

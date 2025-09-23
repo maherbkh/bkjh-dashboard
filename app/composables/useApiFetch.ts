@@ -8,12 +8,12 @@ export function useApiFetch<T = unknown>(
     path: string,
     options: UseFetchOptions<T> = {},
 ) {
-    const config = useRuntimeConfig()
-    const { handleError } = useGlobalErrorHandler()
+    const config = useRuntimeConfig();
+    const { handleError } = useGlobalErrorHandler();
     // Helper function to get CSRF token for state-changing requests
     const getCSRFToken = async () => {
         const method = String(options.method || 'GET').toUpperCase();
-        
+
         // Only fetch CSRF token for state-changing requests
         if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
             try {
@@ -25,10 +25,11 @@ export function useApiFetch<T = unknown>(
                         'x-requested-with': 'XMLHttpRequest',
                         'referer': import.meta.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
                         'origin': import.meta.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
-                    }
+                    },
                 });
                 return (csrfData as any)?.data?.csrfToken;
-            } catch (error) {
+            }
+            catch (error) {
                 console.warn('Failed to fetch CSRF token:', error);
                 return null;
             }
@@ -38,17 +39,17 @@ export function useApiFetch<T = unknown>(
 
     // Use Record<string, string> instead of `HeadersObject` (nuxt uses Fetch-compatible headers)
     const headers: Record<string, string> = {
-        accept: 'application/json',
+        'accept': 'application/json',
         'x-requested-with': 'XMLHttpRequest',
-        referer: import.meta.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
-        origin: import.meta.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
+        'referer': import.meta.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
+        'origin': import.meta.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
     };
 
     // Add Content-Type header for requests with body
     const method = String(options.method || 'GET').toUpperCase();
     if (['POST', 'PUT', 'PATCH'].includes(method) && options.body) {
         headers['content-type'] = 'application/json';
-    }    
+    }
 
     // CSRF token will be added dynamically in onRequest
 
@@ -62,7 +63,7 @@ export function useApiFetch<T = unknown>(
     if (import.meta.server) {
         Object.assign(headers, useRequestHeaders(['cookie']));
     }
-    
+
     return useFetch(`${config.public.apiUrl}` + path, {
         credentials: 'include',
         watch: false,
@@ -77,7 +78,8 @@ export function useApiFetch<T = unknown>(
             if (import.meta.client) {
                 try {
                     handleError(error);
-                } catch (err) {
+                }
+                catch (err) {
                     console.error('Error in global error handler:', err);
                     // Fallback error handling
                     if (response.status === 401) {

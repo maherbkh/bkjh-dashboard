@@ -23,7 +23,7 @@ export const useFileIcon = () => {
         if (attachment.mimeType?.startsWith('audio/')) {
             return 'solar:music-notes-bold';
         }
-        if (attachment.mimeType?.includes('zip') || attachment.mimeType?.includes('archive') 
+        if (attachment.mimeType?.includes('zip') || attachment.mimeType?.includes('archive')
             || attachment.mimeType?.includes('compressed')) {
             return 'solar:archive-bold';
         }
@@ -64,10 +64,10 @@ export const useFileIcon = () => {
         // Transform URL to use proxy (bypasses CORS)
         const proxyUrl = getProxyUrl(attachment.urls.internal);
         const filename = attachment.filename || 'download';
-        
+
         console.log('Using proxy URL for download:', proxyUrl);
         console.log('Downloading file with filename:', filename);
-        
+
         if (attachment.mimeType?.startsWith('image/')) {
             // Open image in new tab for preview using proxy URL
             window.open(proxyUrl, '_blank');
@@ -82,53 +82,53 @@ export const useFileIcon = () => {
                 link.setAttribute('download', filename);
                 link.target = '_blank';
                 link.style.display = 'none';
-                
+
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                
+
                 console.log('Direct download initiated with proxy URL');
-                
-            } catch (error) {
+            }
+            catch (error) {
                 console.error('Direct download failed:', error);
-                
+
                 // Method 2: Fetch with proxy URL as fallback
                 try {
                     const response = await fetch(proxyUrl, {
                         method: 'GET',
                         headers: {
-                            'Accept': '*/*',
-                        }
+                            Accept: '*/*',
+                        },
                     });
-                    
+
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
-                    
+
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
-                    
+
                     console.log('Downloading blob with filename:', filename);
-                    
+
                     const link = document.createElement('a');
                     link.href = url;
                     link.download = filename;
                     link.setAttribute('download', filename);
                     link.style.display = 'none';
                     link.target = '_blank';
-                    
+
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
-                    
+
                     // Cleanup blob URL
                     setTimeout(() => {
                         window.URL.revokeObjectURL(url);
                     }, 100);
-                    
-                } catch (fetchError) {
+                }
+                catch (fetchError) {
                     console.error('Fetch download failed:', fetchError);
-                    
+
                     // Method 3: Final fallback - open in new tab
                     console.log('Opening file in new tab as fallback');
                     window.open(proxyUrl, '_blank');

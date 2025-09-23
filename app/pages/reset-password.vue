@@ -2,17 +2,17 @@
 definePageMeta({
     layout: false,
     middleware: 'guest',
-})
+});
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 // Make SEO meta reactive to language changes
 watchEffect(() => {
     useSeoMeta({
         title: t('auth.reset_password_title'),
         ogTitle: t('auth.reset_password_title'),
-    })
-})
+    });
+});
 </script>
 
 <template>

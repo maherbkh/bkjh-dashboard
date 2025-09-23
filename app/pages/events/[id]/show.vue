@@ -1,53 +1,18 @@
 <script setup lang="ts">
-const { t } = useI18n()
-const route = useRoute()
-
-// Page configuration
-const pageTitle = computed(() => t('academy.singular') + ' ' + t('common.details'))
-const pageIcon = usePageIcon()
-const pageDescription = computed(() => t('academy.singular') + ' ' + t('common.details'))
+const route = useRoute();
 
 definePageMeta({
     middleware: 'auth',
-})
+});
 
-useSeoMeta({
-    title: pageTitle,
-    ogTitle: pageTitle,
-    description: pageDescription,
-    ogDescription: pageDescription,
-})
-
-const eventId = computed(() => route.params.id as string)
+const { data, status, error } = useApiFetch<EventData>(`/api/v1/dashboard/academy/events/${route.params.id as string}`);
 </script>
 
 <template>
-    <div>
-        <PageHeader
-            :title="pageTitle"
-            :icon="pageIcon || 'solar:calendar-outline'"
-        >
-            <Button
-                variant="outline"
-                size="sm"
-                @click="$router.back()"
-            >
-                <Icon name="solar:arrow-left-outline" />
-                {{ $t('action.back') }}
-            </Button>
-            
-            <Button
-                size="sm"
-                @click="navigateTo(`/events/${eventId}/edit`)"
-            >
-                <Icon name="solar:pen-outline" />
-                {{ $t('action.edit') }}
-            </Button>
-        </PageHeader>
-        
-        <!-- Event details content will go here -->
-        <div class="text-center text-muted-foreground mt-8">
-            Event Show Content for ID: {{ eventId }}
-        </div>
+    <div class="flex flex-col gap-6">
+        <Event
+            v-if="status !== 'pending'"
+            :event="data.data"
+        />
     </div>
 </template>

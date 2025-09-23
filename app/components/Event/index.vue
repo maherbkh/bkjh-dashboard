@@ -1,163 +1,173 @@
-<script setup lang="ts">
+<script lang="ts" setup>
+import { toast } from 'vue-sonner';
 import type { EventData } from '~/types';
 
-interface Props {
-    events: EventData[];
-    viewMode?: 'grid' | 'list' | 'month' | 'week' | 'day';
-    loading?: boolean;
-}
-
-const props = withDefaults(defineProps<Props>(), {
-    viewMode: 'grid',
-    loading: false,
-});
-
-const emit = defineEmits<{
-    eventClick: [event: EventData];
-    viewModeChange: [mode: string];
+const props = defineProps<{
+    event: EventData;
 }>();
 
-const handleEventClick = (event: EventData) => {
-    emit('eventClick', event);
-};
-
-const handleViewModeChange = (mode: string) => {
-    emit('viewModeChange', mode);
-};
+const { t } = useI18n();
 </script>
 
 <template>
-    <div class="space-y-6">
-        <!-- View Mode Selector -->
-        <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-bold tracking-tight">
-                {{ $t('academy.events.title') }}
+    <div class="flex flex-col gap-6">
+        <!-- Ticket Not Found State -->
+        <div
+            v-if="!props.event"
+            class="flex flex-col items-center justify-center py-16 text-center"
+        >
+            <div class="flex items-center justify-center size-20 rounded-full bg-muted mb-6">
+                <Icon
+                    name="solar:ticket-cross-outline"
+                    class="!size-10 text-muted-foreground"
+                />
+            </div>
+            <h2 class="text-2xl font-semibold text-foreground mb-2">
+                {{ $t("action.message.not_found_title", { model: $t("academy.singular") }) }}
             </h2>
-            <div class="flex items-center space-x-2">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    :class="{ 'bg-primary text-primary-foreground': viewMode === 'grid' }"
-                    @click="handleViewModeChange('grid')"
-                >
-                    <Icon
-                        name="lucide:grid-3x3"
-                        class="h-4 w-4"
-                    />
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    :class="{ 'bg-primary text-primary-foreground': viewMode === 'list' }"
-                    @click="handleViewModeChange('list')"
-                >
-                    <Icon
-                        name="lucide:list"
-                        class="h-4 w-4"
-                    />
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    :class="{ 'bg-primary text-primary-foreground': viewMode === 'month' }"
-                    @click="handleViewModeChange('month')"
-                >
-                    <Icon
-                        name="lucide:calendar"
-                        class="h-4 w-4"
-                    />
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    :class="{ 'bg-primary text-primary-foreground': viewMode === 'week' }"
-                    @click="handleViewModeChange('week')"
-                >
-                    <Icon
-                        name="lucide:calendar-days"
-                        class="h-4 w-4"
-                    />
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    :class="{ 'bg-primary text-primary-foreground': viewMode === 'day' }"
-                    @click="handleViewModeChange('day')"
-                >
-                    <Icon
-                        name="lucide:calendar-clock"
-                        class="h-4 w-4"
-                    />
-                </Button>
+            <p class="text-muted-foreground mb-6 max-w-md">
+                {{ $t("action.message.not_found_description", { model: $t("academy.singular") }) }}
+            </p>
+            <div class="flex items-center gap-3">
+                <NuxtLink to="/events">
+                    <Button>
+                        <Icon
+                            name="solar:arrow-left-linear"
+                            class="mr-2 h-4 w-4"
+                        />
+                        {{ $t("action.back") + " " + $t("common.to") + " " + $t("academy.plural") }}
+                    </Button>
+                </NuxtLink>
             </div>
         </div>
 
-        <!-- Content Area -->
-        <div class="min-h-[400px]">
-            <!-- Loading State -->
-            <div
-                v-if="loading"
-                class="space-y-4"
-            >
-                <div
-                    v-for="i in 6"
-                    :key="i"
-                    class="animate-pulse"
-                >
-                    <div class="h-48 bg-muted rounded-lg" />
+        <!-- Ticket Content -->
+        <div
+            v-else-if="props.event"
+            class="space-y-6"
+        >
+            <!-- Header -->
+            <div class="flex lg:flex-row flex-col gap-5 lg:items-center justify-between">
+                <div class="flex items-start gap-4">
+                    <Icon
+                        name="solar:calendar-line-duotone"
+                        class="!size-5 shrink-0 opacity-75 mt-1"
+                    />
+                    <div>
+                        <div class="text-lg font-bold flex items-center gap-4">
+                            <div>{{ event.title }}</div>
+                            <Icon
+                                :title="event.isActive ? 'Event Currently Active' : 'Event is not active'"
+                                :name="event.isActive ? 'solar:check-circle-bold' : 'solar:close-circle-bold'"
+                                :class="[(event.isActive ? 'text-success' : 'text-muted-foreground'), 'shrink-0 size-5']"
+                            />
+                        </div>
+                        <div class="mt-1 text-muted-foreground flex items-center gap-2">
+                            <div class="text-sm">
+                                {{ useGermanDateFormat().formatDateShort(event.schedules[0]?.date) }}
+                            </div>
+                            <template v-if="event.schedules.length > 1">
+                                <Icon
+                                    name="solar:arrow-right-bold-duotone"
+                                    class="size-5 shrink-0 opacity-75"
+                                />
+                                <div class="text-sm">
+                                    {{ useGermanDateFormat().formatDateShort(event.schedules[(event.schedules.length - 1)]?.date) }}
+                                </div>
+                            </template>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Grid View -->
-            <EventCardGrid
-                v-else-if="viewMode === 'grid'"
-                :events="events"
-                @event-click="handleEventClick"
-            />
+            <!-- Ticket Details Grid -->
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                <!-- Main Content -->
+                <div class="xl:col-span-8 space-y-6">
+                    <!-- Description and Content Card -->
+                    <Card>
+                        <CardHeader>
+                            <CardTitle class="flex items-center gap-2">
+                                <Icon
+                                    name="solar:clipboard-text-broken"
+                                    class="!size-5 opacity-75 shrink-0"
+                                />
+                                {{ $t("global.short_description") }}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p class="whitespace-pre-wrap font-mono">
+                                {{ event.shortDescription }}
+                            </p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle class="flex items-center gap-2">
+                                <Icon
+                                    name="solar:document-text-linear"
+                                    class="!size-5 opacity-75 shrink-0"
+                                />
+                                {{ $t("global.description") }}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p v-html="event.description" />
+                        </CardContent>
+                    </Card>
+                </div>
+                <div class="xl:col-span-4 space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>
+                                <Icon
+                                    name="solar:documents-minimalistic-outline"
+                                    class="!size-5 opacity-75 shrink-0"
+                                />
+                                {{ $t("global.information") }}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent class="flex flex-col divide-y divide-dashed">
+                            <AppListItem
+                                :title="$t('academy.type')"
+                                :value="event.type"
+                            />
+                            <AppListItem
+                                :title="$t('category.singular')"
+                                :value="event.eventCategory?.name"
+                            />
+                            <AppListItem
+                                :title="$t('target.singular')"
+                                :value="event.eventTarget?.name"
+                            />
 
-            <!-- List View -->
-            <EventList
-                v-else-if="viewMode === 'list'"
-                :events="events"
-                @event-click="handleEventClick"
-            />
+                            <AppListItem
+                                :title="$t('academy.duration')"
+                                :value="event.schedulesCount + ' ' + (event.schedulesCount === 1 ? $t('common.day') : $t('common.days')) "
+                            />
 
-            <!-- Month View -->
-            <EventMonth
-                v-else-if="viewMode === 'month'"
-                :events="events"
-                @event-click="handleEventClick"
-            />
+                            <AppListItem
+                                :title="$t('academy.capacity')"
+                                :value="event.maxCapacity"
+                            />
 
-            <!-- Week View -->
-            <EventWeek
-                v-else-if="viewMode === 'week'"
-                :events="events"
-                @event-click="handleEventClick"
-            />
+                            <AppListItem
+                                :title="$t('academy.room')"
+                                :value="event.room"
+                            />
 
-            <!-- Day View -->
-            <EventDay
-                v-else-if="viewMode === 'day'"
-                :events="events"
-                @event-click="handleEventClick"
-            />
+                            <AppListItem
+                                :title="$t('academy.location')"
+                                :value="event.location"
+                            />
 
-            <!-- Empty State -->
-            <div
-                v-if="!loading && events.length === 0"
-                class="text-center py-12"
-            >
-                <Icon
-                    name="lucide:calendar-x"
-                    class="h-12 w-12 text-muted-foreground mx-auto mb-4"
-                />
-                <h3 class="text-lg font-semibold text-muted-foreground mb-2">
-                    {{ $t('academy.events.no_events') }}
-                </h3>
-                <p class="text-muted-foreground">
-                    {{ $t('academy.events.no_events_description') }}
-                </p>
+                            <AppListItem
+                                :title="$t('academy.createdBy')"
+                                :value="event.admin?.firstName + ' ' + event.admin?.lastName"
+                            />
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </div>
     </div>

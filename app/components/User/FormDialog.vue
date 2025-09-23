@@ -2,6 +2,7 @@
 import { z } from 'zod';
 import type { User } from '~/types';
 import type { UserForm } from '~/composables/userSchema';
+
 const { t } = useI18n();
 
 const props = withDefaults(defineProps<{
@@ -26,7 +27,8 @@ watch([() => props.isDialogOpen, () => props.dialogMode], ([isOpen, dialogMode])
     if (isOpen && dialogMode) {
         const mode = dialogMode === 'add' ? 'create' : 'edit';
         currentSchema.value = createUserSchema(t, mode);
-    } else {
+    }
+    else {
         currentSchema.value = undefined;
     }
 }, { immediate: false });
@@ -146,13 +148,14 @@ watch(() => props.isDialogOpen, (isOpen) => {
 const onSubmitAndClose = handleSubmit((values) => {
     console.log('Form submitted with values:', values);
     console.log('Dialog mode:', props.dialogMode);
-    
+
     // Remove password field if it exists in edit mode
     if (props.dialogMode === 'edit' && 'password' in values) {
         const { password, ...valuesWithoutPassword } = values;
         console.log('Sending values without password:', valuesWithoutPassword);
         emit('submitAndClose', valuesWithoutPassword);
-    } else {
+    }
+    else {
         console.log('Sending all values:', values);
         emit('submitAndClose', values);
     }

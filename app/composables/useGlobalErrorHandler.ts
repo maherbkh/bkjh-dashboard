@@ -25,7 +25,7 @@ export const useGlobalErrorHandler = (t?: (key: string) => string) => {
 
     const handleForbidden = (error: any) => {
         const message = error?.data?.details?.message || error?.message || 'Access denied';
-        
+
         toast.error(t ? t('global.messages.error') : 'Error', {
             description: message,
             duration: 5000,
@@ -34,7 +34,7 @@ export const useGlobalErrorHandler = (t?: (key: string) => string) => {
 
     const handleValidationError = (error: any) => {
         const validationErrors = error?.data?.details?.validationErrors || [];
-        
+
         if (validationErrors.length > 0) {
             // Show first validation error
             const firstError = validationErrors[0];
@@ -42,7 +42,8 @@ export const useGlobalErrorHandler = (t?: (key: string) => string) => {
                 description: `${firstError.field}: ${firstError.message}`,
                 duration: 5000,
             });
-        } else {
+        }
+        else {
             // Fallback to generic validation message
             toast.error(t ? t('global.messages.validation_error') : 'Validation Error', {
                 description: error?.data?.details?.message || error?.message || 'Validation failed',

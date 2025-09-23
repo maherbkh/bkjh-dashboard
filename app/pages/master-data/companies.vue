@@ -1,20 +1,20 @@
 <script setup lang="ts">
-const { t } = useI18n()
+const { t } = useI18n();
 
 // Page configuration
-const pageTitle = computed(() => t('company.plural'))
-const pageIcon = usePageIcon()
-const pageDescription = computed(() => t('company.plural'))
+const pageTitle = computed(() => t('company.plural'));
+const pageIcon = usePageIcon();
+const pageDescription = computed(() => t('company.plural'));
 definePageMeta({
     middleware: 'auth',
-})
+});
 
 useSeoMeta({
     title: pageTitle,
     ogTitle: pageTitle,
     description: pageDescription,
     ogDescription: pageDescription,
-})
+});
 
 // CRUD operations
 const {
@@ -32,21 +32,21 @@ const {
     crudPath: 'companies',
     tenant: 'shared',
     formSchema: createCompanySchema(t),
-})
+});
 
 // /api/v1/dashboard/shared/companies
 
-const selectedRows = ref<string[]>([])
+const selectedRows = ref<string[]>([]);
 
 // Search and pagination state
-const searchQuery = ref('')
-const currentPage = ref(1)
-const perPage = ref(25)
-const sortBy = ref('name')
-const sortDir = ref<'asc' | 'desc'>('asc')
+const searchQuery = ref('');
+const currentPage = ref(1);
+const perPage = ref(25);
+const sortBy = ref('name');
+const sortDir = ref<'asc' | 'desc'>('asc');
 
 // Computed properties
-const status = computed(() => isLoading.value ? 'pending' : 'success')
+const status = computed(() => isLoading.value ? 'pending' : 'success');
 
 const headerItems = computed(() => [
     {
@@ -64,30 +64,30 @@ const headerItems = computed(() => [
         name: t('global.management'),
         id: 'management',
     },
-])
+]);
 
 // Initialize data
 await fetchItems(currentPage.value, perPage.value, {
     sort_by: sortBy.value,
     sort_dir: sortDir.value,
-})
+});
 
 // Dialog state management
-const isDialogOpen = ref(false)
-const dialogMode = ref<'add' | 'edit'>('add')
-const editingCompany = ref<Company | null>(null)
-const isSubmitting = ref(false)
+const isDialogOpen = ref(false);
+const dialogMode = ref<'add' | 'edit'>('add');
+const editingCompany = ref<Company | null>(null);
+const isSubmitting = ref(false);
 
 const openAddDialog = () => {
-    dialogMode.value = 'add'
-    resetForm()
-    editingCompany.value = null
-    isDialogOpen.value = true
-}
+    dialogMode.value = 'add';
+    resetForm();
+    editingCompany.value = null;
+    isDialogOpen.value = true;
+};
 
 const handleEdit = async (company: Company) => {
-    dialogMode.value = 'edit'
-    editingCompany.value = company
+    dialogMode.value = 'edit';
+    editingCompany.value = company;
     setValues({
         name: company.name,
         location: company.location,
@@ -99,177 +99,177 @@ const handleEdit = async (company: Company) => {
         },
         management: company.management,
         addressId: company.address?.id || null,
-    })
-    isDialogOpen.value = true
-}
+    });
+    isDialogOpen.value = true;
+};
 
 const onSubmitAndClose = async (values: CompanyForm) => {
-    isSubmitting.value = true
+    isSubmitting.value = true;
     try {
         if (editingCompany.value) {
             // Edit existing company
-            await updateItem(editingCompany.value.id, values)
+            await updateItem(editingCompany.value.id, values);
         }
         else {
             // Add new company
-            await createItem(values)
+            await createItem(values);
         }
-        selectedRows.value = []
+        selectedRows.value = [];
 
         // Close dialog on success
-        isDialogOpen.value = false
-        editingCompany.value = null
-        resetForm()
+        isDialogOpen.value = false;
+        editingCompany.value = null;
+        resetForm();
     }
     catch (error) {
-        console.error('Error submitting form:', error)
+        console.error('Error submitting form:', error);
         // Keep dialog open to show errors - error handling is done in the CRUD composable
         // The dialog will remain open so users can see validation errors or try again
     }
     finally {
-        isSubmitting.value = false
+        isSubmitting.value = false;
     }
-}
+};
 
 const onSubmitAndAddNew = async (values: CompanyForm) => {
-    isSubmitting.value = true
+    isSubmitting.value = true;
     try {
         if (editingCompany.value) {
             // Edit existing company
-            await updateItem(editingCompany.value.id, values)
+            await updateItem(editingCompany.value.id, values);
             // After update, switch to add mode
-            editingCompany.value = null
-            dialogMode.value = 'add'
+            editingCompany.value = null;
+            dialogMode.value = 'add';
         }
         else {
             // Add new company
-            await createItem(values)
+            await createItem(values);
             // Force form reset by temporarily changing dialogMode to trigger watcher
-            dialogMode.value = 'edit'
-            await nextTick()
-            dialogMode.value = 'add'
+            dialogMode.value = 'edit';
+            await nextTick();
+            dialogMode.value = 'add';
         }
-        selectedRows.value = []
+        selectedRows.value = [];
 
         // Reset form but keep dialog open for adding new item
-        resetForm()
+        resetForm();
     }
     catch (error) {
-        console.error('Error submitting form:', error)
+        console.error('Error submitting form:', error);
         // Keep dialog open to show errors - error handling is done in the CRUD composable
         // The dialog will remain open so users can see validation errors or try again
     }
     finally {
-        isSubmitting.value = false
+        isSubmitting.value = false;
     }
-}
+};
 
 const handleDialogClose = () => {
-    isDialogOpen.value = false
-    resetForm()
-    editingCompany.value = null
-}
+    isDialogOpen.value = false;
+    resetForm();
+    editingCompany.value = null;
+};
 
 // Delete handlers
-const { confirmDelete, confirmBulkDelete } = useConfirmDialog()
+const { confirmDelete, confirmBulkDelete } = useConfirmDialog();
 
 async function handleDelete(companyId: string) {
-    const confirmed = await confirmDelete()
-    if (!confirmed) return
+    const confirmed = await confirmDelete();
+    if (!confirmed) return;
 
     try {
-        await deleteItem(companyId)
+        await deleteItem(companyId);
         // No need to manually refresh - useCrud handles it automatically
     }
     catch (error) {
-        console.error('Error deleting company:', error)
+        console.error('Error deleting company:', error);
     }
 }
 
 async function handleBulkDelete() {
-    if (selectedRows.value.length === 0) return
+    if (selectedRows.value.length === 0) return;
 
-    const confirmed = await confirmBulkDelete(selectedRows.value.length)
-    if (!confirmed) return
+    const confirmed = await confirmBulkDelete(selectedRows.value.length);
+    if (!confirmed) return;
 
     try {
-        await deleteManyItems(selectedRows.value)
-        selectedRows.value = []
+        await deleteManyItems(selectedRows.value);
+        selectedRows.value = [];
         // No need to manually refresh - useCrud handles it automatically
     }
     catch (error) {
-        console.error('Error deleting companies:', error)
+        console.error('Error deleting companies:', error);
     }
 }
 
 // Search and pagination handlers
 const handleReset = async () => {
-    searchQuery.value = ''
-    currentPage.value = 1
-    sortBy.value = 'name'
-    sortDir.value = 'asc'
+    searchQuery.value = '';
+    currentPage.value = 1;
+    sortBy.value = 'name';
+    sortDir.value = 'asc';
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    })
-    selectedRows.value = []
-}
+    });
+    selectedRows.value = [];
+};
 
 const handleSearchSubmit = async () => {
-    currentPage.value = 1
+    currentPage.value = 1;
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    })
-    selectedRows.value = []
-}
+    });
+    selectedRows.value = [];
+};
 
 const handlePageChange = async (page: number) => {
-    currentPage.value = page
+    currentPage.value = page;
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    })
-    selectedRows.value = []
-}
+    });
+    selectedRows.value = [];
+};
 
 async function handleSortChange(dir: 'asc' | 'desc', id: string) {
-    sortDir.value = dir
-    sortBy.value = id
-    currentPage.value = 1
+    sortDir.value = dir;
+    sortBy.value = id;
+    currentPage.value = 1;
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    })
-    selectedRows.value = []
+    });
+    selectedRows.value = [];
 }
 
 // Row selection handlers
 const isAllSelected = computed(() => {
-    return companies.value.length > 0 && selectedRows.value.length === companies.value.length
-})
+    return companies.value.length > 0 && selectedRows.value.length === companies.value.length;
+});
 
 const handleSelectAll = (checked: boolean) => {
     if (checked) {
-        selectedRows.value = companies.value.map(company => company.id)
+        selectedRows.value = companies.value.map(company => company.id);
     }
     else {
-        selectedRows.value = []
+        selectedRows.value = [];
     }
-}
+};
 
 const handleRowSelected = (id: string, checked: boolean) => {
     if (checked) {
-        selectedRows.value.push(id)
+        selectedRows.value.push(id);
     }
     else {
-        selectedRows.value = selectedRows.value.filter(rowId => rowId !== id)
+        selectedRows.value = selectedRows.value.filter(rowId => rowId !== id);
     }
-}
+};
 </script>
 
 <template>

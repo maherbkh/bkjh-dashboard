@@ -1,75 +1,136 @@
 /**
- * Composable for formatting dates in German locale
+ * Composable for formatting dates using Day.js with German locale
  * Auto-imported by Nuxt 3
  */
 export const useGermanDateFormat = () => {
+    const dayjs = useDayjs();
+
     /**
-   * Formats a date string to German locale format (DD.MM.YYYY, HH:MM)
-   * @param dateString - ISO date string or any valid date string
-   * @param options - Optional Intl.DateTimeFormatOptions to customize formatting
-   * @returns Formatted date string in German locale
-   */
+     * Formats a date string to German locale format (DD.MM.YYYY, HH:MM)
+     * @param dateString - ISO date string or any valid date string
+     * @param format - Day.js format string (default: 'DD.MM.YYYY, HH:mm')
+     * @returns Formatted date string in German locale
+     */
     const formatDate = (
         dateString: string | Date,
-        options?: Intl.DateTimeFormatOptions,
+        format: string = 'DD.MM.YYYY, HH:mm',
     ): string => {
         if (!dateString) return '';
 
-        const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+        const date = dayjs(dateString);
+        if (!date.isValid()) return '';
 
-        // Check if date is valid
-        if (isNaN(date.getTime())) return '';
-
-        const defaultOptions: Intl.DateTimeFormatOptions = {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            ...options,
-        };
-
-        return date.toLocaleString('de-DE', defaultOptions);
+        return date.format(format);
     };
 
     /**
-   * Formats a date string to German date only (DD.MM.YYYY)
-   * @param dateString - ISO date string or any valid date string
-   * @returns Formatted date string without time
-   */
+     * Formats a date string to German date only (DD.MM.YYYY)
+     * @param dateString - ISO date string or any valid date string
+     * @returns Formatted date string without time
+     */
     const formatDateOnly = (dateString: string | Date): string => {
-        return formatDate(dateString, {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-        });
+        return formatDate(dateString, 'DD.MM.YYYY');
     };
 
     /**
-   * Formats a date string to German time only (HH:MM)
-   * @param dateString - ISO date string or any valid date string
-   * @returns Formatted time string
-   */
+     * Formats a date string to German time only (HH:MM)
+     * @param dateString - ISO date string or any valid date string
+     * @returns Formatted time string
+     */
     const formatTimeOnly = (dateString: string | Date): string => {
-        return formatDate(dateString, {
-            hour: '2-digit',
-            minute: '2-digit',
-        });
+        return formatDate(dateString, 'HH:mm');
     };
 
     /**
-   * Formats a date string to German long format (DD. MMMM YYYY, HH:MM)
-   * @param dateString - ISO date string or any valid date string
-   * @returns Formatted date string in long format
-   */
+     * Formats a date string to German long format (DD. MMMM YYYY, HH:MM)
+     * @param dateString - ISO date string or any valid date string
+     * @returns Formatted date string in long format
+     */
     const formatDateLong = (dateString: string | Date): string => {
-        return formatDate(dateString, {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
+        return formatDate(dateString, 'dddd, DD. MMMM YYYY');
+    };
+
+    /**
+     * Formats a date string to German short format (DD. MMM YYYY)
+     * @param dateString - ISO date string or any valid date string
+     * @returns Formatted date string in short format
+     */
+    const formatDateShort = (dateString: string | Date): string => {
+        return formatDate(dateString, 'DD. MMM YYYY');
+    };
+
+    /**
+     * Formats a date string to German week format (DD. MMM)
+     * @param dateString - ISO date string or any valid date string
+     * @returns Formatted date string in week format
+     */
+    const formatWeek = (dateString: string | Date): string => {
+        return formatDate(dateString, 'DD. MMM');
+    };
+
+    /**
+     * Formats a date string to German month format (MMMM YYYY)
+     * @param dateString - ISO date string or any valid date string
+     * @returns Formatted date string in month format
+     */
+    const formatMonth = (dateString: string | Date): string => {
+        return formatDate(dateString, 'MMMM YYYY');
+    };
+
+    /**
+     * Gets relative time (e.g., "vor 2 Stunden", "in 3 Tagen")
+     * @param dateString - ISO date string or any valid date string
+     * @returns Relative time string in German
+     */
+    const formatRelative = (dateString: string | Date): string => {
+        if (!dateString) return '';
+
+        const date = dayjs(dateString);
+        if (!date.isValid()) return '';
+
+        return date.fromNow();
+    };
+
+    /**
+     * Checks if a date is today
+     * @param dateString - ISO date string or any valid date string
+     * @returns Boolean indicating if the date is today
+     */
+    const isToday = (dateString: string | Date): boolean => {
+        if (!dateString) return false;
+
+        const date = dayjs(dateString);
+        if (!date.isValid()) return false;
+
+        return date.isSame(dayjs(), 'day');
+    };
+
+    /**
+     * Checks if a date is in the past
+     * @param dateString - ISO date string or any valid date string
+     * @returns Boolean indicating if the date is in the past
+     */
+    const isPast = (dateString: string | Date): boolean => {
+        if (!dateString) return false;
+
+        const date = dayjs(dateString);
+        if (!date.isValid()) return false;
+
+        return date.isBefore(dayjs());
+    };
+
+    /**
+     * Checks if a date is in the future
+     * @param dateString - ISO date string or any valid date string
+     * @returns Boolean indicating if the date is in the future
+     */
+    const isFuture = (dateString: string | Date): boolean => {
+        if (!dateString) return false;
+
+        const date = dayjs(dateString);
+        if (!date.isValid()) return false;
+
+        return date.isAfter(dayjs());
     };
 
     return {
@@ -77,5 +138,12 @@ export const useGermanDateFormat = () => {
         formatDateOnly,
         formatTimeOnly,
         formatDateLong,
+        formatDateShort,
+        formatWeek,
+        formatMonth,
+        formatRelative,
+        isToday,
+        isPast,
+        isFuture,
     };
 };

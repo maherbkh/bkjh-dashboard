@@ -291,8 +291,8 @@
   },
   
   "academy": {
-    "plural": "Academy Events",
-    "singular": "Academy Event",
+    "plural": "Events",
+    "singular": "Event",
     "description": "Manage academy events and activities"
   },
   "company": {
