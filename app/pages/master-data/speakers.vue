@@ -382,46 +382,44 @@ const handleToggleActive = async (speaker: Speaker) => {
                         </template>
 
                         <template #cell-actions="{ row }">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger as-child>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                    >
-                                        <Icon
-                                            name="solar:menu-dots"
-                                            class="h-4 w-4"
-                                        />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem @click="openEditDialog(row)">
-                                        <Icon
-                                            name="solar:pen"
-                                            class="mr-2 h-4 w-4"
-                                        />
-                                        {{ $t("action.edit") }}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem @click="handleToggleActive(row)">
-                                        <Icon
-                                            :name="row.isActive ? 'solar:eye-closed' : 'solar:eye'"
-                                            class="mr-2 h-4 w-4"
-                                        />
-                                        {{ row.isActive ? $t("action.deactivate") : $t("action.activate") }}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                        class="text-destructive"
-                                        @click="handleDelete(row.id)"
-                                    >
-                                        <Icon
-                                            name="solar:trash-bin"
-                                            class="mr-2 h-4 w-4"
-                                        />
-                                        {{ $t("action.delete") }}
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                            <div class="flex justify-end gap-2">
+                                <LazyButton
+                                    :title="$t('action.edit')"
+                                    variant="ghost"
+                                    size="icon"
+                                    hydrate-on-interaction="mouseover"
+                                    @click="openEditDialog(row)"
+                                >
+                                    <Icon
+                                        name="solar:pen-new-square-outline"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                    />
+                                </LazyButton>
+                                <LazyButton
+                                    :title="row.isActive ? $t('action.deactivate') : $t('action.activate')"
+                                    variant="ghost"
+                                    size="icon"
+                                    hydrate-on-interaction="mouseover"
+                                    @click="handleToggleActive(row)"
+                                >
+                                    <Icon
+                                        :name="row.isActive ? 'solar:eye-closed-outline' : 'solar:eye-outline'"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                    />
+                                </LazyButton>
+                                <LazyButton
+                                    :title="$t('action.delete')"
+                                    variant="ghost"
+                                    size="icon"
+                                    hydrate-on-interaction="mouseover"
+                                    @click="handleDelete(row.id)"
+                                >
+                                    <Icon
+                                        name="solar:trash-bin-trash-outline"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
+                                    />
+                                </LazyButton>
+                            </div>
                         </template>
                     </PageTable>
                     <PageTablePaginator
