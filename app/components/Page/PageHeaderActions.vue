@@ -24,7 +24,8 @@ const emit = defineEmits(['add-new']);
     >
         <slot name="actions" />
 
-        <LazyButton v-if="hasAddNew"
+        <LazyButton
+            v-if="hasAddNew"
             class="cursor-pointer"
             size="sm"
             hydrate-on-interaction="mouseover"

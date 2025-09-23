@@ -26,64 +26,64 @@ export { Editor, EditorContent } from '@tiptap/vue-3';
 
 // Utility function to get all extensions with common configuration
 export const useTiptapExtensions = (options: {
-  showCharacterCount?: boolean;
-  maxLength?: number;
+    showCharacterCount?: boolean;
+    maxLength?: number;
 } = {}) => {
-  const extensions: any[] = [
-    StarterKit.configure({
-      heading: {
-        levels: [1, 2, 3, 4, 5, 6],
-      },
-    }),
-    Underline,
-    TextAlign.configure({
-      types: ['heading', 'paragraph'],
-    }),
-    Image.configure({
-      inline: true,
-      allowBase64: true,
-    }),
-    Link.configure({
-      openOnClick: false,
-    }),
-    TextStyle,
-    Color,
-  ];
+    const extensions: any[] = [
+        StarterKit.configure({
+            heading: {
+                levels: [1, 2, 3, 4, 5, 6],
+            },
+        }),
+        Underline,
+        TextAlign.configure({
+            types: ['heading', 'paragraph'],
+        }),
+        Image.configure({
+            inline: true,
+            allowBase64: true,
+        }),
+        Link.configure({
+            openOnClick: false,
+        }),
+        TextStyle,
+        Color,
+    ];
 
-  // Add character count if requested
-  if (options.showCharacterCount) {
-    extensions.push(
-      CharacterCount.configure({
-        limit: options.maxLength,
-      })
-    );
-  }
+    // Add character count if requested
+    if (options.showCharacterCount) {
+        extensions.push(
+            CharacterCount.configure({
+                limit: options.maxLength,
+            }),
+        );
+    }
 
-  return extensions;
+    return extensions;
 };
 
 // Common editor configuration
 export const useTiptapConfig = (options: {
-  content?: string;
-  placeholder?: string;
-  minHeight?: string;
-  readonly?: boolean;
-  onUpdate?: (props: { editor: any }) => void;
-  onFocus?: (props: { event: FocusEvent }) => void;
-  onBlur?: (props: { event: FocusEvent }) => void;
+    content?: string;
+    placeholder?: string;
+    minHeight?: string;
+    readonly?: boolean;
+    onUpdate?: (props: { editor: any }) => void;
+    onFocus?: (props: { event: FocusEvent }) => void;
+    onBlur?: (props: { event: FocusEvent }) => void;
 }) => {
-  return {
-    content: options.content || '',
-    editorProps: {
-      attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none',
-        style: `min-height: ${options.minHeight || '200px'}`,
-        placeholder: options.placeholder || 'Start typing...',
-      },
-    },
-    editable: !options.readonly,
-    onUpdate: options.onUpdate,
-    onFocus: options.onFocus,
-    onBlur: options.onBlur,
-  };
+    return {
+        content: options.content || '',
+        editorProps: {
+            attributes: {
+                class: 'prose prose-sm max-w-none focus:outline-none',
+                style: `min-height: ${options.minHeight || '200px'}`,
+                placeholder: options.placeholder || 'Start typing...',
+            },
+        },
+        editable: !options.readonly,
+        onUpdate: options.onUpdate,
+        onFocus: options.onFocus,
+        onBlur: options.onBlur,
+    };
 };

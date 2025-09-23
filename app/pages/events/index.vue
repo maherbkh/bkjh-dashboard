@@ -151,19 +151,25 @@ const handleRowSelected = (id: string, checked: boolean) => {
     if (checked) selectedRows.value.push(id);
     else selectedRows.value = selectedRows.value.filter(rowId => rowId !== id);
 };
-
 </script>
 
 <template>
     <div class="flex flex-col gap-4">
-        <PageHeaderActions :has-add-new="false"
+        <PageHeaderActions
+            :has-add-new="false"
             :page-title="pageTitle"
             :page-icon="pageIcon || 'solar:calendar-outline'"
         >
             <template #actions>
                 <NuxtLink to="/events/add">
-                    <Button variant="default" size="sm">
-                        <Icon name="solar:clipboard-add-outline"  class="!size-4 shrink-0" />
+                    <Button
+                        variant="default"
+                        size="sm"
+                    >
+                        <Icon
+                            name="solar:clipboard-add-outline"
+                            class="!size-4 shrink-0"
+                        />
                         {{ $t('action.add') }} {{ $t('common.new') }} {{ $t('academy.singular') }}
                     </Button>
                 </NuxtLink>
@@ -314,6 +320,5 @@ const handleRowSelected = (id: string, checked: boolean) => {
                 </template>
             </div>
         </div>
-
     </div>
 </template>

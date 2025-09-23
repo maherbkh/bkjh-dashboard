@@ -20,8 +20,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 // Emits
 const emit = defineEmits<{
-    'submit': [values: EventForm];
-    'cancel': [];
+    submit: [values: EventForm];
+    cancel: [];
 }>();
 
 // CRUD
@@ -70,7 +70,8 @@ watch(() => props.initialData, (newData) => {
             location: newData.location || undefined,
             isActive: newData.isActive,
         });
-    } else if (props.mode === 'add') {
+    }
+    else if (props.mode === 'add') {
         resetForm();
     }
 }, { immediate: true });
@@ -91,7 +92,7 @@ const submitButtonText = computed(() => {
 });
 
 const formTitle = computed(() => {
-    return props.mode === 'add' 
+    return props.mode === 'add'
         ? `${t('action.add')} ${t('event.singular')}`
         : `${t('action.edit')} ${t('event.singular')}`;
 });

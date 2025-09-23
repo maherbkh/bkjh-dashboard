@@ -168,7 +168,6 @@ export const useUserStore = defineStore('user', () => {
         return false;
     };
 
-
     const forgotPassword = async (email: string) => {
         const { data, error } = await useApiFetch('/api/v1/dashboard/auth/request-reset', {
             method: 'POST',

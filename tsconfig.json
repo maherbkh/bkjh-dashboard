@@ -1,29 +1,8 @@
 {
   // https://nuxt.com/docs/guide/concepts/typescript
-  "files": [],
+  "extends": "./.nuxt/tsconfig.json",
   "compilerOptions": {
-    "module": "ESNext",
-    "paths": {
-        "~/*": [
-          "./app/*"
-        ],
-        "@/*": [
-          "./app/*"
-        ]
-      },
-  },
-  // "references": [
-  //   {
-  //     "path": "./.nuxt/tsconfig.app.json"
-  //   },
-  //   {
-  //     "path": "./.nuxt/tsconfig.server.json"
-  //   },
-  //   {
-  //     "path": "./.nuxt/tsconfig.shared.json"
-  //   },
-  //   {
-  //     "path": "./.nuxt/tsconfig.node.json"
-  //   }
-  // ]
+    "types": ["@nuxt/types"],
+    "module": "ESNext"
+  }
 }
