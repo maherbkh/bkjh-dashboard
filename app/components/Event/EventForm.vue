@@ -1,8 +1,31 @@
 <script setup lang="ts">
 import { useResourcesStore } from '~/stores/resources';
+import RTEditor from '~/components/FormItem/RTEditor.vue';
 
 const { t } = useI18n();
-const { defineField, errors, setValues, handleSubmit, resetForm, loading } = useCrud<
+
+// Props
+interface Props {
+    mode: 'add' | 'edit';
+    initialData?: EventData | null;
+    isSubmitting?: boolean;
+    showActions?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    initialData: null,
+    isSubmitting: false,
+    showActions: true,
+});
+
+// Emits
+const emit = defineEmits<{
+    'submit': [values: EventForm];
+    'cancel': [];
+}>();
+
+// CRUD
+const { defineField, errors, setValues, handleSubmit, resetForm } = useCrud<
     EventData,
     EventForm
 >({
@@ -11,6 +34,7 @@ const { defineField, errors, setValues, handleSubmit, resetForm, loading } = use
     formSchema: createEventSchema(t),
 });
 
+// Form fields
 const [title, titleAttrs] = defineField('title');
 const [description, descriptionAttrs] = defineField('description');
 const [shortDescription, shortDescriptionAttrs] = defineField('shortDescription');
@@ -24,91 +48,68 @@ const [room, roomAttrs] = defineField('room');
 const [location, locationAttrs] = defineField('location');
 const [isActive, isActiveAttrs] = defineField('isActive');
 
-// Schedules handled as an array in the parent page if needed; keep simple here
-
 // Resources for selects
 const resourcesStore = useResourcesStore();
 const eventCategories = computed(() => resourcesStore.eventCategories || []);
 const eventTargets = computed(() => resourcesStore.eventTargets || []);
 
-type Props = {
-    isDialogOpen: boolean;
-    dialogMode: 'add' | 'edit';
-    editingEvent: EventData | null;
-    isSubmitting: boolean;
+// Initialize form data when props change
+watch(() => props.initialData, (newData) => {
+    if (newData && props.mode === 'edit') {
+        setValues({
+            title: newData.title,
+            description: newData.description,
+            shortDescription: newData.shortDescription,
+            note: newData.note || undefined,
+            type: (newData.type?.toUpperCase?.() || newData.type) as any,
+            eventCategoryId: (newData as any).eventCategoryId || (newData as any).categoryId || null,
+            eventTargetId: (newData as any).eventTargetId || (newData as any).targetGroupId || null,
+            adminId: (newData as any).adminId,
+            maxCapacity: (newData as any).maxCapacity ?? (newData as any).maxTrainee ?? 1,
+            room: (newData as any).conferenceRoom || newData.room || undefined,
+            location: newData.location || undefined,
+            isActive: newData.isActive,
+        });
+    } else if (props.mode === 'add') {
+        resetForm();
+    }
+}, { immediate: true });
+
+// Form submission
+const onSubmit = handleSubmit((values) => {
+    emit('submit', values);
+});
+
+// Cancel handler
+const handleCancel = () => {
+    emit('cancel');
 };
 
-const props = withDefaults(defineProps<Props>(), {
-    editingEvent: null,
-    dialogMode: 'add',
-    isSubmitting: false,
+// Computed properties
+const submitButtonText = computed(() => {
+    return props.mode === 'add' ? t('action.save') : t('action.update');
 });
 
-const emit = defineEmits<{
-    'update:is-dialog-open': [value: boolean];
-    'update:dialog-mode': [value: 'add' | 'edit'];
-    'update:editing-event': [value: EventData | null];
-    'submit-and-close': [values: EventForm];
-    'submit-and-add-new': [values: EventForm];
-    'close-dialog': [];
-}>();
-
-const dialogTitle = computed(() => {
-    return props.dialogMode === 'add'
-        ? t('action.add') + ' ' + t('common.new') + ' ' + t('event.singular')
-        : t('action.edit') + ' ' + t('event.singular');
+const formTitle = computed(() => {
+    return props.mode === 'add' 
+        ? `${t('action.add')} ${t('event.singular')}`
+        : `${t('action.edit')} ${t('event.singular')}`;
 });
-
-const dialogDescription = computed(() => {
-    return props.dialogMode === 'add' ? t('event.add') : t('event.edit');
-});
-
-const isOpen = computed({
-    get: () => props.isDialogOpen,
-    set: (value: boolean) => emit('update:is-dialog-open', value),
-});
-
-watch(
-    () => props.editingEvent,
-    (ev) => {
-        if (ev && props.dialogMode === 'edit') {
-            setValues({
-                title: ev.title,
-                description: ev.description,
-                shortDescription: ev.shortDescription,
-                note: ev.note || undefined,
-                type: (ev.type?.toUpperCase?.() || ev.type) as any,
-                eventCategoryId: (ev as any).eventCategoryId || (ev as any).categoryId || null,
-                eventTargetId: (ev as any).eventTargetId || (ev as any).targetGroupId || null,
-                adminId: (ev as any).adminId,
-                maxCapacity: (ev as any).maxCapacity ?? (ev as any).maxTrainee ?? 1,
-                room: (ev as any).conferenceRoom || ev.room || undefined,
-                location: ev.location || undefined,
-                isActive: ev.isActive,
-            });
-        }
-    },
-    { immediate: true },
-);
-
-watch(
-    () => props.isDialogOpen,
-    (open) => { if (!open) resetForm(); },
-);
-
-const onSubmitAndClose = handleSubmit((values) => { emit('submit-and-close', values); });
-const onSubmitAndAddNew = handleSubmit((values) => { emit('submit-and-add-new', values); });
-const handleClose = () => { emit('close-dialog'); };
 </script>
 
 <template>
-    <FormDialog
-        v-model:open="isOpen"
-        :title="dialogTitle"
-        :description="dialogDescription"
-    >
-        <template #content>
-            <form @submit.prevent="onSubmitAndClose">
+    <Card>
+        <CardHeader>
+            <CardTitle>{{ formTitle }}</CardTitle>
+            <CardDescription>
+                {{ props.mode === 'add' ? t('event.add') : t('event.edit') }}
+            </CardDescription>
+        </CardHeader>
+        <CardContent>
+            <form
+                class="space-y-6"
+                @submit.prevent="onSubmit"
+            >
                 <div class="grid grid-cols-12 gap-4">
                     <FormItemInput
                         id="title"
@@ -247,44 +248,32 @@ const handleClose = () => { emit('close-dialog'); };
                         v-bind="isActiveAttrs"
                     />
                 </div>
-            </form>
-        </template>
 
-        <template #footer>
-            <Button
-                variant="outline"
-                :disabled="isSubmitting"
-                @click="handleClose"
-            >
-                {{ t("action.cancel") }}
-            </Button>
-            <Button
-                variant="outline"
-                :disabled="isSubmitting"
-                @click="onSubmitAndAddNew"
-            >
-                <Icon
-                    v-if="isSubmitting"
-                    name="solar:refresh-linear"
-                    class="mr-2 h-4 w-4 animate-spin"
-                />
-                {{
-                    props.dialogMode === 'add'
-                        ? t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new')
-                        : $t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new')
-                }}
-            </Button>
-            <Button
-                :disabled="isSubmitting"
-                @click="onSubmitAndClose"
-            >
-                <Icon
-                    v-if="isSubmitting"
-                    name="solar:refresh-linear"
-                    class="mr-2 h-4 w-4 animate-spin"
-                />
-                {{ props.dialogMode === 'add' ? t('action.save') : t('action.update') }}
-            </Button>
-        </template>
-    </FormDialog>
+                <div
+                    v-if="showActions"
+                    class="flex justify-end gap-2 pt-4 border-t"
+                >
+                    <Button
+                        type="button"
+                        variant="outline"
+                        :disabled="isSubmitting"
+                        @click="handleCancel"
+                    >
+                        {{ t("action.cancel") }}
+                    </Button>
+                    <Button
+                        type="submit"
+                        :disabled="isSubmitting"
+                    >
+                        <Icon
+                            v-if="isSubmitting"
+                            name="solar:refresh-linear"
+                            class="mr-2 h-4 w-4 animate-spin"
+                        />
+                        {{ submitButtonText }}
+                    </Button>
+                </div>
+            </form>
+        </CardContent>
+    </Card>
 </template>

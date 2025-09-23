@@ -112,37 +112,9 @@ async function handleSortChange(dir: 'asc' | 'desc', id: string) {
     selectedRows.value = [];
 }
 
-// Dialog state
-const isDialogOpen = ref(false);
-const dialogMode = ref<'add' | 'edit'>('add');
-const editingEvent = ref<EventData | null>(null);
-const isSubmitting = ref(false);
-
-const openAddDialog = () => {
-    dialogMode.value = 'add';
-    resetForm();
-    editingEvent.value = null;
-    isDialogOpen.value = true;
-};
-
+// Navigation handlers
 const handleEdit = (event: EventData) => {
-    dialogMode.value = 'edit';
-    editingEvent.value = event;
-    setValues({
-        title: event.title,
-        description: event.description,
-        shortDescription: event.shortDescription,
-        note: event.note || undefined,
-        type: (event.type?.toUpperCase?.() || event.type) as any,
-        eventCategoryId: (event as any).eventCategoryId || (event as any).categoryId || null,
-        eventTargetId: (event as any).eventTargetId || (event as any).targetGroupId || null,
-        adminId: (event as any).adminId,
-        maxCapacity: (event as any).maxCapacity ?? (event as any).maxTrainee ?? 1,
-        room: (event as any).conferenceRoom || (event as any).room || undefined,
-        location: event.location || undefined,
-        isActive: event.isActive,
-    });
-    isDialogOpen.value = true;
+    router.push(`/events/${event.id}/edit`);
 };
 
 const { confirmDelete, confirmBulkDelete } = useConfirmDialog();
@@ -180,61 +152,21 @@ const handleRowSelected = (id: string, checked: boolean) => {
     else selectedRows.value = selectedRows.value.filter(rowId => rowId !== id);
 };
 
-// Submit handlers (pages trigger create/update via dialog emits)
-const onSubmitAndClose = async (values: EventForm) => {
-    isSubmitting.value = true;
-    try {
-        if (editingEvent.value) await updateItem(editingEvent.value.id, values);
-        else await createItem(values);
-        selectedRows.value = [];
-        isDialogOpen.value = false;
-        editingEvent.value = null;
-        resetForm();
-    }
-    catch (error) {
-        console.error('Error submitting event:', error);
-    }
-    finally { isSubmitting.value = false; }
-};
-
-const onSubmitAndAddNew = async (values: EventForm) => {
-    isSubmitting.value = true;
-    try {
-        if (editingEvent.value) {
-            await updateItem(editingEvent.value.id, values);
-            editingEvent.value = null;
-            dialogMode.value = 'add';
-        }
-        else {
-            await createItem(values);
-            dialogMode.value = 'edit';
-            await nextTick();
-            dialogMode.value = 'add';
-        }
-        selectedRows.value = [];
-        resetForm();
-    }
-    catch (error) {
-        console.error('Error submitting event:', error);
-    }
-    finally { isSubmitting.value = false; }
-};
-
-const handleDialogClose = () => {
-    isDialogOpen.value = false;
-    resetForm();
-    editingEvent.value = null;
-};
 </script>
 
 <template>
     <div class="flex flex-col gap-4">
-        <PageHeaderActions
+        <PageHeaderActions :has-add-new="false"
             :page-title="pageTitle"
             :page-icon="pageIcon || 'solar:calendar-outline'"
-            @add-new="openAddDialog"
         >
             <template #actions>
+                <NuxtLink to="/events/add">
+                    <Button variant="default" size="sm">
+                        <Icon name="solar:clipboard-add-outline"  class="!size-4 shrink-0" />
+                        {{ $t('action.add') }} {{ $t('common.new') }} {{ $t('academy.singular') }}
+                    </Button>
+                </NuxtLink>
                 <LazyButton
                     v-if="selectedRows.length > 0"
                     class="cursor-pointer"
@@ -383,14 +315,5 @@ const handleDialogClose = () => {
             </div>
         </div>
 
-        <LazyEventFormDialog
-            v-model:is-dialog-open="isDialogOpen"
-            v-model:dialog-mode="dialogMode"
-            v-model:editing-event="editingEvent"
-            :is-submitting="isSubmitting"
-            @submit-and-close="onSubmitAndClose"
-            @submit-and-add-new="onSubmitAndAddNew"
-            @close-dialog="handleDialogClose"
-        />
     </div>
 </template>

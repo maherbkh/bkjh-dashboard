@@ -8,6 +8,10 @@ defineProps({
         type: String,
         required: true,
     },
+    hasAddNew: {
+        type: Boolean,
+        default: true,
+    },
 });
 
 const emit = defineEmits(['add-new']);
@@ -20,7 +24,7 @@ const emit = defineEmits(['add-new']);
     >
         <slot name="actions" />
 
-        <LazyButton
+        <LazyButton v-if="hasAddNew"
             class="cursor-pointer"
             size="sm"
             hydrate-on-interaction="mouseover"

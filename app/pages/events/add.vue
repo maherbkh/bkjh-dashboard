@@ -2,9 +2,9 @@
 const { t } = useI18n();
 
 // Page configuration
-const pageTitle = computed(() => t('action.add') + ' ' + t('academy.singular'));
+const pageTitle = computed(() => t('action.add') + ' ' + t('event.singular'));
 const pageIcon = usePageIcon();
-const pageDescription = computed(() => t('action.add') + ' ' + t('academy.singular'));
+const pageDescription = computed(() => t('action.add') + ' ' + t('event.singular'));
 
 definePageMeta({
     middleware: 'auth',
@@ -18,56 +18,39 @@ useSeoMeta({
 });
 
 // Use CRUD for submit flows
-const { createItem, resetForm } = useCrud<EventData, EventForm>({
+const { createItem } = useCrud<EventData, EventForm>({
     crudPath: 'events',
     tenant: 'academy',
     formSchema: createEventSchema(t),
 });
 
-// Dialog state
-const isDialogOpen = ref(true);
-const dialogMode = ref<'add' | 'edit'>('add');
-const editingEvent = ref<EventData | null>(null);
+// State
 const isSubmitting = ref(false);
-
 const router = useRouter();
 
-const onSubmitAndClose = async (values: EventForm) => {
+// Form submission
+const onSubmit = async (values: EventForm) => {
     isSubmitting.value = true;
     try {
         await createItem(values);
-        isDialogOpen.value = false;
-        resetForm();
-        router.back();
+        await router.push('/events');
     }
     catch (error) {
         console.error('Error creating event:', error);
     }
-    finally { isSubmitting.value = false; }
+    finally {
+        isSubmitting.value = false;
+    }
 };
 
-const onSubmitAndAddNew = async (values: EventForm) => {
-    isSubmitting.value = true;
-    try {
-        await createItem(values);
-        // keep dialog open for adding more
-        resetForm();
-    }
-    catch (error) {
-        console.error('Error creating event:', error);
-    }
-    finally { isSubmitting.value = false; }
-};
-
-const handleDialogClose = () => {
-    isDialogOpen.value = false;
-    resetForm();
+// Cancel handler
+const handleCancel = () => {
     router.back();
 };
 </script>
 
 <template>
-    <div>
+    <div class="space-y-6">
         <PageHeader
             :title="pageTitle"
             :icon="pageIcon || 'solar:calendar-add-outline'"
@@ -75,21 +58,18 @@ const handleDialogClose = () => {
             <Button
                 variant="outline"
                 size="sm"
-                @click="$router.back()"
+                @click="handleCancel"
             >
                 <Icon name="solar:arrow-left-outline" />
                 {{ $t('action.back') }}
             </Button>
         </PageHeader>
 
-        <LazyEventFormDialog
-            v-model:is-dialog-open="isDialogOpen"
-            v-model:dialog-mode="dialogMode"
-            v-model:editing-event="editingEvent"
+        <EventForm
+            mode="add"
             :is-submitting="isSubmitting"
-            @submit-and-close="onSubmitAndClose"
-            @submit-and-add-new="onSubmitAndAddNew"
-            @close-dialog="handleDialogClose"
+            @submit="onSubmit"
+            @cancel="handleCancel"
         />
     </div>
 </template>
