@@ -54,6 +54,10 @@ export const useUserStore = defineStore('user', () => {
 
             setUser(loginData.admin);
             setAccessToken(loginData.accessToken);
+            
+            // Wait for cookie to be set before fetching admin data
+            await new Promise(resolve => setTimeout(resolve, 100));
+            await resourcesStore.fetchAdminData();
 
             // Wait a bit to ensure cookie is set
             await new Promise(resolve => setTimeout(resolve, 150));
@@ -103,11 +107,13 @@ export const useUserStore = defineStore('user', () => {
         const { data: res, error } = await useApiFetch(`/api/v1/dashboard/auth/check`, {
             lazy: true,
         });
-        if (res && res.value) {
+        if (res.value) {
             const responseData = (res.value as any).data;
             // Update user data with fresh information from server
             setUser(responseData.admin);
             setAccessToken(responseData.admin.currentToken);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            await resourcesStore.fetchAdminData();
         }
         if (error && error.value) {
             // Clear user data but don't call logout() to avoid unwanted redirects

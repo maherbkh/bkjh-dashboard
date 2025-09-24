@@ -53,8 +53,7 @@ const [schedules, schedulesAttrs] = defineField('schedules');
 // Resources for selects
 const resourcesStore = useResourcesStore();
 const eventCategories = computed(() => resourcesStore.eventCategories || []);
-// TODO: Add eventTargets to resources store or fetch separately
-const eventTargets = computed(() => []);
+const eventTargets = computed(() => resourcesStore.eventTargets || []);
 
 // Initialize form data when props change
 watch(() => props.initialData, (newData) => {

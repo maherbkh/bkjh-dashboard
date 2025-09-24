@@ -59,6 +59,12 @@ interface Occupation {
     isActive: boolean;
 }
 
+interface EventTarget {
+    id: string;
+    name: string;
+    code: string;
+}
+
 interface AdminData {
     categories: {
         ticketCategories: TicketCategory[];
@@ -68,6 +74,7 @@ interface AdminData {
     addresses: Address[];
     companies: Company[];
     occupations: Occupation[];
+    eventTargets: EventTarget[];
 }
 
 interface AdminDataResponse {
@@ -89,6 +96,7 @@ export const useResourcesStore = defineStore('resources', () => {
     const addresses = ref<Address[]>([]);
     const companies = ref<Company[]>([]);
     const occupations = ref<Occupation[]>([]);
+    const eventTargets = ref<EventTarget[]>([]);
 
     // Check if data is stale (older than 30 minutes)
     const isStale = computed(() => {
@@ -107,11 +115,16 @@ export const useResourcesStore = defineStore('resources', () => {
         addresses: [],
         companies: [],
         occupations: [],
+        eventTargets: [],
     });
 
     // Fetch admin data from authenticated endpoint
     const fetchAdminData = async (forceRefresh = false): Promise<AdminData> => {
+        console.log('fetchAdminData called with forceRefresh:', forceRefresh);
+        console.log('isStale:', isStale.value, 'ticketCategories.length:', ticketCategories.value.length);
+        
         if (!forceRefresh && !isStale.value && ticketCategories.value.length > 0) {
+            console.log('Returning cached data');
             return {
                 categories: {
                     ticketCategories: ticketCategories.value,
@@ -121,21 +134,17 @@ export const useResourcesStore = defineStore('resources', () => {
                 addresses: addresses.value,
                 companies: companies.value,
                 occupations: occupations.value,
+                eventTargets: eventTargets.value,
             };
         }
 
         isLoading.value = true;
         error.value = null;
 
-        // Check if we have an access token before making the request
-        const accessToken = useCookie('BKJH_ACCESS_TOKEN');
-        if (!accessToken.value) {
-            console.warn('No access token available for admin data request, skipping fetch');
-            isLoading.value = false;
-            return getEmptyAdminData();
-        }
+        const { data: response, error: fetchError } = await useApiFetch<AdminDataResponse>('/api/v1/dashboard/auth/admin-data');
 
-        const { data: response, error: fetchError } = await useApiFetch<AdminDataResponse>('/api/v1/dashboard/auth/check');
+        console.log('API Response:', response.value);
+        console.log('API Error:', fetchError.value);
 
         if (fetchError.value) {
             error.value = `API Error: ${fetchError.value.statusCode} - ${fetchError.value.data?.message || fetchError.value.message}`;
@@ -143,20 +152,44 @@ export const useResourcesStore = defineStore('resources', () => {
             return getEmptyAdminData();
         }
 
-        if (response.value && response.value.status && response.value.data) {
-            const adminData = response.value.data;
-            ticketCategories.value = adminData.categories.ticketCategories;
-            eventCategories.value = adminData.categories.eventCategories;
-            groups.value = adminData.groups;
-            addresses.value = adminData.addresses;
-            companies.value = adminData.companies;
-            occupations.value = adminData.occupations;
-            lastFetched.value = Date.now();
-            isLoading.value = false;
-            return adminData;
+        if (response.value) {
+            console.log('response', response.value);
+            
+            // Check different possible response structures
+            let adminData;
+            if (response.value.status && response.value.data) {
+                // Structure: { status: true, data: { ... } }
+                adminData = response.value.data;
+            } else if (response.value.data) {
+                // Structure: { data: { ... } }
+                adminData = response.value.data;
+            } else {
+                // Direct structure: { ... }
+                adminData = response.value;
+            }
+            console.log('Parsed adminData:', adminData);
+            
+            // Check if adminData has the expected structure
+            if (adminData && adminData.categories) {
+                ticketCategories.value = adminData.categories.ticketCategories || [];
+                eventCategories.value = adminData.categories.eventCategories || [];
+                groups.value = adminData.groups || [];
+                addresses.value = adminData.addresses || [];
+                companies.value = adminData.companies || [];
+                occupations.value = adminData.occupations || [];
+                eventTargets.value = adminData.eventTargets || [];
+                lastFetched.value = Date.now();
+                isLoading.value = false;
+                return adminData;
+            } else {
+                console.error('AdminData missing categories:', adminData);
+                error.value = 'Invalid response format - missing categories';
+                isLoading.value = false;
+                return getEmptyAdminData();
+            }
         }
 
-        error.value = 'Invalid response format';
+        error.value = 'No response data received';
         isLoading.value = false;
         return getEmptyAdminData();
     };
@@ -176,6 +209,7 @@ export const useResourcesStore = defineStore('resources', () => {
         addresses.value = [];
         companies.value = [];
         occupations.value = [];
+        eventTargets.value = [];
     };
 
     return {
@@ -191,6 +225,7 @@ export const useResourcesStore = defineStore('resources', () => {
         addresses: readonly(addresses),
         companies: readonly(companies),
         occupations: readonly(occupations),
+        eventTargets: readonly(eventTargets),
 
         // Getters
         isStale,
