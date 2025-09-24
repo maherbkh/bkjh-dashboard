@@ -16,4 +16,11 @@ export default defineNuxtRouteMiddleware((to) => {
     if (folderRedirects[normalizedPath]) {
         return navigateTo(folderRedirects[normalizedPath]);
     }
+
+    // Handle event UUID redirect: /events/:uuid -> /events/:uuid/show
+    const eventUuidMatch = to.path.match(/^\/events\/([a-f0-9-]+)$/i);
+    if (eventUuidMatch) {
+        const eventId = eventUuidMatch[1];
+        return navigateTo(`/events/${eventId}/show`);
+    }
 });

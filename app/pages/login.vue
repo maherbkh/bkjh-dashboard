@@ -15,7 +15,7 @@ watchEffect(() => {
 });
 const colorMode = useColorMode();
 
-const logoVariant = computed(() => colorMode.preference === 'light' ? 'dark' : 'light');
+// const logoVariant = computed(() => colorMode.preference === 'light' ? 'dark' : 'light');
 </script>
 
 <template>
@@ -24,10 +24,10 @@ const logoVariant = computed(() => colorMode.preference === 'light' ? 'dark' : '
         :class="{ 'flex-row-reverse': true }"
     >
         <div class="relative hidden h-full flex-1 flex-col bg-[url(/images/login-bg.jpg)] bg-blend-screen dark:bg-muted bg-cover bg-right p-10 text-white lg:flex dark:border-r">
-            <div class="absolute inset-0 dark:from-primary from-slate-900/50 to-transparent bg-gradient-to-b" />
+            <div class="absolute inset-0 from-slate-900/75 to-transparent bg-gradient-to-b" />
             <div class="relative z-20 flex items-center text-lg font-medium">
                 <AppLogo
-                    :variant="logoVariant"
+                    variant="dark"
                     class="h-20"
                 />
             </div>

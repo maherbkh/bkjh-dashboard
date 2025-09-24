@@ -2,6 +2,7 @@
 const { t } = useI18n();
 const route = useRoute();
 const { getTicketNumber, isTicketDetailPage, extractUuidFromPath } = useOpenedTickets();
+const { getEventTitle, isEventDetailPage, extractUuidFromEventPath, version: openedEventsVersion } = useOpenedEvents();
 
 // Translation mapping for route segments (reactive)
 const translationMap = computed(() => ({
@@ -32,6 +33,15 @@ const getTranslatedName = (segment: string, fullPath?: string) => {
             if (ticketNumber) {
                 return ticketNumber;
             }
+        }
+    }
+
+    // Check if this is an event detail page and the segment is a UUID
+    if (fullPath && isEventDetailPage(fullPath)) {
+        const uuid = extractUuidFromEventPath(fullPath);
+        if (uuid && uuid === segment) {
+            const eventTitle = getEventTitle(uuid);
+            if (eventTitle) return eventTitle;
         }
     }
 
@@ -67,7 +77,11 @@ const formatRoutePath = (path: string) => {
     });
 };
 
-const formattedPath = computed(() => formatRoutePath(route.fullPath));
+const formattedPath = computed(() => {
+    // Depend on opened events version to recalc when event title arrives
+    openedEventsVersion.value;
+    return formatRoutePath(route.fullPath);
+});
 </script>
 
 <template>

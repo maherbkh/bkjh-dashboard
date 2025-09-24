@@ -51,11 +51,9 @@ const sortDir = ref<'asc' | 'desc'>('desc');
 const headerItems = computed((): TableHeaderItem[] => [
     { as: 'th', name: t('event.title'), id: 'title' },
     { as: 'th', name: t('event.type'), id: 'type' },
-    { as: 'th', name: t('event_category.singular'), id: 'eventCategory' },
-    { as: 'th', name: t('event_target.singular'), id: 'eventTarget' },
+    { as: 'th', name: t('academy.information'), id: 'eventCategory' },
     { as: 'th', name: t('event.max_capacity'), id: 'maxCapacity' },
     { as: 'th', name: t('common.status'), id: 'isActive' },
-    { as: 'th', name: t('common.created_at'), id: 'createdAt' },
 ]);
 
 // Initialize data
@@ -221,13 +219,30 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         @update:model-value="handleSelectAll"
                     >
                         <template #cell-title="{ row }">
-                            <div class="font-medium">
+                            <div class="font-medium ">
                                 <NuxtLink
                                     :to="`/events/${row.id}/show`"
-                                    class="text-primary hover:underline"
+                                    class="text-primary-foreground hover:underline hover:text-primary truncate"
                                 >
                                     {{ row.title }}
                                 </NuxtLink>
+                                <div
+                                    v-if="row.schedules && row.schedules.length > 0"
+                                    class="mt-1 text-muted-foreground flex items-center gap-1 whitespace-nowrap text-xs"
+                                >
+                                    <div>
+                                        {{ useGermanDateFormat().formatDateShort(row.schedules[0]?.date) }}
+                                    </div>
+                                    <template v-if="row.schedules.length > 1">
+                                        <Icon
+                                            name="solar:arrow-right-bold-duotone"
+                                            class="size-5 shrink-0 opacity-75"
+                                        />
+                                        <div>
+                                            {{ useGermanDateFormat().formatDateShort(row.schedules[(row.schedules.length - 1)]?.date) }}
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
                         </template>
 
@@ -238,35 +253,43 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         </template>
 
                         <template #cell-eventCategory="{ row }">
-                            <span v-if="row.eventCategory">{{ row.eventCategory.name }}</span>
+                            <div class-font-m="normal truncat">
+                                <span v-if="row.eventCategory">{{ row.eventCategory.name }}</span>
+                            <span
+                                v-else
+                                class="text-muted-foreground"
+                            >{{ $t('common.not_assigned') }}</span></div>
+                            <div class-font-m="normal truncat">
+                            <span v-if="row.eventTarget" class="text-muted-foreground">{{ row.eventTarget.name }}</span>
                             <span
                                 v-else
                                 class="text-muted-foreground"
                             >{{ $t('common.not_assigned') }}</span>
-                        </template>
-
-                        <template #cell-eventTarget="{ row }">
-                            <span v-if="row.eventTarget">{{ row.eventTarget.name }}</span>
-                            <span
-                                v-else
-                                class="text-muted-foreground"
-                            >{{ $t('common.not_assigned') }}</span>
+                            </div>
                         </template>
 
                         <template #cell-maxCapacity="{ row }">
-                            <Badge variant="secondary">
-                                {{ row.maxCapacity || 0 }}
-                            </Badge>
+                           <div class="flex flex-col gap-1">
+                            <div>
+                            <Button variant="secondary" size="icon-sm" class="!cursor-default font-normal border !border-border aspect-square !size-5 text-xs">
+                                {{ row.maxCapacity || 0 }} 
+                            </Button>
+                            <span class="text-muted-foreground ml-1.5 text-xs font-normal" >Attenden</span>
+                            </div>
+                            <div>
+                            <Button variant="secondary" size="icon-sm" class="!cursor-default font-normal border !border-border aspect-square !size-5 text-xs">
+                                {{ row.approvedRegistrationsCount || 0 }} 
+                            </Button>
+                            <span class="text-muted-foreground ml-1.5 text-xs font-normal" >Aprroved</span>
+                            </div></div>
                         </template>
 
                         <template #cell-isActive="{ row }">
-                            <Badge :variant="row.isActive ? 'default' : 'secondary'">
+                            <div>
+                            <Badge :variant="row.isActive ? 'default' : 'secondary'" class="w-full">
                                 {{ row.isActive ? $t('common.active') : $t('common.inactive') }}
                             </Badge>
-                        </template>
-
-                        <template #cell-createdAt="{ row }">
-                            {{ formatDate(row.createdAt) }}
+                            </div>
                         </template>
 
                         <template #cell-actions="{ row }">

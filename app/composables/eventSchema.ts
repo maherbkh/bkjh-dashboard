@@ -35,7 +35,7 @@ export function createEventSchema(
 
         description: z
             .string()
-            .max(2000, t('form.description') + ' ' + t('validation.max_length', { max: 2000 }))
+            .max(3000, t('form.description') + ' ' + t('validation.max_length', { max: 3000 }))
             .optional(),
 
         shortDescription: z

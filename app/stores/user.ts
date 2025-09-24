@@ -6,7 +6,7 @@ import { useResourcesStore } from '~/stores/resources';
 export const useUserStore = defineStore('user', () => {
     const { t } = useNuxtApp().$i18n;
     const user = ref<User | undefined>();
-    const accessToken = useCookie('BKJH_ACCESS_TOKEN', { maxAge: 60 * 15 }); // 15 minutes to match backend
+    const accessToken = useCookie('BKJH_ACCESS_TOKEN', { maxAge: 60 * 60 * 24 }); // 15 minutes to match backend
     const lastAuthValidation = useCookie('last_auth_validation', { maxAge: 60 * 5 }); // 5 minutes
 
     // Resources store instance - declared once for reuse
@@ -143,7 +143,7 @@ export const useUserStore = defineStore('user', () => {
 
             // Update access token if a new one is provided
             if (responseData.admin.currentToken) {
-                setAccessToken(responseData.admin.currentToken);
+                setAccessToken(responseData.admin.currentToken, 60 * 60 * 24); // 15 minutes
             }
 
             // Fetch admin data after successful auth check

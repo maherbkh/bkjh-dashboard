@@ -578,6 +578,29 @@ export type EventSpeakerLite = {
 export type EventListCategory = { id: string; name: string };
 export type EventListTarget = { id: string; name: string };
 
+// Event detail nested types
+export interface EventSchedule {
+    id: string;
+    eventId: string;
+    date: string; // ISO date
+    startTime: string; // e.g. "09:00"
+    endTime: string; // e.g. "15:30"
+    note?: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface EventAdminLite {
+    id: string;
+    firstName: string;
+    lastName: string;
+}
+
+export interface EventRegistration {
+    // Unknown shape for now; align with API when available
+    [key: string]: any;
+}
+
 export type EventData = {
     id: string; // UUID
     title: string;
@@ -597,7 +620,10 @@ export type EventData = {
     updatedAt: string;
     eventCategory?: EventListCategory | null;
     eventTarget?: EventListTarget | null;
+    admin?: EventAdminLite | null;
     speakers?: EventSpeakerLite[];
+    schedules?: EventSchedule[];
+    registrations?: EventRegistration[];
     registrationsCount?: number;
     schedulesCount?: number;
     availableSpots?: number;

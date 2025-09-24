@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { EventData } from '~/types';
 import { useResourcesStore } from '~/stores/resources';
 import RTEditor from '~/components/FormItem/RTEditor.vue';
 
