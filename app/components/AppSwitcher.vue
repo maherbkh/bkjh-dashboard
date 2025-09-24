@@ -42,9 +42,9 @@ const handleAppClick = (app: typeof props.apps[0]) => {
                 <DropdownMenuTrigger as-child>
                     <SidebarMenuButton
                         size="lg"
-                        class="bg-sidebar-accent data-[state=open]:bg-sidebar-primary data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
+                        class="ease-in-out duration-300 bg-sidebar-accent group data-[state=open]:bg-sidebar-primary data-[state=open]:text-sidebar-primary-foreground cursor-pointer"
                     >
-                        <div class="flex aspect-square !size-9 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                        <div class="ease-in-out duration-150 flex aspect-square group-data-[state=open]:bg-sidebar-accent group-data-[state=open]:text-sidebar-accent-foreground !size-9 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                             <Icon
                                 :name="activeApp.logo"
                                 class="!size-5"

@@ -2,7 +2,7 @@
 import { useSidebar } from '~/components/ui/sidebar';
 import { useUserStore } from '~/stores/user';
 
-const { isMobile } = useSidebar();
+const { isMobile, state } = useSidebar();
 const userStore = useUserStore();
 
 const handleLogout = async () => {
@@ -19,9 +19,16 @@ const userInitials = computed(() => useInitials(userStore.user?.name ?? ''));
                 <DropdownMenuTrigger as-child>
                     <SidebarMenuButton
                         size="lg"
-                        class="cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground bg-background border"
+                        :class="[
+                            'active:bg-transparent focus-visible:ring-0 cursor-pointer group data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground bg-background',
+                            (state === 'expanded' ? 'border border-border/75' : 'rounded-full')
+                        ]"
                     >
-                        <Avatar class="h-8 w-8 rounded-full border">
+                        <Avatar
+                            class="size-9 rounded-full border
+                                   group-active:bg-sidebar-primary group-active:text-sidebar-primary-foreground
+                                   group-data-[state=open]:bg-sidebar-accent group-data-[state=open]:text-sidebar-accent-foreground"
+                        >
                             <AvatarImage
                                 v-if="userStore.user?.avatar"
                                 class="bg-background"
