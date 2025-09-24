@@ -6,7 +6,9 @@ definePageMeta({
     middleware: 'auth',
 });
 
-const { data, status, error } = useApiFetch(`/api/v1/dashboard/academy/events/${route.params.id as string}`);
+const { data, status, error, refresh } = useApiFetch(`/api/v1/dashboard/academy/events/${route.params.id as string}`, {
+    immediate: false,
+});
 
 // Watch for data changes and store event when available
 watch(data, (newData) => {
@@ -17,6 +19,10 @@ watch(data, (newData) => {
         }
     }
 }, { immediate: true });
+
+onMounted(async () => {
+    await refresh();
+})
 </script>
 
 <template>

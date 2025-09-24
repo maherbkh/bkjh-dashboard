@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const { t } = useI18n();
-
+import type { EventData } from '~/types';
+import { toast } from 'vue-sonner';
 // Page configuration
 const pageTitle = computed(() => t('action.add') + ' ' + t('event.singular'));
 const pageIcon = usePageIcon();
@@ -17,12 +18,8 @@ useSeoMeta({
     ogDescription: pageDescription,
 });
 
-// Use CRUD for submit flows
-const { createItem } = useCrud<EventData, EventForm>({
-    crudPath: 'events',
-    tenant: 'academy',
-    formSchema: createEventSchema(t),
-});
+import type { EventForm } from '~/composables/eventSchema';
+// Validation schema is used inside EventForm component; no CRUD here
 
 // State
 const isSubmitting = ref(false);
@@ -31,16 +28,25 @@ const router = useRouter();
 // Form submission
 const onSubmit = async (values: EventForm) => {
     isSubmitting.value = true;
-    try {
-        await createItem(values);
+
+    const { data, error } = await useApiFetch('/api/v1/dashboard/academy/events', {
+        method: 'POST',
+        body: values as any,
+    });
+
+    if (error.value) {
+        const errorMessage = error.value.data?.message || error.value.message || t('global.messages.something_went_wrong');
+        toast.error(errorMessage);
+        isSubmitting.value = false;
+        return;
+    }
+
+    if (data.value) {
+        toast.success(t('global.messages.success'));
         await navigateTo('/events');
     }
-    catch (error) {
-        console.error('Error creating event:', error);
-    }
-    finally {
-        isSubmitting.value = false;
-    }
+
+    isSubmitting.value = false;
 };
 
 // Cancel handler

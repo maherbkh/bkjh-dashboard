@@ -7,7 +7,6 @@ export const useUserStore = defineStore('user', () => {
     const { t } = useNuxtApp().$i18n;
     const user = ref<User | undefined>();
     const accessToken = useCookie('BKJH_ACCESS_TOKEN', { maxAge: 60 * 60 * 24 }); // 15 minutes to match backend
-    const lastAuthValidation = useCookie('last_auth_validation', { maxAge: 60 * 5 }); // 5 minutes
 
     // Resources store instance - declared once for reuse
     const resourcesStore = useResourcesStore();
@@ -17,8 +16,6 @@ export const useUserStore = defineStore('user', () => {
         return accessToken.value;
     };
     const setUser = (data?: User) => (user.value = data);
-    const updateAuthValidation = () => (lastAuthValidation.value = Date.now().toString());
-    const clearAuthValidation = () => (lastAuthValidation.value = null);
 
     // Legacy token getter for backward compatibility
     const token = computed(() => accessToken.value);
@@ -36,28 +33,13 @@ export const useUserStore = defineStore('user', () => {
 
         setAccessToken();
         setUser();
-
-        // Clear all resources data
-        try {
-            resourcesStore.clearAll();
-        }
-        catch (error) {
-            // Failed to clear resources data
-        }
-
-        // Clear CSRF token cookie
-        const csrfToken = useCookie('XSRF-TOKEN-DASHBOARD');
-        csrfToken.value = null;
+        resourcesStore.clearAll();
 
         // Clear auth validation timestamp
-        clearAuthValidation();
         toast.success(t('global.goodbye'), {
             description: t('auth.logout_success'),
-            duration: 3000,
+            duration: 5000,
         });
-
-        // Wait 200ms to ensure cookies are properly cleared
-        await new Promise(resolve => setTimeout(resolve, 200));
 
         navigateTo('/login');
     };
@@ -73,29 +55,14 @@ export const useUserStore = defineStore('user', () => {
             setUser(loginData.admin);
             setAccessToken(loginData.accessToken);
 
-            // Fetch admin data after successful login
-            try {
-                // Wait a bit to ensure cookie is set
-                await new Promise(resolve => setTimeout(resolve, 50));
-                await resourcesStore.fetchAdminData();
-            }
-            catch (error) {
-                // Don't block login if admin data fetch fails
-            }
+            // Wait a bit to ensure cookie is set
+            await new Promise(resolve => setTimeout(resolve, 150));
 
             toast.success(t('global.welcome'), {
                 description: t('auth.login_success'),
                 duration: 5000,
             });
 
-            // Update auth validation timestamp
-            updateAuthValidation();
-
-            // Wait 200ms to ensure cookies are properly set
-            await new Promise(resolve => setTimeout(resolve, 200));
-
-            // Let middleware handle navigation - just ensure state is updated
-            await nextTick();
             await navigateTo(path as string ? path : '/');
         }
         if (error.value) {
@@ -136,38 +103,17 @@ export const useUserStore = defineStore('user', () => {
         const { data: res, error } = await useApiFetch(`/api/v1/dashboard/auth/check`, {
             lazy: true,
         });
-        if (res.value) {
+        if (res && res.value) {
             const responseData = (res.value as any).data;
             // Update user data with fresh information from server
             setUser(responseData.admin);
-
-            // Update access token if a new one is provided
-            if (responseData.admin.currentToken) {
-                setAccessToken(responseData.admin.currentToken); // 15 minutes
-            }
-
-            // Fetch admin data after successful auth check
-            try {
-                await resourcesStore.fetchAdminData();
-            }
-            catch (error) {
-                // Don't block auth check if admin data fetch fails
-                setAccessToken();
-                navigateTo('/login');
-            }
-
-            // Update auth validation timestamp on successful check
-            updateAuthValidation();
-
-            return true;
+            setAccessToken(responseData.admin.currentToken);
         }
         if (error && error.value) {
             // Clear user data but don't call logout() to avoid unwanted redirects
             setUser();
             setAccessToken();
-            return false;
         }
-        return false;
     };
 
     const forgotPassword = async (email: string) => {
@@ -180,7 +126,6 @@ export const useUserStore = defineStore('user', () => {
                 description: t('auth.reset_link_sent'),
                 duration: 5000,
             });
-            return true;
         }
         if (error.value) {
             const description = (error.value.data?.message ?? error.value.data?.status) || t('auth.failed_to_send_reset_email');
@@ -188,9 +133,7 @@ export const useUserStore = defineStore('user', () => {
                 description,
                 duration: 5000,
             });
-            return false;
         }
-        return false;
     };
 
     const resetPassword = async (resetData: ResetPasswordForm) => {
@@ -212,7 +155,6 @@ export const useUserStore = defineStore('user', () => {
                 duration: 5000,
             });
             navigateTo('/');
-            return true;
         }
         if (error.value) {
             const description = (error.value.data?.message ?? error.value.data?.status) || t('auth.password_reset_failed');
@@ -220,26 +162,7 @@ export const useUserStore = defineStore('user', () => {
                 description,
                 duration: 5000,
             });
-            return false;
         }
-        return false;
-    };
-
-    // Get CSRF token for forms
-    const getCsrfToken = async () => {
-        try {
-            const { data: csrfData } = await useApiFetch('/api/v1/dashboard/auth/csrf-token');
-            return (csrfData.value as any)?.data?.csrfToken;
-        }
-        catch (error) {
-            return null;
-        }
-    };
-
-    // Get comprehensive admin data
-    const getAdminData = async () => {
-        const { data: adminData } = await useApiFetch('/api/v1/dashboard/auth/admin-data');
-        return (adminData.value as any)?.data;
     };
 
     // Logout all sessions
@@ -253,25 +176,12 @@ export const useUserStore = defineStore('user', () => {
 
         setAccessToken();
         setUser();
-
-        // Clear auth validation timestamp
-        clearAuthValidation();
-
-        // Clear all resources data
-        try {
-            resourcesStore.clearAll();
-        }
-        catch (error) {
-            // Failed to clear resources data
-        }
+        resourcesStore.clearAll();
 
         toast.success(t('global.goodbye'), {
             description: t('auth.logout_all_success'),
-            duration: 3000,
+            duration: 5000,
         });
-
-        // Wait 200ms to ensure cookies are properly cleared
-        await new Promise(resolve => setTimeout(resolve, 200));
 
         navigateTo('/login');
     };
@@ -289,7 +199,6 @@ export const useUserStore = defineStore('user', () => {
                     description: t('auth.password_change_success'),
                     duration: 5000,
                 });
-                return true;
             }
 
             if (error.value) {
@@ -298,7 +207,6 @@ export const useUserStore = defineStore('user', () => {
                     description,
                     duration: 5000,
                 });
-                return false;
             }
         }
         catch (error) {
@@ -306,9 +214,7 @@ export const useUserStore = defineStore('user', () => {
                 description: t('auth.password_change_failed'),
                 duration: 5000,
             });
-            return false;
         }
-        return false;
     };
 
     // Update profile
@@ -320,15 +226,7 @@ export const useUserStore = defineStore('user', () => {
             });
 
             if (data.value) {
-                const updatedUser = (data.value as any).data?.admin;
-                if (updatedUser) {
-                    setUser(updatedUser);
-                }
-                toast.success(t('auth.profile_updated'), {
-                    description: t('auth.profile_update_success'),
-                    duration: 5000,
-                });
-                return true;
+                await fetchAuthUser();
             }
 
             if (error.value) {
@@ -337,7 +235,6 @@ export const useUserStore = defineStore('user', () => {
                     description,
                     duration: 5000,
                 });
-                return false;
             }
         }
         catch (error) {
@@ -345,9 +242,7 @@ export const useUserStore = defineStore('user', () => {
                 description: t('auth.profile_update_failed'),
                 duration: 5000,
             });
-            return false;
         }
-        return false;
     };
 
     return {
@@ -362,8 +257,6 @@ export const useUserStore = defineStore('user', () => {
         login,
         forgotPassword,
         resetPassword,
-        getCsrfToken,
-        getAdminData,
         logoutAll,
         changePassword,
         updateProfile,

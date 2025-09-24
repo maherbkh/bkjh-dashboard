@@ -64,25 +64,17 @@ export function useApiFetch<T = unknown>(
         Object.assign(headers, useRequestHeaders(['cookie']));
     }
 
+
     return useFetch(`${config.public.apiUrl}` + path, {
         credentials: 'include',
         watch: false,
-        // Use a stable key to avoid SSR + client double fetches
-        key: options.key ?? path,
+        // Disable browser caching; backend controls freshness
+        cache: 'no-store',
+        // Stable key includes HTTP method so mutations don't reuse GET cache
         ...options,
         headers: {
             ...headers,
             ...(options.headers as Record<string, string>),
-        },
-        onResponse({ response }) {
-            // Extend access token cookie expiration on successful responses
-            // Only for logged-in users (when access token exists)
-            if (import.meta.client && response.ok && accessToken.value) {
-                // Use setAccessToken to extend cookie expiration by another 15 minutes
-                const userStore = useUserStore();
-                const currentToken = accessToken.value;
-                userStore.setAccessToken(currentToken); // This will reset the cookie with new maxAge
-            }
         },
         onResponseError({ response, error }) {
             // Use global error handler for all error responses
@@ -107,11 +99,6 @@ export function useApiFetch<T = unknown>(
                 (requestOptions.headers as unknown as Record<string, string>)['X-CSRF-TOKEN'] = csrfToken;
             }
 
-            // Always re-attach Authorization right before sending
-            const tokenCookie = useCookie('BKJH_ACCESS_TOKEN');
-            if (tokenCookie.value) {
-                (requestOptions.headers as unknown as Record<string, string>).Authorization = `Bearer ${tokenCookie.value}`;
-            }
         },
     });
 }

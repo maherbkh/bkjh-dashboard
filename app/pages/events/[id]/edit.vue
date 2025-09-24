@@ -1,8 +1,8 @@
 <script setup lang="ts">
 const { t } = useI18n();
 const route = useRoute();
-
-// Page configuration
+import type { EventData } from '~/types';
+import { toast } from 'vue-sonner';// Page configuration
 const pageTitle = computed(() => t('action.edit') + ' ' + t('event.singular'));
 const pageIcon = usePageIcon();
 const pageDescription = computed(() => t('action.edit') + ' ' + t('event.singular'));
@@ -18,14 +18,8 @@ useSeoMeta({
     ogDescription: pageDescription,
 });
 
-// Use route.params.id directly
 
-// CRUD
-const { updateItem, fetchItem } = useCrud<EventData, EventForm>({
-    crudPath: 'events',
-    tenant: 'academy',
-    formSchema: createEventSchema(t),
-});
+import type { EventForm } from '~/composables/eventSchema';
 
 // State
 const editingEvent = ref<EventData | null>(null);
@@ -33,24 +27,41 @@ const isSubmitting = ref(false);
 
 // Load event data
 onMounted(async () => {
-    const res = await fetchItem(route.params.id as string);
-    editingEvent.value = (res?.data as any) || null;
+    const { data, error } = await useApiFetch(`/api/v1/dashboard/academy/events/${route.params.id as string}`);
+    if (error.value) {
+        toast.error(t('global.messages.error'));
+        return;
+    }
+    if (data.value) {
+        editingEvent.value = (data.value as any).data as EventData;
+    }
 });
 
 // Form submission
 const onSubmit = async (values: EventForm) => {
+    console.log('values', values);
     if (!editingEvent.value) return;
     isSubmitting.value = true;
-    try {
-        await updateItem(editingEvent.value.id, values);
-        await navigateTo(`/events/${route.params.id as string}`);
-    }
-    catch (error) {
-        console.error('Error updating event:', error);
-    }
-    finally {
+    const { data, error } = await useApiFetch(`/api/v1/dashboard/academy/events/${editingEvent.value.id}`, {
+        method: 'PATCH',
+        body: values as any,
+    });
+
+    if (error.value) {
+        console.log('error', error.value);
+        const errorMessage = error.value.data?.message || error.value.message || t('global.messages.something_went_wrong');
+        toast.error(errorMessage);
         isSubmitting.value = false;
+        return;
     }
+
+    if (data.value) {
+        console.log('success', data.value);
+        toast.success(t('global.messages.success'));
+        await navigateTo(`/events/${route.params.id as string}/show`, { replace: true });
+    }
+
+    isSubmitting.value = false;
 };
 
 // Cancel handler

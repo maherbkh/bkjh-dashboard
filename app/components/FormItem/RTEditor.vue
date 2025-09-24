@@ -16,6 +16,7 @@
                     size="icon"
                     :disabled="!editor.can().chain().focus().toggleBold().run()"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('bold') }"
+                    :title="$t('editor.bold')"
                     @click.prevent="editor.chain().focus().toggleBold().run()"
                 >
                     <Icon
@@ -29,6 +30,7 @@
                     size="icon"
                     :disabled="!editor.can().chain().focus().toggleItalic().run()"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('italic') }"
+                    :title="$t('editor.italic')"
                     @click.prevent="editor.chain().focus().toggleItalic().run()"
                 >
                     <Icon
@@ -42,6 +44,7 @@
                     size="icon"
                     :disabled="!editor.can().chain().focus().toggleStrike().run()"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('strike') }"
+                    :title="$t('editor.strike')"
                     @click.prevent="editor.chain().focus().toggleStrike().run()"
                 >
                     <Icon
@@ -55,6 +58,7 @@
                     size="icon"
                     :disabled="!editor.can().chain().focus().toggleUnderline().run()"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('underline') }"
+                    :title="$t('editor.underline')"
                     @click.prevent="editor.chain().focus().toggleUnderline().run()"
                 >
                     <Icon
@@ -68,6 +72,7 @@
                     size="icon"
                     :disabled="!editor.can().chain().focus().toggleCode().run()"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('code') }"
+                    :title="$t('editor.code')"
                     @click.prevent="editor.chain().focus().toggleCode().run()"
                 >
                     <Icon
@@ -87,9 +92,10 @@
                     type="button"
                     variant="ghost"
                     size="sm"
+                    :title="$t('editor.remove_color')"
                     @click.prevent="editor.chain().focus().unsetColor().run()"
                 >
-                    Remove Color
+                    {{ $t('editor.remove_color') }}
                 </Button>
 
                 <!-- Headings -->
@@ -98,6 +104,7 @@
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('heading', { level: 1 }) }"
+                    :title="$t('editor.heading_h1')"
                     @click.prevent="editor.chain().focus().toggleHeading({ level: 1 }).run()"
                 >
                     <span class="text-xs font-bold">H1</span>
@@ -107,6 +114,7 @@
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('heading', { level: 2 }) }"
+                    :title="$t('editor.heading_h2')"
                     @click.prevent="editor.chain().focus().toggleHeading({ level: 2 }).run()"
                 >
                     <span class="text-xs font-bold">H2</span>
@@ -116,6 +124,7 @@
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('heading', { level: 3 }) }"
+                    :title="$t('editor.heading_h3')"
                     @click.prevent="editor.chain().focus().toggleHeading({ level: 3 }).run()"
                 >
                     <span class="text-xs font-bold">H3</span>
@@ -125,6 +134,7 @@
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('heading', { level: 4 }) }"
+                    :title="$t('editor.heading_h4')"
                     @click.prevent="editor.chain().focus().toggleHeading({ level: 4 }).run()"
                 >
                     <span class="text-xs font-bold">H4</span>
@@ -134,6 +144,7 @@
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('heading', { level: 5 }) }"
+                    :title="$t('editor.heading_h5')"
                     @click.prevent="editor.chain().focus().toggleHeading({ level: 5 }).run()"
                 >
                     <span class="text-xs font-bold">H5</span>
@@ -143,6 +154,7 @@
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('heading', { level: 6 }) }"
+                    :title="$t('editor.heading_h6')"
                     @click.prevent="editor.chain().focus().toggleHeading({ level: 6 }).run()"
                 >
                     <span class="text-xs font-bold">H6</span>
@@ -154,6 +166,7 @@
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive({ textAlign: 'left' }) }"
+                    :title="$t('editor.align_left')"
                     @click.prevent="editor.chain().focus().setTextAlign('left').run()"
                 >
                     <Icon
@@ -166,6 +179,7 @@
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive({ textAlign: 'center' }) }"
+                    :title="$t('editor.align_center')"
                     @click.prevent="editor.chain().focus().setTextAlign('center').run()"
                 >
                     <Icon
@@ -178,6 +192,7 @@
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive({ textAlign: 'right' }) }"
+                    :title="$t('editor.align_right')"
                     @click.prevent="editor.chain().focus().setTextAlign('right').run()"
                 >
                     <Icon
@@ -190,6 +205,7 @@
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive({ textAlign: 'justify' }) }"
+                    :title="$t('editor.align_justify')"
                     @click.prevent="editor.chain().focus().setTextAlign('justify').run()"
                 >
                     <Icon
@@ -201,6 +217,7 @@
                     type="button"
                     variant="ghost"
                     size="icon"
+                    :title="$t('editor.align_unset')"
                     @click.prevent="editor.chain().focus().unsetTextAlign().run()"
                 >
                     <Icon
@@ -215,6 +232,7 @@
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('link') }"
+                    :title="$t('editor.link_set')"
                     @click.prevent="setLink"
                 >
                     <Icon
@@ -227,6 +245,7 @@
                     variant="ghost"
                     size="icon"
                     :disabled="!editor.isActive('link')"
+                    :title="$t('editor.link_unset')"
                     @click.prevent="editor.chain().focus().unsetLink().run()"
                 >
                     <Icon
@@ -241,6 +260,7 @@
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('bulletList') }"
+                    :title="$t('editor.list_bullet')"
                     @click.prevent="editor.chain().focus().toggleBulletList().run()"
                 >
                     <Icon
@@ -253,6 +273,7 @@
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('orderedList') }"
+                    :title="$t('editor.list_ordered')"
                     @click.prevent="editor.chain().focus().toggleOrderedList().run()"
                 >
                     <Icon
@@ -267,6 +288,7 @@
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('codeBlock') }"
+                    :title="$t('editor.code_block')"
                     @click.prevent="editor.chain().focus().toggleCodeBlock().run()"
                 >
                     <Icon
@@ -279,6 +301,7 @@
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('blockquote') }"
+                    :title="$t('editor.blockquote')"
                     @click.prevent="editor.chain().focus().toggleBlockquote().run()"
                 >
                     <Icon
@@ -290,7 +313,7 @@
                     type="button"
                     variant="ghost"
                     size="icon"
-                    title="Clear formatting"
+                    :title="$t('editor.clear_formatting')"
                     @click.prevent="clearFormatting(editor, { resetBlocks: true, resetAlignment: true, resetColors: true })"
                 >
                     <Icon name="solar:eraser-linear" class="!size-4 shrink-0" />
@@ -299,6 +322,7 @@
                     type="button"
                     variant="ghost"
                     size="icon"
+                    :title="$t('editor.hr')"
                     @click.prevent="editor.chain().focus().setHorizontalRule().run()"
                 >
                     <Icon
@@ -310,6 +334,7 @@
                     type="button"
                     variant="ghost"
                     size="icon"
+                    :title="$t('editor.hard_break')"
                     @click.prevent="editor.chain().focus().setHardBreak().run()"
                 >
                     <Icon
@@ -324,6 +349,7 @@
                     variant="ghost"
                     size="icon"
                     :disabled="!editor.can().chain().focus().undo().run()"
+                    :title="$t('editor.undo')"
                     @click.prevent="editor.chain().focus().undo().run()"
                 >
                     <Icon
@@ -336,6 +362,7 @@
                     variant="ghost"
                     size="icon"
                     :disabled="!editor.can().chain().focus().redo().run()"
+                    :title="$t('editor.redo')"
                     @click.prevent="editor.chain().focus().redo().run()"
                 >
                     <Icon

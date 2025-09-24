@@ -164,7 +164,7 @@ const formTitle = computed(() => {
                             v-model="description"
                             :placeholder="t('form.description')"
                             :show-character-count="true"
-                            :max-length="5000"
+                            :max-length="10000"
                             min-height="200px"
                             class="w-full"
                         />

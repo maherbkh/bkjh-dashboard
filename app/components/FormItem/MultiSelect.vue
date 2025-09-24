@@ -410,7 +410,7 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                         variant="ghost"
                         size="icon"
                         class="h-4 w-4 p-0"
-                        @click.stop="opt && toggleValue(opt.value, false)"
+                        @click="opt && toggleValue(opt.value, false)"
                     >
                         ×
                     </Button>
