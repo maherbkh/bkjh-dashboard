@@ -40,13 +40,15 @@
                     />
                     {{ $t("action.retry") }}
                 </Button>
-                <Button @click="() => router.push('/support-tickets')">
+                <NuxtLink :to="'/support-tickets'">
+                    <Button>
                     <Icon
                         name="solar:arrow-left-linear"
                         class="mr-2 h-4 w-4"
                     />
                     {{ $t("action.back") + " " + $t("common.to") + " " + $t("ticket.plural") }}
                 </Button>
+                </NuxtLink>
             </div>
         </div>
 

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 const { t } = useI18n();
 const route = useRoute();
-const router = useRouter();
 
 // Page configuration
 const pageTitle = computed(() => t('action.edit') + ' ' + t('event.singular'));
@@ -19,7 +18,7 @@ useSeoMeta({
     ogDescription: pageDescription,
 });
 
-const eventId = computed(() => route.params.id as string);
+// Use route.params.id directly
 
 // CRUD
 const { updateItem, fetchItem } = useCrud<EventData, EventForm>({
@@ -34,7 +33,7 @@ const isSubmitting = ref(false);
 
 // Load event data
 onMounted(async () => {
-    const res = await fetchItem(eventId.value);
+    const res = await fetchItem(route.params.id as string);
     editingEvent.value = (res?.data as any) || null;
 });
 
@@ -44,7 +43,7 @@ const onSubmit = async (values: EventForm) => {
     isSubmitting.value = true;
     try {
         await updateItem(editingEvent.value.id, values);
-        await navigateTo(`/events/${eventId.value}`);
+        await navigateTo(`/events/${route.params.id as string}`);
     }
     catch (error) {
         console.error('Error updating event:', error);
@@ -56,7 +55,7 @@ const onSubmit = async (values: EventForm) => {
 
 // Cancel handler
 const handleCancel = () => {
-    router.push(`/events/${eventId.value}`);
+    navigateTo(`/events/${route.params.id as string}`);
 };
 </script>
 
@@ -66,14 +65,15 @@ const handleCancel = () => {
             :title="pageTitle"
             :icon="pageIcon || 'solar:pen-outline'"
         >
-            <Button
+            <NuxtLink :to="`/events/${route.params.id as string}`">
+                <Button
                 variant="outline"
                 size="sm"
-                @click="handleCancel"
             >
                 <Icon name="solar:arrow-left-outline" />
                 {{ $t('action.back') }}
             </Button>
+            </NuxtLink>
         </PageHeader>
 
         <EventForm
@@ -81,7 +81,6 @@ const handleCancel = () => {
             :initial-data="editingEvent"
             :is-submitting="isSubmitting"
             @submit="onSubmit"
-            @cancel="handleCancel"
         />
     </div>
 </template>

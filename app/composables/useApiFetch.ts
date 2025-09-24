@@ -67,7 +67,8 @@ export function useApiFetch<T = unknown>(
     return useFetch(`${config.public.apiUrl}` + path, {
         credentials: 'include',
         watch: false,
-        key: `${path}-${Date.now()}`, // Add cache busting key
+        // Use a stable key to avoid SSR + client double fetches
+        key: options.key ?? path,
         ...options,
         headers: {
             ...headers,
@@ -104,6 +105,12 @@ export function useApiFetch<T = unknown>(
             const csrfToken = await getCSRFToken();
             if (csrfToken && requestOptions.headers) {
                 (requestOptions.headers as unknown as Record<string, string>)['X-CSRF-TOKEN'] = csrfToken;
+            }
+
+            // Always re-attach Authorization right before sending
+            const tokenCookie = useCookie('BKJH_ACCESS_TOKEN');
+            if (tokenCookie.value) {
+                (requestOptions.headers as unknown as Record<string, string>).Authorization = `Bearer ${tokenCookie.value}`;
             }
         },
     });

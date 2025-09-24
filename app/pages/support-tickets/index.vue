@@ -454,18 +454,19 @@ const getStatusVariant = (status: string) => {
 
                         <template #cell-actions="{ row }">
                             <div class="flex justify-end gap-2">
-                                <LazyButton
+                                <NuxtLink :to="`/support-tickets/${row.id}`">
+                                    <LazyButton
                                     :title="$t('action.view')"
                                     variant="ghost"
                                     size="icon"
                                     hydrate-on-interaction="mouseover"
-                                    @click="$router.push(`/support-tickets/${row.id}`)"
                                 >
                                     <Icon
                                         name="solar:eye-outline"
                                         class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
                                     />
                                 </LazyButton>
+                                </NuxtLink>
                                 <LazyButton
                                     :title="$t('action.edit')"
                                     variant="ghost"

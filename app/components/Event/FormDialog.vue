@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useResourcesStore } from '~/stores/resources';
+import type { EventData } from '~/types';
 
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm, loading } = useCrud<

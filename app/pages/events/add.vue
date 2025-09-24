@@ -33,7 +33,7 @@ const onSubmit = async (values: EventForm) => {
     isSubmitting.value = true;
     try {
         await createItem(values);
-        await router.push('/events');
+        await navigateTo('/events');
     }
     catch (error) {
         console.error('Error creating event:', error);

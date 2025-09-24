@@ -290,6 +290,15 @@
                     type="button"
                     variant="ghost"
                     size="icon"
+                    title="Clear formatting"
+                    @click.prevent="clearFormatting(editor, { resetBlocks: true, resetAlignment: true, resetColors: true })"
+                >
+                    <Icon name="solar:eraser-linear" class="!size-4 shrink-0" />
+                </Button>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
                     @click.prevent="editor.chain().focus().setHorizontalRule().run()"
                 >
                     <Icon
@@ -371,6 +380,7 @@ import Link from '@tiptap/extension-link';
 import CharacterCount from '@tiptap/extension-character-count';
 import { Button } from '~/components/ui/button';
 import { watch, onMounted, onBeforeUnmount, ref, computed } from 'vue';
+import { clearFormatting } from '~/composables/useTiptapFormat';
 
 // Props
 interface Props {

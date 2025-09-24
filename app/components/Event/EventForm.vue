@@ -23,7 +23,6 @@ const props = withDefaults(defineProps<Props>(), {
 // Emits
 const emit = defineEmits<{
     submit: [values: EventForm];
-    cancel: [];
 }>();
 
 // CRUD
@@ -91,11 +90,6 @@ watch(() => props.initialData, (newData) => {
 const onSubmit = handleSubmit((values) => {
     emit('submit', values);
 });
-
-// Cancel handler
-const handleCancel = () => {
-    emit('cancel');
-};
 
 // Schedule management
 const addSchedule = () => {
@@ -363,14 +357,6 @@ const formTitle = computed(() => {
                     v-if="showActions"
                     class="flex justify-end gap-2 pt-4 border-t"
                 >
-                    <Button
-                        type="button"
-                        variant="outline"
-                        :disabled="isSubmitting"
-                        @click="handleCancel"
-                    >
-                        {{ t("action.cancel") }}
-                    </Button>
                     <Button
                         type="submit"
                         :disabled="isSubmitting"
