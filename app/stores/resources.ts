@@ -132,7 +132,7 @@ export const useResourcesStore = defineStore('resources', () => {
                 };
             }
 
-            const { data: response, error } = await useApiFetch<AdminDataResponse>('/api/v1/dashboard/auth/admin-data');
+            const { data: response, error } = await useApiFetch<AdminDataResponse>('/api/v1/dashboard/auth/check');
 
             if (error.value) {
                 throw new Error(`API Error: ${error.value.statusCode} - ${error.value.data?.message || error.value.message}`);

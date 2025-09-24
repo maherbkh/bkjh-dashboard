@@ -76,7 +76,7 @@ export const useTiptapConfig = (options: {
         content: options.content || '',
         editorProps: {
             attributes: {
-                class: 'prose prose-sm max-w-none focus:outline-none',
+                class: 'content max-w-none focus:outline-none',
                 style: `min-height: ${options.minHeight || '200px'}`,
                 placeholder: options.placeholder || 'Start typing...',
             },

@@ -1,7 +1,36 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "./typography.css";
+@import "./vue-datepicker.css";
+@import "./content.css";
 
+/* vue-sonner theme variables (applies to .toaster root) */
+.toaster{
+	--normal-bg: var(--popover);
+	--normal-border: var(--border);
+	--normal-text: var(--popover-foreground);
+
+	--success-bg: var(--success);
+	--success-border: var(--success);
+	--success-text: var(--success-foreground);
+
+	--error-bg: var(--destructive);
+	--error-border: var(--destructive);
+	--error-text: var(--destructive-foreground);
+
+	--warning-bg: var(--warning, oklch(0.86 0.14 85));
+	--warning-border: var(--warning, oklch(0.86 0.14 85));
+	--warning-text: var(--warning-foreground, oklch(0.2 0.04 85));
+
+	--info-bg: var(--primary);
+	--info-border: var(--primary);
+	--info-text: var(--primary-foreground);
+
+	/* common */
+	--toast-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+@plugin "@tailwindcss/typography";
 @plugin 'tailwind-scrollbar';
 /* Local font definitions using assets directory */
 @font-face {
@@ -212,7 +241,7 @@
 		--normal-text: var(--foreground) !important;
 
 		--success-bg: var(--success) !important;
-		--success-border: oklch(0.492 0.159 140.317) !important;
+		--success-border: var(--success) !important;
 		--success-text: var(--success-foreground) !important;
 
 		--info-bg: var(--primary) !important;

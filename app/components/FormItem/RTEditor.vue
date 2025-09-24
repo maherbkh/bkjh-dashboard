@@ -11,11 +11,12 @@
             >
                 <!-- Text Formatting -->
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :disabled="!editor.can().chain().focus().toggleBold().run()"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('bold') }"
-                    @click="editor.chain().focus().toggleBold().run()"
+                    @click.prevent="editor.chain().focus().toggleBold().run()"
                 >
                     <Icon
                         name="oui:editor-bold"
@@ -23,11 +24,12 @@
                     />
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :disabled="!editor.can().chain().focus().toggleItalic().run()"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('italic') }"
-                    @click="editor.chain().focus().toggleItalic().run()"
+                    @click.prevent="editor.chain().focus().toggleItalic().run()"
                 >
                     <Icon
                         name="oui:editor-italic"
@@ -35,11 +37,12 @@
                     />
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :disabled="!editor.can().chain().focus().toggleStrike().run()"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('strike') }"
-                    @click="editor.chain().focus().toggleStrike().run()"
+                    @click.prevent="editor.chain().focus().toggleStrike().run()"
                 >
                     <Icon
                         name="oui:editor-strike"
@@ -47,11 +50,12 @@
                     />
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :disabled="!editor.can().chain().focus().toggleUnderline().run()"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('underline') }"
-                    @click="editor.chain().focus().toggleUnderline().run()"
+                    @click.prevent="editor.chain().focus().toggleUnderline().run()"
                 >
                     <Icon
                         name="oui:editor-underline"
@@ -59,11 +63,12 @@
                     />
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :disabled="!editor.can().chain().focus().toggleCode().run()"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('code') }"
-                    @click="editor.chain().focus().toggleCode().run()"
+                    @click.prevent="editor.chain().focus().toggleCode().run()"
                 >
                     <Icon
                         name="oui:editor-code-block"
@@ -79,69 +84,77 @@
                     @input="handleColorChange"
                 >
                 <Button
+                    type="button"
                     variant="ghost"
                     size="sm"
-                    @click="editor.chain().focus().unsetColor().run()"
+                    @click.prevent="editor.chain().focus().unsetColor().run()"
                 >
                     Remove Color
                 </Button>
 
                 <!-- Headings -->
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('heading', { level: 1 }) }"
-                    @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
+                    @click.prevent="editor.chain().focus().toggleHeading({ level: 1 }).run()"
                 >
                     <span class="text-xs font-bold">H1</span>
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('heading', { level: 2 }) }"
-                    @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
+                    @click.prevent="editor.chain().focus().toggleHeading({ level: 2 }).run()"
                 >
                     <span class="text-xs font-bold">H2</span>
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('heading', { level: 3 }) }"
-                    @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
+                    @click.prevent="editor.chain().focus().toggleHeading({ level: 3 }).run()"
                 >
                     <span class="text-xs font-bold">H3</span>
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('heading', { level: 4 }) }"
-                    @click="editor.chain().focus().toggleHeading({ level: 4 }).run()"
+                    @click.prevent="editor.chain().focus().toggleHeading({ level: 4 }).run()"
                 >
                     <span class="text-xs font-bold">H4</span>
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('heading', { level: 5 }) }"
-                    @click="editor.chain().focus().toggleHeading({ level: 5 }).run()"
+                    @click.prevent="editor.chain().focus().toggleHeading({ level: 5 }).run()"
                 >
                     <span class="text-xs font-bold">H5</span>
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('heading', { level: 6 }) }"
-                    @click="editor.chain().focus().toggleHeading({ level: 6 }).run()"
+                    @click.prevent="editor.chain().focus().toggleHeading({ level: 6 }).run()"
                 >
                     <span class="text-xs font-bold">H6</span>
                 </Button>
 
                 <!-- Text Alignment -->
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive({ textAlign: 'left' }) }"
-                    @click="editor.chain().focus().setTextAlign('left').run()"
+                    @click.prevent="editor.chain().focus().setTextAlign('left').run()"
                 >
                     <Icon
                         name="oui:editor-align-left"
@@ -149,10 +162,11 @@
                     />
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive({ textAlign: 'center' }) }"
-                    @click="editor.chain().focus().setTextAlign('center').run()"
+                    @click.prevent="editor.chain().focus().setTextAlign('center').run()"
                 >
                     <Icon
                         name="oui:editor-align-center"
@@ -160,10 +174,11 @@
                     />
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive({ textAlign: 'right' }) }"
-                    @click="editor.chain().focus().setTextAlign('right').run()"
+                    @click.prevent="editor.chain().focus().setTextAlign('right').run()"
                 >
                     <Icon
                         name="oui:editor-align-right"
@@ -171,10 +186,11 @@
                     />
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive({ textAlign: 'justify' }) }"
-                    @click="editor.chain().focus().setTextAlign('justify').run()"
+                    @click.prevent="editor.chain().focus().setTextAlign('justify').run()"
                 >
                     <Icon
                         name="solar:hamburger-menu-outline"
@@ -182,9 +198,10 @@
                     />
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
-                    @click="editor.chain().focus().unsetTextAlign().run()"
+                    @click.prevent="editor.chain().focus().unsetTextAlign().run()"
                 >
                     <Icon
                         name="solar:list-cross-minimalistic-bold"
@@ -194,10 +211,11 @@
 
                 <!-- Links -->
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('link') }"
-                    @click="setLink"
+                    @click.prevent="setLink"
                 >
                     <Icon
                         name="solar:link-bold"
@@ -205,10 +223,11 @@
                     />
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :disabled="!editor.isActive('link')"
-                    @click="editor.chain().focus().unsetLink().run()"
+                    @click.prevent="editor.chain().focus().unsetLink().run()"
                 >
                     <Icon
                         name="solar:link-broken-linear"
@@ -218,10 +237,11 @@
 
                 <!-- Lists -->
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('bulletList') }"
-                    @click="editor.chain().focus().toggleBulletList().run()"
+                    @click.prevent="editor.chain().focus().toggleBulletList().run()"
                 >
                     <Icon
                         name="oui:editor-unordered-list"
@@ -229,10 +249,11 @@
                     />
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('orderedList') }"
-                    @click="editor.chain().focus().toggleOrderedList().run()"
+                    @click.prevent="editor.chain().focus().toggleOrderedList().run()"
                 >
                     <Icon
                         name="oui:editor-ordered-list"
@@ -242,10 +263,11 @@
 
                 <!-- Block Elements -->
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('codeBlock') }"
-                    @click="editor.chain().focus().toggleCodeBlock().run()"
+                    @click.prevent="editor.chain().focus().toggleCodeBlock().run()"
                 >
                     <Icon
                         name="oui:editor-code-block"
@@ -253,10 +275,11 @@
                     />
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': editor.isActive('blockquote') }"
-                    @click="editor.chain().focus().toggleBlockquote().run()"
+                    @click.prevent="editor.chain().focus().toggleBlockquote().run()"
                 >
                     <Icon
                         name="oui:quote"
@@ -264,9 +287,10 @@
                     />
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
-                    @click="editor.chain().focus().setHorizontalRule().run()"
+                    @click.prevent="editor.chain().focus().setHorizontalRule().run()"
                 >
                     <Icon
                         name="octicon:horizontal-rule-24"
@@ -274,9 +298,10 @@
                     />
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
-                    @click="editor.chain().focus().setHardBreak().run()"
+                    @click.prevent="editor.chain().focus().setHardBreak().run()"
                 >
                     <Icon
                         name="carbon:text-new-line"
@@ -286,10 +311,11 @@
 
                 <!-- Undo/Redo -->
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :disabled="!editor.can().chain().focus().undo().run()"
-                    @click="editor.chain().focus().undo().run()"
+                    @click.prevent="editor.chain().focus().undo().run()"
                 >
                     <Icon
                         name="oui:editor-undo"
@@ -297,10 +323,11 @@
                     />
                 </Button>
                 <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     :disabled="!editor.can().chain().focus().redo().run()"
-                    @click="editor.chain().focus().redo().run()"
+                    @click.prevent="editor.chain().focus().redo().run()"
                 >
                     <Icon
                         name="oui:editor-redo"
@@ -313,7 +340,7 @@
             <div class="relative">
                 <editor-content
                     :editor="editor"
-                    class="prose prose-sm max-w-none focus:outline-none p-4 min-h-[200px] text-foreground [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-foreground [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-foreground [&_h3]:text-lg [&_h3]:font-medium [&_h3]:text-foreground [&_p]:leading-relaxed [&_p]:text-foreground [&_ul]:list-disc [&_ul]:list-inside [&_ol]:list-decimal [&_ol]:list-inside [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono [&_code]:bg-muted [&_code]:text-foreground [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:overflow-x-auto [&_pre]:bg-muted [&_pre_code]:bg-transparent [&_pre_code]:p-0"
+                    class="contentmax-w-none focus:outline-none p-4 min-h-[200px] text-foreground [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-foreground [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-foreground [&_h3]:text-lg [&_h3]:font-medium [&_h3]:text-foreground [&_p]:leading-relaxed [&_p]:text-foreground [&_ul]:list-disc [&_ul]:list-inside [&_ol]:list-decimal [&_ol]:list-inside [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono [&_code]:bg-muted [&_code]:text-foreground [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:overflow-x-auto [&_pre]:bg-muted [&_pre_code]:bg-transparent [&_pre_code]:p-0"
                     :class="{
                         'border border-border rounded-md': !showToolbar,
                         'border-0': showToolbar,
@@ -444,7 +471,7 @@ const initializeEditor = () => {
         extensions,
         editorProps: {
             attributes: {
-                class: 'prose prose-sm max-w-none focus:outline-none',
+                class: 'contentmax-w-none focus:outline-none',
                 style: `min-height: ${props.minHeight}`,
                 placeholder: props.placeholder,
             },

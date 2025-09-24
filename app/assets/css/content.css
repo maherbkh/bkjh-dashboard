@@ -1,0 +1,251 @@
+/* Content Typography System */
+/* Custom prose-like styles that adapt to theme colors */
+
+.content {
+  /* Base typography */
+  color: var(--foreground);
+  line-height: 1.6;
+  font-family: 'Museo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+/* Headings */
+.content h1,
+.content h2,
+.content h3,
+.content h4,
+.content h5,
+.content h6 {
+  color: var(--foreground);
+  font-weight: 600;
+  line-height: 1.25;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-family: 'Museo', ui-sans-serif, system-ui, sans-serif;
+}
+
+.content h1 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.content h4 {
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.content h5 {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.content h6 {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Paragraphs */
+.content p {
+  margin-bottom: 1rem;
+  color: var(--foreground);
+}
+
+.content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Links */
+.content a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.content a:hover {
+  color: var(--primary);
+  opacity: 0.8;
+}
+
+/* Lists */
+.content ul,
+.content ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+  color: var(--foreground);
+}
+
+.content li {
+  margin-bottom: 0.5rem;
+}
+
+.content ul li {
+  list-style-type: disc;
+}
+
+.content ol li {
+  list-style-type: decimal;
+}
+
+/* Strong/Bold text */
+.content strong,
+.content b {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+/* Emphasis/Italic text */
+.content em,
+.content i {
+  color: var(--foreground);
+  font-style: italic;
+}
+
+/* Code */
+.content code {
+  background-color: var(--muted);
+  color: var(--foreground);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+}
+
+.content pre {
+  background-color: var(--muted);
+  color: var(--foreground);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+}
+
+.content pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.875rem;
+}
+
+/* Blockquotes */
+.content blockquote {
+  border-left: 4px solid var(--border);
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+/* Horizontal rules */
+.content hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+/* Tables */
+.content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.content th,
+.content td {
+  border: 1px solid var(--border);
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.content th {
+  background-color: var(--muted);
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.content td {
+  color: var(--foreground);
+}
+
+/* Images */
+.content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+/* Captions */
+.content figcaption {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* Small text */
+.content small {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+/* Mark/Highlight */
+.content mark {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+/* Del/Strikethrough */
+.content del {
+  color: var(--muted-foreground);
+  text-decoration: line-through;
+}
+
+/* Ins/Underline */
+.content ins {
+  color: var(--foreground);
+  text-decoration: underline;
+}
+
+/* First paragraph spacing */
+.content > *:first-child {
+  margin-top: 0;
+}
+
+.content > *:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .content h1 {
+    font-size: 1.75rem;
+  }
+  
+  .content h2 {
+    font-size: 1.375rem;
+  }
+  
+  .content h3 {
+    font-size: 1.125rem;
+  }
+  
+  .content {
+    font-size: 0.875rem;
+  }
+}

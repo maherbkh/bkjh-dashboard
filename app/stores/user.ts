@@ -143,7 +143,7 @@ export const useUserStore = defineStore('user', () => {
 
             // Update access token if a new one is provided
             if (responseData.admin.currentToken) {
-                setAccessToken(responseData.admin.currentToken, 60 * 60 * 24); // 15 minutes
+                setAccessToken(responseData.admin.currentToken); // 15 minutes
             }
 
             // Fetch admin data after successful auth check
@@ -152,6 +152,8 @@ export const useUserStore = defineStore('user', () => {
             }
             catch (error) {
                 // Don't block auth check if admin data fetch fails
+                setAccessToken();
+                navigateTo('/login');
             }
 
             // Update auth validation timestamp on successful check

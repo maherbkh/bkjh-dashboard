@@ -44,7 +44,7 @@ const onSubmit = async (values: EventForm) => {
     isSubmitting.value = true;
     try {
         await updateItem(editingEvent.value.id, values);
-        await router.push(`/events/${eventId.value}`);
+        await navigateTo(`/events/${eventId.value}`);
     }
     catch (error) {
         console.error('Error updating event:', error);

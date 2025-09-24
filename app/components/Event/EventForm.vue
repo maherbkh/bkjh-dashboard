@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { EventData } from '~/types';
+import type { EventForm } from '~/composables/eventSchema';
 import { useResourcesStore } from '~/stores/resources';
 import RTEditor from '~/components/FormItem/RTEditor.vue';
 
@@ -48,11 +49,13 @@ const [maxCapacity, maxCapacityAttrs] = defineField('maxCapacity');
 const [room, roomAttrs] = defineField('room');
 const [location, locationAttrs] = defineField('location');
 const [isActive, isActiveAttrs] = defineField('isActive');
+const [schedules, schedulesAttrs] = defineField('schedules');
 
 // Resources for selects
 const resourcesStore = useResourcesStore();
 const eventCategories = computed(() => resourcesStore.eventCategories || []);
-const eventTargets = computed(() => resourcesStore.eventTargets || []);
+// TODO: Add eventTargets to resources store or fetch separately
+const eventTargets = computed(() => []);
 
 // Initialize form data when props change
 watch(() => props.initialData, (newData) => {
@@ -70,6 +73,13 @@ watch(() => props.initialData, (newData) => {
             room: (newData as any).conferenceRoom || newData.room || undefined,
             location: newData.location || undefined,
             isActive: newData.isActive,
+            schedules: (newData.schedules || []).map(schedule => ({
+                ...schedule,
+                date: schedule.date ? new Date(schedule.date).toISOString().split('T')[0] : '',
+                startTime: schedule.startTime || '',
+                endTime: schedule.endTime || '',
+                note: schedule.note || ''
+            })),
         });
     }
     else if (props.mode === 'add') {
@@ -87,6 +97,24 @@ const handleCancel = () => {
     emit('cancel');
 };
 
+// Schedule management
+const addSchedule = () => {
+    schedules.value = [...(schedules.value || []), {
+        date: '',
+        startTime: '',
+        endTime: '',
+        note: ''
+    }];
+};
+
+const removeSchedule = (index: number) => {
+    if (!schedules.value || index < 0 || index >= schedules.value.length) return;
+    schedules.value = [
+        ...schedules.value.slice(0, index),
+        ...schedules.value.slice(index + 1),
+    ];
+};
+
 // Computed properties
 const submitButtonText = computed(() => {
     return props.mode === 'add' ? t('action.save') : t('action.update');
@@ -94,8 +122,8 @@ const submitButtonText = computed(() => {
 
 const formTitle = computed(() => {
     return props.mode === 'add'
-        ? `${t('action.add')} ${t('event.singular')}`
-        : `${t('action.edit')} ${t('event.singular')}`;
+        ? `${t('action.add')} ${t('academy.singular')}`
+        : `${t('action.edit')} ${t('academy.singular')}`;
 });
 </script>
 
@@ -104,7 +132,7 @@ const formTitle = computed(() => {
         <CardHeader>
             <CardTitle>{{ formTitle }}</CardTitle>
             <CardDescription>
-                {{ props.mode === 'add' ? t('event.add') : t('event.edit') }}
+                {{ props.mode === 'add' ? t('action.add') : t('action.edit') }}
             </CardDescription>
         </CardHeader>
         <CardContent>
@@ -180,7 +208,7 @@ const formTitle = computed(() => {
                         class="col-span-12 sm:col-span-6"
                         :errors="errors.eventCategoryId ? [errors.eventCategoryId] : []"
                         v-bind="eventCategoryIdAttrs"
-                        :data="eventCategories"
+                        :data="eventCategories as any"
                         key-value="id"
                         name-value="name"
                     />
@@ -193,7 +221,7 @@ const formTitle = computed(() => {
                         class="col-span-12 sm:col-span-6"
                         :errors="errors.eventTargetId ? [errors.eventTargetId] : []"
                         v-bind="eventTargetIdAttrs"
-                        :data="eventTargets"
+                        :data="eventTargets as any"
                         key-value="id"
                         name-value="name"
                     />
@@ -249,6 +277,86 @@ const formTitle = computed(() => {
                         class="col-span-12"
                         v-bind="isActiveAttrs"
                     />
+
+                    <!-- Schedules Section -->
+                    <div class="col-span-12">
+                        <label class="block text-sm font-medium mb-2">
+                            {{ t('event.schedules') }}
+                        </label>
+                        <div class="space-y-4">
+                            <div
+                                v-for="(schedule, index) in schedules"
+                                :key="index"
+                                class="grid grid-cols-12 gap-4 p-4 border rounded-lg"
+                            >
+                                <FormItemDatePicker
+                                    :model-value="schedule.date"
+                                    :label="t('event.date')"
+                                    :placeholder="t('academy.events.filters.select_date')"
+                                    format="yyyy-MM-dd"
+                                    :time-picker="false"
+                                    :name="`schedule-${index}-date`"
+                                    class="col-span-12 sm:col-span-4"
+                                    :errors="errors[`schedules.${index}.date`] ? [errors[`schedules.${index}.date`]] : []"
+                                    @update:model-value="(value: string | number) => schedule.date = String(value)"
+                                />
+                                <FormItemDatePicker
+                                    :model-value="schedule.startTime"
+                                    :label="t('event.start_time')"
+                                    :placeholder="t('event.start_time')"
+                                    format="HH:mm"
+                                    :time-picker="true"
+                                    :name="`schedule-${index}-startTime`"
+                                    class="col-span-12 sm:col-span-4"
+                                    :errors="errors[`schedules.${index}.startTime`] ? [errors[`schedules.${index}.startTime`]] : []"
+                                    @update:model-value="(value: string | number) => schedule.startTime = String(value)"
+                                />
+                                <FormItemDatePicker
+                                    :model-value="schedule.endTime"
+                                    :label="t('event.end_time')"
+                                    :placeholder="t('event.end_time')"
+                                    format="HH:mm"
+                                    :time-picker="true"
+                                    :name="`schedule-${index}-endTime`"
+                                    class="col-span-12 sm:col-span-4"
+                                    :errors="errors[`schedules.${index}.endTime`] ? [errors[`schedules.${index}.endTime`]] : []"
+                                    @update:model-value="(value: string | number) => schedule.endTime = String(value)"
+                                />
+                                <FormItemInput
+                                    :id="`schedule-${index}-note`"
+                                    v-model="schedule.note"
+                                    :title="t('note.singular')"
+                                    :placeholder="t('note.singular')"
+                                    class="col-span-12"
+                                    :errors="errors[`schedules.${index}.note`] ? [String(errors[`schedules.${index}.note`] || '')] : []"
+                                />
+                                <div class="col-span-12 flex justify-end">
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="icon-sm"
+                                        @click="removeSchedule(index)"
+                                    >
+                                        <Icon name="solar:trash-bin-minimalistic-outline" class="!size-4 shrink-0" />
+                                    </Button>
+                                </div>
+                            </div>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                @click="addSchedule"
+                            >
+                                <Icon name="solar:add-circle-outline" class="mr-2 h-4 w-4" />
+                                {{ t('action.add') }} {{ t('event.schedule') }}
+                            </Button>
+                        </div>
+                        <div
+                            v-if="errors.schedules"
+                            class="text-sm text-destructive mt-1"
+                        >
+                            {{ errors.schedules }}
+                        </div>
+                    </div>
                 </div>
 
                 <div

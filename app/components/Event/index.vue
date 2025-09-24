@@ -120,7 +120,7 @@ const { t } = useI18n();
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p v-html="event.description" />
+                            <p class="content" v-html="event.description" />
                         </CardContent>
                     </Card>
                 </div>
