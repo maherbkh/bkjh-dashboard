@@ -97,6 +97,18 @@ export const useResourcesStore = defineStore('resources', () => {
         return Date.now() - lastFetched.value > thirtyMinutes;
     });
 
+    // Defaults helper
+    const getEmptyAdminData = (): AdminData => ({
+        categories: {
+            ticketCategories: [],
+            eventCategories: [],
+        },
+        groups: [],
+        addresses: [],
+        companies: [],
+        occupations: [],
+    });
+
     // Fetch admin data from authenticated endpoint
     const fetchAdminData = async (forceRefresh = false): Promise<AdminData> => {
         if (!forceRefresh && !isStale.value && ticketCategories.value.length > 0) {
@@ -115,51 +127,38 @@ export const useResourcesStore = defineStore('resources', () => {
         isLoading.value = true;
         error.value = null;
 
-        try {
-            // Check if we have an access token before making the request
-            const accessToken = useCookie('BKJH_ACCESS_TOKEN');
-            if (!accessToken.value) {
-                console.warn('No access token available for admin data request, skipping fetch');
-                return {
-                    categories: {
-                        ticketCategories: [],
-                        eventCategories: [],
-                    },
-                    groups: [],
-                    addresses: [],
-                    companies: [],
-                    occupations: [],
-                };
-            }
-
-            const { data: response, error } = await useApiFetch<AdminDataResponse>('/api/v1/dashboard/auth/check');
-
-            if (error.value) {
-                throw new Error(`API Error: ${error.value.statusCode} - ${error.value.data?.message || error.value.message}`);
-            }
-
-            if (response.value && response.value.status && response.value.data) {
-                const adminData = response.value.data;
-                ticketCategories.value = adminData.categories.ticketCategories;
-                eventCategories.value = adminData.categories.eventCategories;
-                groups.value = adminData.groups;
-                addresses.value = adminData.addresses;
-                companies.value = adminData.companies;
-                occupations.value = adminData.occupations;
-                lastFetched.value = Date.now();
-
-                return adminData;
-            }
-
-            throw new Error('Invalid response format');
-        }
-        catch (err) {
-            error.value = err instanceof Error ? err.message : 'Failed to fetch admin data';
-            throw err;
-        }
-        finally {
+        // Check if we have an access token before making the request
+        const accessToken = useCookie('BKJH_ACCESS_TOKEN');
+        if (!accessToken.value) {
+            console.warn('No access token available for admin data request, skipping fetch');
             isLoading.value = false;
+            return getEmptyAdminData();
         }
+
+        const { data: response, error: fetchError } = await useApiFetch<AdminDataResponse>('/api/v1/dashboard/auth/check');
+
+        if (fetchError.value) {
+            error.value = `API Error: ${fetchError.value.statusCode} - ${fetchError.value.data?.message || fetchError.value.message}`;
+            isLoading.value = false;
+            return getEmptyAdminData();
+        }
+
+        if (response.value && response.value.status && response.value.data) {
+            const adminData = response.value.data;
+            ticketCategories.value = adminData.categories.ticketCategories;
+            eventCategories.value = adminData.categories.eventCategories;
+            groups.value = adminData.groups;
+            addresses.value = adminData.addresses;
+            companies.value = adminData.companies;
+            occupations.value = adminData.occupations;
+            lastFetched.value = Date.now();
+            isLoading.value = false;
+            return adminData;
+        }
+
+        error.value = 'Invalid response format';
+        isLoading.value = false;
+        return getEmptyAdminData();
     };
 
     // Refetch function for fresh data
