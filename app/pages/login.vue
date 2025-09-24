@@ -27,7 +27,7 @@ const logoVariant = computed(() => colorMode.preference === 'light' ? 'dark' : '
             <div class="absolute inset-0 dark:from-primary from-slate-900/50 to-transparent bg-gradient-to-b" />
             <div class="relative z-20 flex items-center text-lg font-medium">
                 <AppLogo
-                    :variant="logoVariant as 'dark' | 'light'"
+                    :variant="logoVariant"
                     class="h-20"
                 />
             </div>

@@ -8,6 +8,7 @@ export default withNuxt(
             '@typescript-eslint/no-unused-vars': 'off',
             '@typescript-eslint/no-explicit-any': 'off',
             'vue/require-default-prop': 'off',
+            'vue/no-v-html': 'off',
 
         },
     },

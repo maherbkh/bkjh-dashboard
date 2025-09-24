@@ -236,13 +236,8 @@ export const useUserStore = defineStore('user', () => {
 
     // Get comprehensive admin data
     const getAdminData = async () => {
-        try {
-            const { data: adminData } = await useApiFetch('/api/v1/dashboard/auth/admin-data');
-            return (adminData.value as any)?.data;
-        }
-        catch (error) {
-            throw error;
-        }
+        const { data: adminData } = await useApiFetch('/api/v1/dashboard/auth/admin-data');
+        return (adminData.value as any)?.data;
     };
 
     // Logout all sessions

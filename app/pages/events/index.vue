@@ -122,8 +122,12 @@ const { confirmDelete, confirmBulkDelete } = useConfirmDialog();
 async function handleDelete(id: string) {
     const confirmed = await confirmDelete();
     if (!confirmed) return;
-    try { await deleteItem(id); }
-    catch (error) { console.error('Error deleting event:', error); }
+    try {
+        await deleteItem(id);
+    }
+    catch (error) {
+        console.error('Error deleting event:', error);
+    }
 }
 
 async function handleBulkDelete() {

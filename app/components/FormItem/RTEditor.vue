@@ -409,7 +409,6 @@ const setLink = () => {
 
 // Initialize editor
 const initializeEditor = () => {
-    // @ts-expect-error - Tiptap extension types are complex
     const extensions = [
         StarterKit.configure({
             heading: {
@@ -433,7 +432,6 @@ const initializeEditor = () => {
 
     // Add character count if requested
     if (props.showCharacterCount) {
-        // @ts-expect-error - Tiptap extension types are complex
         extensions.push(
             CharacterCount.configure({
                 limit: props.maxLength,
@@ -441,7 +439,6 @@ const initializeEditor = () => {
         );
     }
 
-    // @ts-expect-error - Tiptap editor types are complex
     editor.value = new Editor({
         content: props.modelValue,
         extensions,

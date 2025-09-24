@@ -22,9 +22,9 @@ const addressesData = computed(() => resourcesStore.addresses);
 
 type Props = {
     isDialogOpen: boolean;
-    dialogMode: 'add' | 'edit';
-    editingGroup: Group | null;
-    isSubmitting: boolean;
+    dialogMode?: 'add' | 'edit';
+    editingGroup?: Group | null;
+    isSubmitting?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {

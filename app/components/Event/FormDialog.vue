@@ -33,9 +33,9 @@ const eventTargets = computed(() => resourcesStore.eventTargets || []);
 
 type Props = {
     isDialogOpen: boolean;
-    dialogMode: 'add' | 'edit';
-    editingEvent: EventData | null;
-    isSubmitting: boolean;
+    dialogMode?: 'add' | 'edit';
+    editingEvent?: EventData | null;
+    isSubmitting?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -96,9 +96,15 @@ watch(
     (open) => { if (!open) resetForm(); },
 );
 
-const onSubmitAndClose = handleSubmit((values) => { emit('submit-and-close', values); });
-const onSubmitAndAddNew = handleSubmit((values) => { emit('submit-and-add-new', values); });
-const handleClose = () => { emit('close-dialog'); };
+const onSubmitAndClose = handleSubmit((values) => {
+    emit('submit-and-close', values);
+});
+const onSubmitAndAddNew = handleSubmit((values) => {
+    emit('submit-and-add-new', values);
+});
+const handleClose = () => {
+    emit('close-dialog');
+};
 </script>
 
 <template>
