@@ -299,7 +299,7 @@ const { t } = useI18n();
                                         </div>
                                     </div>
                                     <div :class="[!day.note && 'italic', 'font-mono text-xs leading-tight mt-1 text-muted-foreground']">
-                                        {{ day.note ? day.note : $t("global.not_assigned") }}
+                                        {{ day.note ? day.note : $t("common.not_assigned") }}
                                     </div>
                                 </div>
                             </div>

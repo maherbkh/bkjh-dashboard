@@ -17,14 +17,17 @@ function getScheduleItemSchema(t: (key: string, params?: Record<string, string |
     return z.object({
         date: z
             .string({ required_error: t('date.singular') + ' ' + t('validation.required') })
+            .min(1, t('date.singular') + ' ' + t('validation.required'))
             .regex(/^\d{4}-\d{2}-\d{2}$/u, t('date.singular') + ' ' + t('validation.date_format')),
         startTime: z
             .string({ required_error: t('event.start_time') + ' ' + t('validation.required') })
+            .min(1, t('event.start_time') + ' ' + t('validation.required'))
             .regex(/^\d{2}:\d{2}$/u, t('event.start_time') + ' ' + t('validation.time_format')),
         endTime: z
             .string({ required_error: t('event.end_time') + ' ' + t('validation.required') })
+            .min(1, t('event.end_time') + ' ' + t('validation.required'))
             .regex(/^\d{2}:\d{2}$/u, t('event.end_time') + ' ' + t('validation.time_format')),
-        note: z.string().max(500, t('note.singular') + ' ' + t('validation.max_length', { max: 500 })).optional(),
+        note: z.string().max(500, t('note.singular') + ' ' + t('validation.max_length', { max: 500 })).optional().nullable(),
     }).refine((val) => toMinutes(val.endTime) > toMinutes(val.startTime), {
         message: t('event.end_time') + ' ' + t('validation.greater_than', { field: t('event.start_time') }),
         path: ['endTime'],
@@ -123,7 +126,7 @@ export function createEventSchema(
         location: z.string().max(200, t('event.location') + ' ' + t('validation.max_length', { max: 200 })).optional(),
         isActive: z.boolean().optional().default(true),
 
-        schedules: scheduleArrayWithGlobalRules(t),
+        schedules: scheduleArrayWithGlobalRules(t).default([]),
     });
 }
 
@@ -161,7 +164,7 @@ export function updateEventSchema(
         room: z.string().max(200, t('event.room') + ' ' + t('validation.max_length', { max: 200 })).optional(),
         location: z.string().max(200, t('event.location') + ' ' + t('validation.max_length', { max: 200 })).optional(),
         isActive: z.boolean().optional().default(true),
-        schedules: scheduleArrayWithGlobalRules(t),
+        schedules: scheduleArrayWithGlobalRules(t).default([]),
     });
 }
 
