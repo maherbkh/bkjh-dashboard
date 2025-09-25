@@ -3,7 +3,7 @@ import type { EventData, TableHeaderItem } from '~/types';
 
 const { t } = useI18n();
 const router = useRouter();
-const { formatDate } = useGermanDateFormat();
+const { formatDateShort } = useGermanDateFormat();
 
 // Page configuration
 const pageTitle = computed(() => t('academy.plural'));
@@ -222,7 +222,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                             <div class="font-medium ">
                                 <NuxtLink
                                     :to="`/events/${row.id}/show`"
-                                    class="text-primary-foreground hover:underline hover:text-primary truncate"
+                                    class="hover:underline hover:text-primary truncate"
                                 >
                                     {{ row.title }}
                                 </NuxtLink>
@@ -231,7 +231,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                     class="mt-1 text-muted-foreground flex items-center gap-1 whitespace-nowrap text-xs"
                                 >
                                     <div>
-                                        {{ useGermanDateFormat().formatDateShort(row.schedules[0]?.date) }}
+                                        {{ formatDateShort(row.schedules[0]?.date) }}
                                     </div>
                                     <template v-if="row.schedules.length > 1">
                                         <Icon
@@ -239,7 +239,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                             class="size-5 shrink-0 opacity-75"
                                         />
                                         <div>
-                                            {{ useGermanDateFormat().formatDateShort(row.schedules[(row.schedules.length - 1)]?.date) }}
+                                            {{ formatDateShort(row.schedules[(row.schedules.length - 1)]?.date) }}
                                         </div>
                                     </template>
                                 </div>

@@ -321,7 +321,12 @@
   "academy": {
     "plural": "Akademie-Veranstaltungen",
     "singular": "Akademie-Veranstaltung",
-    "description": "Akademie-Veranstaltungen und Aktivitäten verwalten"
+    "description": "Akademie-Veranstaltungen und Aktivitäten verwalten",
+    "type": {
+      "online": "Online",
+      "in_person": "Vor Ort",
+      "hybrid": "Hybrid"
+    }
   },
   "company": {
     "plural": "Unternehmen",

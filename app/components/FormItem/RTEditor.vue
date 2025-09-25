@@ -1,8 +1,13 @@
 <template>
     <ClientOnly>
         <div
-            class="border border-border rounded-md overflow-hidden focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
-            :class="{ 'opacity-50 cursor-not-allowed': disabled, 'bg-muted/30': readonly }"
+            class="border rounded-md overflow-hidden focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
+            :class="{
+                'opacity-50 cursor-not-allowed': disabled,
+                'bg-muted/30': readonly,
+                'border-destructive aria-invalid:border-destructive': (errors?.length || 0) > 0,
+                'border-border': (errors?.length || 0) === 0,
+            }"
         >
             <!-- Toolbar -->
             <div
@@ -381,7 +386,9 @@
                     :editor="editor"
                     class="contentmax-w-none focus:outline-none p-4 min-h-[200px] text-foreground [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-foreground [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-foreground [&_h3]:text-lg [&_h3]:font-medium [&_h3]:text-foreground [&_p]:leading-relaxed [&_p]:text-foreground [&_ul]:list-disc [&_ul]:list-inside [&_ol]:list-decimal [&_ol]:list-inside [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono [&_code]:bg-muted [&_code]:text-foreground [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:overflow-x-auto [&_pre]:bg-muted [&_pre_code]:bg-transparent [&_pre_code]:p-0"
                     :class="{
-                        'border border-border rounded-md': !showToolbar,
+                        'border rounded-md': !showToolbar,
+                        'border-destructive aria-invalid:border-destructive': !showToolbar && (errors?.length || 0) > 0,
+                        'border-border': !showToolbar && (errors?.length || 0) === 0,
                         'border-0': showToolbar,
                     }"
                 />
@@ -422,6 +429,7 @@ interface Props {
     minHeight?: string;
     disabled?: boolean;
     readonly?: boolean;
+    errors?: (string | { $message?: string })[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -433,6 +441,7 @@ const props = withDefaults(defineProps<Props>(), {
     minHeight: '200px',
     disabled: false,
     readonly: false,
+    errors: () => [],
 });
 
 // Emits

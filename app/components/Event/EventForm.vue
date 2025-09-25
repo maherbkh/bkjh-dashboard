@@ -55,6 +55,12 @@ const resourcesStore = useResourcesStore();
 const eventCategories = computed(() => resourcesStore.eventCategories || []);
 const eventTargets = computed(() => resourcesStore.eventTargets || []);
 
+// Event type options with translated names
+const typeOptions = computed(() => {
+    const ids = ['ONLINE', 'IN_PERSON', 'HYBRID'] as const;
+    return ids.map((id) => ({ id, name: t(`academy.type.${id.toLowerCase()}`) }));
+});
+
 // Initialize form data when props change
 watch(() => props.initialData, (newData) => {
     if (newData && props.mode === 'edit') {
@@ -178,6 +184,7 @@ const formTitle = computed(() => {
                                     :max-length="10000"
                                     min-height="200px"
                                     class="w-full"
+                                    :errors="errors.description ? [errors.description] : []"
                                 />
                                 <div
                                     v-if="errors.description"
@@ -200,7 +207,7 @@ const formTitle = computed(() => {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div class="grid grid-cols-12 gap-5">
+                        <div class="grid grid-cols-12 items-start gap-5">
                             <FormItemSelect
                                 id="type"
                                 v-model="type"
@@ -209,11 +216,7 @@ const formTitle = computed(() => {
                                 class="col-span-12 lg:col-span-4"
                                 :errors="errors.type ? [errors.type] : []"
                                 v-bind="typeAttrs"
-                                :data="[
-                                    { id: 'ONLINE', name: 'Online' },
-                                    { id: 'OFFLINE', name: 'Offline' },
-                                    { id: 'HYBRID', name: 'Hybrid' },
-                                ]"
+                                :data="typeOptions as any"
                                 key-value="id"
                                 name-value="name"
                                 required
@@ -342,13 +345,14 @@ const formTitle = computed(() => {
                                         <div class="col-span-12">
                                             <Button
                                                 type="button"
-                                                variant="destructive"
+                                                variant="destructive-outline"
                                                 class="w-full"
+                                                size="sm"
                                                 @click="removeSchedule(index)"
                                             >
                                                 <Icon
                                                     name="solar:trash-bin-minimalistic-outline"
-                                                    class="!size-5 shrink-0"
+                                                    class="!size-4.5 shrink-0"
                                                 />
                                                 {{ t('action.delete') }}
                                             </Button>

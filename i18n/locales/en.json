@@ -323,7 +323,12 @@
   "academy": {
     "plural": "Events",
     "singular": "Event",
-    "description": "Manage academy events and activities"
+    "description": "Manage academy events and activities",
+    "type": {
+      "online": "Online",
+      "in_person": "In person",
+      "hybrid": "Hybrid"
+    }
   },
   "company": {
     "plural": "Companies",
