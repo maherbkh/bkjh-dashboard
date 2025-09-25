@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import type { EventData } from '~/types';
+import { useInitials } from '~/composables/useInitials';
 
-const { formatDate } = useGermanDateFormat();
+const { formatDateShort, formatTimeOnly } = useGermanDateFormat();
 
 const props = defineProps<{
     event: EventData;
@@ -12,7 +13,7 @@ const { t } = useI18n();
 
 <template>
     <div class="flex flex-col gap-6">
-        <!-- Ticket Not Found State -->
+        <!-- Event Not Found State -->
         <div
             v-if="!props.event"
             class="flex flex-col items-center justify-center py-16 text-center"
@@ -41,8 +42,7 @@ const { t } = useI18n();
                 </NuxtLink>
             </div>
         </div>
-
-        <!-- Ticket Content -->
+        <!-- Event Content -->
         <div
             v-else-if="props.event"
             class="space-y-6"
@@ -68,7 +68,7 @@ const { t } = useI18n();
                             class="mt-1 text-muted-foreground flex items-center gap-2"
                         >
                             <div class="text-sm">
-                                {{ useGermanDateFormat().formatDateShort(event.schedules[0]?.date) }}
+                                {{ formatDateShort(event.schedules[0]?.date as string) }}
                             </div>
                             <template v-if="event.schedules.length > 1">
                                 <Icon
@@ -76,7 +76,7 @@ const { t } = useI18n();
                                     class="size-5 shrink-0 opacity-75"
                                 />
                                 <div class="text-sm">
-                                    {{ useGermanDateFormat().formatDateShort(event.schedules[(event.schedules.length - 1)]?.date) }}
+                                    {{ formatDateShort(event.schedules[(event.schedules.length - 1)]?.date as string) }}
                                 </div>
                             </template>
                         </div>
@@ -94,12 +94,28 @@ const { t } = useI18n();
                     </NuxtLink>
                 </div>
             </div>
-
             <!-- Ticket Details Grid -->
             <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
                 <!-- Main Content -->
                 <div class="xl:col-span-8 space-y-6">
                     <!-- Description and Content Card -->
+                    <div class="grid lg:grid-cols-3 gap-4">
+                        <EventBox
+                            title="Approved Attendees"
+                            icon="solar:user-id-line-duotone"
+                            :value="event.approvedRegistrationsCount as number"
+                        />
+                        <EventBox
+                            title="Pending Attendees"
+                            icon="solar:users-group-two-rounded-linear"
+                            :value="Number((event.registrationsCount as number) - (event.approvedRegistrationsCount as number))"
+                        />
+                        <EventBox
+                            title="Event Days"
+                            icon="solar:calendar-line-duotone"
+                            :value="event.schedulesCount as number"
+                        />
+                    </div>
                     <Card>
                         <CardHeader>
                             <CardTitle class="flex items-center gap-2">
@@ -131,6 +147,24 @@ const { t } = useI18n();
                                 class="content"
                                 v-html="event.description"
                             />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle class="flex items-center gap-2">
+                                <Icon
+                                    name="solar:users-group-two-rounded-line-duotone"
+                                    class="!size-5 opacity-75 shrink-0"
+                                />
+                                {{ $t("attendee.plural") }}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div>
+                                <EventAttendeesTable
+                                    :data="event.registrations as any[]"
+                                />
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -183,6 +217,92 @@ const { t } = useI18n();
                                 :title="$t('academy.createdBy')"
                                 :value="event.admin?.firstName + ' ' + event.admin?.lastName"
                             />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>
+                                <Icon
+                                    name="solar:user-speak-rounded-line-duotone"
+                                    class="!size-5 opacity-75 shrink-0"
+                                />
+                                {{ $t("academy.speakers") }}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent class="flex flex-col">
+                            <div
+                                v-for="speaker in event.speakers"
+                                :key="speaker.id"
+                                class="bg-muted/50 p-3 px-4 rounded-2xl border border-border/75 flex items-center gap-4 my-1"
+                            >
+                                <Avatar
+                                    class="size-9 rounded-full border
+                                   group-active:bg-sidebar-primary group-active:text-sidebar-primary-foreground
+                                   group-data-[state=open]:bg-sidebar-accent group-data-[state=open]:text-sidebar-accent-foreground"
+                                >
+                                    <AvatarImage
+                                        class="bg-background"
+                                        :src="speaker.speaker.avatar"
+                                        :alt="speaker.speaker.name"
+                                    />
+                                    <AvatarFallback class="rounded-full bg-background">
+                                        {{ useInitials(speaker.speaker.name) }}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div class="grid flex-1 text-left text-sm leading-tight">
+                                    <span class="truncate font-semibold">{{ speaker.speaker.name }}</span>
+                                    <span class="truncate text-xs">{{ speaker.speaker.qualification }}</span>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>
+                                <Icon
+                                    name="solar:calendar-line-duotone"
+                                    class="!size-5 opacity-75 shrink-0"
+                                />
+                                {{ $t("academy.schedules") }}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent class="flex flex-col">
+                            <div
+                                v-for="day in event.schedules"
+                                :key="day.id"
+                                class="bg-muted/50 p-3 px-4 rounded-2xl border border-border/75 flex items-center gap-4 my-1"
+                            >
+                                <div class="grid flex-1 text-left text-sm leading-tight">
+                                    <div class="flex items-center gap-3 justify-between">
+                                        <div class="truncate font-semibold">
+                                            {{ formatDateShort(day.date) }}
+                                        </div>
+                                        <div class="flex items-center gap-2 mt-1 font-medium">
+                                            <div class="truncate opacity-75 flex items-center">
+                                                <Icon
+                                                    name="solar:watch-square-line-duotone"
+                                                    class="!size-4 shrink-0 mr-1.5"
+                                                />
+                                                {{ day.startTime }}
+                                            </div>
+                                            <Icon
+                                                name="solar:arrow-right-bold-duotone"
+                                                class="size-5 shrink-0 opacity-75"
+                                            />
+                                            <div class="truncate opacity-75 flex items-center">
+                                                <Icon
+                                                    name="solar:watch-square-line-duotone"
+                                                    class="!size-4 shrink-0 mr-1.5"
+                                                />
+                                                {{ day.endTime }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div :class="[!day.note && 'italic', 'font-mono text-xs leading-tight mt-1 text-muted-foreground']">
+                                        {{ day.note ? day.note : $t("global.not_assigned") }}
+                                    </div>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>

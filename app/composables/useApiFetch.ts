@@ -66,6 +66,7 @@ export function useApiFetch<T = unknown>(
 
     return useFetch(`${config.public.apiUrl}` + path, {
         credentials: 'include',
+        server: false,
         watch: false,
         // Disable browser caching; backend controls freshness
         cache: 'no-store',

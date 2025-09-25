@@ -133,6 +133,21 @@ export const useGermanDateFormat = () => {
         return date.isAfter(dayjs());
     };
 
+    /**
+     * Returns German-formatted parts for date and time.
+     * Example: input → 2025-09-25T11:46:26.152Z
+     * Output: { date: '25.09.2025', time: '13:46' }
+     */
+    const formatDateParts = (dateString: string | Date): { date: string; time: string } => {
+        if (!dateString) return { date: '', time: '' };
+        const date = dayjs(dateString);
+        if (!date.isValid()) return { date: '', time: '' };
+        return {
+            date: date.format('DD.MM.YYYY'),
+            time: date.format('HH:mm'),
+        };
+    };
+
     return {
         formatDate,
         formatDateOnly,
@@ -145,5 +160,6 @@ export const useGermanDateFormat = () => {
         isToday,
         isPast,
         isFuture,
+        formatDateParts,
     };
 };

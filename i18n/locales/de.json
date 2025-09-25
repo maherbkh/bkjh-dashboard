@@ -126,6 +126,8 @@
     "description": "Beschreibung",
     "list": "Liste",
     "and": "und",
+    "day": "Tag",
+    "days": "Tage",
     "new": "Neu",
     "add": "Hinzufügen",
     "edit": "Bearbeiten",

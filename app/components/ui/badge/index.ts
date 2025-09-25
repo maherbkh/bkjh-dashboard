@@ -14,9 +14,11 @@ export const badgeVariants = cva(
           'bg-background text-secondary-foreground [a&]:hover:bg-secondary/90 border-secondary',
 
                 destructive:
-         'bg-destructive/80 text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
+         'bg-red-300 text-red-800 [a&]:hover:bg-success/90 border-red-400/25',
                 success:
-          'bg-success/80 text-white [a&]:hover:bg-success/90',
+          'bg-green-300 text-green-800 [a&]:hover:bg-success/90 border-green-400/25',
+          pending:
+          'bg-yellow-300 text-yellow-800 [a&]:hover:bg-yellow/90 border-yellow-400/25',
                 outline:
           'text-foreground/80 [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
             },

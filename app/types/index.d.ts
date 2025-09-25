@@ -572,7 +572,7 @@ export type EventSpeakerLite = {
     speakerId: string;
     createdAt: string;
     updatedAt: string;
-    speaker: { id: string; name: string; qualification?: string | null };
+    speaker: { id: string; avatar: string; name: string; qualification?: string | null };
 };
 
 export type EventListCategory = { id: string; name: string };
@@ -598,7 +598,19 @@ export interface EventAdminLite {
 
 export interface EventRegistration {
     // Unknown shape for now; align with API when available
-    [key: string]: any;
+    id: string;
+    status: 'REJECTED' | 'APPROVED' | 'PENDING';
+    registrationDate: string;
+    attendee: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+        isEmployee: string;
+        group: string;
+        occupation: string;
+        fullName: string;
+    };
 }
 
 export type EventData = {
@@ -627,6 +639,8 @@ export type EventData = {
     registrationsCount?: number;
     schedulesCount?: number;
     availableSpots?: number;
+    approvedRegistrationsCount?: number;
+
 };
 
 // Attachment types for ticket messages
