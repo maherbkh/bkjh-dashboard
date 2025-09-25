@@ -63,7 +63,7 @@ export const useNavigationData = (): ComputedRef<{
                             title: t('group.plural'),
                             url: '/master-data/groups',
                             icon: 'solar:buildings-outline',
-                            apps: ['support'],
+                            apps: ['support', 'academy'],
                         },
                         {
                             title: t('address.plural'),

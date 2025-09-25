@@ -66,6 +66,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    autoApply: {
+        type: Boolean,
+        default: true,
+    },
     range: {
         type: Boolean,
         default: false,
@@ -138,7 +142,7 @@ watchEffect(() => {
             :teleport="false"
             :enable-time-picker="timePicker"
             :time-picker="onlyTime"
-            :auto-apply="true"
+            :auto-apply="autoApply"
             :locale="resolvedLocale"
             :week-start="resolvedWeekStart"
             :format="format ? format : timePicker ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd'"
@@ -169,7 +173,7 @@ watchEffect(() => {
                         class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground bg-background border-input flex h-8 w-full min-w-0 rounded-full border px-4 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-5 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
                         :class="[icon ? 'pl-8' : '']"
                         type="text"
-                        :value="formatDateOnly(inputValue)"
+                        :value="onlyTime ? String(inputValue || '') : formatDateOnly(inputValue)"
                     >
                 </div>
             </template>

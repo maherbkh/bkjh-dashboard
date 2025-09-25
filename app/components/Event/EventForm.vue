@@ -206,7 +206,7 @@ const formTitle = computed(() => {
                                 v-model="type"
                                 :title="t('event.type')"
                                 :placeholder="t('action.select') + ' ' + t('event.type')"
-                                class="col-span-12 sm:col-span-4"
+                                class="col-span-12 lg:col-span-4"
                                 :errors="errors.type ? [errors.type] : []"
                                 v-bind="typeAttrs"
                                 :data="[
@@ -223,7 +223,7 @@ const formTitle = computed(() => {
                                 v-model="eventCategoryId"
                                 :title="t('event_category.singular')"
                                 :placeholder="t('action.select') + ' ' + t('event_category.singular')"
-                                class="col-span-12 sm:col-span-4"
+                                class="col-span-12 lg:col-span-4"
                                 :errors="errors.eventCategoryId ? [errors.eventCategoryId] : []"
                                 v-bind="eventCategoryIdAttrs"
                                 :data="eventCategories as any"
@@ -235,7 +235,7 @@ const formTitle = computed(() => {
                                 v-model="eventTargetId"
                                 :title="t('event_target.singular')"
                                 :placeholder="t('action.select') + ' ' + t('event_target.singular')"
-                                class="col-span-12 sm:col-span-4"
+                                class="col-span-12 lg:col-span-4"
                                 :errors="errors.eventTargetId ? [errors.eventTargetId] : []"
                                 v-bind="eventTargetIdAttrs"
                                 :data="eventTargets as any"
@@ -247,7 +247,7 @@ const formTitle = computed(() => {
                                 v-model="maxCapacity"
                                 :title="t('event.max_capacity')"
                                 :placeholder="t('event.max_capacity')"
-                                class="col-span-12 sm:col-span-4"
+                                class="col-span-12 lg:col-span-4"
                                 :errors="errors.maxCapacity ? [errors.maxCapacity] : []"
                                 v-bind="maxCapacityAttrs"
                                 type="number"
@@ -259,7 +259,7 @@ const formTitle = computed(() => {
                                 v-model="room"
                                 :title="t('event.room')"
                                 :placeholder="t('event.room')"
-                                class="col-span-12 sm:col-span-4"
+                                class="col-span-12 lg:col-span-4"
                                 :errors="errors.room ? [errors.room] : []"
                                 v-bind="roomAttrs"
                             />
@@ -268,7 +268,7 @@ const formTitle = computed(() => {
                                 v-model="location"
                                 :title="t('event.location')"
                                 :placeholder="t('event.location')"
-                                class="col-span-12 sm:col-span-4"
+                                class="col-span-12 lg:col-span-4"
                                 :errors="errors.location ? [errors.location] : []"
                                 v-bind="locationAttrs"
                             />
@@ -305,7 +305,7 @@ const formTitle = computed(() => {
                                             format="yyyy-MM-dd"
                                             :time-picker="false"
                                             :name="`schedule-${index}-date`"
-                                            class="col-span-12 sm:col-span-4"
+                                            class="col-span-12 lg:col-span-4"
                                             :errors="errors[`schedules.${index}.date`] ? [errors[`schedules.${index}.date`]] : []"
                                             @update:model-value="(value: string | number) => schedule.date = String(value)"
                                         />
@@ -316,7 +316,7 @@ const formTitle = computed(() => {
                                             :placeholder="t('event.start_time')"
                                             format="HH:mm"
                                             :name="`schedule-${index}-startTime`"
-                                            class="col-span-12 sm:col-span-4"
+                                            class="col-span-12 lg:col-span-4"
                                             :errors="errors[`schedules.${index}.startTime`] ? [errors[`schedules.${index}.startTime`]] : []"
                                             @update:model-value="(value: string | number) => schedule.startTime = String(value)"
                                         />
@@ -327,7 +327,7 @@ const formTitle = computed(() => {
                                             :placeholder="t('event.end_time')"
                                             format="HH:mm"
                                             :name="`schedule-${index}-endTime`"
-                                            class="col-span-12 sm:col-span-4"
+                                            class="col-span-12 lg:col-span-4"
                                             :errors="errors[`schedules.${index}.endTime`] ? [errors[`schedules.${index}.endTime`]] : []"
                                             @update:model-value="(value: string | number) => schedule.endTime = String(value)"
                                         />
@@ -376,51 +376,24 @@ const formTitle = computed(() => {
                         </div>
                     </CardContent>
                 </Card>
-            </form>
-        </div>
-        <Card>
-            <CardHeader>
-                <CardTitle>{{ formTitle }}</CardTitle>
-                <CardDescription>
-                    {{ props.mode === 'add' ? t('action.add') : t('action.edit') }}
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <form
-                    class="space-y-6"
-                    @submit.prevent="onSubmit"
-                >
-                    <div class="grid grid-cols-12 gap-4">
-                        <FormItemInput
-                            id="adminId"
-                            v-model="adminId"
-                            :title="t('user.admin')"
-                            :placeholder="t('user.admin')"
-                            class="col-span-12 sm:col-span-6"
-                            :errors="errors.adminId ? [errors.adminId] : []"
-                            v-bind="adminIdAttrs"
-                            required
-                        />
-                    </div>
-
-                    <div
+                <div
                         v-if="showActions"
-                        class="flex justify-end gap-2 pt-4 border-t"
+                        class="flex justify-end gap-2 pt-4 border-t lg:col-span-12"
                     >
                         <Button
                             type="submit"
+                            class="w-full"
                             :disabled="isSubmitting"
                         >
                             <Icon
                                 v-if="isSubmitting"
                                 name="solar:refresh-linear"
-                                class="mr-2 h-4 w-4 animate-spin"
+                                class="mr-2 !size-5 animate-spin"
                             />
                             {{ submitButtonText }}
                         </Button>
                     </div>
-                </form>
-            </CardContent>
-        </Card>
+            </form>
+        </div>
     </div>
 </template>
