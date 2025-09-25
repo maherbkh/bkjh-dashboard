@@ -54,7 +54,7 @@ export const useUserStore = defineStore('user', () => {
 
             setUser(loginData.admin);
             setAccessToken(loginData.accessToken);
-            
+
             // Wait for cookie to be set before fetching admin data
             await new Promise(resolve => setTimeout(resolve, 100));
             await resourcesStore.fetchAdminData();

@@ -255,40 +255,56 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         <template #cell-eventCategory="{ row }">
                             <div class-font-m="normal truncat">
                                 <span v-if="row.eventCategory">{{ row.eventCategory.name }}</span>
-                            <span
-                                v-else
-                                class="text-muted-foreground"
-                            >{{ $t('common.not_assigned') }}</span></div>
+                                <span
+                                    v-else
+                                    class="text-muted-foreground"
+                                >{{ $t('common.not_assigned') }}</span>
+                            </div>
                             <div class-font-m="normal truncat">
-                            <span v-if="row.eventTarget" class="text-muted-foreground">{{ row.eventTarget.name }}</span>
-                            <span
-                                v-else
-                                class="text-muted-foreground"
-                            >{{ $t('common.not_assigned') }}</span>
+                                <span
+                                    v-if="row.eventTarget"
+                                    class="text-muted-foreground"
+                                >{{ row.eventTarget.name }}</span>
+                                <span
+                                    v-else
+                                    class="text-muted-foreground"
+                                >{{ $t('common.not_assigned') }}</span>
                             </div>
                         </template>
 
                         <template #cell-maxCapacity="{ row }">
-                           <div class="flex flex-col gap-1">
-                            <div>
-                            <Button variant="secondary" size="icon-sm" class="!cursor-default font-normal border !border-border aspect-square !size-5 text-xs">
-                                {{ row.maxCapacity || 0 }} 
-                            </Button>
-                            <span class="text-muted-foreground ml-1.5 text-xs font-normal" >Attenden</span>
+                            <div class="flex flex-col gap-1">
+                                <div>
+                                    <Button
+                                        variant="secondary"
+                                        size="icon-sm"
+                                        class="!cursor-default font-normal border !border-border aspect-square !size-5 text-xs"
+                                    >
+                                        {{ row.maxCapacity || 0 }}
+                                    </Button>
+                                    <span class="text-muted-foreground ml-1.5 text-xs font-normal">Attenden</span>
+                                </div>
+                                <div>
+                                    <Button
+                                        variant="secondary"
+                                        size="icon-sm"
+                                        class="!cursor-default font-normal border !border-border aspect-square !size-5 text-xs"
+                                    >
+                                        {{ row.approvedRegistrationsCount || 0 }}
+                                    </Button>
+                                    <span class="text-muted-foreground ml-1.5 text-xs font-normal">Aprroved</span>
+                                </div>
                             </div>
-                            <div>
-                            <Button variant="secondary" size="icon-sm" class="!cursor-default font-normal border !border-border aspect-square !size-5 text-xs">
-                                {{ row.approvedRegistrationsCount || 0 }} 
-                            </Button>
-                            <span class="text-muted-foreground ml-1.5 text-xs font-normal" >Aprroved</span>
-                            </div></div>
                         </template>
 
                         <template #cell-isActive="{ row }">
                             <div>
-                            <Badge :variant="row.isActive ? 'default' : 'secondary'" class="w-full">
-                                {{ row.isActive ? $t('common.active') : $t('common.inactive') }}
-                            </Badge>
+                                <Badge
+                                    :variant="row.isActive ? 'default' : 'secondary'"
+                                    class="w-full"
+                                >
+                                    {{ row.isActive ? $t('common.active') : $t('common.inactive') }}
+                                </Badge>
                             </div>
                         </template>
 
@@ -296,16 +312,16 @@ const handleRowSelected = (id: string, checked: boolean) => {
                             <div class="flex justify-end gap-2">
                                 <NuxtLink :to="`/events/${row.id}/show`">
                                     <LazyButton
-                                    :title="$t('action.view')"
-                                    variant="ghost"
-                                    size="icon"
-                                    hydrate-on-interaction="mouseover"
-                                >
-                                    <Icon
-                                        name="solar:eye-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
-                                    />
-                                </LazyButton>
+                                        :title="$t('action.view')"
+                                        variant="ghost"
+                                        size="icon"
+                                        hydrate-on-interaction="mouseover"
+                                    >
+                                        <Icon
+                                            name="solar:eye-outline"
+                                            class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                        />
+                                    </LazyButton>
                                 </NuxtLink>
                                 <LazyButton
                                     :title="$t('action.edit')"

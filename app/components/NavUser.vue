@@ -21,7 +21,7 @@ const userInitials = computed(() => useInitials(userStore.user?.name ?? ''));
                         size="lg"
                         :class="[
                             'active:bg-transparent focus-visible:ring-0 cursor-pointer group data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground bg-background',
-                            (state === 'expanded' ? 'border border-border/75' : 'rounded-full')
+                            (state === 'expanded' ? 'border border-border/75' : 'rounded-full'),
                         ]"
                     >
                         <Avatar

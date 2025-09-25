@@ -456,16 +456,16 @@ const getStatusVariant = (status: string) => {
                             <div class="flex justify-end gap-2">
                                 <NuxtLink :to="`/support-tickets/${row.id}`">
                                     <LazyButton
-                                    :title="$t('action.view')"
-                                    variant="ghost"
-                                    size="icon"
-                                    hydrate-on-interaction="mouseover"
-                                >
-                                    <Icon
-                                        name="solar:eye-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
-                                    />
-                                </LazyButton>
+                                        :title="$t('action.view')"
+                                        variant="ghost"
+                                        size="icon"
+                                        hydrate-on-interaction="mouseover"
+                                    >
+                                        <Icon
+                                            name="solar:eye-outline"
+                                            class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                        />
+                                    </LazyButton>
                                 </NuxtLink>
                                 <LazyButton
                                     :title="$t('action.edit')"

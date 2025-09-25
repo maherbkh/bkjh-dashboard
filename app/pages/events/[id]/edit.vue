@@ -1,8 +1,11 @@
 <script setup lang="ts">
-const { t } = useI18n();
-const route = useRoute();
 import type { EventData } from '~/types';
-import { toast } from 'vue-sonner';// Page configuration
+import { toast } from 'vue-sonner';
+
+import type { EventForm } from '~/composables/eventSchema';
+
+const { t } = useI18n();
+const route = useRoute();// Page configuration
 const pageTitle = computed(() => t('action.edit') + ' ' + t('event.singular'));
 const pageIcon = usePageIcon();
 const pageDescription = computed(() => t('action.edit') + ' ' + t('event.singular'));
@@ -17,9 +20,6 @@ useSeoMeta({
     description: pageDescription,
     ogDescription: pageDescription,
 });
-
-
-import type { EventForm } from '~/composables/eventSchema';
 
 // State
 const editingEvent = ref<EventData | null>(null);
@@ -78,12 +78,12 @@ const handleCancel = () => {
         >
             <NuxtLink :to="`/events/${route.params.id as string}`">
                 <Button
-                variant="outline"
-                size="sm"
-            >
-                <Icon name="solar:arrow-left-outline" />
-                {{ $t('action.back') }}
-            </Button>
+                    variant="outline"
+                    size="sm"
+                >
+                    <Icon name="solar:arrow-left-outline" />
+                    {{ $t('action.back') }}
+                </Button>
             </NuxtLink>
         </PageHeader>
 

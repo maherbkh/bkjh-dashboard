@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { EventData } from '~/types';
+
 const { formatDate } = useGermanDateFormat();
 
 const props = defineProps<{
@@ -62,7 +63,10 @@ const { t } = useI18n();
                                 :class="[(event.isActive ? 'text-success' : 'text-muted-foreground'), 'shrink-0 size-5']"
                             />
                         </div>
-                        <div v-if="event.schedules && event.schedules.length > 0" class="mt-1 text-muted-foreground flex items-center gap-2">
+                        <div
+                            v-if="event.schedules && event.schedules.length > 0"
+                            class="mt-1 text-muted-foreground flex items-center gap-2"
+                        >
                             <div class="text-sm">
                                 {{ useGermanDateFormat().formatDateShort(event.schedules[0]?.date) }}
                             </div>
@@ -80,7 +84,10 @@ const { t } = useI18n();
                 </div>
                 <div class="flex items-center gap-4">
                     <NuxtLink :to="`/events/${props.event.id}/edit`">
-                        <Button variant="default" size="sm">
+                        <Button
+                            variant="default"
+                            size="sm"
+                        >
                             <Icon name="solar:pen-new-square-outline" />
                             {{ $t("action.edit") }}
                         </Button>
@@ -120,7 +127,10 @@ const { t } = useI18n();
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p class="content" v-html="event.description" />
+                            <p
+                                class="content"
+                                v-html="event.description"
+                            />
                         </CardContent>
                     </Card>
                 </div>

@@ -62,6 +62,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    onlyTime: {
+        type: Boolean,
+        default: false,
+    },
     range: {
         type: Boolean,
         default: false,
@@ -133,6 +137,7 @@ watchEffect(() => {
             v-model="value"
             :teleport="false"
             :enable-time-picker="timePicker"
+            :time-picker="onlyTime"
             :auto-apply="true"
             :locale="resolvedLocale"
             :week-start="resolvedWeekStart"

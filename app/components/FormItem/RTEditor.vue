@@ -316,7 +316,10 @@
                     :title="$t('editor.clear_formatting')"
                     @click.prevent="clearFormatting(editor, { resetBlocks: true, resetAlignment: true, resetColors: true })"
                 >
-                    <Icon name="solar:eraser-linear" class="!size-4 shrink-0" />
+                    <Icon
+                        name="solar:eraser-linear"
+                        class="!size-4 shrink-0"
+                    />
                 </Button>
                 <Button
                     type="button"

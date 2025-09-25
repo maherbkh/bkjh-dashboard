@@ -1,4 +1,5 @@
 import { useUserStore } from '~/stores/user';
+
 export default defineNuxtRouteMiddleware(async (to) => {
     const userStore = useUserStore();
     await userStore.fetchAuthUser();

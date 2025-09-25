@@ -54,5 +54,3 @@ export function clearFormatting(editor: any, opts: ClearFormattingOptions = {}) 
 
     chain.run();
 }
-
-

@@ -122,7 +122,7 @@ export const useResourcesStore = defineStore('resources', () => {
     const fetchAdminData = async (forceRefresh = false): Promise<AdminData> => {
         console.log('fetchAdminData called with forceRefresh:', forceRefresh);
         console.log('isStale:', isStale.value, 'ticketCategories.length:', ticketCategories.value.length);
-        
+
         if (!forceRefresh && !isStale.value && ticketCategories.value.length > 0) {
             console.log('Returning cached data');
             return {
@@ -154,21 +154,23 @@ export const useResourcesStore = defineStore('resources', () => {
 
         if (response.value) {
             console.log('response', response.value);
-            
+
             // Check different possible response structures
             let adminData;
             if (response.value.status && response.value.data) {
                 // Structure: { status: true, data: { ... } }
                 adminData = response.value.data;
-            } else if (response.value.data) {
+            }
+            else if (response.value.data) {
                 // Structure: { data: { ... } }
                 adminData = response.value.data;
-            } else {
+            }
+            else {
                 // Direct structure: { ... }
                 adminData = response.value;
             }
             console.log('Parsed adminData:', adminData);
-            
+
             // Check if adminData has the expected structure
             if (adminData && adminData.categories) {
                 ticketCategories.value = adminData.categories.ticketCategories || [];
@@ -181,7 +183,8 @@ export const useResourcesStore = defineStore('resources', () => {
                 lastFetched.value = Date.now();
                 isLoading.value = false;
                 return adminData;
-            } else {
+            }
+            else {
                 console.error('AdminData missing categories:', adminData);
                 error.value = 'Invalid response format - missing categories';
                 isLoading.value = false;

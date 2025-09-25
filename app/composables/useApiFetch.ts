@@ -64,7 +64,6 @@ export function useApiFetch<T = unknown>(
         Object.assign(headers, useRequestHeaders(['cookie']));
     }
 
-
     return useFetch(`${config.public.apiUrl}` + path, {
         credentials: 'include',
         watch: false,
@@ -98,7 +97,6 @@ export function useApiFetch<T = unknown>(
             if (csrfToken && requestOptions.headers) {
                 (requestOptions.headers as unknown as Record<string, string>)['X-CSRF-TOKEN'] = csrfToken;
             }
-
         },
     });
 }

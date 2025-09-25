@@ -22,7 +22,7 @@ watch(data, (newData) => {
 
 onMounted(async () => {
     await refresh();
-})
+});
 </script>
 
 <template>

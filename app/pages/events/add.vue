@@ -1,7 +1,10 @@
 <script setup lang="ts">
-const { t } = useI18n();
 import type { EventData } from '~/types';
 import { toast } from 'vue-sonner';
+
+import type { EventForm } from '~/composables/eventSchema';
+
+const { t } = useI18n();
 // Page configuration
 const pageTitle = computed(() => t('action.add') + ' ' + t('event.singular'));
 const pageIcon = usePageIcon();
@@ -17,8 +20,6 @@ useSeoMeta({
     description: pageDescription,
     ogDescription: pageDescription,
 });
-
-import type { EventForm } from '~/composables/eventSchema';
 // Validation schema is used inside EventForm component; no CRUD here
 
 // State

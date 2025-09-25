@@ -39,7 +39,7 @@ const switchValue = computed<boolean>({
                 class="text-destructive font-semibold"
             >*</span>
         </Label>
-        <div class="flex items-center space-x-2 mt-1.5">
+        <div class="flex items-center space-x-2">
             <Switch
                 :id="id"
                 v-model="switchValue"
