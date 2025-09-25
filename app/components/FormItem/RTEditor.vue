@@ -1,12 +1,12 @@
 <template>
     <ClientOnly>
         <div
-            class="border rounded-md overflow-hidden focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
+            class="border rounded-md overflow-hidden focus-within:ring-ring/50 focus-within:ring-[3px]"
             :class="{
                 'opacity-50 cursor-not-allowed': disabled,
                 'bg-muted/30': readonly,
-                'border-destructive aria-invalid:border-destructive': (errors?.length || 0) > 0,
-                'border-border': (errors?.length || 0) === 0,
+                'border-destructive aria-invalid:border-destructive focus-within:border-destructive focus-within:ring-destructive/20 dark:focus-within:ring-destructive/40': (errors?.length || 0) > 0,
+                'border-border focus-within:border-ring': (errors?.length || 0) === 0,
             }"
         >
             <!-- Toolbar -->
@@ -485,7 +485,7 @@ const setLink = () => {
 
 // Initialize editor
 const initializeEditor = () => {
-    const extensions = [
+    const extensions: any[] = [
         StarterKit.configure({
             heading: {
                 levels: [1, 2, 3, 4, 5, 6],

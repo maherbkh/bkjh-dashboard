@@ -49,7 +49,7 @@ const hasErrors = computed(() => props.errors && props.errors.length > 0);
             :readonly="readonly"
             :rows="rows"
             :class="{
-                'border-destructive focus-visible:ring-destructive': hasErrors,
+                'border-destructive focus-visible:ring-destructive dark:focus-visible:ring-destructive/40': hasErrors,
             }"
         />
         <div

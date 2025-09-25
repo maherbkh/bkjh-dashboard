@@ -5,7 +5,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     await userStore.fetchAuthUser();
 
     // 1) No access token or user -> go to login
-    if (!userStore.accessToken || !userStore.user) {
+    if (!userStore.accessToken) {
         return navigateTo({
             path: '/login',
             query: { redirect: to.fullPath },

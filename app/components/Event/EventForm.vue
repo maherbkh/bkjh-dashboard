@@ -210,6 +210,7 @@ const formTitle = computed(() => {
                         <div class="grid grid-cols-12 items-start gap-5">
                             <FormItemSelect
                                 id="type"
+                                :searchable="false"
                                 v-model="type"
                                 :title="t('event.type')"
                                 :placeholder="t('action.select') + ' ' + t('event.type')"

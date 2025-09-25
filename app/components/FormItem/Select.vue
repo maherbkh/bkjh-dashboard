@@ -20,6 +20,7 @@ type Props = {
     keyValue?: string;
     nameValue?: string;
     emptyText?: string;
+    searchable?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -35,6 +36,7 @@ const props = withDefaults(defineProps<Props>(), {
     keyValue: 'id',
     nameValue: 'name',
     emptyText: 'No options available',
+    searchable: true,
 });
 
 const emit = defineEmits<{
@@ -102,33 +104,34 @@ const handleSelect = (value: string) => {
                 </Button>
             </PopoverTrigger>
             <PopoverContent
-                class="w-full p-0"
+                class="w-full p-0 rounded-md"
                 align="start"
             >
                 <Command v-model="selectedValue">
-                    <CommandInput :placeholder="t('action.search_placeholder')" />
+                    <CommandInput v-if="searchable" :placeholder="t('action.search_placeholder')" />
                     <CommandEmpty v-if="data.length === 0">
                         {{ emptyText }}
                     </CommandEmpty>
                     <CommandEmpty v-else>
                         {{ t('global.messages.no_search_results') }}
                     </CommandEmpty>
-                    <CommandList>
+                    <CommandList class="space-y-2">
                         <CommandGroup>
-                            <CommandItem
+                            <CommandItem class="cursor-pointer hover:bg-accent hover:text-accent-foreground my-1"
+                            :class="selectedValue === item[keyValue].toString() ? 'bg-accent text-accent-foreground' : ''"
                                 v-for="item in data"
                                 :key="item[keyValue]"
                                 :value="item[keyValue].toString()"
                                 @select="() => handleSelect(item[keyValue].toString())"
                             >
                                 <Icon
-                                    name="solar:check-bold"
+                                    name="solar:check-circle-line-duotone"
                                     :class="cn(
-                                        'mr-2 h-4 w-4',
+                                        'mr-2 !size-4 shrink-0 text-success',
                                         selectedValue === item[keyValue].toString() ? 'opacity-100' : 'opacity-0',
                                     )"
                                 />
-                                {{ item[nameValue] }}
+                                <span :class="selectedValue === item[keyValue].toString() ? 'font-semibold' : ''" class="line-clamp-1">{{ item[nameValue] }}</span>
                             </CommandItem>
                         </CommandGroup>
                     </CommandList>
