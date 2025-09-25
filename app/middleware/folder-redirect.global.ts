@@ -17,10 +17,13 @@ export default defineNuxtRouteMiddleware((to) => {
         return navigateTo(folderRedirects[normalizedPath]);
     }
 
-    // Handle event UUID redirect: /events/:uuid -> /events/:uuid/show
-    const eventUuidMatch = to.path.match(/^\/events\/([a-f0-9-]+)$/i);
-    if (eventUuidMatch) {
-        const eventId = eventUuidMatch[1];
-        return navigateTo(`/events/${eventId}/show`);
+    // Handle event UUID redirect strictly for UUID v4:
+    // Only redirect /events/:uuid where :uuid is a real UUID, not words like "add"
+    const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const uuidCandidate = to.path.startsWith('/events/') && to.path.split('/').length === 3
+        ? to.path.split('/')[2]
+        : '';
+    if (uuidCandidate && uuidV4Regex.test(uuidCandidate)) {
+        return navigateTo(`/events/${uuidCandidate}/show`);
     }
 });

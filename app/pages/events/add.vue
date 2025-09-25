@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { EventData } from '~/types';
 import { toast } from 'vue-sonner';
 
 import type { EventForm } from '~/composables/eventSchema';

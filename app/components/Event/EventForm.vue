@@ -378,7 +378,7 @@ const formTitle = computed(() => {
                 </Card>
                 <div
                         v-if="showActions"
-                        class="flex justify-end gap-2 pt-4 border-t lg:col-span-12"
+                        class="flex justify-end gap-2 pt-4 border-t lg:col-span-12 mb-8"
                     >
                         <Button
                             type="submit"

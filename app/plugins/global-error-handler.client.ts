@@ -3,6 +3,8 @@ import { useUserStore } from '~/stores/user';
 
 export default defineNuxtPlugin(() => {
     const userStore = useUserStore();
+    // Access i18n instance once at plugin init; don't call useI18n() later
+    const { $i18n } = useNuxtApp();
 
     // Global error handler for 401 errors
     const handleUnauthorized = () => {
@@ -11,9 +13,9 @@ export default defineNuxtPlugin(() => {
         userStore.setUser();
 
         // Show toast notification
-        const { t } = useI18n();
-        toast.error(t('auth.validation.incorrect_credentials'), {
-            description: t('auth.token_refresh_failed'),
+        const translate = $i18n?.t?.bind($i18n) as ((key: string) => string) | undefined;
+        toast.error(translate ? translate('auth.validation.incorrect_credentials') : 'Unauthorized', {
+            description: translate ? translate('auth.token_refresh_failed') : 'Session expired. Please log in again.',
             duration: 5000,
         });
 
