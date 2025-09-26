@@ -78,6 +78,9 @@ export default defineNuxtConfig({
                     'Access-Control-Expose-Headers': 'Content-Disposition, Content-Length, Content-Type',
                 },
             },
+            '/backend/**': {
+                proxy: `${process.env.NUXT_PUBLIC_API_URL || 'http://api.backhaus-akademie.test:3055/api/v1/academy'}/**`,
+            },
         },
     },
     vite: {

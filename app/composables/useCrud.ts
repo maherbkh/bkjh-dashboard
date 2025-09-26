@@ -22,7 +22,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
 
     // Build API path with tenant and crud path
     const buildApiPath = (endpoint: string = '') => {
-        return `/api/v1/dashboard/${tenant}/${crudPath}${endpoint}`;
+        return `/${tenant}/${crudPath}${endpoint}`;
     };
 
     // VeeValidate form

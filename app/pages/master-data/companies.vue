@@ -34,8 +34,6 @@ const {
     formSchema: createCompanySchema(t),
 });
 
-// /api/v1/dashboard/shared/companies
-
 const selectedRows = ref<string[]>([]);
 
 // Search and pagination state

@@ -35,7 +35,7 @@
 
 ## 🌐 **Base URL**
 ```
-http://api.backhaus.test:3055/api/v1/dashboard
+http://api.backhaus.test:3055
 ```
 
 ---
@@ -46,7 +46,7 @@ http://api.backhaus.test:3055/api/v1/dashboard
 
 #### **CSRF Token**
 ```http
-GET /api/v1/dashboard/auth/csrf-token
+GET /auth/csrf-token
 ```
 - **Description**: Generate CSRF token for admin forms
 - **Authentication**: None required
@@ -56,7 +56,7 @@ GET /api/v1/dashboard/auth/csrf-token
 
 #### **Login**
 ```http
-POST /api/v1/dashboard/auth/login
+POST /auth/login
 ```
 - **Description**: Admin login
 - **Authentication**: None required
@@ -94,7 +94,7 @@ POST /api/v1/dashboard/auth/login
 
 #### **Refresh Token**
 ```http
-POST /api/v1/dashboard/auth/refresh
+POST /auth/refresh
 ```
 - **Description**: Refresh access token
 - **Authentication**: None required
@@ -121,7 +121,7 @@ POST /api/v1/dashboard/auth/refresh
 
 #### **Logout**
 ```http
-POST /api/v1/dashboard/auth/logout
+POST /auth/logout
 ```
 - **Description**: Logout current session
 - **Authentication**: Required
@@ -129,7 +129,7 @@ POST /api/v1/dashboard/auth/logout
 
 #### **Logout All Devices**
 ```http
-POST /api/v1/dashboard/auth/logout-all
+POST /auth/logout-all
 ```
 - **Description**: Logout all sessions
 - **Authentication**: Required
@@ -137,7 +137,7 @@ POST /api/v1/dashboard/auth/logout-all
 
 #### **Check Authentication**
 ```http
-GET /api/v1/dashboard/auth/check
+GET /auth/check
 ```
 - **Description**: Validate access token and get admin data
 - **Authentication**: Required (Bearer token in header)
@@ -163,7 +163,7 @@ GET /api/v1/dashboard/auth/check
 
 #### **Admin Data**
 ```http
-GET /api/v1/dashboard/auth/admin-data
+GET /auth/admin-data
 ```
 - **Description**: Get comprehensive admin data
 - **Authentication**: Required
@@ -173,7 +173,7 @@ GET /api/v1/dashboard/auth/admin-data
 
 #### **Change Password**
 ```http
-POST /api/v1/dashboard/auth/change-password
+POST /auth/change-password
 ```
 - **Description**: Change admin password
 - **Authentication**: Required
@@ -181,7 +181,7 @@ POST /api/v1/dashboard/auth/change-password
 
 #### **Request Password Reset**
 ```http
-POST /api/v1/dashboard/auth/request-reset
+POST /auth/request-reset
 ```
 - **Description**: Request password reset
 - **Authentication**: None required
@@ -189,7 +189,7 @@ POST /api/v1/dashboard/auth/request-reset
 
 #### **Verify Password Reset**
 ```http
-POST /api/v1/dashboard/auth/verify-reset
+POST /auth/verify-reset
 ```
 - **Description**: Verify password reset code
 - **Authentication**: None required
@@ -197,7 +197,7 @@ POST /api/v1/dashboard/auth/verify-reset
 
 #### **Resend Reset Code**
 ```http
-POST /api/v1/dashboard/auth/resend-code
+POST /auth/resend-code
 ```
 - **Description**: Resend password reset code
 - **Authentication**: None required
@@ -207,14 +207,14 @@ POST /api/v1/dashboard/auth/resend-code
 
 #### **Get Profile**
 ```http
-GET /api/v1/dashboard/auth/profile
+GET /auth/profile
 ```
 - **Description**: Get admin profile
 - **Authentication**: Required
 
 #### **Update Profile**
 ```http
-PUT /api/v1/dashboard/auth/profile
+PUT /auth/profile
 ```
 - **Description**: Update admin profile
 - **Authentication**: Required
@@ -222,7 +222,7 @@ PUT /api/v1/dashboard/auth/profile
 
 #### **My Support Tasks**
 ```http
-GET /api/v1/dashboard/auth/profile/tasks
+GET /auth/profile/tasks
 ```
 - **Description**: Get admin's support tasks
 - **Authentication**: Required
@@ -248,7 +248,7 @@ GET /api/v1/dashboard/auth/profile/tasks
 
 ### **Get Admin Data**
 ```http
-GET /api/v1/dashboard/auth/admin-data
+GET /auth/admin-data
 ```
 
 **Response includes:**
@@ -284,13 +284,13 @@ GET /api/v1/dashboard/auth/admin-data
 ### **Login Flow**
 ```javascript
 // 1. Get CSRF token
-const csrfResponse = await fetch('/api/v1/dashboard/auth/csrf-token', {
+const csrfResponse = await fetch('/auth/csrf-token', {
   credentials: 'include'
 });
 const csrfData = await csrfResponse.json();
 
 // 2. Login
-const loginResponse = await fetch('/api/v1/dashboard/auth/login', {
+const loginResponse = await fetch('/auth/login', {
   method: 'POST',
   credentials: 'include',
   headers: {
@@ -305,7 +305,7 @@ const loginResponse = await fetch('/api/v1/dashboard/auth/login', {
 });
 
 // 3. Get admin data
-const adminDataResponse = await fetch('/api/v1/dashboard/auth/admin-data', {
+const adminDataResponse = await fetch('/auth/admin-data', {
   credentials: 'include'
 });
 ```
@@ -313,7 +313,7 @@ const adminDataResponse = await fetch('/api/v1/dashboard/auth/admin-data', {
 ### **Check Authentication**
 ```javascript
 // Validate token and get admin data
-const checkResponse = await fetch('/api/v1/dashboard/auth/check', {
+const checkResponse = await fetch('/auth/check', {
   headers: {
     'Authorization': `Bearer ${accessToken}`
   }
@@ -323,7 +323,7 @@ const checkResponse = await fetch('/api/v1/dashboard/auth/check', {
 ### **Protected API Calls**
 ```javascript
 // All subsequent API calls automatically include cookies
-const response = await fetch('/api/v1/dashboard/some-endpoint', {
+const response = await fetch('/some-endpoint', {
   credentials: 'include'
 });
 ```
@@ -391,7 +391,7 @@ export const useUserStore = defineStore('user', () => {
   // Actions
   const getCsrfToken = async () => {
     try {
-      const response = await fetch('/api/v1/dashboard/auth/csrf-token', {
+      const response = await fetch('/auth/csrf-token', {
         credentials: 'include'
       })
       const data: ApiResponse<{ csrfToken: string }> = await response.json()
@@ -411,7 +411,7 @@ export const useUserStore = defineStore('user', () => {
       // Get CSRF token first
       await getCsrfToken()
       
-      const response = await fetch('/api/v1/dashboard/auth/login', {
+      const response = await fetch('/auth/login', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -448,7 +448,7 @@ export const useUserStore = defineStore('user', () => {
     try {
       await getCsrfToken()
       
-      const response = await fetch('/api/v1/dashboard/auth/refresh', {
+      const response = await fetch('/auth/refresh', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -481,7 +481,7 @@ export const useUserStore = defineStore('user', () => {
     }
 
     try {
-      const response = await fetch('/api/v1/dashboard/auth/check', {
+      const response = await fetch('/auth/check', {
         headers: {
           'Authorization': `Bearer ${accessToken.value}`
         }
@@ -506,7 +506,7 @@ export const useUserStore = defineStore('user', () => {
     try {
       await getCsrfToken()
       
-      await fetch('/api/v1/dashboard/auth/logout', {
+      await fetch('/auth/logout', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -532,7 +532,7 @@ export const useUserStore = defineStore('user', () => {
     try {
       await getCsrfToken()
       
-      await fetch('/api/v1/dashboard/auth/logout-all', {
+      await fetch('/auth/logout-all', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -824,7 +824,7 @@ export function useApiFetch<T = unknown>(
         if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
             try {
                 // Use $fetch instead of useFetch to avoid caching issues
-                const csrfData = await $fetch(`${config.public.apiUrl}/api/v1/dashboard/auth/csrf-token`, {
+                const csrfData = await $fetch(`${config.public.apiUrl}/auth/csrf-token`, {
                     credentials: 'include',
                     headers: {
                         'accept': 'application/json',
@@ -882,7 +882,7 @@ export function useApiFetch<T = unknown>(
                 const refreshToken = useCookie('BKJH_REFRESH_TOKEN')
                 if (refreshToken.value) {
                     // Attempt to refresh token
-                    useApiFetch('/api/v1/dashboard/auth/refresh', {
+                    useApiFetch('/auth/refresh', {
                         method: 'POST',
                         body: { refreshToken: refreshToken.value }
                     }).then(({ data: refreshData, error: refreshError }) => {
@@ -970,7 +970,7 @@ export function useApiFetch<T = unknown>(
 
 ### **1. Login**
 - **Method**: `POST`
-- **Endpoint**: `/api/v1/dashboard/auth/login`
+- **Endpoint**: `/auth/login`
 - **Headers**: 
   - `Content-Type: application/json`
   - `X-CSRF-TOKEN: {csrfToken}` (required)
@@ -1007,7 +1007,7 @@ export function useApiFetch<T = unknown>(
 
 ### **2. Refresh Token**
 - **Method**: `POST`
-- **Endpoint**: `/api/v1/dashboard/auth/refresh`
+- **Endpoint**: `/auth/refresh`
 - **Headers**: 
   - `Content-Type: application/json`
   - `X-CSRF-TOKEN: {csrfToken}` (required)
@@ -1033,7 +1033,7 @@ export function useApiFetch<T = unknown>(
 
 ### **3. Check Authentication**
 - **Method**: `GET`
-- **Endpoint**: `/api/v1/dashboard/auth/check`
+- **Endpoint**: `/auth/check`
 - **Headers**: 
   - `Authorization: Bearer {accessToken}`
 - **Response**:
@@ -1057,7 +1057,7 @@ export function useApiFetch<T = unknown>(
 
 ### **4. Logout**
 - **Method**: `POST`
-- **Endpoint**: `/api/v1/dashboard/auth/logout`
+- **Endpoint**: `/auth/logout`
 - **Headers**: 
   - `Authorization: Bearer {accessToken}`
   - `X-CSRF-TOKEN: {csrfToken}` (required)
@@ -1071,7 +1071,7 @@ export function useApiFetch<T = unknown>(
 
 ### **5. Logout All Sessions**
 - **Method**: `POST`
-- **Endpoint**: `/api/v1/dashboard/auth/logout-all`
+- **Endpoint**: `/auth/logout-all`
 - **Headers**: 
   - `Authorization: Bearer {accessToken}`
   - `X-CSRF-TOKEN: {csrfToken}` (required)
@@ -1085,7 +1085,7 @@ export function useApiFetch<T = unknown>(
 
 ### **6. Forgot Password**
 - **Method**: `POST`
-- **Endpoint**: `/api/v1/dashboard/auth/forgot-password`
+- **Endpoint**: `/auth/forgot-password`
 - **Headers**: 
   - `Content-Type: application/json`
 - **Payload**:
@@ -1104,7 +1104,7 @@ export function useApiFetch<T = unknown>(
 
 ### **7. Reset Password**
 - **Method**: `POST`
-- **Endpoint**: `/api/v1/dashboard/auth/reset-password`
+- **Endpoint**: `/auth/reset-password`
 - **Headers**: 
   - `Content-Type: application/json`
 - **Payload**:
@@ -1124,7 +1124,7 @@ export function useApiFetch<T = unknown>(
 
 ### **8. Get Admin Data**
 - **Method**: `GET`
-- **Endpoint**: `/api/v1/dashboard/auth/admin-data`
+- **Endpoint**: `/auth/admin-data`
 - **Headers**: 
   - `Authorization: Bearer {accessToken}`
 - **Response**:
@@ -1157,7 +1157,7 @@ export function useApiFetch<T = unknown>(
 
 ### **Get CSRF Token**
 - **Method**: `GET`
-- **Endpoint**: `/api/v1/dashboard/auth/csrf-token`
+- **Endpoint**: `/auth/csrf-token`
 - **Headers**: None required
 - **Response**:
 ```json
@@ -1320,7 +1320,7 @@ export const useUserStore = defineStore('user', () => {
   // Actions
   const getCsrfToken = async () => {
     try {
-      const { data } = await useApiFetch<ApiResponse<{ csrfToken: string }>>('/api/v1/dashboard/auth/csrf-token')
+      const { data } = await useApiFetch<ApiResponse<{ csrfToken: string }>>('/auth/csrf-token')
       
       if (data.value?.status) {
         csrfToken.value = data.value.data.csrfToken
@@ -1341,7 +1341,7 @@ export const useUserStore = defineStore('user', () => {
     try {
       const payload: LoginPayload = { email, password, remember }
       
-      const { data } = await useApiFetch<ApiResponse<{ tokens: Tokens; admin: Admin }>>('/api/v1/dashboard/auth/login', {
+      const { data } = await useApiFetch<ApiResponse<{ tokens: Tokens; admin: Admin }>>('/auth/login', {
         method: 'POST',
         body: payload
       })
@@ -1386,7 +1386,7 @@ export const useUserStore = defineStore('user', () => {
     try {
       const payload: RefreshPayload = { refreshToken: refreshToken.value }
       
-      const { data } = await useApiFetch<ApiResponse<{ tokens: Tokens }>>('/api/v1/dashboard/auth/refresh', {
+      const { data } = await useApiFetch<ApiResponse<{ tokens: Tokens }>>('/auth/refresh', {
         method: 'POST',
         body: payload
       })
@@ -1412,7 +1412,7 @@ export const useUserStore = defineStore('user', () => {
     }
 
     try {
-      const { data } = await useApiFetch<ApiResponse<{ admin: Admin }>>('/api/v1/dashboard/auth/check')
+      const { data } = await useApiFetch<ApiResponse<{ admin: Admin }>>('/auth/check')
       
       if (data.value?.status) {
         admin.value = data.value.data.admin
@@ -1429,7 +1429,7 @@ export const useUserStore = defineStore('user', () => {
     if (!accessToken.value) return
 
     try {
-      await useApiFetch('/api/v1/dashboard/auth/logout', {
+      await useApiFetch('/auth/logout', {
         method: 'POST'
       })
       
@@ -1460,7 +1460,7 @@ export const useUserStore = defineStore('user', () => {
     if (!accessToken.value) return
 
     try {
-      await useApiFetch('/api/v1/dashboard/auth/logout-all', {
+      await useApiFetch('/auth/logout-all', {
         method: 'POST'
       })
       
@@ -1493,7 +1493,7 @@ export const useUserStore = defineStore('user', () => {
     }
 
     try {
-      const { data } = await useApiFetch<ApiResponse<{ admin: Admin; stats: any }>>('/api/v1/dashboard/auth/admin-data')
+      const { data } = await useApiFetch<ApiResponse<{ admin: Admin; stats: any }>>('/auth/admin-data')
       
       if (data.value?.status) {
         admin.value = data.value.data.admin
@@ -1563,15 +1563,15 @@ export const useUserStore = defineStore('user', () => {
 - **Session Secret**: `dashboardCsrfSecret` (separate from global)
 - **Cookie Name**: `XSRF-TOKEN-DASHBOARD`
 - **Header Name**: `X-Dashboard-CSRF-Token`
-- **Routes**: Only applies to `/api/v1/dashboard/*`
+- **Routes**: Only applies to `/*`
 
 ### **Environment Variables**
 - `DASHBOARD_CSRF_ENABLED`: Enable/disable CSRF (default: true)
 - `BASE_DOMAIN`: Base domain for cookie sharing
 
 ### **Public Endpoints (No CSRF Required)**
-- `GET /api/v1/dashboard/auth/csrf-token`
-- `POST /api/v1/dashboard/auth/login`
+- `GET /auth/csrf-token`
+- `POST /auth/login`
 - `POST /api/v1/dashboard/auth/refresh-token`
 - `POST /api/v1/dashboard/auth/request-reset`
 - `POST /api/v1/dashboard/auth/verify-reset`

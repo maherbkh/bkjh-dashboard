@@ -10,7 +10,7 @@ definePageMeta({
 
 interface EventResponse { success: boolean; message?: string; data: EventData }
 
-const { data, status, refresh } = useApiFetch<EventResponse>(`/api/v1/dashboard/academy/events/${route.params.id as string}`, {
+const { data, status, refresh } = useApiFetch<EventResponse>(`/academy/events/${route.params.id as string}`, {
     immediate: false,
 });
 const eventData = computed<EventData | undefined>(() => (data.value as any)?.data as EventData | undefined);

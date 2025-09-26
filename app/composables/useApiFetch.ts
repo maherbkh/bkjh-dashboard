@@ -18,13 +18,13 @@ export function useApiFetch<T = unknown>(
         if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
             try {
                 // Use $fetch instead of useFetch to avoid caching issues
-                const csrfData = await $fetch(`${config.public.apiUrl}/api/v1/dashboard/auth/csrf-token`, {
+                const csrfData = await $fetch(`${config.public.apiUrl}/auth/csrf-token`, {
                     credentials: 'include',
                     headers: {
                         'accept': 'application/json',
                         'x-requested-with': 'XMLHttpRequest',
-                        'referer': import.meta.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
-                        'origin': import.meta.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
+                        'referer': import.meta.client ? window.location.origin : 'https://dashboard.backhaus.de',
+                        'origin': import.meta.client ? window.location.origin : 'https://dashboard.backhaus.de',
                     },
                 });
                 return (csrfData as any)?.data?.csrfToken;
@@ -41,11 +41,11 @@ export function useApiFetch<T = unknown>(
     const headers: Record<string, string> = {
         'accept': 'application/json',
         'x-requested-with': 'XMLHttpRequest',
-        'referer': import.meta.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
-        'origin': import.meta.client ? window.location.origin : 'http://dashboard.backhaus.test:3022',
+        'referer': import.meta.client ? window.location.origin : 'https://dashboard.backhaus.de',
+        'origin': import.meta.client ? window.location.origin : 'https://dashboard.backhaus.de',
     };
 
-    // Add Content-Type header for requests with body
+    // Add a Content-Type header for requests with body
     const method = String(options.method || 'GET').toUpperCase();
     if (['POST', 'PUT', 'PATCH'].includes(method) && options.body) {
         headers['content-type'] = 'application/json';
@@ -64,7 +64,7 @@ export function useApiFetch<T = unknown>(
         Object.assign(headers, useRequestHeaders(['cookie']));
     }
 
-    return useFetch(`${config.public.apiUrl}` + path, {
+    return useFetch('/backend' + path, {
         credentials: 'include',
         server: false,
         watch: false,

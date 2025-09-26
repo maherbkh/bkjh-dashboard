@@ -5,7 +5,7 @@ This module provides CRUD operations for managing event categories in the academ
 
 ## Base URL
 ```
-/api/v1/dashboard/academy/event-categories
+/academy/event-categories
 ```
 
 ## Authentication
@@ -14,7 +14,7 @@ All endpoints require JWT authentication and admin privileges with 'academy' app
 ## API Endpoints
 
 ### 1. Create Event Category
-**POST** `/api/v1/dashboard/academy/event-categories`
+**POST** `/academy/event-categories`
 
 Creates a new event category.
 
@@ -57,7 +57,7 @@ Creates a new event category.
 ---
 
 ### 2. Get All Event Categories
-**GET** `/api/v1/dashboard/academy/event-categories`
+**GET** `/academy/event-categories`
 
 Retrieves all event categories with filtering and pagination.
 
@@ -73,7 +73,7 @@ Retrieves all event categories with filtering and pagination.
 
 #### Example Request
 ```
-GET /api/v1/dashboard/academy/event-categories?page=1&length=25&search=tech&isActive=true&sort_by=name&sort_dir=asc
+GET /academy/event-categories?page=1&length=25&search=tech&isActive=true&sort_by=name&sort_dir=asc
 ```
 
 #### Response
@@ -108,7 +108,7 @@ GET /api/v1/dashboard/academy/event-categories?page=1&length=25&search=tech&isAc
 ---
 
 ### 3. Get Event Categories Statistics
-**GET** `/api/v1/dashboard/academy/event-categories/stats`
+**GET** `/academy/event-categories/stats`
 
 Retrieves statistics about event categories.
 
@@ -129,7 +129,7 @@ Retrieves statistics about event categories.
 ---
 
 ### 4. Get Active Event Categories
-**GET** `/api/v1/dashboard/academy/event-categories/active`
+**GET** `/academy/event-categories/active`
 
 Retrieves only active event categories for selection purposes.
 
@@ -155,7 +155,7 @@ Retrieves only active event categories for selection purposes.
 ---
 
 ### 5. Get Hierarchical Event Categories
-**GET** `/api/v1/dashboard/academy/event-categories/hierarchical`
+**GET** `/academy/event-categories/hierarchical`
 
 Retrieves event categories with their hierarchical structure (parent-child relationships).
 
@@ -190,7 +190,7 @@ Retrieves event categories with their hierarchical structure (parent-child relat
 ---
 
 ### 6. Get Event Category by ID
-**GET** `/api/v1/dashboard/academy/event-categories/:id`
+**GET** `/academy/event-categories/:id`
 
 Retrieves a specific event category by its ID.
 
@@ -226,7 +226,7 @@ Retrieves a specific event category by its ID.
 ---
 
 ### 7. Update Event Category
-**PATCH** `/api/v1/dashboard/academy/event-categories/:id`
+**PATCH** `/academy/event-categories/:id`
 
 Updates an existing event category.
 
@@ -277,7 +277,7 @@ All fields are optional (partial update):
 ---
 
 ### 8. Toggle Event Category Active Status
-**PATCH** `/api/v1/dashboard/academy/event-categories/:id/toggle-active`
+**PATCH** `/academy/event-categories/:id/toggle-active`
 
 Toggles the active status of an event category.
 
@@ -307,7 +307,7 @@ Toggles the active status of an event category.
 ---
 
 ### 9. Delete Event Category
-**DELETE** `/api/v1/dashboard/academy/event-categories/:id`
+**DELETE** `/academy/event-categories/:id`
 
 Deletes an event category.
 

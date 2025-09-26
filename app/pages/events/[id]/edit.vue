@@ -27,7 +27,7 @@ const isSubmitting = ref(false);
 
 // Load event data
 onMounted(async () => {
-    const { data, error } = await useApiFetch(`/api/v1/dashboard/academy/events/${route.params.id as string}`);
+    const { data, error } = await useApiFetch(`/academy/events/${route.params.id as string}`);
     if (error.value) {
         toast.error(t('global.messages.error'));
         return;
@@ -42,7 +42,7 @@ const onSubmit = async (values: EventForm) => {
     console.log('values', values);
     if (!editingEvent.value) return;
     isSubmitting.value = true;
-    const { data, error } = await useApiFetch(`/api/v1/dashboard/academy/events/${editingEvent.value.id}`, {
+    const { data, error } = await useApiFetch(`/academy/events/${editingEvent.value.id}`, {
         method: 'PATCH',
         body: values as any,
     });

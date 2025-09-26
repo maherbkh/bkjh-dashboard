@@ -5,7 +5,7 @@ This module provides comprehensive speaker management functionality for the Acad
 
 ## Base URL
 ```
-/api/v1/dashboard/academy/speakers
+/academy/speakers
 ```
 
 ## Authentication
@@ -18,7 +18,7 @@ This module provides comprehensive speaker management functionality for the Acad
 ## API Endpoints
 
 ### 1. Create Speaker
-**POST** `/api/v1/dashboard/academy/speakers`
+**POST** `/academy/speakers`
 
 Creates a new speaker in the system.
 
@@ -59,7 +59,7 @@ Creates a new speaker in the system.
 ---
 
 ### 2. Get All Speakers
-**GET** `/api/v1/dashboard/academy/speakers`
+**GET** `/academy/speakers`
 
 Retrieves all speakers with filtering, pagination, and sorting.
 
@@ -114,7 +114,7 @@ Retrieves all speakers with filtering, pagination, and sorting.
 ---
 
 ### 3. Get Speaker by ID
-**GET** `/api/v1/dashboard/academy/speakers/:id`
+**GET** `/academy/speakers/:id`
 
 Retrieves a specific speaker by ID with associated events.
 
@@ -152,7 +152,7 @@ Retrieves a specific speaker by ID with associated events.
 ---
 
 ### 4. Update Speaker
-**PATCH** `/api/v1/dashboard/academy/speakers/:id`
+**PATCH** `/academy/speakers/:id`
 
 Updates an existing speaker.
 
@@ -200,7 +200,7 @@ Updates an existing speaker.
 ---
 
 ### 5. Toggle Speaker Active Status
-**PATCH** `/api/v1/dashboard/academy/speakers/:id/toggle-active`
+**PATCH** `/academy/speakers/:id/toggle-active`
 
 Toggles the active status of a speaker.
 
@@ -230,7 +230,7 @@ Toggles the active status of a speaker.
 ---
 
 ### 6. Delete Speaker
-**DELETE** `/api/v1/dashboard/academy/speakers/:id`
+**DELETE** `/academy/speakers/:id`
 
 Deletes a speaker from the system.
 
@@ -255,7 +255,7 @@ Deletes a speaker from the system.
 ---
 
 ### 7. Get Speakers Statistics
-**GET** `/api/v1/dashboard/academy/speakers/stats`
+**GET** `/academy/speakers/stats`
 
 Retrieves statistics about speakers.
 
@@ -284,7 +284,7 @@ Retrieves statistics about speakers.
 ---
 
 ### 8. Get Active Speakers for Selection
-**GET** `/api/v1/dashboard/academy/speakers/active`
+**GET** `/academy/speakers/active`
 
 Retrieves only active speakers for dropdown/selection purposes.
 
@@ -351,7 +351,7 @@ interface Event {
       "statusCode": 400
     },
     "timestamp": "2024-01-15T10:30:00.000Z",
-    "path": "/api/v1/dashboard/academy/speakers"
+    "path": "/academy/speakers"
   }
 }
 ```

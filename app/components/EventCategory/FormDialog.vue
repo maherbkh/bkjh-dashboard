@@ -157,7 +157,7 @@ const fetchParentCategories = async () => {
     try {
         const { data } = await useApiFetch<{
             data: EventCategory[];
-        }>('/api/v1/dashboard/academy/event-categories/active');
+        }>('/academy/event-categories/active');
 
         parentCategoryOptions.value = data.value?.data?.map(category => ({
             value: category.id,

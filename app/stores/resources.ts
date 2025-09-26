@@ -1,5 +1,5 @@
 // Admin resources store for authenticated API data
-// Fetches admin data from /api/v1/dashboard/auth/admin-data
+// Fetches admin data from /auth/admin-data
 
 // Types based on API response
 interface Address {
@@ -141,7 +141,7 @@ export const useResourcesStore = defineStore('resources', () => {
         isLoading.value = true;
         error.value = null;
 
-        const { data: response, error: fetchError } = await useApiFetch<AdminDataResponse>('/api/v1/dashboard/auth/admin-data');
+        const { data: response, error: fetchError } = await useApiFetch<AdminDataResponse>('/auth/admin-data');
 
         console.log('API Response:', response.value);
         console.log('API Error:', fetchError.value);

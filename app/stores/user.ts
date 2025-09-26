@@ -25,7 +25,7 @@ export const useUserStore = defineStore('user', () => {
 
     const logout = async () => {
         try {
-            await useApiFetch('/api/v1/dashboard/auth/logout', { method: 'POST' });
+            await useApiFetch('/auth/logout', { method: 'POST' });
         }
         catch (error) {
             // Continue with logout even if API call fails
@@ -45,7 +45,7 @@ export const useUserStore = defineStore('user', () => {
     };
 
     async function login(credentials: Credentials, path?: LocationQueryValue) {
-        const { data, error } = await useApiFetch(`/api/v1/dashboard/auth/login`, {
+        const { data, error } = await useApiFetch(`/auth/login`, {
             method: 'POST',
             body: credentials,
         });
@@ -104,12 +104,12 @@ export const useUserStore = defineStore('user', () => {
     }
     const fetchAuthUser = async () => {
         // Use the auth check endpoint to verify authentication and get updated user data
-        const { data: res, error } = await useApiFetch(`/api/v1/dashboard/auth/check`, {
+        const { data: res, error } = await useApiFetch(`/auth/check`, {
             lazy: true,
         });
         if (res.value) {
             const responseData = (res.value as any).data;
-            // Update user data with fresh information from server
+            // Update user data with fresh information from the server
             setUser(responseData.admin);
             setAccessToken(responseData.admin.currentToken);
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -123,7 +123,7 @@ export const useUserStore = defineStore('user', () => {
     };
 
     const forgotPassword = async (email: string) => {
-        const { data, error } = await useApiFetch('/api/v1/dashboard/auth/request-reset', {
+        const { data, error } = await useApiFetch('/auth/request-reset', {
             method: 'POST',
             body: { email },
         });
@@ -143,7 +143,7 @@ export const useUserStore = defineStore('user', () => {
     };
 
     const resetPassword = async (resetData: ResetPasswordForm) => {
-        const { data, error } = await useApiFetch('/api/v1/dashboard/auth/verify-reset', {
+        const { data, error } = await useApiFetch('/auth/verify-reset', {
             method: 'POST',
             body: resetData,
         });
@@ -174,7 +174,7 @@ export const useUserStore = defineStore('user', () => {
     // Logout all sessions
     const logoutAll = async () => {
         try {
-            await useApiFetch('/api/v1/dashboard/auth/logout-all', { method: 'POST' });
+            await useApiFetch('/auth/logout-all', { method: 'POST' });
         }
         catch (error) {
             // Logout all API call failed
@@ -195,7 +195,7 @@ export const useUserStore = defineStore('user', () => {
     // Change password
     const changePassword = async (currentPassword: string, newPassword: string) => {
         try {
-            const { data, error } = await useApiFetch('/api/v1/dashboard/auth/change-password', {
+            const { data, error } = await useApiFetch('/auth/change-password', {
                 method: 'POST',
                 body: { currentPassword, newPassword },
             });
@@ -226,7 +226,7 @@ export const useUserStore = defineStore('user', () => {
     // Update profile
     const updateProfile = async (profileData: any) => {
         try {
-            const { data, error } = await useApiFetch('/api/v1/dashboard/auth/profile', {
+            const { data, error } = await useApiFetch('/auth/profile', {
                 method: 'PUT',
                 body: profileData,
             });

@@ -29,7 +29,7 @@ const router = useRouter();
 const onSubmit = async (values: EventForm) => {
     isSubmitting.value = true;
 
-    const { data, error } = await useApiFetch('/api/v1/dashboard/academy/events', {
+    const { data, error } = await useApiFetch('/academy/events', {
         method: 'POST',
         body: values as any,
     });

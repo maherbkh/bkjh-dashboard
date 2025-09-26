@@ -5,7 +5,7 @@ This module provides CRUD operations for managing event targets in the academy s
 
 ## Base URL
 ```
-/api/v1/dashboard/academy/event-targets
+/academy/event-targets
 ```
 
 ## Authentication
@@ -14,7 +14,7 @@ All endpoints require JWT authentication and admin privileges with 'academy' app
 ## API Endpoints
 
 ### 1. Create Event Target
-**POST** `/api/v1/dashboard/academy/event-targets`
+**POST** `/academy/event-targets`
 
 Creates a new event target.
 
@@ -55,7 +55,7 @@ Creates a new event target.
 ---
 
 ### 2. Get All Event Targets
-**GET** `/api/v1/dashboard/academy/event-targets`
+**GET** `/academy/event-targets`
 
 Retrieves all event targets with filtering and pagination.
 
@@ -70,7 +70,7 @@ Retrieves all event targets with filtering and pagination.
 
 #### Example Request
 ```
-GET /api/v1/dashboard/academy/event-targets?page=1&length=25&search=emp&sort_by=name&sort_dir=asc
+GET /academy/event-targets?page=1&length=25&search=emp&sort_by=name&sort_dir=asc
 ```
 
 #### Response
@@ -105,7 +105,7 @@ GET /api/v1/dashboard/academy/event-targets?page=1&length=25&search=emp&sort_by=
 ---
 
 ### 3. Get Event Targets Statistics
-**GET** `/api/v1/dashboard/academy/event-targets/stats`
+**GET** `/academy/event-targets/stats`
 
 Retrieves statistics about event targets.
 
@@ -124,7 +124,7 @@ Retrieves statistics about event targets.
 ---
 
 ### 4. Get All Event Targets for Selection
-**GET** `/api/v1/dashboard/academy/event-targets/selection`
+**GET** `/academy/event-targets/selection`
 
 Retrieves all event targets for selection purposes (e.g., in dropdowns).
 
@@ -150,7 +150,7 @@ Retrieves all event targets for selection purposes (e.g., in dropdowns).
 ---
 
 ### 5. Get Event Target by ID
-**GET** `/api/v1/dashboard/academy/event-targets/:id`
+**GET** `/academy/event-targets/:id`
 
 Retrieves a specific event target by its ID.
 
@@ -186,7 +186,7 @@ Retrieves a specific event target by its ID.
 ---
 
 ### 6. Update Event Target
-**PATCH** `/api/v1/dashboard/academy/event-targets/:id`
+**PATCH** `/academy/event-targets/:id`
 
 Updates an existing event target.
 
@@ -235,7 +235,7 @@ All fields are optional (partial update):
 ---
 
 ### 7. Delete Event Target
-**DELETE** `/api/v1/dashboard/academy/event-targets/:id`
+**DELETE** `/academy/event-targets/:id`
 
 Deletes an event target.
 

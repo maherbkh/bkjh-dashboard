@@ -563,7 +563,7 @@ const { data: ticketData, pending: isLoading, error, refresh } = useApiFetch<{
     status: boolean;
     message: string;
     data: SupportTicket;
-}>(`/api/v1/dashboard/support/tickets/${props.id}`);
+}>(`/support/tickets/${props.id}`);
 
 const ticket = computed(() => ticketData.value?.data as SupportTicket | undefined);
 
@@ -683,7 +683,7 @@ const assignSelf = async () => {
     isActionLoading.value = true;
     try {
         await useApiFetch(
-            `/api/v1/dashboard/support/tickets/${ticket.value.id}/self-assign`,
+            `/support/tickets/${ticket.value.id}/self-assign`,
             {
                 method: 'POST',
             },
@@ -711,7 +711,7 @@ const transferTicket = async (userId: number) => {
 
     isActionLoading.value = true;
     try {
-        await useApiFetch(`/api/v1/dashboard/support/tickets/${ticket.value.id}/transfer`, {
+        await useApiFetch(`/support/tickets/${ticket.value.id}/transfer`, {
             method: 'POST',
             body: { user_id: userId },
         });
@@ -737,7 +737,7 @@ const addTicketAction = async (actionType: string, note?: string) => {
 
     isActionLoading.value = true;
     try {
-        await useApiFetch(`/api/v1/dashboard/support/tickets/${ticket.value.id}/action`, {
+        await useApiFetch(`/support/tickets/${ticket.value.id}/action`, {
             method: 'POST',
             body: {
                 action_type: actionType,
