@@ -4,12 +4,13 @@ import type { UseFetchOptions } from 'nuxt/app';
 import { useUserStore } from '~/stores/user';
 import { useGlobalErrorHandler } from '~/composables/useGlobalErrorHandler';
 
-export function useApiFetch<T = unknown>(
+export async function useApiFetch<T = unknown>(
     path: string,
     options: UseFetchOptions<T> = {},
 ) {
     const config = useRuntimeConfig();
     const { handleError } = useGlobalErrorHandler();
+    
     // Helper function to get CSRF token for state-changing requests
     const getCSRFToken = async () => {
         const method = String(options.method || 'GET').toUpperCase();
@@ -18,7 +19,7 @@ export function useApiFetch<T = unknown>(
         if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
             try {
                 // Use $fetch instead of useFetch to avoid caching issues
-                const csrfData = await $fetch(`${config.public.apiUrl}/auth/csrf-token`, {
+                const csrfData = await $fetch(`/backend/auth/csrf-token`, {
                     credentials: 'include',
                     headers: {
                         'accept': 'application/json',
@@ -59,6 +60,18 @@ export function useApiFetch<T = unknown>(
         headers.Authorization = `Bearer ${accessToken.value}`;
     }
 
+    // Fetch and add CSRF token for state-changing requests
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+        try {
+            const csrfToken = await getCSRFToken();
+            if (csrfToken) {
+                headers['X-Dashboard-CSRF-Token'] = csrfToken;
+            }
+        } catch (error) {
+            console.warn('Failed to fetch CSRF token for request:', error);
+        }
+    }
+
     // Append server-side headers
     if (import.meta.server) {
         Object.assign(headers, useRequestHeaders(['cookie']));
@@ -68,16 +81,29 @@ export function useApiFetch<T = unknown>(
         credentials: 'include',
         server: false,
         watch: false,
+        cache: 'no-store', // Disable caching entirely as per Nuxt 4.x docs
+        immediate: true, // Explicitly set to true (default behavior)
+        dedupe: 'cancel', // Cancel duplicate requests (default behavior)
         ...options,
         headers: {
             ...headers,
             ...(options.headers as Record<string, string>),
         },
-        onResponseError({ response, error }) {
+        onRequest({ request, options }) {
+            // CSRF token is already added in headers setup above
+            // This interceptor can be used for additional request modifications if needed
+        },
+        onRequestError({ request, options, error }) {
+            console.error('Request error:', error);
+        },
+        onResponse({ request, response, options }) {
+            // Process successful responses if needed
+        },
+        onResponseError({ request, response, options }) {
             // Use global error handler for all error responses
             if (import.meta.client) {
                 try {
-                    handleError(error);
+                    handleError(response._data || response);
                 }
                 catch (err) {
                     console.error('Error in global error handler:', err);
@@ -89,6 +115,5 @@ export function useApiFetch<T = unknown>(
                 }
             }
         },
-
     });
 }
