@@ -68,9 +68,6 @@ export function useApiFetch<T = unknown>(
         credentials: 'include',
         server: false,
         watch: false,
-        // Disable browser caching; backend controls freshness
-        cache: 'no-store',
-        // Stable key includes HTTP method so mutations don't reuse GET cache
         ...options,
         headers: {
             ...headers,
@@ -92,12 +89,6 @@ export function useApiFetch<T = unknown>(
                 }
             }
         },
-        async onRequest({ request, options: requestOptions }) {
-            // Get CSRF token for state-changing requests
-            const csrfToken = await getCSRFToken();
-            if (csrfToken && requestOptions.headers) {
-                (requestOptions.headers as unknown as Record<string, string>)['X-CSRF-TOKEN'] = csrfToken;
-            }
-        },
+
     });
 }
