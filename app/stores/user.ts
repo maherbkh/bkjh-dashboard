@@ -46,35 +46,17 @@ export const useUserStore = defineStore('user', () => {
 
     async function login(credentials: Credentials, path?: LocationQueryValue) {
         // Ensure CSRF token is available before login
-        console.log('🔐 Starting login process...');
-        
-        // First, fetch CSRF token if not available
-        const csrfToken = useCookie('XSRF-TOKEN-DASHBOARD').value;
-        if (!csrfToken) {
-            console.log('🔄 No CSRF token found, fetching...');
-            try {
-                await $fetch('/backend/auth/csrf-token', {
-                    credentials: 'include',
-                    headers: {
-                        'accept': 'application/json',
-                        'x-requested-with': 'XMLHttpRequest',
-                        'referer': import.meta.client ? window.location.origin : 'https://dashboard.backhaus.de',
-                        'origin': import.meta.client ? window.location.origin : 'https://dashboard.backhaus.de',
-                    },
-                });
-                console.log('✅ CSRF token fetched');
-            } catch (error) {
-                console.error('❌ Failed to fetch CSRF token:', error);
-            }
-        } else {
-            console.log('✅ CSRF token already available');
-        }
-        
+        console.log(`🔐 ${new Date().toISOString()} - Starting login process...`);
+    
         const { data, error } = await useApiFetch(`/auth/login`, {
             method: 'POST',
             body: credentials,
         });
+        
+        console.log(`📊 ${new Date().toISOString()} - Login response - data:`, data.value, 'error:', error.value);
+        
         if (data.value) {
+            console.log(`✅ ${new Date().toISOString()} - Login successful, processing response...`);
             const loginData = (data.value as any).data;
 
             setUser(loginData.admin);
@@ -92,9 +74,11 @@ export const useUserStore = defineStore('user', () => {
                 duration: 5000,
             });
 
+            console.log(`🚀 ${new Date().toISOString()} - Navigating to:`, path || '/');
             await navigateTo(path as string ? path : '/');
         }
         if (error.value) {
+            console.error('❌ Login failed:', error.value);
             // Handle different types of login errors
             const statusCode = error.value.statusCode || error.value.status;
             let description = error.value.data?.message || error.value.message;
@@ -128,19 +112,36 @@ export const useUserStore = defineStore('user', () => {
         }
     }
     const fetchAuthUser = async () => {
+        console.log(`🔍 ${new Date().toISOString()} - fetchAuthUser called - current token:`, accessToken.value ? 'EXISTS' : 'NONE');
         // Use the auth check endpoint to verify authentication and get updated user data
         const { data: res, error } = await useApiFetch(`/auth/check`, {
             lazy: true,
         });
+        
+        console.log(`🔍 ${new Date().toISOString()} - fetchAuthUser response - data:`, res.value ? 'EXISTS' : 'NONE', 'error:', error.value ? 'EXISTS' : 'NONE');
+        
         if (res.value) {
             const responseData = (res.value as any).data;
+            console.log(`✅ ${new Date().toISOString()} - fetchAuthUser: Updating user data`);
             // Update user data with fresh information from the server
             setUser(responseData.admin);
-            setAccessToken(responseData.admin.currentToken);
+            // Only update token if we don't have one
+            // Don't update token from server response to avoid overwriting valid tokens
+            if (!accessToken.value) {
+                console.log(`🔄 ${new Date().toISOString()} - fetchAuthUser: Setting token from server (no existing token)`);
+                console.log(`🔄 New token from server:`, responseData.admin.currentToken);
+                setAccessToken(responseData.admin.currentToken);
+            } else {
+                console.log(`⏭️ ${new Date().toISOString()} - fetchAuthUser: Keeping current token (avoiding server token overwrite)`);
+                console.log(`⏭️ Current token:`, accessToken.value);
+                console.log(`⏭️ Server token:`, responseData.admin.currentToken);
+                console.log(`⏭️ Tokens match:`, accessToken.value === responseData.admin.currentToken);
+            }
             await new Promise(resolve => setTimeout(resolve, 100));
             await resourcesStore.fetchAdminData();
         }
         if (error && error.value) {
+            console.error('❌ fetchAuthUser: Auth check failed, clearing user data', error.value);
             // Clear user data but don't call logout() to avoid unwanted redirects
             setUser();
             setAccessToken();
