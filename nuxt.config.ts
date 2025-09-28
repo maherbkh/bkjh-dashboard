@@ -51,6 +51,10 @@ export default defineNuxtConfig({
             apiUrl: process.env.NUXT_PUBLIC_API_URL || 'http://api.backhaus.test:3055',
         },
     },
+    routeRules: {
+        '/*/**': { ssr: false }, // everything under it
+
+    },
     build: {
         transpile: [
             'vee-validate',

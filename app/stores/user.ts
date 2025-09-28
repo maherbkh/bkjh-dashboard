@@ -45,6 +45,31 @@ export const useUserStore = defineStore('user', () => {
     };
 
     async function login(credentials: Credentials, path?: LocationQueryValue) {
+        // Ensure CSRF token is available before login
+        console.log('🔐 Starting login process...');
+        
+        // First, fetch CSRF token if not available
+        const csrfToken = useCookie('XSRF-TOKEN-DASHBOARD').value;
+        if (!csrfToken) {
+            console.log('🔄 No CSRF token found, fetching...');
+            try {
+                await $fetch('/backend/auth/csrf-token', {
+                    credentials: 'include',
+                    headers: {
+                        'accept': 'application/json',
+                        'x-requested-with': 'XMLHttpRequest',
+                        'referer': import.meta.client ? window.location.origin : 'https://dashboard.backhaus.de',
+                        'origin': import.meta.client ? window.location.origin : 'https://dashboard.backhaus.de',
+                    },
+                });
+                console.log('✅ CSRF token fetched');
+            } catch (error) {
+                console.error('❌ Failed to fetch CSRF token:', error);
+            }
+        } else {
+            console.log('✅ CSRF token already available');
+        }
+        
         const { data, error } = await useApiFetch(`/auth/login`, {
             method: 'POST',
             body: credentials,

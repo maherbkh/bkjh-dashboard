@@ -1,119 +1,111 @@
-import { useRequestHeaders, useFetch, useCookie } from 'nuxt/app';
-import { toast } from 'vue-sonner';
-import type { UseFetchOptions } from 'nuxt/app';
-import { useUserStore } from '~/stores/user';
-import { useGlobalErrorHandler } from '~/composables/useGlobalErrorHandler';
+// composables/useApiFetch.ts
+import { useFetch } from 'nuxt/app'
+import type { UseFetchOptions } from 'nuxt/app'
+import { useCookie } from 'nuxt/app'
+import { useUserStore } from '~/stores/user'
+import { useGlobalErrorHandler } from '~/composables/useGlobalErrorHandler'
 
-export async function useApiFetch<T = unknown>(
-    path: string,
-    options: UseFetchOptions<T> = {},
+export interface ApiResponse<T = any> {
+  data: T
+  message?: string
+  status?: number
+  errors?: Record<string, string[]>
+}
+
+export interface ApiFetchOptions<T = any> extends UseFetchOptions<ApiResponse<T>> {
+  skipAuth?: boolean
+  skipCSRF?: boolean
+}
+
+/**
+ * Custom wrapper around useFetch for your backend API.
+ * Returns the same shape as useFetch: { data, error, refresh, status, etc. }
+ */
+export function useApiFetch<T = any>(
+  path: string,
+  opts: ApiFetchOptions<T> = {}
 ) {
-    const config = useRuntimeConfig();
-    const { handleError } = useGlobalErrorHandler();
-    
-    // Helper function to get CSRF token for state-changing requests
-    const getCSRFToken = async () => {
-        const method = String(options.method || 'GET').toUpperCase();
+  const { handleError } = useGlobalErrorHandler()
+  const userStore = useUserStore()
 
-        // Only fetch CSRF token for state-changing requests
-        if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-            try {
-                // Use $fetch instead of useFetch to avoid caching issues
-                const csrfData = await $fetch(`/backend/auth/csrf-token`, {
-                    credentials: 'include',
-                    headers: {
-                        'accept': 'application/json',
-                        'x-requested-with': 'XMLHttpRequest',
-                        'referer': import.meta.client ? window.location.origin : 'https://dashboard.backhaus.de',
-                        'origin': import.meta.client ? window.location.origin : 'https://dashboard.backhaus.de',
-                    },
-                });
-                return (csrfData as any)?.data?.csrfToken;
-            }
-            catch (error) {
-                console.warn('Failed to fetch CSRF token:', error);
-                return null;
-            }
-        }
-        return null;
-    };
+  // Normalize method
+  const method = (opts.method ?? 'GET').toString().toUpperCase()
+  const skipAuth = opts.skipAuth ?? false
+  const skipCSRF = opts.skipCSRF ?? false
 
-    // Use Record<string, string> instead of `HeadersObject` (nuxt uses Fetch-compatible headers)
-    const headers: Record<string, string> = {
-        'accept': 'application/json',
-        'x-requested-with': 'XMLHttpRequest',
-        'referer': import.meta.client ? window.location.origin : 'https://dashboard.backhaus.de',
-        'origin': import.meta.client ? window.location.origin : 'https://dashboard.backhaus.de',
-    };
+  // We'll build headers (static or reactive)
+  const defaultHeaders: Record<string, string> = {
+    accept: 'application/json',
+    'x-requested-with': 'XMLHttpRequest',
+    // In CSR mode, referer/origin is window.origin
+    referer: window.location.origin,
+    origin: window.location.origin,
+  }
+  if (['POST', 'PUT', 'PATCH'].includes(method) && opts.body != null) {
+    defaultHeaders['Content-Type'] = 'application/json'
+  }
 
-    // Add a Content-Type header for requests with body
-    const method = String(options.method || 'GET').toUpperCase();
-    if (['POST', 'PUT', 'PATCH'].includes(method) && options.body) {
-        headers['content-type'] = 'application/json';
+  if (!skipAuth) {
+    const token = useCookie('BKJH_ACCESS_TOKEN').value
+    if (token) {
+      defaultHeaders['Authorization'] = `Bearer ${token}`
     }
+  }
 
-    // CSRF token will be added dynamically in onRequest
+  // Compose the final fetch options including interceptors/hooks
+  const fetchOpts: ApiFetchOptions<T> = {
+    ...opts,
+    method: method as any,
+    headers: {
+      ...defaultHeaders,
+      ...(opts.headers as Record<string, string>),
+    },
 
-    // Get auth token and add to headers if available
-    const accessToken = useCookie('BKJH_ACCESS_TOKEN');
-    if (accessToken.value) {
-        headers.Authorization = `Bearer ${accessToken.value}`;
-    }
-
-    // Fetch and add CSRF token for state-changing requests
-    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    // Use onRequest hook to inject CSRF token
+    async onRequest({ request, options }) {
+      if (!skipCSRF && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
         try {
-            const csrfToken = await getCSRFToken();
-            if (csrfToken) {
-                headers['X-Dashboard-CSRF-Token'] = csrfToken;
+          const resp = await $fetch<{ data: { csrfToken: string } }>(
+            '/backend/auth/csrf-token',
+            {
+              credentials: 'include',
+              headers: {
+                accept: 'application/json',
+                'x-requested-with': 'XMLHttpRequest',
+              },
             }
-        } catch (error) {
-            console.warn('Failed to fetch CSRF token for request:', error);
+          )
+          const csrf = resp?.data?.csrfToken
+          if (csrf) {
+            options.headers = options.headers || {}
+            ;(options.headers as unknown as Record<string, string>)['X-Dashboard-CSRF-Token'] = csrf
+          }
+        } catch (err) {
+          console.warn('[CSRF] fetch failed in onRequest:', err)
         }
-    }
+      }
+    },
 
-    // Append server-side headers
-    if (import.meta.server) {
-        Object.assign(headers, useRequestHeaders(['cookie']));
-    }
+    onResponseError({ response, options }) {
+      try {
+        handleError(response._data ?? response)
+      } catch (err) {
+        console.error('[API] handleError threw:', err)
+        if (response.status === 401) {
+          userStore.logout()
+        }
+      }
+    },
+  }
 
-    return useFetch('/backend' + path, {
-        credentials: 'include',
-        server: false,
-        watch: false,
-        cache: 'no-store', // Disable caching entirely as per Nuxt 4.x docs
-        immediate: true, // Explicitly set to true (default behavior)
-        dedupe: 'cancel', // Cancel duplicate requests (default behavior)
-        ...options,
-        headers: {
-            ...headers,
-            ...(options.headers as Record<string, string>),
-        },
-        onRequest({ request, options }) {
-            // CSRF token is already added in headers setup above
-            // This interceptor can be used for additional request modifications if needed
-        },
-        onRequestError({ request, options, error }) {
-            console.error('Request error:', error);
-        },
-        onResponse({ request, response, options }) {
-            // Process successful responses if needed
-        },
-        onResponseError({ request, response, options }) {
-            // Use global error handler for all error responses
-            if (import.meta.client) {
-                try {
-                    handleError(response._data || response);
-                }
-                catch (err) {
-                    console.error('Error in global error handler:', err);
-                    // Fallback error handling - redirect to login on 401
-                    if (response.status === 401) {
-                        const userStore = useUserStore();
-                        userStore.logout();
-                    }
-                }
-            }
-        },
-    });
+  // Use server: false (CSR-only), no caching, dedupe cancel, immediate by default
+  const result = useFetch<ApiResponse<T>>('/backend' + path, {
+    server: false,
+    cache: 'no-store',
+    dedupe: 'cancel',
+    immediate: opts.immediate ?? true,
+    ...fetchOpts,
+  })
+
+  return result
 }
