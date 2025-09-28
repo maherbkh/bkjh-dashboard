@@ -47,15 +47,11 @@ export function useApiFetch<T = any>(
 
   if (!skipAuth) {
     const token = useCookie('BKJH_ACCESS_TOKEN').value
-    console.log(`[AUTH] ${new Date().toISOString()} - ${method} request to ${path} - Token:`, token ? 'EXISTS' : 'NONE')
     if (token) {
       defaultHeaders['Authorization'] = `Bearer ${token}`
-      console.log(`[AUTH] ${new Date().toISOString()} - Authorization header set for ${method} ${path}`)
     } else {
       console.warn(`[AUTH] ${new Date().toISOString()} - No token found for ${method} ${path}`)
     }
-  } else {
-    console.log(`[AUTH] ${new Date().toISOString()} - Skipping auth for ${method} ${path}`)
   }
 
   // Compose the final fetch options including interceptors/hooks
@@ -63,30 +59,7 @@ export function useApiFetch<T = any>(
     ...defaultHeaders,
     ...(opts.headers as Record<string, string>),
   }
-  
-  console.log(`[AUTH] ${new Date().toISOString()} - Final headers for ${method} ${path}:`, {
-    Authorization: finalHeaders.Authorization ? 'SET' : 'NOT SET',
-    'X-Dashboard-CSRF-Token': finalHeaders['X-Dashboard-CSRF-Token'] ? 'SET' : 'NOT SET',
-    'Content-Type': finalHeaders['Content-Type'] || 'NOT SET'
-  })
-  
-  // Log the actual JWT token for debugging
-  if (finalHeaders.Authorization) {
-    const token = finalHeaders.Authorization.replace('Bearer ', '')
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]))
-      console.log(`[AUTH] ${new Date().toISOString()} - JWT payload for ${method} ${path}:`, {
-        exp: payload.exp,
-        iat: payload.iat,
-        expTime: new Date(payload.exp * 1000).toISOString(),
-        currentTime: new Date().toISOString(),
-        isExpired: payload.exp < Math.floor(Date.now() / 1000)
-      })
-    } catch (e) {
-      console.warn(`[AUTH] Could not decode JWT for ${method} ${path}`)
-    }
-  }
-  
+
   const fetchOpts: ApiFetchOptions<T> = {
     ...opts,
     method: method as any,
@@ -95,12 +68,8 @@ export function useApiFetch<T = any>(
     // Use onRequest hook to inject CSRF token
     async onRequest({ request, options }) {
       if (!skipCSRF && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-        console.log(`[CSRF] ${new Date().toISOString()} - Fetching CSRF token for ${method} request to ${request}`)
-
-        
         // Log existing CSRF token from cookies before fetching
         const existingCsrfToken = useCookie('XSRF-TOKEN-DASHBOARD').value
-        console.log(`[CSRF] ${new Date().toISOString()} - Existing token from cookie:`, existingCsrfToken || 'NONE')
         
         try {
           const resp = await $fetch<{ data: { csrfToken: string } }>(
@@ -114,27 +83,13 @@ export function useApiFetch<T = any>(
             }
           )
           const csrf = resp?.data?.csrfToken
-          console.log(`[CSRF] ${new Date().toISOString()} - Token received from endpoint:`, csrf || 'NONE')
-          console.log(`[CSRF] ${new Date().toISOString()} - Token comparison - Cookie vs Endpoint:`, {
-            cookie: existingCsrfToken || 'NONE',
-            endpoint: csrf || 'NONE',
-            match: existingCsrfToken === csrf
-          })
           
           if (csrf) {
             // Wait 100ms for the CSRF token to be set in browser cookies
             await new Promise(resolve => setTimeout(resolve, 100))
             
-            // Log the token that will be used in the request
-            console.log(`[CSRF] ${new Date().toISOString()} - Using token in request:`, csrf)
-            
             options.headers = options.headers || {}
             ;(options.headers as unknown as Record<string, string>)['X-Dashboard-CSRF-Token'] = csrf
-            console.log(`[CSRF] ${new Date().toISOString()} - Token added to headers - X-Dashboard-CSRF-Token:`, csrf)
-            
-            // Also log all cookies after the delay
-            const allCookies = document.cookie
-            console.log(`[CSRF] ${new Date().toISOString()} - All cookies after delay:`, allCookies)
           }
         } catch (err) {
           console.warn(`[CSRF] ${new Date().toISOString()} - fetch failed in onRequest:`, err)

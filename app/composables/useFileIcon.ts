@@ -65,8 +65,6 @@ export const useFileIcon = () => {
         const proxyUrl = getProxyUrl(attachment.urls.internal);
         const filename = attachment.filename || 'download';
 
-        console.log('Using proxy URL for download:', proxyUrl);
-        console.log('Downloading file with filename:', filename);
 
         if (attachment.mimeType?.startsWith('image/')) {
             // Open image in new tab for preview using proxy URL
@@ -87,7 +85,6 @@ export const useFileIcon = () => {
                 link.click();
                 document.body.removeChild(link);
 
-                console.log('Direct download initiated with proxy URL');
             }
             catch (error) {
                 console.error('Direct download failed:', error);
@@ -108,7 +105,6 @@ export const useFileIcon = () => {
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
 
-                    console.log('Downloading blob with filename:', filename);
 
                     const link = document.createElement('a');
                     link.href = url;
@@ -130,7 +126,6 @@ export const useFileIcon = () => {
                     console.error('Fetch download failed:', fetchError);
 
                     // Method 3: Final fallback - open in new tab
-                    console.log('Opening file in new tab as fallback');
                     window.open(proxyUrl, '_blank');
                 }
             }

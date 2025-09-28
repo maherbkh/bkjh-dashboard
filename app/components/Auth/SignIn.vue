@@ -47,7 +47,6 @@ const onSubmit = handleSubmit(async (values) => {
         password: values.password,
     };
 
-    console.log('Attempting login with validated credentials for:', credentials.email);
 
     try {
         if (redirectPath) {
@@ -75,7 +74,6 @@ const onSubmit = handleSubmit(async (values) => {
 
 // Helper function for enter key handling that also triggers validation
 const handleEnterKey = () => {
-    console.log('Enter key pressed, triggering form validation');
     onSubmit();
 };
 </script>

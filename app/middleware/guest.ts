@@ -9,7 +9,6 @@ import { useUserStore } from '~/stores/user';
  * - On login page, watch for authentication completion and redirect.
  */
 export default defineNuxtRouteMiddleware(async (to) => {
-    console.log('Guest middleware: Starting for', to.fullPath);
     const userStore = useUserStore();
 
     // 1) No token => definitely a guest
@@ -41,20 +40,17 @@ export default defineNuxtRouteMiddleware(async (to) => {
     // 3) If authenticated (token + user), bounce away
     if (userStore.accessToken && userStore.user) {
         const redirectTarget = (to.query?.redirect as string | undefined) || '/';
-        console.log('Guest middleware: Redirecting authenticated user to:', redirectTarget);
         return navigateTo(redirectTarget, { replace: true });
     }
 
     // 4) Watch for authentication changes during login process
     if (to.path === '/login' && userStore.accessToken && !userStore.user) {
-        console.log('Guest middleware: Setting up auth watcher for login page');
 
         // Watch for user data to be populated (login completion)
         const stopWatcher = watch(
             () => userStore.user,
             (newUser) => {
                 if (newUser && userStore.accessToken) {
-                    console.log('Guest middleware: User authenticated, redirecting...');
                     stopWatcher(); // Stop watching
                     const redirectTarget = (to.query?.redirect as string | undefined) || '/';
                     navigateTo(redirectTarget, { replace: true });

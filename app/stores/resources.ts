@@ -120,11 +120,8 @@ export const useResourcesStore = defineStore('resources', () => {
 
     // Fetch admin data from authenticated endpoint
     const fetchAdminData = async (forceRefresh = false): Promise<AdminData> => {
-        console.log('fetchAdminData called with forceRefresh:', forceRefresh);
-        console.log('isStale:', isStale.value, 'ticketCategories.length:', ticketCategories.value.length);
 
         if (!forceRefresh && !isStale.value && ticketCategories.value.length > 0) {
-            console.log('Returning cached data');
             return {
                 categories: {
                     ticketCategories: ticketCategories.value,
@@ -143,8 +140,6 @@ export const useResourcesStore = defineStore('resources', () => {
 
         const { data: response, error: fetchError } = await useApiFetch<AdminDataResponse>('/auth/admin-data');
 
-        console.log('API Response:', response.value);
-        console.log('API Error:', fetchError.value);
 
         if (fetchError.value) {
             error.value = `API Error: ${fetchError.value.statusCode} - ${fetchError.value.data?.message || fetchError.value.message}`;
@@ -153,7 +148,6 @@ export const useResourcesStore = defineStore('resources', () => {
         }
 
         if (response.value) {
-            console.log('response', response.value);
 
             // Check different possible response structures
             let adminData;
@@ -169,7 +163,6 @@ export const useResourcesStore = defineStore('resources', () => {
                 // Direct structure: { ... }
                 adminData = response.value;
             }
-            console.log('Parsed adminData:', adminData);
 
             // Check if adminData has the expected structure
             if (adminData && adminData.categories) {

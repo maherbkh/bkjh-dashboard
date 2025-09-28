@@ -39,7 +39,6 @@ onMounted(async () => {
 
 // Form submission
 const onSubmit = async (values: EventForm) => {
-    console.log('values', values);
     if (!editingEvent.value) return;
     isSubmitting.value = true;
     const { data, error } = await useApiFetch(`/academy/events/${editingEvent.value.id}`, {
@@ -48,7 +47,6 @@ const onSubmit = async (values: EventForm) => {
     });
 
     if (error.value) {
-        console.log('error', error.value);
         const errorMessage = error.value.data?.message || error.value.message || t('global.messages.something_went_wrong');
         toast.error(errorMessage);
         isSubmitting.value = false;
@@ -56,7 +54,6 @@ const onSubmit = async (values: EventForm) => {
     }
 
     if (data.value) {
-        console.log('success', data.value);
         toast.success(t('global.messages.success'));
         await navigateTo(`/events/${route.params.id as string}/show`, { replace: true });
     }

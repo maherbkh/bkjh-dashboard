@@ -24,7 +24,6 @@ const eventId = computed(() => route.params.id as string);
 // Event handlers
 const openAddDialog = () => {
     // Add attendee logic will go here
-    console.log('Add attendee to event:', eventId.value);
 };
 </script>
 

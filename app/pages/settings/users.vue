@@ -252,10 +252,8 @@ const handleDialogClose = () => {
 const { confirmDelete, confirmBulkDelete } = useConfirmDialog();
 
 async function handleDelete(userId: number) {
-    console.log('handleDelete called with userId:', userId);
     const confirmed = await confirmDelete();
     if (!confirmed) return;
-    console.log('handleDelete confirmed');
     try {
         await deleteItem(userId);
         await fetchItems(currentPage.value, perPage.value, {

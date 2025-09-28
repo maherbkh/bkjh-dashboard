@@ -100,7 +100,6 @@ const saveProfile = handleProfileSubmit(async (values) => {
 });
 
 const changePassword = handlePasswordSubmit(async (values) => {
-    console.log('Form submitted with values:', values);
     try {
         const { data } = await useApiFetch('/api/v1/auth/change-password', {
             method: 'POST',
@@ -115,7 +114,6 @@ const changePassword = handlePasswordSubmit(async (values) => {
         toast.error(t('action.message.update_failed', { model: t('form.password') }));
     }
 }, (errors) => {
-    console.log('Form validation errors:', errors);
 });
 
 const savePreferences = async () => {

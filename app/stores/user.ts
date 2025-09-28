@@ -46,17 +46,14 @@ export const useUserStore = defineStore('user', () => {
 
     async function login(credentials: Credentials, path?: LocationQueryValue) {
         // Ensure CSRF token is available before login
-        console.log(`🔐 ${new Date().toISOString()} - Starting login process...`);
     
         const { data, error } = await useApiFetch(`/auth/login`, {
             method: 'POST',
             body: credentials,
         });
         
-        console.log(`📊 ${new Date().toISOString()} - Login response - data:`, data.value, 'error:', error.value);
         
         if (data.value) {
-            console.log(`✅ ${new Date().toISOString()} - Login successful, processing response...`);
             const loginData = (data.value as any).data;
 
             setUser(loginData.admin);
@@ -74,7 +71,6 @@ export const useUserStore = defineStore('user', () => {
                 duration: 5000,
             });
 
-            console.log(`🚀 ${new Date().toISOString()} - Navigating to:`, path || '/');
             await navigateTo(path as string ? path : '/');
         }
         if (error.value) {
@@ -112,30 +108,20 @@ export const useUserStore = defineStore('user', () => {
         }
     }
     const fetchAuthUser = async () => {
-        console.log(`🔍 ${new Date().toISOString()} - fetchAuthUser called - current token:`, accessToken.value ? 'EXISTS' : 'NONE');
         // Use the auth check endpoint to verify authentication and get updated user data
         const { data: res, error } = await useApiFetch(`/auth/check`, {
             lazy: true,
         });
         
-        console.log(`🔍 ${new Date().toISOString()} - fetchAuthUser response - data:`, res.value ? 'EXISTS' : 'NONE', 'error:', error.value ? 'EXISTS' : 'NONE');
         
         if (res.value) {
             const responseData = (res.value as any).data;
-            console.log(`✅ ${new Date().toISOString()} - fetchAuthUser: Updating user data`);
             // Update user data with fresh information from the server
             setUser(responseData.admin);
             // Only update token if we don't have one
             // Don't update token from server response to avoid overwriting valid tokens
             if (!accessToken.value) {
-                console.log(`🔄 ${new Date().toISOString()} - fetchAuthUser: Setting token from server (no existing token)`);
-                console.log(`🔄 New token from server:`, responseData.admin.currentToken);
                 setAccessToken(responseData.admin.currentToken);
-            } else {
-                console.log(`⏭️ ${new Date().toISOString()} - fetchAuthUser: Keeping current token (avoiding server token overwrite)`);
-                console.log(`⏭️ Current token:`, accessToken.value);
-                console.log(`⏭️ Server token:`, responseData.admin.currentToken);
-                console.log(`⏭️ Tokens match:`, accessToken.value === responseData.admin.currentToken);
             }
             await new Promise(resolve => setTimeout(resolve, 100));
             await resourcesStore.fetchAdminData();

@@ -20,7 +20,6 @@ useSeoMeta({
 // Event handlers
 const openAddDialog = () => {
     // Add attendee logic will go here
-    console.log('Add new attendee');
 };
 </script>
 

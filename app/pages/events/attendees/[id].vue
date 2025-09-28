@@ -38,7 +38,7 @@ const attendeeId = computed(() => route.params.id as string);
 
             <Button
                 size="sm"
-                @click="console.log('Edit attendee:', attendeeId)"
+                @click="() => {}"
             >
                 <Icon name="solar:pen-outline" />
                 {{ $t('action.edit') }}
