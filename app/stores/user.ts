@@ -108,11 +108,11 @@ export const useUserStore = defineStore('user', () => {
         }
     }
     const fetchAuthUser = async () => {
-        console.log(`[FETCH AUTH USER] ${new Date().toISOString()} - Starting fetchAuthUser`);
+        console.log(`[FETCH AUTH USER] ${new Date().toISOString()} - Starting fetchAuthUser - calling /auth/check`);
         
         // Use the auth check endpoint to verify authentication and get updated user data
         const { data: res, error } = await useApiFetch(`/auth/check`, {
-            lazy: true,
+            // Remove lazy: true to ensure the request is executed immediately
         });
         
         console.log(`[FETCH AUTH USER] ${new Date().toISOString()} - Auth check response:`, { hasData: !!res.value, hasError: !!error.value });
