@@ -1,10 +1,14 @@
 <script setup lang="ts">
+import type { Admin, AdminForm, Occupation, TableHeaderItem, ServerParamsTypes } from '~/types';
+import { createAdminSchema } from '~/composables/adminSchema';
+import { useResourcesStore } from '~/stores/resources';
+
 const { t } = useI18n();
 
 // Page configuration
-const pageTitle = computed(() => t('user.plural'));
+const pageTitle = computed(() => t('admin.plural'));
 const pageIcon = usePageIcon();
-const pageDescription = computed(() => t('user.plural'));
+const pageDescription = computed(() => t('admin.plural'));
 definePageMeta({
     middleware: 'auth',
 });
@@ -18,7 +22,7 @@ useSeoMeta({
 
 // CRUD operations
 const {
-    items: users,
+    items: admins,
     loading: isLoading,
     pagination,
     fetchItems,
@@ -28,19 +32,20 @@ const {
     deleteManyItems,
     resetForm,
     setValues,
-} = useCrud<User, UserForm>({
-    apiSlug: 'user',
-    formSchema: createUserSchema(t),
+} = useCrud<Admin, AdminForm>({
+    crudPath: 'admins',
+    tenant: 'shared',
+    formSchema: createAdminSchema(t),
 });
 
-const selectedRows = ref<number[]>([]);
+const selectedRows = ref<string[]>([]);
 
 // Search and pagination state
 const searchQuery = ref('');
 const currentPage = ref(1);
 const perPage = ref(25);
-const sortBy = ref('name');
-const sortDir = ref<'asc' | 'desc'>('asc');
+const sortBy = ref('createdAt');
+const sortDir = ref<'asc' | 'desc'>('desc');
 
 const headerItems = computed(() => [
     {
@@ -55,8 +60,8 @@ const headerItems = computed(() => [
     },
     {
         as: 'th',
-        name: t('user.username'),
-        id: 'username',
+        name: t('occupation.singular'),
+        id: 'occupation',
     },
     {
         as: 'th',
@@ -65,8 +70,13 @@ const headerItems = computed(() => [
     },
     {
         as: 'th',
-        name: t('role.singular'),
+        name: t('admin.role'),
         id: 'isSuperAdmin',
+    },
+    {
+        as: 'th',
+        name: t('admin.apps'),
+        id: 'apps',
     },
     {
         as: 'th',
@@ -84,119 +94,51 @@ await fetchItems(currentPage.value, perPage.value, {
 // Dialog state management
 const isDialogOpen = ref(false);
 const dialogMode = ref<'add' | 'edit'>('add');
-const editingUser = ref<User | null>(null);
+const editingAdmin = ref<Admin | null>(null);
 const isSubmitting = ref(false);
 
-// Roles state
-const roles = ref<Array<{ id: number; name: string; position: number }>>([]);
-const isRolesLoading = ref(false);
+// Resources store for occupations
+const resourcesStore = useResourcesStore();
 
 const openAddDialog = async () => {
     dialogMode.value = 'add';
     resetForm();
-    editingUser.value = null;
-
-    // Fetch roles when opening dialog
-    if (roles.value.length === 0) {
-        isRolesLoading.value = true;
-        try {
-            const { data, status } = await useApiFetch<{
-                status: string;
-                message: string;
-                data: Array<{ id: number; name: string; position: number }>;
-            }>('/api/role-all');
-
-            // Only proceed if status is not pending
-            if (status.value !== 'pending') {
-                if (data.value?.data) {
-                    roles.value = data.value.data;
-                }
-                isDialogOpen.value = true;
-            }
-        }
-        catch (error) {
-            console.error('Failed to fetch roles:', error);
-        }
-        finally {
-            isRolesLoading.value = false;
-        }
-    }
-    else {
-        // If roles are already loaded, open dialog immediately
-        isDialogOpen.value = true;
-    }
+    editingAdmin.value = null;
+    isDialogOpen.value = true;
 };
 
-const handleEdit = async (user: User) => {
+const handleEdit = async (admin: Admin) => {
     dialogMode.value = 'edit';
-    editingUser.value = user;
+    editingAdmin.value = admin;
 
-    // Fetch roles when opening dialog if not already loaded
-    if (roles.value.length === 0) {
-        isRolesLoading.value = true;
-        try {
-            const { data, status } = await useApiFetch<{
-                status: string;
-                message: string;
-                data: Array<{ id: number; name: string; position: number }>;
-            }>('/api/role-all');
-
-            // Only proceed if status is not pending
-            if (status.value !== 'pending') {
-                if (data.value?.data) {
-                    roles.value = data.value.data;
-                }
-
-                setValues({
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    email: user.email,
-                    username: user.username,
-                    name: user.name || '',
-                    isActive: user.isActive || true,
-                    isSuperAdmin: user.isSuperAdmin || false,
-                });
-                isDialogOpen.value = true;
-            }
-        }
-        catch (error) {
-            console.error('Failed to fetch roles:', error);
-        }
-        finally {
-            isRolesLoading.value = false;
-        }
-    }
-    else {
-        // If roles are already loaded, set values and open dialog immediately
-        setValues({
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            username: user.username,
-            name: user.name || '',
-            isActive: user.isActive || true,
-            isSuperAdmin: user.isSuperAdmin || false,
-        });
-        isDialogOpen.value = true;
-    }
+    setValues({
+        firstName: admin.firstName,
+        lastName: admin.lastName,
+        email: admin.email,
+        occupationId: admin.occupationId || null,
+        isActive: admin.isActive || true,
+        isSuperAdmin: admin.isSuperAdmin || false,
+        apps: admin.apps || ['dashboard'],
+    });
+    isDialogOpen.value = true;
 };
 
-const onSubmitAndClose = async (values: UserForm) => {
+const onSubmitAndClose = async (values: AdminForm) => {
     isSubmitting.value = true;
     try {
-        if (editingUser.value) {
-            // Edit existing user
-            await updateItem(editingUser.value.id, values);
+        if (editingAdmin.value) {
+            // Edit existing admin
+            await updateItem(editingAdmin.value.id, values);
         }
         else {
-            // Add new user
+            // Add new admin
             await createItem(values);
         }
         selectedRows.value = [];
 
         // Close dialog on success
         isDialogOpen.value = false;
-        editingUser.value = null;
+        editingAdmin.value = null;
         resetForm();
     }
     catch (error) {
@@ -209,18 +151,18 @@ const onSubmitAndClose = async (values: UserForm) => {
     }
 };
 
-const onSubmitAndAddNew = async (values: UserForm) => {
+const onSubmitAndAddNew = async (values: AdminForm) => {
     isSubmitting.value = true;
     try {
-        if (editingUser.value) {
-            // Edit existing user
-            await updateItem(editingUser.value.id, values);
+        if (editingAdmin.value) {
+            // Edit existing admin
+            await updateItem(editingAdmin.value.id, values);
             // After the update, switch to add mode
-            editingUser.value = null;
+            editingAdmin.value = null;
             dialogMode.value = 'add';
         }
         else {
-            // Add new user
+            // Add new admin
             await createItem(values);
             // Force form reset by temporarily changing dialogMode to trigger the watcher
             dialogMode.value = 'edit';
@@ -245,17 +187,17 @@ const onSubmitAndAddNew = async (values: UserForm) => {
 const handleDialogClose = () => {
     isDialogOpen.value = false;
     resetForm();
-    editingUser.value = null;
+    editingAdmin.value = null;
 };
 
 // Delete handlers
 const { confirmDelete, confirmBulkDelete } = useConfirmDialog();
 
-async function handleDelete(userId: number) {
+async function handleDelete(adminId: string) {
     const confirmed = await confirmDelete();
     if (!confirmed) return;
     try {
-        await deleteItem(userId);
+        await deleteItem(adminId);
         await fetchItems(currentPage.value, perPage.value, {
             search: searchQuery.value,
             sort_by: sortBy.value,
@@ -263,7 +205,7 @@ async function handleDelete(userId: number) {
         });
     }
     catch (error) {
-        console.error('Error deleting user:', error);
+        console.error('Error deleting admin:', error);
     }
 }
 
@@ -283,7 +225,7 @@ async function handleBulkDelete() {
         });
     }
     catch (error) {
-        console.error('Error deleting users:', error);
+        console.error('Error deleting admins:', error);
     }
 }
 
@@ -291,8 +233,8 @@ async function handleBulkDelete() {
 const handleReset = async () => {
     searchQuery.value = '';
     currentPage.value = 1;
-    sortBy.value = 'name';
-    sortDir.value = 'asc';
+    sortBy.value = 'createdAt';
+    sortDir.value = 'desc';
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
         sort_by: sortBy.value,
@@ -335,19 +277,19 @@ async function handleSortChange(dir: 'asc' | 'desc', id: string) {
 
 // Row selection handlers
 const isAllSelected = computed(() => {
-    return users.value.length > 0 && selectedRows.value.length === users.value.length;
+    return admins.value.length > 0 && selectedRows.value.length === admins.value.length;
 });
 
 const handleSelectAll = (checked: boolean) => {
     if (checked) {
-        selectedRows.value = users.value.map(user => user.id);
+        selectedRows.value = admins.value.map(admin => admin.id);
     }
     else {
         selectedRows.value = [];
     }
 };
 
-const handleRowSelected = (id: number, checked: boolean) => {
+const handleRowSelected = (id: string, checked: boolean) => {
     if (checked) {
         selectedRows.value.push(id);
     }
@@ -389,16 +331,16 @@ const handleRowSelected = (id: number, checked: boolean) => {
         <div>
             <div>
                 <PageEmptyState
-                    v-if="users.length === 0"
+                    v-if="admins.length === 0"
                     :search-query="searchQuery"
-                    :add-new-text="$t('action.add') + ' ' + $t('common.new') + ' ' + $t('user.singular')"
+                    :add-new-text="$t('action.add') + ' ' + $t('common.new') + ' ' + $t('admin.singular')"
                 />
                 <template v-else>
                     <PageTable
                         :header-items="headerItems as TableHeaderItem[]"
-                        :rows="users.map(user => ({
-                            ...user,
-                            selected: selectedRows.includes(user.id),
+                        :rows="admins.map(admin => ({
+                            ...admin,
+                            selected: selectedRows.includes(admin.id),
                         }))"
                         :selected-rows="selectedRows"
                         :loading="isLoading"
@@ -413,15 +355,15 @@ const handleRowSelected = (id: number, checked: boolean) => {
                         } as ServerParamsTypes"
                         :model-value="isAllSelected"
                         @toggle-sort="handleSortChange"
-                        @row-selected="(id, checked) => handleRowSelected(Number(id), checked)"
-                        @update:selected-rows="(rows) => selectedRows = rows.map(Number)"
+                        @row-selected="(id, checked) => handleRowSelected(String(id), checked)"
+                        @update:selected-rows="(rows) => selectedRows = rows.map(String)"
                         @update:model-value="handleSelectAll"
                     >
                         <template #cell-name="{ row }">
                             <div class="font-medium flex items-center gap-2">
-                                <div>{{ row.name || `${row.firstName} ${row.lastName}` }}</div>
+                                <div>{{ `${row.firstName} ${row.lastName}` }}</div>
                                 <Icon
-                                    v-if="row.meta?.isOnline"
+                                    v-if="row.lastLoginAt"
                                     name="solar:user-circle-outline"
                                     class="!size-4 rounded-full shrink-0 text-success"
                                 />
@@ -434,9 +376,9 @@ const handleRowSelected = (id: number, checked: boolean) => {
                             </div>
                         </template>
 
-                        <template #cell-username="{ row }">
+                        <template #cell-occupation="{ row }">
                             <div class="text-sm">
-                                {{ row.username }}
+                                {{ row.occupation?.name || '-' }}
                             </div>
                         </template>
 
@@ -454,8 +396,21 @@ const handleRowSelected = (id: number, checked: boolean) => {
                                 :variant="row.isSuperAdmin ? 'secondary' : 'outline'"
                                 class="text-xs"
                             >
-                                {{ row.isSuperAdmin ? $t('user.super_admin') : $t('role.singular') }}
+                                {{ row.isSuperAdmin ? $t('admin.super_admin') : $t('admin.admin') }}
                             </Badge>
+                        </template>
+
+                        <template #cell-apps="{ row }">
+                            <div class="flex gap-1 flex-wrap">
+                                <Badge
+                                    v-for="app in row.apps"
+                                    :key="app"
+                                    variant="outline"
+                                    class="text-xs"
+                                >
+                                    {{ app }}
+                                </Badge>
+                            </div>
                         </template>
 
                         <template #cell-createdAt="{ row }">
@@ -506,12 +461,12 @@ const handleRowSelected = (id: number, checked: boolean) => {
             </div>
         </div>
 
-        <LazyUserFormDialog
+        <LazyAdminFormDialog
             v-model:is-dialog-open="isDialogOpen"
             v-model:dialog-mode="dialogMode"
-            v-model:editing-user="editingUser"
+            v-model:editing-admin="editingAdmin"
             :is-submitting="isSubmitting"
-            :roles="roles"
+            :occupations="resourcesStore.occupations"
             @submit-and-close="onSubmitAndClose"
             @submit-and-add-new="onSubmitAndAddNew"
             @close-dialog="handleDialogClose"

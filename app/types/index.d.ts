@@ -22,8 +22,35 @@ export type User = {
     apps: string[]; // Available apps: 'support', 'academy', etc.
     name?: string;
     avatar?: string;
-    lastLoginAt?: string; // From login response
-    occupation?: string | null; // From login response
+};
+
+// Admin type for CRUD operations (extends User with additional fields)
+export type Admin = {
+    id: string; // UUID from API
+    firstName: string;
+    lastName: string;
+    email: string;
+    isSuperAdmin: boolean;
+    isActive: boolean;
+    occupationId?: string | null;
+    apps: string[]; // Available apps: 'dashboard', 'support', 'academy', etc.
+    createdAt: string;
+    updatedAt: string;
+    lastLoginAt?: string | null;
+    name?: string; // Computed field: firstName + lastName
+    occupation?: Occupation | null; // Populated occupation object
+};
+
+// Admin form type for create/update operations
+export type AdminForm = {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password?: string; // Required for create, optional for update
+    isSuperAdmin: boolean;
+    isActive: boolean;
+    occupationId?: string | null;
+    apps: string[];
 };
 
 export type LoginData = {

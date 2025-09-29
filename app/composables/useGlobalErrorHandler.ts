@@ -52,12 +52,6 @@ export const useGlobalErrorHandler = (t?: (key: string) => string) => {
         }
     };
 
-    const handleCsrfError = (error: any) => {
-        toast.error(t ? t('global.messages.error') : 'Error', {
-            description: error?.message || 'CSRF token is invalid. Please refresh the page.',
-            duration: 5000,
-        });
-    };
 
     const handleError = (error: any) => {
         if (!error || typeof error !== 'object') {
@@ -81,11 +75,6 @@ export const useGlobalErrorHandler = (t?: (key: string) => string) => {
             return;
         }
 
-        // Handle CSRF token errors
-        if (errorCode === 'CSRF_TOKEN_INVALID') {
-            handleCsrfError(error);
-            return;
-        }
 
         // Handle validation errors (400 with validation details)
         if (status === 400 && (errorCode === 'VALIDATION_ERROR' || error?.data?.details?.validationErrors)) {
@@ -107,7 +96,6 @@ export const useGlobalErrorHandler = (t?: (key: string) => string) => {
         handleUnauthorized,
         handleForbidden,
         handleValidationError,
-        handleCsrfError,
         handleError,
     };
 };

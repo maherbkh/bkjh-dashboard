@@ -45,8 +45,6 @@ export const useUserStore = defineStore('user', () => {
     };
 
     async function login(credentials: Credentials, path?: LocationQueryValue) {
-        // Ensure CSRF token is available before login
-    
         const { data, error } = await useApiFetch(`/auth/login`, {
             method: 'POST',
             body: credentials,

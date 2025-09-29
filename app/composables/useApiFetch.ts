@@ -14,7 +14,6 @@ export interface ApiResponse<T = any> {
 
 export interface ApiFetchOptions<T = any> extends UseFetchOptions<ApiResponse<T>> {
   skipAuth?: boolean
-  skipCSRF?: boolean
 }
 
 /**
@@ -31,15 +30,17 @@ export function useApiFetch<T = any>(
   // Normalize method
   const method = (opts.method ?? 'GET').toString().toUpperCase()
   const skipAuth = opts.skipAuth ?? false
-  const skipCSRF = opts.skipCSRF ?? false
+
+  // Get runtime config for appUrl
+  const runtimeConfig = useRuntimeConfig()
+  const originUrl = runtimeConfig.public.appUrl || window.location.origin
 
   // We'll build headers (static or reactive)
   const defaultHeaders: Record<string, string> = {
     accept: 'application/json',
     'x-requested-with': 'XMLHttpRequest',
-    // In CSR mode, referer/origin is window.origin
-    referer: window.location.origin,
-    origin: window.location.origin,
+    referer: originUrl,
+    origin: originUrl,
   }
   if (['POST', 'PUT', 'PATCH'].includes(method) && opts.body != null) {
     defaultHeaders['Content-Type'] = 'application/json'
@@ -65,37 +66,6 @@ export function useApiFetch<T = any>(
     method: method as any,
     headers: finalHeaders,
 
-    // Use onRequest hook to inject CSRF token
-    async onRequest({ request, options }) {
-      if (!skipCSRF && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-        // Log existing CSRF token from cookies before fetching
-        const existingCsrfToken = useCookie('XSRF-TOKEN-DASHBOARD').value
-        
-        try {
-          const resp = await $fetch<{ data: { csrfToken: string } }>(
-            '/backend/auth/csrf-token',
-            {
-              credentials: 'include',
-              headers: {
-                accept: 'application/json',
-                'x-requested-with': 'XMLHttpRequest',
-              },
-            }
-          )
-          const csrf = resp?.data?.csrfToken
-          
-          if (csrf) {
-            // Wait 100ms for the CSRF token to be set in browser cookies
-            await new Promise(resolve => setTimeout(resolve, 100))
-            
-            options.headers = options.headers || {}
-            ;(options.headers as unknown as Record<string, string>)['X-Dashboard-CSRF-Token'] = csrf
-          }
-        } catch (err) {
-          console.warn(`[CSRF] ${new Date().toISOString()} - fetch failed in onRequest:`, err)
-        }
-      }
-    },
 
     onResponseError({ response, options }) {
       try {

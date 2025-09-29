@@ -49,6 +49,7 @@ export default defineNuxtConfig({
     runtimeConfig: {
         public: {
             apiUrl: process.env.NUXT_PUBLIC_API_URL || 'http://api.backhaus.test:3055',
+            appUrl: process.env.NUXT_PUBLIC_APP_URL || 'http://dashboard.backhaus.test:3022',
         },
     },
     routeRules: {

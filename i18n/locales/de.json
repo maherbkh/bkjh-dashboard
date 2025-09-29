@@ -63,7 +63,8 @@
     "positive": "muss eine positive Zahl sein",
     "slug_format": "darf nur Kleinbuchstaben, Zahlen und Bindestriche enthalten",
     "code_format": "darf nur Großbuchstaben, Zahlen und Unterstriche enthalten",
-    "uuid": "muss eine gültige UUID sein"
+    "uuid": "muss eine gültige UUID sein",
+    "password_strength": "muss mindestens einen Kleinbuchstaben, einen Großbuchstaben und eine Zahl enthalten"
   },
   "auth": {
     "login_form": "Anmeldeformular",
@@ -265,7 +266,21 @@
   "admin": {
     "singular": "Administrator",
     "plural": "Administratoren",
-    "description": "Systemadministrator mit vollständigem Zugriff auf alle Funktionen"
+    "description": "Systemadministrator mit vollständigem Zugriff auf alle Funktionen",
+    "first_name": "Vorname",
+    "first_name_placeholder": "Vorname eingeben",
+    "last_name": "Nachname",
+    "last_name_placeholder": "Nachname eingeben",
+    "role": "Rolle",
+    "admin": "Administrator",
+    "super_admin": "Super-Administrator",
+    "not_super_admin": "Regulärer Administrator",
+    "is_super_admin": "Super-Administrator",
+    "apps": "Anwendungen",
+    "apps_placeholder": "Anwendungen auswählen",
+    "password_change_placeholder": "Leer lassen, um aktuelles Passwort zu behalten",
+    "add_description": "Neuen Administrator zum System hinzufügen",
+    "edit_description": "Administrator-Informationen und Berechtigungen bearbeiten"
   },
   "event_category": {
     "singular": "Veranstaltungskategorie",

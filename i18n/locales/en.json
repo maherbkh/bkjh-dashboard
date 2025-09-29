@@ -64,7 +64,8 @@
     "positive": "must be a positive number",
     "slug_format": "must contain only lowercase letters, numbers, and hyphens",
     "code_format": "must contain only uppercase letters, numbers, and underscores",
-    "uuid": "must be a valid UUID"
+    "uuid": "must be a valid UUID",
+    "password_strength": "must contain at least one lowercase letter, one uppercase letter, and one number"
   },
   "auth": {
     "login_form": "Login Form",
@@ -265,7 +266,21 @@
   "admin": {
     "singular": "Admin",
     "plural": "Admins",
-    "description": "System administrator with full access to all features"
+    "description": "System administrator with full access to all features",
+    "first_name": "First Name",
+    "first_name_placeholder": "Enter first name",
+    "last_name": "Last Name",
+    "last_name_placeholder": "Enter last name",
+    "role": "Role",
+    "admin": "Admin",
+    "super_admin": "Super Admin",
+    "not_super_admin": "Regular Admin",
+    "is_super_admin": "Super Admin",
+    "apps": "Applications",
+    "apps_placeholder": "Select applications",
+    "password_change_placeholder": "Leave empty to keep current password",
+    "add_description": "Add a new admin to the system",
+    "edit_description": "Edit admin information and permissions"
   },
   "event_category": {
     "singular": "Event Category",

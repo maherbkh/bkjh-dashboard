@@ -126,8 +126,8 @@ export const useNavigationData = (): ComputedRef<{
                     apps: ['support'],
                     items: [
                         {
-                            title: t('user.plural'),
-                            url: '/settings/users',
+                            title: t('admin.plural'),
+                            url: '/settings/admins',
                             icon: 'solar:users-group-rounded-outline',
                             apps: ['support'],
                         },
