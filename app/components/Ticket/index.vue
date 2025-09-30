@@ -76,7 +76,7 @@
                         :attachments="ticket.attachments || []"
                     />
 
-                    <!-- Comment List -->
+                    <!-- Comments Section -->
                     <Card>
                         <CardHeader>
                             <CardTitle>
@@ -84,12 +84,25 @@
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <CommentList :ticket-id="ticket.id" />
+                            <TicketComments
+                                :ticket-id="ticket.id"
+                                :comments="ticket.comments || []"
+                                :refresh="refresh"
+                            />
                         </CardContent>
                     </Card>
 
                     <!-- Action History Component -->
-                    <TicketActionHistory :actions="ticket.actions || []" />
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>
+                                {{ $t("action.history") }}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <TicketActionHistory :actions="ticket.actions || []" />
+                        </CardContent>
+                    </Card>
                 </div>
 
                 <!-- Sidebar -->

@@ -37,7 +37,7 @@
             
             <template #cell-targetUser="{ row }">
                 <div
-                    v-if="row.target"
+                    v-if="row.target && isAssignmentAction(row.actionType)"
                     class="text-sm"
                 >
                     <div>{{ row.target.firstName }} {{ row.target.lastName }}</div>
@@ -92,6 +92,14 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const { formatDate } = useGermanDateFormat();
+
+// Action types that require a target admin
+const ASSIGNMENT_ACTION_TYPES = ['ASSIGN', 'REASSIGN', 'UNASSIGN', 'TEMPORARY_ASSIGN', 'TRANSFER'];
+
+// Helper function to check if an action type requires a target
+const isAssignmentAction = (actionType: string) => {
+    return ASSIGNMENT_ACTION_TYPES.includes(actionType.toUpperCase());
+};
 
 // Action history table configuration
 const actionHistoryHeaders = computed(() => [

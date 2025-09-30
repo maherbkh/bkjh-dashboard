@@ -142,6 +142,7 @@
     "created_at": "Erstellt am",
     "updated_at": "Aktualisiert am",
     "deleted_at": "Gelöscht am",
+    "edited": "bearbeitet",
     "more": "Mehr",
     "to": "bis",
     "no_action_history": "Keine Aktionshistorie",
@@ -182,6 +183,7 @@
     "all": "Alle",
     "singular": "Aktion",
     "plural": "Aktionen",
+    "history": "Aktionshistorie",
     "view": "Anzeigen",
     "edit": "Bearbeiten",
     "delete": "Löschen",
@@ -494,7 +496,25 @@
   },
   "comment": {
     "singular": "Kommentar",
-    "plural": "Kommentare"
+    "plural": "Kommentare",
+    "add": "Kommentar hinzufügen",
+    "edit": "Kommentar bearbeiten",
+    "delete": "Kommentar löschen",
+    "internal": "Interner Kommentar",
+    "internal_label": "Intern",
+    "external_label": "Extern",
+    "public": "Öffentlicher Kommentar",
+    "placeholder": "Kommentar schreiben...",
+    "no_comments": "Noch keine Kommentare. Seien Sie der Erste!",
+    "confirm_delete": "Möchten Sie diesen Kommentar wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "message": {
+      "comment_added_successfully": "Kommentar erfolgreich hinzugefügt",
+      "comment_add_failed": "Kommentar konnte nicht hinzugefügt werden",
+      "comment_updated_successfully": "Kommentar erfolgreich aktualisiert",
+      "comment_update_failed": "Kommentar konnte nicht aktualisiert werden",
+      "comment_deleted_successfully": "Kommentar erfolgreich gelöscht",
+      "comment_delete_failed": "Kommentar konnte nicht gelöscht werden"
+    }
   },
   "type": {
     "singular": "Typ",

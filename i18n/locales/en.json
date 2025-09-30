@@ -143,6 +143,7 @@
     "created_at": "Created At",
     "updated_at": "Updated At",
     "deleted_at": "Deleted At",
+    "edited": "edited",
     "more": "More",
     "to": "to",
     "no_action_history": "No action history",
@@ -183,6 +184,7 @@
     "all": "All",
     "singular": "Action",
     "plural": "Actions",
+    "history": "Action History",
     "view": "View",
     "edit": "Edit",
     "delete": "Delete",
@@ -497,7 +499,25 @@
   },
   "comment": {
     "singular": "Comment",
-    "plural": "Comments"
+    "plural": "Comments",
+    "add": "Add Comment",
+    "edit": "Edit Comment",
+    "delete": "Delete Comment",
+    "internal": "Internal Comment",
+    "internal_label": "Internal",
+    "external_label": "External",
+    "public": "Public Comment",
+    "placeholder": "Write a comment...",
+    "no_comments": "No comments yet. Be the first to add one!",
+    "confirm_delete": "Are you sure you want to delete this comment? This action cannot be undone.",
+    "message": {
+      "comment_added_successfully": "Comment added successfully",
+      "comment_add_failed": "Failed to add comment",
+      "comment_updated_successfully": "Comment updated successfully",
+      "comment_update_failed": "Failed to update comment",
+      "comment_deleted_successfully": "Comment deleted successfully",
+      "comment_delete_failed": "Failed to delete comment"
+    }
   },
   "type": {
     "singular": "Type",

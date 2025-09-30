@@ -192,6 +192,7 @@ export type SupportTicket = {
     statuses: TicketStatus[];
     actions?: TicketAction[];
     attachments?: TicketAttachment[];
+    comments?: TicketComment[];
 };
 
 export type TicketStatus = {
@@ -274,6 +275,22 @@ export type TicketAttachment = {
         internal: string;
     };
     createdAt: string;
+};
+
+export type TicketComment = {
+    id: string;
+    ticketId: string;
+    adminId: string;
+    content: string;
+    isInternal: boolean;
+    createdAt: string;
+    updatedAt: string;
+    admin: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+    };
 };
 
 // Component types
