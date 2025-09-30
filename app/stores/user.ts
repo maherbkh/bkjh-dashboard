@@ -55,6 +55,8 @@ export const useUserStore = defineStore('user', () => {
 
             setUser(loginData.admin);
             setAccessToken(loginData.accessToken);
+            console.log('loginData.accessToken after submit', loginData.accessToken);
+            console.log('loginData.admin after submit', loginData.admin);
 
             // Wait for cookie to be set before fetching admin data
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -69,6 +71,8 @@ export const useUserStore = defineStore('user', () => {
             });
 
             await navigateTo(path as string ? path : '/');
+            console.log('loginData.accessToken after navigateTo', loginData.accessToken);
+            console.log('loginData.admin after navigateTo', loginData.admin);
         }
         if (error.value) {
             console.error('❌ Login failed:', error.value);
@@ -95,28 +99,19 @@ export const useUserStore = defineStore('user', () => {
                     description = description || t('auth.login_failed');
                 }
             }
-
             toast.error(t('global.messages.error'), {
                 description,
                 duration: 5000,
             });
-
-            // Don't log out on login failure - the user is not authenticated yet
         }
     }
     const fetchAuthUser = async () => {
-        console.log(`[FETCH AUTH USER] ${new Date().toISOString()} - Starting fetchAuthUser - calling /auth/check`);
-
         // Use the auth check endpoint to verify authentication and get updated user data
         const { data: res, error } = await useApiFetch(`/auth/check`, {
             // Remove lazy: true to ensure the request is executed immediately
         });
-
-        console.log(`[FETCH AUTH USER] ${new Date().toISOString()} - Auth check response:`, { hasData: !!res.value, hasError: !!error.value });
-
         if (res.value) {
             const responseData = (res.value as any).data;
-            console.log(`[FETCH AUTH USER] ${new Date().toISOString()} - Auth check successful, updating user data`);
             // Update user data with fresh information from the server
             setUser(responseData.admin);
             // Only update token if we don't have one
