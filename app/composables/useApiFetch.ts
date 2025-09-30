@@ -1,7 +1,6 @@
 // composables/useApiFetch.ts
-import { useFetch } from 'nuxt/app';
+import { useFetch, useCookie } from 'nuxt/app';
 import type { UseFetchOptions } from 'nuxt/app';
-import { useCookie } from 'nuxt/app';
 import { useUserStore } from '~/stores/user';
 import { useGlobalErrorHandler } from '~/composables/useGlobalErrorHandler';
 
