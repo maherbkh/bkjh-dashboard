@@ -1,6 +1,6 @@
 // composables/useApiFetch.ts
-import { useFetch, useCookie } from 'nuxt/app';
 import type { UseFetchOptions } from 'nuxt/app';
+import { useCookie, useFetch } from 'nuxt/app';
 import { useUserStore } from '~/stores/user';
 import { useGlobalErrorHandler } from '~/composables/useGlobalErrorHandler';
 
@@ -80,7 +80,7 @@ export function useApiFetch<T = any>(
     };
 
     // Use server: false (CSR-only), no caching, dedupe cancel, immediate by default
-    const result = useFetch<ApiResponse<T>>('/backend' + path, {
+    return useFetch<ApiResponse<T>>('/backend' + path, {
         server: false,
         cache: 'no-store',
         dedupe: 'cancel',
@@ -91,6 +91,4 @@ export function useApiFetch<T = any>(
             : `/backend${path}`),
         ...fetchOpts,
     });
-
-    return result;
 }

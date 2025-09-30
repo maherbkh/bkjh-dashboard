@@ -78,7 +78,8 @@ const formatRoutePath = (path: string) => {
 };
 
 const formattedPath = computed(() => {
-    // Depend on opened events version to recalc when event title arrives
+    // Depend on an opened events version to recalc when the event title arrives
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     openedEventsVersion.value;
     return formatRoutePath(route.fullPath);
 });
