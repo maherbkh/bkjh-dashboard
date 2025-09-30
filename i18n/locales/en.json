@@ -174,7 +174,8 @@
     "completion_rate": "Completion Rate",
     "featured": "Featured",
     "app_not_found": "App Not Found",
-    "please_select_app": "Please select an app from the switcher"
+    "please_select_app": "Please select an app from the switcher",
+    "showing": "Showing"
   },
   "note": {
     "singular": "Note",

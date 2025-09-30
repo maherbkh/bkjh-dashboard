@@ -22,7 +22,6 @@
                         :title="$t('comment.placeholder')"
                         v-model="newCommentContent"
                         :placeholder="$t('comment.placeholder')"
-                        rows="3"
                         class="w-full"
                     />
                     <div class="flex items-center justify-between">

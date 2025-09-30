@@ -10,8 +10,10 @@ const props = withDefaults(defineProps<{
     selectable?: boolean;
     selectedRows: (string | number)[];
     sortable?: boolean;
+    hasActionsSlot?: boolean;
 }>(), {
     sortable: true,
+    hasActionsSlot: true,
 });
 const emit = defineEmits<{
     (e: 'toggleSort', dir: SortDirection, id: string): void;
@@ -44,6 +46,7 @@ const toggleAllRows = (checked: boolean) => {
                 :dir="params ? params.sortDir : 'asc'"
                 :selectable="selectable"
                 :sortable="sortable"
+                :has-actions-slot="hasActionsSlot"
                 :model-value="allRowsSelected"
                 @toggle-sort="(dir, id) => emit('toggleSort', dir, id)"
                 @update:model-value="toggleAllRows"
@@ -55,6 +58,7 @@ const toggleAllRows = (checked: boolean) => {
                 :skeleton-rows="skeletonRows"
                 :selectable="selectable"
                 :selected-rows="selectedRows"
+                :has-actions-slot="hasActionsSlot"
                 @row-selected="(id, checked) => emit('rowSelected', id, checked)"
             >
                 <!-- Forward all slots from parent to PageTableBody -->

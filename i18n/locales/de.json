@@ -173,7 +173,8 @@
     "completion_rate": "Abschlussrate",
     "featured": "Empfohlen",
     "app_not_found": "App nicht gefunden",
-    "please_select_app": "Bitte wählen Sie eine App aus dem Switcher"
+    "please_select_app": "Bitte wählen Sie eine App aus dem Switcher",
+    "showing": "Zeige"
   },
   "note": {
     "singular": "Notiz",

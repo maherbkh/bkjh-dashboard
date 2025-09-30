@@ -16,6 +16,7 @@
             :loading="false"
             :selectable="false"
             :sortable="false"
+            :has-actions-slot="false"
         >
             <template #cell-actionType="{ row }">
                 <Badge variant="secondary">

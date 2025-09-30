@@ -19,7 +19,10 @@
                 :sortable="sortable"
                 @toggle-sort="(dir, id) => emit('toggleSort', dir, id)"
             />
-            <th class="text-right">
+            <th
+                v-if="hasActionsSlot"
+                class="text-right"
+            >
                 Action
             </th>
         </tr>
@@ -29,14 +32,17 @@
 <script setup lang="ts">
 import type { TableHeaderItem, SortDirection } from '~/types';
 
-defineProps<{
+withDefaults(defineProps<{
     items: TableHeaderItem[];
     activeDirColumn: string;
     dir: SortDirection;
     selectable?: boolean;
     modelValue?: boolean;
     sortable?: boolean;
-}>();
+    hasActionsSlot?: boolean;
+}>(), {
+    hasActionsSlot: true,
+});
 const emit = defineEmits<{
     (e: 'toggleSort', dir: SortDirection, id: string): void;
     (e: 'update:modelValue', value: boolean): void;

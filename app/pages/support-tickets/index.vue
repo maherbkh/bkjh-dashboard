@@ -3,11 +3,10 @@ import type {
     SupportTicket,
     TicketStatus,
     TableHeaderItem,
-    ServerParamsTypes,
 } from '~/types';
 
 const { t } = useI18n();
-
+const { formatDate } = useGermanDateFormat();
 // Page configuration
 const pageTitle = computed(() => t('ticket.plural'));
 const pageIcon = usePageIcon();
@@ -449,7 +448,7 @@ const getStatusVariant = (status: string) => {
                         </template>
 
                         <template #cell-createdAt="{ row }">
-                            {{ useGermanDateFormat().formatDate(row.createdAt) }}
+                            {{ formatDate(row.createdAt) }}
                         </template>
 
                         <template #cell-actions="{ row }">

@@ -4,14 +4,17 @@ import { useSlots } from 'vue';
 
 import type { TableHeaderItem } from '~/types';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     rows: any[]; // Use any[] for flexibility
     columns: TableHeaderItem[]; // Need columns to generate dynamic slots
     loading?: boolean;
     skeletonRows?: number; // Number of skeleton rows to show when loading
     selectable?: boolean;
     selectedRows: (string | number)[];
-}>();
+    hasActionsSlot?: boolean;
+}>(), {
+    hasActionsSlot: true,
+});
 
 const slots = useSlots();
 
@@ -98,7 +101,7 @@ function getValueByPath(obj: any, path: string): any {
                     </slot>
                 </td>
 
-                <td class="text-right">
+                <td v-if="hasActionsSlot" class="text-right">
                     <slot
                         name="cell-actions"
                         :row="row"
