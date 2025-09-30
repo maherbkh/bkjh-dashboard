@@ -1,86 +1,127 @@
 import { toast } from 'vue-sonner';
+import type { TicketActionType } from '~/types';
+import { useUserStore } from '~/stores/user';
 
 export const useTicketActions = () => {
     const { t } = useI18n();
     const route = useRoute();
+    const userStore = useUserStore();
     const isActionLoading = ref(false);
 
-    // Self assign function
-    const assignSelf = async (ticketUuid: string, refresh: () => Promise<void>) => {
+    /**
+     * Core function: Add action to ticket using the unified API endpoint
+     * All ticket actions now use POST /support/tickets/:ticketId/add-action
+     * 
+     * @param ticketId - Ticket UUID
+     * @param targetId - Admin UUID (target of action)
+     * @param actionType - Type of action from TicketActionType enum
+     * @param note - Optional note describing the action
+     * @param refresh - Optional refresh function to call after success
+     * @returns Promise that resolves when action is added
+     */
+    const addAction = async (
+        ticketId: string,
+        targetId: string,
+        actionType: TicketActionType,
+        note?: string,
+        refresh?: () => Promise<void>,
+    ) => {
         isActionLoading.value = true;
         try {
-            await useApiFetch(`/api/ticket/${ticketUuid}/self-assign`, {
-                method: 'POST',
-            });
-
-            await refresh();
-            toast.success(t('action.message.assigned_successfully', { model: t('ticket.singular') }));
-            // Refresh the page data
-            await navigateTo(route.fullPath, { replace: true });
-        }
-        catch (error) {
-            console.error('Error assigning ticket:', error);
-            toast.error('Failed to assign ticket');
-        }
-        finally {
-            isActionLoading.value = false;
-        }
-    };
-
-    // Transfer function
-    const transferTicket = async (ticketUuid: string, userId: number, refresh: () => Promise<void>) => {
-        isActionLoading.value = true;
-        try {
-            await useApiFetch(`/api/ticket/${ticketUuid}/transfer`, {
-                method: 'POST',
-                body: { user_id: userId },
-            });
-
-            toast.success(t('action.message.transferred_successfully', { model: t('ticket.singular') }));
-            // Refresh the page data
-            await navigateTo(route.fullPath, { replace: true });
-        }
-        catch (error) {
-            console.error('Error transferring ticket:', error);
-            toast.error('Failed to transfer ticket');
-        }
-        finally {
-            isActionLoading.value = false;
-        }
-    };
-
-    // Add action function
-    const addTicketAction = async (ticketUuid: string, actionType: string, note?: string, refresh?: () => Promise<void>) => {
-        isActionLoading.value = true;
-        try {
-            await useApiFetch(`/api/ticket/${ticketUuid}/action`, {
+            const response = await useApiFetch<{
+                success: boolean;
+                message: string;
+                data: any;
+            }>(`/support/tickets/${ticketId}/add-action`, {
                 method: 'POST',
                 body: {
-                    action_type: actionType,
-                    note: note || '',
+                    targetId,
+                    actionType,
+                    note,
                 },
             });
 
-            toast.success(t(`action.message.${actionType}_successfully`, { model: t('ticket.singular') }));
+            // Show success message from API or fallback to generic message
+            if (response.data?.value?.message) {
+                toast.success(response.data.value.message);
+            }
+            else {
+                toast.success(t('action.message.action_added_successfully'));
+            }
+
+            // Refresh the ticket data
             if (refresh) {
                 await refresh();
             }
-            // Refresh the page data
+
+            // Reload the current page to show updated data
             await navigateTo(route.fullPath, { replace: true });
         }
-        catch (error) {
+        catch (error: any) {
             console.error('Error adding action:', error);
-            toast.error('Failed to add action');
+            
+            // Show error message from API or fallback to generic message
+            const errorMessage = error?.data?.message || error?.message || t('action.message.action_add_failed');
+            toast.error(errorMessage);
+            
+            throw error; // Re-throw so calling component can handle it
         }
         finally {
             isActionLoading.value = false;
         }
     };
+
+    /**
+     * Self-assign ticket to current user
+     * Uses the new unified add-action API with ASSIGN action type
+     */
+    const assignSelf = async (ticketId: string, refresh: () => Promise<void>) => {
+        const currentUserId = userStore.user?.id;
+        if (!currentUserId) {
+            toast.error('User not found');
+            return;
+        }
+        await addAction(ticketId, currentUserId, 'ASSIGN', 'Self-assigned ticket', refresh);
+    };
+
+    /**
+     * Transfer ticket to another user
+     * Uses the new unified add-action API with TRANSFER action type
+     */
+    const transferTicket = async (ticketId: string, targetUserId: string, refresh: () => Promise<void>) => {
+        await addAction(ticketId, targetUserId, 'TRANSFER', undefined, refresh);
+    };
+
+    /**
+     * Add a ticket action (legacy compatibility wrapper)
+     * Uses the new unified add-action API
+     */
+    const addTicketAction = async (
+        ticketId: string, 
+        actionType: string, 
+        note?: string, 
+        refresh?: () => Promise<void>
+    ) => {
+        const currentUserId = userStore.user?.id;
+        if (!currentUserId) {
+            toast.error('User not found');
+            return;
+        }
+        await addAction(ticketId, currentUserId, actionType as TicketActionType, note, refresh);
+    };
+
+    /**
+     * Add manual action (alias for the core addAction function)
+     * Kept for backward compatibility
+     */
+    const addManualAction = addAction;
 
     return {
         isActionLoading: readonly(isActionLoading),
         assignSelf,
         transferTicket,
         addTicketAction,
+        addManualAction,
+        addAction, // Export core function
     };
 };

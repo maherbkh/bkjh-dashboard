@@ -385,7 +385,7 @@ const getStatusVariant = (status: string) => {
                             <div class="font-medium">
                                 <NuxtLink
                                     :to="`/support-tickets/${row.id}`"
-                                    class="text-primary hover:underline"
+                                    class="hover:text-primary hover:underline"
                                 >
                                     {{ row.ticketNumber }}
                                 </NuxtLink>

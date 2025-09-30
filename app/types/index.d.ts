@@ -202,13 +202,49 @@ export type TicketStatus = {
     updatedAt: string;
 };
 
+export type TicketActionType =
+    | 'ASSIGN'
+    | 'REASSIGN'
+    | 'UNASSIGN'
+    | 'TEMPORARY_ASSIGN'
+    | 'TRANSFER'
+    | 'UPGRADE_HARDWARE'
+    | 'DOWNGRADE_HARDWARE'
+    | 'REPAIR_HARDWARE'
+    | 'UPGRADE_SOFTWARE'
+    | 'DOWNGRADE_SOFTWARE'
+    | 'REPAIR_SOFTWARE'
+    | 'INSTALL_SOFTWARE'
+    | 'UNINSTALL_SOFTWARE'
+    | 'UPDATE_LICENSE'
+    | 'RECONFIGURE'
+    | 'CHANGE_NETWORK'
+    | 'ADD_PERIPHERALS'
+    | 'REMOVE_PERIPHERALS'
+    | 'CLEAN'
+    | 'AUDIT'
+    | 'BACKUP'
+    | 'RESTORE'
+    | 'DECOMMISSION'
+    | 'REACTIVATE'
+    | 'MARK_OFF_DUTY'
+    | 'RETURN_TO_INVENTORY'
+    | 'TROUBLESHOOT'
+    | 'RESET_PASSWORD'
+    | 'REPLACE'
+    | 'LOAN'
+    | 'RETRIEVE'
+    | 'TAG'
+    | 'CREATE'
+    | 'STATUS_CHANGE';
+
 export type TicketAction = {
     id: string;
     ticketId: string;
     issuerId: string;
     targetId: string;
     note: string;
-    actionType: 'CREATE' | 'ASSIGN' | 'UPDATE' | 'RESOLVE' | 'CLOSE' | 'REOPEN';
+    actionType: TicketActionType;
     createdAt: string;
     updatedAt: string;
     issuer: {

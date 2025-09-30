@@ -107,7 +107,7 @@
                     </div>
                 </div>
                 <div class="flex lg:flex-row flex-col items-center gap-5">
-                    <Button
+                    <!-- <Button
                         class="lg:w-fit w-full"
                         variant="outline"
                         size="sm"
@@ -118,7 +118,7 @@
                             class="mr-2 h-4 w-4"
                         />
                         {{ $t("action.edit") }}
-                    </Button>
+                    </Button> -->
                     <Button
                         v-if="ticket.type === 'TICKET'"
                         class="lg:w-fit w-full"
@@ -144,7 +144,7 @@
                             <Button
                                 class="group lg:w-fit w-full"
                                 :title="$t('common.more')"
-                                variant="outline"
+                                variant="default"
                                 :disabled="isActionLoading"
                             >
                                 <Icon
@@ -162,74 +162,123 @@
                             align="end"
                             class="w-56"
                         >
+                            <!-- Assignment Actions -->
+                            <DropdownMenuLabel>{{ $t("action.groups.assignment") }}</DropdownMenuLabel>
                             <DropdownMenuItem @click="handleTransferSelect">
                                 <Icon
-                                    name="solar:user-plus-broken"
+                                    name="solar:transfer-horizontal-outline"
                                     class="shrink-0 mr-2"
                                 />
-                                Transfer
+                                {{ $t("action.types.TRANSFER") }}
                             </DropdownMenuItem>
+                            
                             <DropdownMenuSeparator />
-                            <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
-                            <DropdownMenuItem @click="handleActionSelect('status_change')">
-                                <Icon
-                                    name="solar:refresh-circle-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                Change Status
-                            </DropdownMenuItem>
-                            <DropdownMenuItem @click="handleActionSelect('troubleshoot')">
-                                <Icon
-                                    name="solar:settings-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                Troubleshoot
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuLabel>Hardware Actions</DropdownMenuLabel>
-                            <DropdownMenuItem @click="handleActionSelect('repair_hardware')">
-                                <Icon
-                                    name="solar:hammer-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                Repair Hardware
-                            </DropdownMenuItem>
-                            <DropdownMenuItem @click="handleActionSelect('replace')">
-                                <Icon
-                                    name="solar:refresh-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                Replace
-                            </DropdownMenuItem>
-                            <DropdownMenuItem @click="handleActionSelect('clean')">
-                                <Icon
-                                    name="solar:broom-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                Clean
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuLabel>Software Actions</DropdownMenuLabel>
-                            <DropdownMenuItem @click="handleActionSelect('install_software')">
-                                <Icon
-                                    name="solar:download-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                Install Software
-                            </DropdownMenuItem>
-                            <DropdownMenuItem @click="handleActionSelect('upgrade_software')">
+                            
+                            <!-- Hardware Actions -->
+                            <DropdownMenuLabel>{{ $t("action.groups.hardware") }}</DropdownMenuLabel>
+                            <DropdownMenuItem @click="handleActionSelect('UPGRADE_HARDWARE')">
                                 <Icon
                                     name="solar:arrow-up-outline"
                                     class="shrink-0 mr-2"
                                 />
-                                Upgrade Software
+                                {{ $t("action.types.UPGRADE_HARDWARE") }}
                             </DropdownMenuItem>
-                            <DropdownMenuItem @click="handleActionSelect('backup')">
+                            <DropdownMenuItem @click="handleActionSelect('REPAIR_HARDWARE')">
+                                <Icon
+                                    name="solar:sledgehammer-line-duotone"
+                                    class="shrink-0 mr-2"
+                                />
+                                {{ $t("action.types.REPAIR_HARDWARE") }}
+                            </DropdownMenuItem>
+                            
+                            <DropdownMenuSeparator />
+                            
+                            <!-- Software Actions -->
+                            <DropdownMenuLabel>{{ $t("action.groups.software") }}</DropdownMenuLabel>
+                            <DropdownMenuItem @click="handleActionSelect('UPGRADE_SOFTWARE')">
+                                <Icon
+                                    name="solar:arrow-up-outline"
+                                    class="shrink-0 mr-2"
+                                />
+                                {{ $t("action.types.UPGRADE_SOFTWARE") }}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem @click="handleActionSelect('REPAIR_SOFTWARE')">
+                                <Icon
+                                    name="solar:widget-outline"
+                                    class="shrink-0 mr-2"
+                                />
+                                {{ $t("action.types.REPAIR_SOFTWARE") }}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem @click="handleActionSelect('INSTALL_SOFTWARE')">
+                                <Icon
+                                    name="solar:download-outline"
+                                    class="shrink-0 mr-2"
+                                />
+                                {{ $t("action.types.INSTALL_SOFTWARE") }}
+                            </DropdownMenuItem>
+                            
+                            <DropdownMenuSeparator />
+                            
+                            <!-- Maintenance Actions -->
+                            <DropdownMenuLabel>{{ $t("action.groups.maintenance") }}</DropdownMenuLabel>
+                            <DropdownMenuItem @click="handleActionSelect('CLEAN')">
+                                <Icon
+                                    name="solar:broom-outline"
+                                    class="shrink-0 mr-2"
+                                />
+                                {{ $t("action.types.CLEAN") }}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem @click="handleActionSelect('BACKUP')">
                                 <Icon
                                     name="solar:cloud-upload-outline"
                                     class="shrink-0 mr-2"
                                 />
-                                Backup
+                                {{ $t("action.types.BACKUP") }}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem @click="handleActionSelect('RESTORE')">
+                                <Icon
+                                    name="solar:cloud-download-outline"
+                                    class="shrink-0 mr-2"
+                                />
+                                {{ $t("action.types.RESTORE") }}
+                            </DropdownMenuItem>
+                            
+                            <DropdownMenuSeparator />
+                            
+                            <!-- Status Actions -->
+                            <DropdownMenuLabel>{{ $t("action.groups.status") }}</DropdownMenuLabel>
+                            <DropdownMenuItem @click="handleActionSelect('MARK_OFF_DUTY')">
+                                <Icon
+                                    name="solar:pause-circle-outline"
+                                    class="shrink-0 mr-2"
+                                />
+                                {{ $t("action.types.MARK_OFF_DUTY") }}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem @click="handleActionSelect('RETURN_TO_INVENTORY')">
+                                <Icon
+                                    name="solar:box-outline"
+                                    class="shrink-0 mr-2"
+                                />
+                                {{ $t("action.types.RETURN_TO_INVENTORY") }}
+                            </DropdownMenuItem>
+                            
+                            <DropdownMenuSeparator />
+                            
+                            <!-- Support Actions -->
+                            <DropdownMenuLabel>{{ $t("action.groups.support") }}</DropdownMenuLabel>
+                            <DropdownMenuItem @click="handleActionSelect('TROUBLESHOOT')">
+                                <Icon
+                                    name="solar:bug-outline"
+                                    class="shrink-0 mr-2"
+                                />
+                                {{ $t("action.types.TROUBLESHOOT") }}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem @click="handleActionSelect('RESET_PASSWORD')">
+                                <Icon
+                                    name="solar:lock-password-outline"
+                                    class="shrink-0 mr-2"
+                                />
+                                {{ $t("action.types.RESET_PASSWORD") }}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -448,17 +497,29 @@
                         {{ $t("action.transfer_description", { model: $t("ticket.singular") }) }}
                     </DialogDescription>
                 </DialogHeader>
-                <div class="space-y-4">
-                    <div class="space-y-2">
-                        <Label for="transfer-user">{{ $t("user.singular") }}</Label>
-                        <Input
-                            id="transfer-user"
-                            v-model.number="transferUserId"
-                            type="number"
-                            :placeholder="$t('user.singular')"
-                            min="1"
+                <div class="space-y-4 py-4">
+                    <FormItemSelect
+                        id="transfer-admin"
+                        v-model="transferUserId"
+                        :title="$t('admin.singular')"
+                        :placeholder="$t('admin.select')"
+                        :data="transferAdmins"
+                        key-value="id"
+                        name-value="name"
+                        :empty-text="$t('admin.no_admins_available')"
+                        :disabled="loadingTransferAdmins"
+                        required
+                    />
+                    <p
+                        v-if="loadingTransferAdmins"
+                        class="text-xs text-muted-foreground flex items-center gap-1"
+                    >
+                        <Icon
+                            name="solar:refresh-linear"
+                            class="!size-3 animate-spin"
                         />
-                    </div>
+                        {{ $t("admin.loading") }}
+                    </p>
                 </div>
                 <DialogFooter>
                     <Button
@@ -482,7 +543,7 @@
             </DialogContent>
         </Dialog>
 
-        <!-- Action Dialog -->
+        <!-- Action Dialog (Legacy) -->
         <Dialog v-model:open="isActionDialogOpen">
             <DialogContent class="sm:max-w-md">
                 <DialogHeader>
@@ -525,6 +586,7 @@
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+
     </div>
 </template>
 
@@ -537,6 +599,7 @@ import type {
     TicketAction,
     TicketStatus,
     TicketAttachment,
+    Admin,
 } from '~/types';
 
 const props = defineProps<{
@@ -673,89 +736,28 @@ const getStatusVariant = (status: string) => {
     }
 };
 
-// API Functions
-const isActionLoading = ref(false);
+// Use ticket actions composable for all ticket actions
+const { 
+    isActionLoading, 
+    assignSelf: assignSelfComposable, 
+    transferTicket: transferTicketComposable, 
+    addTicketAction: addTicketActionComposable,
+} = useTicketActions();
 
-// Self assign function
+// Wrapper functions to adapt the composable to component needs
 const assignSelf = async () => {
     if (!ticket.value) return;
-
-    isActionLoading.value = true;
-    try {
-        await useApiFetch(
-            `/support/tickets/${ticket.value.id}/self-assign`,
-            {
-                method: 'POST',
-            },
-        );
-
-        await refresh();
-        toast.success(
-            t('action.message.assigned_successfully', { model: t('ticket.singular') }),
-        );
-        // Refresh the page data
-        await navigateTo(route.fullPath, { replace: true });
-    }
-    catch (error) {
-        console.error('Error assigning ticket:', error);
-        toast.error('Failed to assign ticket');
-    }
-    finally {
-        isActionLoading.value = false;
-    }
+    await assignSelfComposable(ticket.value.id, refresh);
 };
 
-// Transfer function
-const transferTicket = async (userId: number) => {
+const transferTicket = async (userId: string) => {
     if (!ticket.value) return;
-
-    isActionLoading.value = true;
-    try {
-        await useApiFetch(`/support/tickets/${ticket.value.id}/transfer`, {
-            method: 'POST',
-            body: { user_id: userId },
-        });
-
-        toast.success(
-            t('action.message.transferred_successfully', { model: t('ticket.singular') }),
-        );
-        // Refresh the page data
-        await navigateTo(route.fullPath, { replace: true });
-    }
-    catch (error) {
-        console.error('Error transferring ticket:', error);
-        toast.error('Failed to transfer ticket');
-    }
-    finally {
-        isActionLoading.value = false;
-    }
+    await transferTicketComposable(ticket.value.id, userId, refresh);
 };
 
-// Add action function
 const addTicketAction = async (actionType: string, note?: string) => {
     if (!ticket.value) return;
-
-    isActionLoading.value = true;
-    try {
-        await useApiFetch(`/support/tickets/${ticket.value.id}/action`, {
-            method: 'POST',
-            body: {
-                action_type: actionType,
-                note: note || '',
-            },
-        });
-
-        toast.success(t(`action.message.${actionType}_added`));
-        // Refresh the page data
-        await navigateTo(route.fullPath, { replace: true });
-    }
-    catch (error) {
-        console.error('Error adding action:', error);
-        toast.error('Failed to add action');
-    }
-    finally {
-        isActionLoading.value = false;
-    }
+    await addTicketActionComposable(ticket.value.id, actionType, note, refresh);
 };
 
 // Dialog states for actions
@@ -763,7 +765,24 @@ const isTransferDialogOpen = ref(false);
 const isActionDialogOpen = ref(false);
 const selectedActionType = ref('');
 const actionNote = ref('');
-const transferUserId = ref<number | undefined>(undefined);
+const transferUserId = ref<string | undefined>(undefined);
+
+// Fetch admins for transfer dialog (exclude current user, only when dialog opens)
+const { 
+    admins: transferAdmins, 
+    loadingAdmins: loadingTransferAdmins, 
+    refreshAdmins: refreshTransferAdmins 
+} = useAdminsList({
+    showSelf: false,
+    immediate: false,
+});
+
+// Fetch admins when transfer dialog opens
+watch(() => isTransferDialogOpen.value, (isOpen) => {
+    if (isOpen && transferAdmins.value.length === 0) {
+        refreshTransferAdmins();
+    }
+});
 
 // Available action types
 const actionTypes = [
@@ -831,6 +850,7 @@ const submitTransfer = async () => {
     await refresh();
     isTransferDialogOpen.value = false;
 };
+
 
 // Action history table configuration
 const actionHistoryHeaders = computed(() => [
