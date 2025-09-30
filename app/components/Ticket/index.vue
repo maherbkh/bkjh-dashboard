@@ -57,233 +57,14 @@
             v-else-if="ticket"
             class="space-y-6"
         >
-            <!-- Header -->
-            <div class="flex lg:flex-row flex-col gap-5 lg:items-center justify-between">
-                <div class="flex items-start gap-4">
-                    <Icon
-                        :name="pageIcon || 'solar:ticket-outline'"
-                        class="!size-5 shrink-0 opacity-75 mt-1"
-                    />
-                    <div>
-                        <div class="text-lg font-bold flex items-center gap-4">
-                            {{ ticket.ticketNumber }}
-                            <Badge
-                                :variant="
-                                    getStatusVariant(getLatestStatus(ticket.statuses)?.status || 'PENDING')
-                                "
-                            >
-                                {{
-                                    $t(
-                                        `common.${getLatestStatus(
-                                            ticket.statuses,
-                                        )?.status?.toLowerCase()}`,
-                                    )
-                                }}
-                            </Badge>
-                        </div>
-                        <div class="mt-1 text-muted-foreground flex items-center gap-2">
-                            <div class="text-sm">
-                                {{ ticket.requester.name }}
-                            </div>
-                            <template v-if="ticket.group">
-                                <Icon
-                                    name="solar:arrow-right-line-duotone"
-                                    class="!size-5 shrink-0 opacity-75"
-                                />
-                                <Badge variant="outline">
-                                    {{ ticket.group?.name }}
-                                </Badge>
-                            </template>
-                            <template v-else>
-                                <Icon
-                                    name="solar:arrow-right-line-duotone"
-                                    class="!size-5 shrink-0 opacity-75"
-                                />
-                                <Badge variant="outline">
-                                    no group
-                                </Badge>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex lg:flex-row flex-col items-center gap-5">
-                    <!-- <Button
-                        class="lg:w-fit w-full"
-                        variant="outline"
-                        size="sm"
-                        @click="handleEdit"
-                    >
-                        <Icon
-                            name="solar:pen-new-square-outline"
-                            class="mr-2 h-4 w-4"
-                        />
-                        {{ $t("action.edit") }}
-                    </Button> -->
-                    <Button
-                        v-if="ticket.type === 'TICKET'"
-                        class="lg:w-fit w-full"
-                        variant="default"
-                        size="sm"
-                        :disabled="isActionLoading"
-                        @click="assignSelf"
-                    >
-                        <Icon
-                            v-if="isActionLoading"
-                            name="solar:refresh-linear"
-                            class="mr-2 h-4 w-4 animate-spin"
-                        />
-                        <Icon
-                            v-else
-                            name="solar:add-circle-outline"
-                            class="mr-2 h-4 w-4"
-                        />
-                        {{ $t("action.self_assign") }}
-                    </Button>
-                    <DropdownMenu v-else>
-                        <DropdownMenuTrigger class="lg:w-fit w-full">
-                            <Button
-                                class="group lg:w-fit w-full"
-                                :title="$t('common.more')"
-                                variant="default"
-                                :disabled="isActionLoading"
-                            >
-                                <Icon
-                                    name="solar:folder-path-connect-line-duotone"
-                                    class="shrink-0"
-                                />
-                                Actions
-                                <Icon
-                                    name="solar:double-alt-arrow-down-line-duotone"
-                                    class="ml-2 h-4 w-4 group-hover:rotate-90 ease-in-out duration-300"
-                                />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                            align="end"
-                            class="w-56"
-                        >
-                            <!-- Assignment Actions -->
-                            <DropdownMenuLabel>{{ $t("action.groups.assignment") }}</DropdownMenuLabel>
-                            <DropdownMenuItem @click="handleTransferSelect">
-                                <Icon
-                                    name="solar:transfer-horizontal-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                {{ $t("action.types.TRANSFER") }}
-                            </DropdownMenuItem>
-                            
-                            <DropdownMenuSeparator />
-                            
-                            <!-- Hardware Actions -->
-                            <DropdownMenuLabel>{{ $t("action.groups.hardware") }}</DropdownMenuLabel>
-                            <DropdownMenuItem @click="handleActionSelect('UPGRADE_HARDWARE')">
-                                <Icon
-                                    name="solar:arrow-up-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                {{ $t("action.types.UPGRADE_HARDWARE") }}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem @click="handleActionSelect('REPAIR_HARDWARE')">
-                                <Icon
-                                    name="solar:sledgehammer-line-duotone"
-                                    class="shrink-0 mr-2"
-                                />
-                                {{ $t("action.types.REPAIR_HARDWARE") }}
-                            </DropdownMenuItem>
-                            
-                            <DropdownMenuSeparator />
-                            
-                            <!-- Software Actions -->
-                            <DropdownMenuLabel>{{ $t("action.groups.software") }}</DropdownMenuLabel>
-                            <DropdownMenuItem @click="handleActionSelect('UPGRADE_SOFTWARE')">
-                                <Icon
-                                    name="solar:arrow-up-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                {{ $t("action.types.UPGRADE_SOFTWARE") }}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem @click="handleActionSelect('REPAIR_SOFTWARE')">
-                                <Icon
-                                    name="solar:widget-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                {{ $t("action.types.REPAIR_SOFTWARE") }}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem @click="handleActionSelect('INSTALL_SOFTWARE')">
-                                <Icon
-                                    name="solar:download-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                {{ $t("action.types.INSTALL_SOFTWARE") }}
-                            </DropdownMenuItem>
-                            
-                            <DropdownMenuSeparator />
-                            
-                            <!-- Maintenance Actions -->
-                            <DropdownMenuLabel>{{ $t("action.groups.maintenance") }}</DropdownMenuLabel>
-                            <DropdownMenuItem @click="handleActionSelect('CLEAN')">
-                                <Icon
-                                    name="solar:broom-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                {{ $t("action.types.CLEAN") }}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem @click="handleActionSelect('BACKUP')">
-                                <Icon
-                                    name="solar:cloud-upload-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                {{ $t("action.types.BACKUP") }}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem @click="handleActionSelect('RESTORE')">
-                                <Icon
-                                    name="solar:cloud-download-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                {{ $t("action.types.RESTORE") }}
-                            </DropdownMenuItem>
-                            
-                            <DropdownMenuSeparator />
-                            
-                            <!-- Status Actions -->
-                            <DropdownMenuLabel>{{ $t("action.groups.status") }}</DropdownMenuLabel>
-                            <DropdownMenuItem @click="handleActionSelect('MARK_OFF_DUTY')">
-                                <Icon
-                                    name="solar:pause-circle-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                {{ $t("action.types.MARK_OFF_DUTY") }}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem @click="handleActionSelect('RETURN_TO_INVENTORY')">
-                                <Icon
-                                    name="solar:box-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                {{ $t("action.types.RETURN_TO_INVENTORY") }}
-                            </DropdownMenuItem>
-                            
-                            <DropdownMenuSeparator />
-                            
-                            <!-- Support Actions -->
-                            <DropdownMenuLabel>{{ $t("action.groups.support") }}</DropdownMenuLabel>
-                            <DropdownMenuItem @click="handleActionSelect('TROUBLESHOOT')">
-                                <Icon
-                                    name="solar:bug-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                {{ $t("action.types.TROUBLESHOOT") }}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem @click="handleActionSelect('RESET_PASSWORD')">
-                                <Icon
-                                    name="solar:lock-password-outline"
-                                    class="shrink-0 mr-2"
-                                />
-                                {{ $t("action.types.RESET_PASSWORD") }}
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            </div>
+            <!-- Header Component -->
+            <TicketHeader
+                :ticket="ticket"
+                :is-action-loading="isActionLoading"
+                @assign-self="assignSelf"
+                @action-select="handleActionSelect"
+                @transfer-select="handleTransferSelect"
+            />
 
             <!-- Ticket Details Grid -->
             <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
@@ -306,174 +87,21 @@
                             <CommentList :ticket-id="ticket.id" />
                         </CardContent>
                     </Card>
-                    <div v-if="ticket.actions && ticket.actions.length > 0">
-                        <PageTable
-                            :header-items="actionHistoryHeaders"
-                            :rows="sortedActionsHistory"
-                            :selected-rows="[]"
-                            :loading="false"
-                            :selectable="false"
-                            :sortable="false"
-                        >
-                            <template #cell-actionType="{ row }">
-                                <Badge variant="secondary">
-                                    {{ $t(`action.${row.actionType}`) }}
-                                </Badge>
-                            </template>
 
-                            <template #cell-user="{ row }">
-                                <div
-                                    v-if="row.issuer"
-                                    class="font-medium"
-                                >
-                                    <div>{{ row.issuer.firstName }} {{ row.issuer.lastName }}</div>
-                                </div>
-                                <div v-else>
-                                    —
-                                </div>
-                            </template>
-                            <template #cell-targetUser="{ row }">
-                                <div
-                                    v-if="row.target"
-                                    class="text-sm"
-                                >
-                                    <div>{{ row.target.firstName }} {{ row.target.lastName }}</div>
-                                </div>
-                                <div v-else>
-                                    —
-                                </div>
-                            </template>
-
-                            <template #cell-note="{ row }">
-                                <div
-                                    v-if="row.note"
-                                    class="text-sm text-muted-foreground"
-                                >
-                                    <HoverCard v-if="row.note">
-                                        <HoverCardTrigger
-                                            class="line-clamp-2 max-w-64 cursor-pointer hover:text-primary ease-in-out duration-300"
-                                        >
-                                            {{ row.note }}
-                                        </HoverCardTrigger>
-                                        <HoverCardContent side="right">
-                                            {{ row.note }}
-                                        </HoverCardContent>
-                                    </HoverCard>
-                                </div>
-                                <div v-else>
-                                    —
-                                </div>
-                            </template>
-
-                            <template #cell-createdAt="{ row }">
-                                <span class="text-sm text-muted-foreground">
-                                    {{ formatGermanDate(row.createdAt) }}
-                                </span>
-                            </template>
-                        </PageTable>
-                    </div>
-                    <div
-                        v-else
-                        class="text-center py-4 text-muted-foreground"
-                    >
-                        {{ $t("common.no_action_history") }}
-                    </div>
+                    <!-- Action History Component -->
+                    <TicketActionHistory :actions="ticket.actions || []" />
                 </div>
 
                 <!-- Sidebar -->
                 <div class="xl:col-span-4 space-y-6">
-                    <!-- Ticket Information -->
-                    <Card>
-                        <CardHeader>
-                            <CardTitle class="flex items-center gap-2">
-                                <Icon
-                                    name="solar:info-circle-outline"
-                                    class="!size-5 opacity-75 shrink-0"
-                                />
-                                {{ $t("common.information") }}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent class="flex flex-col divide-y divide-dashed">
-                            <AppListItem
-                                :title="$t('type.singular')"
-                                :value="ticket.type"
-                            />
-                            <AppListItem
-                                :title="$t('common.created_at')"
-                                :value="formatGermanDate(ticket.createdAt)"
-                            />
-                            <AppListItem
-                                :title="$t('common.updated_at')"
-                                :value="formatGermanDate(ticket.updatedAt)"
-                            />
-                        </CardContent>
-                    </Card>
+                    <!-- Ticket Information Card Component -->
+                    <TicketInfoCard :ticket="ticket" />
 
-                    <!-- Contact Information -->
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>
-                                <Icon
-                                    name="solar:user-outline"
-                                    class="!size-5 opacity-75 shrink-0"
-                                />
-                                {{ $t("form.contact_information") }}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent class="flex flex-col divide-y divide-dashed">
-                            <AppListItem
-                                :title="$t('requester.singular')"
-                                :value="ticket.requester.name"
-                            />
-                            <AppListItem
-                                :title="$t('form.email')"
-                                :value="ticket.requester.email"
-                            />
-                            <AppListItem
-                                :title="$t('form.phone')"
-                                :value="ticket.requester.phone"
-                            />
-                            <AppListItem
-                                :title="$t('form.cell')"
-                                :value="ticket.requester.cell"
-                            />
-                            <AppListItem
-                                :title="$t('form.device_id')"
-                                :value="ticket.deviceId"
-                            />
-                        </CardContent>
-                    </Card>
+                    <!-- Contact Information Card Component -->
+                    <TicketContactCard :ticket="ticket" />
 
-                    <!-- Assignment Information -->
-                    <Card>
-                        <CardHeader>
-                            <CardTitle class="flex items-center gap-2">
-                                <Icon
-                                    name="solar:users-group-rounded-outline"
-                                    class="!size-5 opacity-75 shrink-0"
-                                />
-                                {{ $t("form.assignment_information") }}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent class="flex flex-col divide-y divide-dashed">
-                            <AppListItem
-                                :title="$t('category.singular')"
-                                :value="ticket.ticketCategory?.name"
-                            />
-
-                            <AppListItem
-                                :title="$t('group.singular')"
-                                :value="ticket.group?.name"
-                            />
-
-                            <AppListItem
-                                :title="$t('admin.singular')"
-                                :value="
-                                    ticket.admin ? `${ticket.admin.firstName} ${ticket.admin.lastName}` : ''
-                                "
-                            />
-                        </CardContent>
-                    </Card>
+                    <!-- Assignment Information Card Component -->
+                    <TicketAssignmentCard :ticket="ticket" />
                 </div>
             </div>
         </div>
@@ -488,104 +116,24 @@
             @close-dialog="handleEditDialogClose"
         />
 
-        <!-- Transfer Dialog -->
-        <Dialog v-model:open="isTransferDialogOpen">
-            <DialogContent class="sm:max-w-md">
-                <DialogHeader>
-                    <DialogTitle>{{ $t("action.transfer") }}</DialogTitle>
-                    <DialogDescription>
-                        {{ $t("action.transfer_description", { model: $t("ticket.singular") }) }}
-                    </DialogDescription>
-                </DialogHeader>
-                <div class="space-y-4 py-4">
-                    <FormItemSelect
-                        id="transfer-admin"
-                        v-model="transferUserId"
-                        :title="$t('admin.singular')"
-                        :placeholder="$t('admin.select')"
-                        :data="transferAdmins"
-                        key-value="id"
-                        name-value="name"
-                        :empty-text="$t('admin.no_admins_available')"
-                        :disabled="loadingTransferAdmins"
-                        required
-                    />
-                    <p
-                        v-if="loadingTransferAdmins"
-                        class="text-xs text-muted-foreground flex items-center gap-1"
-                    >
-                        <Icon
-                            name="solar:refresh-linear"
-                            class="!size-3 animate-spin"
-                        />
-                        {{ $t("admin.loading") }}
-                    </p>
-                </div>
-                <DialogFooter>
-                    <Button
-                        variant="outline"
-                        @click="isTransferDialogOpen = false"
-                    >
-                        {{ $t("action.cancel") }}
-                    </Button>
-                    <Button
-                        :disabled="!transferUserId || isActionLoading"
-                        @click="submitTransfer"
-                    >
-                        <Icon
-                            v-if="isActionLoading"
-                            name="solar:refresh-linear"
-                            class="mr-2 h-4 w-4 animate-spin"
-                        />
-                        {{ $t("action.transfer") }}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+        <!-- Transfer Dialog Component -->
+        <TicketDialogsTransfer
+            v-model:is-open="isTransferDialogOpen"
+            v-model:transfer-user-id="transferUserId"
+            :transfer-admins="transferAdmins"
+            :loading-admins="loadingTransferAdmins"
+            :is-action-loading="isActionLoading"
+            @submit="submitTransfer"
+        />
 
-        <!-- Action Dialog (Legacy) -->
-        <Dialog v-model:open="isActionDialogOpen">
-            <DialogContent class="sm:max-w-md">
-                <DialogHeader>
-                    <DialogTitle>{{ $t("action.add") + " " + $t("action.singular") }}</DialogTitle>
-                    <DialogDescription>
-                        {{
-                            $t("action.add_description", { action: $t(`action.${selectedActionType}`) })
-                        }}
-                    </DialogDescription>
-                </DialogHeader>
-                <div class="space-y-4">
-                    <div class="space-y-2">
-                        <Label for="action-note">{{ $t("note.singular") }}</Label>
-                        <Textarea
-                            id="action-note"
-                            v-model="actionNote"
-                            :placeholder="$t('note.placeholder')"
-                            rows="3"
-                        />
-                    </div>
-                </div>
-                <DialogFooter>
-                    <Button
-                        variant="outline"
-                        @click="isActionDialogOpen = false"
-                    >
-                        {{ $t("action.cancel") }}
-                    </Button>
-                    <Button
-                        :disabled="isActionLoading"
-                        @click="submitAction"
-                    >
-                        <Icon
-                            v-if="isActionLoading"
-                            name="solar:refresh-linear"
-                            class="mr-2 h-4 w-4 animate-spin"
-                        />
-                        {{ $t("action.add") + " " + $t("action.singular") }}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+        <!-- Action Dialog Component -->
+        <TicketDialogsAction
+            v-model:is-open="isActionDialogOpen"
+            v-model:action-note="actionNote"
+            :selected-action-type="selectedActionType"
+            :is-action-loading="isActionLoading"
+            @submit="submitAction"
+        />
 
     </div>
 </template>
@@ -594,13 +142,7 @@
 import { toast } from 'vue-sonner';
 
 // Fetch ticket data
-import type {
-    SupportTicket,
-    TicketAction,
-    TicketStatus,
-    TicketAttachment,
-    Admin,
-} from '~/types';
+import type { SupportTicket } from '~/types';
 
 const props = defineProps<{
     id: string;
@@ -615,11 +157,9 @@ const router = useRouter();
 const pageTitle = computed(() =>
     t('action.message.title', { model: t('ticket.singular') }),
 );
-const pageIcon = usePageIcon();
 const pageDescription = computed(() =>
     t('action.message.description', { model: t('ticket.singular') }),
 );
-const formatGermanDate = (iso: string) => new Date(iso).toLocaleDateString('de-DE');
 
 // Fetch ticket data
 const { data: ticketData, pending: isLoading, error, refresh } = useApiFetch<{
@@ -708,32 +248,6 @@ const onEditSubmit = async (values: any) => {
 const handleEditDialogClose = () => {
     isEditDialogOpen.value = false;
     resetForm();
-};
-
-// Helper function to get latest status
-const getLatestStatus = (statuses: TicketStatus[]) => {
-    if (!statuses || statuses.length === 0) return null;
-    return statuses.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    )[0];
-};
-
-// Helper function to get status badge variant
-const getStatusVariant = (status: string) => {
-    switch (status) {
-        case 'PENDING':
-            return 'secondary';
-        case 'IN_PROGRESS':
-            return 'default';
-        case 'RESOLVED':
-            return 'success';
-        case 'CLOSED':
-            return 'outline';
-        case 'CANCELLED':
-            return 'destructive';
-        default:
-            return 'secondary';
-    }
 };
 
 // Use ticket actions composable for all ticket actions
@@ -850,42 +364,4 @@ const submitTransfer = async () => {
     await refresh();
     isTransferDialogOpen.value = false;
 };
-
-
-// Action history table configuration
-const actionHistoryHeaders = computed(() => [
-    {
-        as: 'th' as const,
-        name: t('action.type'),
-        id: 'actionType',
-    },
-    {
-        as: 'th' as const,
-        name: t('action.by'),
-        id: 'user',
-    },
-    {
-        as: 'th' as const,
-        name: t('action.assigned_to'),
-        id: 'targetUser',
-    },
-    {
-        as: 'th' as const,
-        name: t('note.singular'),
-        id: 'note',
-    },
-    {
-        as: 'th' as const,
-        name: t('common.created_at'),
-        id: 'createdAt',
-    },
-]);
-
-const sortedActionsHistory = computed(() => {
-    if (!ticket.value?.actions) return [];
-    return [...ticket.value.actions].sort(
-        (a: TicketAction, b: TicketAction) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
-});
 </script>
