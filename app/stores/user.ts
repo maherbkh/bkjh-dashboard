@@ -49,8 +49,7 @@ export const useUserStore = defineStore('user', () => {
             method: 'POST',
             body: credentials,
         });
-        
-        
+
         if (data.value) {
             const loginData = (data.value as any).data;
 
@@ -107,14 +106,14 @@ export const useUserStore = defineStore('user', () => {
     }
     const fetchAuthUser = async () => {
         console.log(`[FETCH AUTH USER] ${new Date().toISOString()} - Starting fetchAuthUser - calling /auth/check`);
-        
+
         // Use the auth check endpoint to verify authentication and get updated user data
         const { data: res, error } = await useApiFetch(`/auth/check`, {
             // Remove lazy: true to ensure the request is executed immediately
         });
-        
+
         console.log(`[FETCH AUTH USER] ${new Date().toISOString()} - Auth check response:`, { hasData: !!res.value, hasError: !!error.value });
-        
+
         if (res.value) {
             const responseData = (res.value as any).data;
             console.log(`[FETCH AUTH USER] ${new Date().toISOString()} - Auth check successful, updating user data`);

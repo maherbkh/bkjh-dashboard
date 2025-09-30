@@ -52,23 +52,23 @@ export default defineNuxtConfig({
             appUrl: process.env.NUXT_PUBLIC_APP_URL || 'http://dashboard.backhaus.test:3022',
         },
     },
-    routeRules: {
-        '/*/**': { 
-            ssr: false, // everything under it
-            headers: {
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-            }
-        },
-    },
     build: {
         transpile: [
             'vee-validate',
             'vue-sonner',
         ],
 
-    }, compatibilityDate: '2025-07-15',
+    }, routeRules: {
+        '/*/**': {
+            ssr: false, // everything under it
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+            },
+        },
+    },
+    compatibilityDate: '2025-07-15',
     // Reduce development warnings
     nitro: {
         experimental: {

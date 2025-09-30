@@ -28,7 +28,7 @@ function getScheduleItemSchema(t: (key: string, params?: Record<string, string |
             .min(1, t('event.end_time') + ' ' + t('validation.required'))
             .regex(/^\d{2}:\d{2}$/u, t('event.end_time') + ' ' + t('validation.time_format')),
         note: z.string().max(500, t('note.singular') + ' ' + t('validation.max_length', { max: 500 })).optional().nullable(),
-    }).refine((val) => toMinutes(val.endTime) > toMinutes(val.startTime), {
+    }).refine(val => toMinutes(val.endTime) > toMinutes(val.startTime), {
         message: t('event.end_time') + ' ' + t('validation.greater_than', { field: t('event.start_time') }),
         path: ['endTime'],
     });

@@ -52,7 +52,6 @@ export const useGlobalErrorHandler = (t?: (key: string) => string) => {
         }
     };
 
-
     const handleError = (error: any) => {
         if (!error || typeof error !== 'object') {
             console.error('Unhandled error:', error);
@@ -74,7 +73,6 @@ export const useGlobalErrorHandler = (t?: (key: string) => string) => {
             handleForbidden(error);
             return;
         }
-
 
         // Handle validation errors (400 with validation details)
         if (status === 400 && (errorCode === 'VALIDATION_ERROR' || error?.data?.details?.validationErrors)) {

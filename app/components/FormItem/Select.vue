@@ -108,7 +108,10 @@ const handleSelect = (value: string) => {
                 align="start"
             >
                 <Command v-model="selectedValue">
-                    <CommandInput v-if="searchable" :placeholder="t('action.search_placeholder')" />
+                    <CommandInput
+                        v-if="searchable"
+                        :placeholder="t('action.search_placeholder')"
+                    />
                     <CommandEmpty v-if="data.length === 0">
                         {{ emptyText }}
                     </CommandEmpty>
@@ -117,10 +120,11 @@ const handleSelect = (value: string) => {
                     </CommandEmpty>
                     <CommandList class="space-y-2">
                         <CommandGroup>
-                            <CommandItem class="cursor-pointer hover:bg-accent hover:text-accent-foreground my-1"
-                            :class="selectedValue === item[keyValue].toString() ? 'bg-accent text-accent-foreground' : ''"
+                            <CommandItem
                                 v-for="item in data"
                                 :key="item[keyValue]"
+                                class="cursor-pointer hover:bg-accent hover:text-accent-foreground my-1"
+                                :class="selectedValue === item[keyValue].toString() ? 'bg-accent text-accent-foreground' : ''"
                                 :value="item[keyValue].toString()"
                                 @select="() => handleSelect(item[keyValue].toString())"
                             >
@@ -131,7 +135,10 @@ const handleSelect = (value: string) => {
                                         selectedValue === item[keyValue].toString() ? 'opacity-100' : 'opacity-0',
                                     )"
                                 />
-                                <span :class="selectedValue === item[keyValue].toString() ? 'font-semibold' : ''" class="line-clamp-1">{{ item[nameValue] }}</span>
+                                <span
+                                    :class="selectedValue === item[keyValue].toString() ? 'font-semibold' : ''"
+                                    class="line-clamp-1"
+                                >{{ item[nameValue] }}</span>
                             </CommandItem>
                         </CommandGroup>
                     </CommandList>

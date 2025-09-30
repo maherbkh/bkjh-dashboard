@@ -45,7 +45,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
     // 4) Watch for authentication changes during login process
     if (to.path === '/login' && userStore.accessToken && !userStore.user) {
-
         // Watch for user data to be populated (login completion)
         const stopWatcher = watch(
             () => userStore.user,

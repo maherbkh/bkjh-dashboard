@@ -47,7 +47,6 @@ const onSubmit = handleSubmit(async (values) => {
         password: values.password,
     };
 
-
     try {
         if (redirectPath) {
             await useUserStore().login(credentials, redirectPath as string);

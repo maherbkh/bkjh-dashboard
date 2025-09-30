@@ -58,7 +58,7 @@ const eventTargets = computed(() => resourcesStore.eventTargets || []);
 // Event type options with translated names
 const typeOptions = computed(() => {
     const ids = ['ONLINE', 'IN_PERSON', 'HYBRID'] as const;
-    return ids.map((id) => ({ id, name: t(`academy.type.${id.toLowerCase()}`) }));
+    return ids.map(id => ({ id, name: t(`academy.type.${id.toLowerCase()}`) }));
 });
 
 // Initialize form data when props change
@@ -210,8 +210,8 @@ const formTitle = computed(() => {
                         <div class="grid grid-cols-12 items-start gap-5">
                             <FormItemSelect
                                 id="type"
-                                :searchable="false"
                                 v-model="type"
+                                :searchable="false"
                                 :title="t('event.type')"
                                 :placeholder="t('action.select') + ' ' + t('event.type')"
                                 class="col-span-12 lg:col-span-4"
@@ -382,22 +382,22 @@ const formTitle = computed(() => {
                     </CardContent>
                 </Card>
                 <div
-                        v-if="showActions"
-                        class="flex justify-end gap-2 pt-4 border-t lg:col-span-12 mb-8"
+                    v-if="showActions"
+                    class="flex justify-end gap-2 pt-4 border-t lg:col-span-12 mb-8"
+                >
+                    <Button
+                        type="submit"
+                        class="w-full"
+                        :disabled="isSubmitting"
                     >
-                        <Button
-                            type="submit"
-                            class="w-full"
-                            :disabled="isSubmitting"
-                        >
-                            <Icon
-                                v-if="isSubmitting"
-                                name="solar:refresh-linear"
-                                class="mr-2 !size-5 animate-spin"
-                            />
-                            {{ submitButtonText }}
-                        </Button>
-                    </div>
+                        <Icon
+                            v-if="isSubmitting"
+                            name="solar:refresh-linear"
+                            class="mr-2 !size-5 animate-spin"
+                        />
+                        {{ submitButtonText }}
+                    </Button>
+                </div>
             </form>
         </div>
     </div>

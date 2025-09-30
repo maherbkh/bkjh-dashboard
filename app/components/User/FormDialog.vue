@@ -146,7 +146,6 @@ watch(() => props.isDialogOpen, (isOpen) => {
 });
 
 const onSubmitAndClose = handleSubmit((values) => {
-
     // Remove password field if it exists in edit mode
     if (props.dialogMode === 'edit' && 'password' in values) {
         const { password, ...valuesWithoutPassword } = values;

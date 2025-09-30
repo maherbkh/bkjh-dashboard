@@ -17,7 +17,7 @@ export const badgeVariants = cva(
          'bg-red-100 text-red-800 dark:bg-red-300/90 [a&]:hover:bg-red-300/90 border-red-400/25',
                 success:
           'bg-green-100 dark:bg-green-300/90 text-green-800 [a&]:hover:bg-green-300/90 border-green-400/25',
-          pending:
+                pending:
           'dark:bg-yellow-300/90 bg-yellow-100 text-yellow-800 [a&]:hover:bg-yellow/90 border-yellow-400/25',
                 outline:
           'text-foreground/80 [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',

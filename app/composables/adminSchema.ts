@@ -7,39 +7,39 @@ export const createAdminSchema = (t: (key: string, params?: Record<string, strin
             .min(1, t('validation.required'))
             .min(2, t('validation.min_length', { min: 2 }))
             .max(50, t('validation.max_length', { max: 50 })),
-        
+
         lastName: z.string()
             .min(1, t('validation.required'))
             .min(2, t('validation.min_length', { min: 2 }))
             .max(50, t('validation.max_length', { max: 50 })),
-        
+
         email: z.string()
             .min(1, t('validation.required'))
             .email(t('validation.invalid')),
-        
+
         password: z.string()
             .min(8, t('validation.min_length', { min: 8 }))
             .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
-                message: t('validation.password_strength')
+                message: t('validation.password_strength'),
             })
             .optional(),
-        
+
         isSuperAdmin: z.boolean()
             .default(false),
-        
+
         isActive: z.boolean()
             .default(true),
-        
+
         occupationId: z.string()
             .uuid(t('validation.uuid'))
             .nullable()
             .optional(),
-        
+
         apps: z.array(z.enum(['dashboard', 'support', 'academy']))
             .default(['dashboard'])
-            .refine((apps) => apps.length > 0, {
-                message: t('validation.required')
-            })
+            .refine(apps => apps.length > 0, {
+                message: t('validation.required'),
+            }),
     });
 };
 
@@ -50,8 +50,8 @@ export const createAdminCreateSchema = (t: (key: string, params?: Record<string,
             .min(1, t('validation.required'))
             .min(8, t('validation.min_length', { min: 8 }))
             .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
-                message: t('validation.password_strength')
-            })
+                message: t('validation.password_strength'),
+            }),
     });
 };
 
@@ -64,7 +64,7 @@ export const createAdminUpdateSchema = (t: (key: string, params?: Record<string,
 export const AVAILABLE_APPS = [
     { value: 'dashboard', label: 'Dashboard' },
     { value: 'support', label: 'IT Support' },
-    { value: 'academy', label: 'Academy' }
+    { value: 'academy', label: 'Academy' },
 ] as const;
 
 export type AdminSchemaType = z.infer<ReturnType<typeof createAdminSchema>>;

@@ -27,10 +27,12 @@ watch([() => props.isDialogOpen, () => props.dialogMode], ([isOpen, dialogMode])
     if (isOpen && dialogMode) {
         if (dialogMode === 'add') {
             currentSchema.value = createAdminCreateSchema(t);
-        } else {
+        }
+        else {
             currentSchema.value = createAdminUpdateSchema(t);
         }
-    } else {
+    }
+    else {
         currentSchema.value = undefined;
     }
 }, { immediate: false });

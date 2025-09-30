@@ -120,7 +120,6 @@ export const useResourcesStore = defineStore('resources', () => {
 
     // Fetch admin data from authenticated endpoint
     const fetchAdminData = async (forceRefresh = false): Promise<AdminData> => {
-
         if (!forceRefresh && !isStale.value && ticketCategories.value.length > 0) {
             return {
                 categories: {
@@ -140,7 +139,6 @@ export const useResourcesStore = defineStore('resources', () => {
 
         const { data: response, error: fetchError } = await useApiFetch<AdminDataResponse>('/auth/admin-data');
 
-
         if (fetchError.value) {
             error.value = `API Error: ${fetchError.value.statusCode} - ${fetchError.value.data?.message || fetchError.value.message}`;
             isLoading.value = false;
@@ -148,7 +146,6 @@ export const useResourcesStore = defineStore('resources', () => {
         }
 
         if (response.value) {
-
             // Check different possible response structures
             let adminData;
             if (response.value.status && response.value.data) {
