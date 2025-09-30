@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { z } from 'zod';
 import type { Admin, AdminForm, Occupation } from '~/types';
-import { createAdminSchema, createAdminCreateSchema, AVAILABLE_APPS } from '~/composables/adminSchema';
+import { createAdminSchema, createAdminCreateSchema, createAdminUpdateSchema, AVAILABLE_APPS } from '~/composables/adminSchema';
 
 const { t } = useI18n();
 
@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<{
 });
 
 // Schema management with reactive ref
-const currentSchema = ref<ReturnType<typeof createAdminSchema> | ReturnType<typeof createAdminCreateSchema> | undefined>(undefined);
+const currentSchema = ref<ReturnType<typeof createAdminCreateSchema> | ReturnType<typeof createAdminUpdateSchema> | undefined>(undefined);
 
 // Watch for dialog mode changes to reload schema
 watch([() => props.isDialogOpen, () => props.dialogMode], ([isOpen, dialogMode]) => {
@@ -28,7 +28,7 @@ watch([() => props.isDialogOpen, () => props.dialogMode], ([isOpen, dialogMode])
         if (dialogMode === 'add') {
             currentSchema.value = createAdminCreateSchema(t);
         } else {
-            currentSchema.value = createAdminSchema(t);
+            currentSchema.value = createAdminUpdateSchema(t);
         }
     } else {
         currentSchema.value = undefined;
@@ -143,23 +143,15 @@ watch(() => props.isDialogOpen, (isOpen) => {
 });
 
 const onSubmitAndClose = handleSubmit((values) => {
-    // Remove password field if it's empty or null in edit mode
-    if (props.dialogMode === 'edit' && (!values.password || values.password.trim() === '')) {
-        const { password, ...valuesWithoutPassword } = values;
-        emit('submitAndClose', valuesWithoutPassword);
-    } else {
-        emit('submitAndClose', values);
-    }
+    // For update mode, password is already excluded by the schema
+    // For create mode, password is included and required
+    emit('submitAndClose', values);
 });
 
 const onSubmitAndAddNew = handleSubmit((values) => {
-    // Remove password field if it's empty or null in edit mode
-    if (props.dialogMode === 'edit' && (!values.password || values.password.trim() === '')) {
-        const { password, ...valuesWithoutPassword } = values;
-        emit('submitAndAddNew', valuesWithoutPassword);
-    } else {
-        emit('submitAndAddNew', values);
-    }
+    // For update mode, password is already excluded by the schema
+    // For create mode, password is included and required
+    emit('submitAndAddNew', values);
 });
 
 const handleClose = () => {
