@@ -2,6 +2,7 @@ import { toast } from 'vue-sonner';
 import type { LocationQueryValue } from '#vue-router';
 import type { Credentials, LoginData, LoginResponse, ResetPasswordForm, User } from '~/types/index';
 import { useResourcesStore } from '~/stores/resources';
+import { useAppStore } from '~/stores/app';
 
 export const useUserStore = defineStore('user', () => {
     const { t } = useNuxtApp().$i18n;
@@ -15,6 +16,7 @@ export const useUserStore = defineStore('user', () => {
 
     // Resources store instance - declared once for reuse
     const resourcesStore = useResourcesStore();
+    const appStore = useAppStore();
 
     const setAccessToken = (data?: string) => {
         accessToken.value = data;
@@ -30,14 +32,15 @@ export const useUserStore = defineStore('user', () => {
 
     const logout = async () => {
         try {
-            await useApiFetch('/auth/logout', { method: 'POST' });
+            await useApiFetch('/auth/logout', { method: 'POST', lazy: true });
         }
         catch (error) {
             // Continue with logout even if API call fails
         }
 
-        setAccessToken();
-        setUser();
+        // Clear all user data
+        setAccessToken(undefined);
+        setUser(undefined);
         resourcesStore.clearAll();
 
         // Clear auth validation timestamp
@@ -60,6 +63,23 @@ export const useUserStore = defineStore('user', () => {
 
             setUser(loginData.admin);
             setAccessToken(loginData.accessToken);
+
+            // Smart app selection logic
+            const userApps = loginData.admin.apps || [];
+            const currentAppSlug = appStore.appSlug;
+            
+            // Check if current appSlug exists and is in user's apps
+            if (currentAppSlug && userApps.includes(currentAppSlug)) {
+                // Keep the current appSlug - user has access to it
+                // No need to change it
+            } else if (userApps.length > 0) {
+                // Use first app from user's available apps
+                const firstUserApp = userApps[0];
+                appStore.setAppSlug(firstUserApp as 'support' | 'academy');
+            } else {
+                // Fallback to dashboard if user has no apps
+                appStore.setAppSlug('dashboard');
+            }
 
             // Wait for cookie to be set before fetching admin data
             await new Promise(resolve => setTimeout(resolve, 200));
@@ -107,25 +127,29 @@ export const useUserStore = defineStore('user', () => {
         }
     }
     const fetchAuthUser = async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Don't proceed if there's no token
-        if (!accessToken.value) {
-            return;
-        }
-        
+        await new Promise(resolve => setTimeout(resolve, 100)); 
         // Use the auth check endpoint to verify authentication and get updated user data
         const { data: res, error } = await useApiFetch(`/auth/check`, {
             headers: {
                 'Authorization': `Bearer ${accessToken.value}`,
                 credentials: 'include',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
             },
-           lazy: true
+            lazy: true,
+            // Force fresh request to avoid cached responses
+            key: `/auth/check-${Date.now()}-${Math.random()}`,
+            server: false,
+            cache: 'no-store'
         });
         if (res.value) {
+            console.log('fetchAuthUser in Store res.value', res.value?.data);
             const responseData = (res.value as any).data;
+            
             // Update user data with fresh information from the server
             setUser(responseData.admin);
+            
             // Only update token if we don't have one
             // Don't update token from server response to avoid overwriting valid tokens
             if (!accessToken.value) {
@@ -135,10 +159,9 @@ export const useUserStore = defineStore('user', () => {
             await resourcesStore.fetchAdminData();
         }
         if (error.value) {
-            console.error('❌ fetchAuthUser: Auth check failed, clearing user data', error.value);
             // Clear user data but don't call logout() to avoid unwanted redirects
-            setUser();
-            // Don't clear the token here - it might be valid but the check failed for other reasons
+            setUser(undefined);
+            setAccessToken(undefined);
         }
     };
 
@@ -200,8 +223,8 @@ export const useUserStore = defineStore('user', () => {
             // Logout all API call failed
         }
 
-        setAccessToken();
-        setUser();
+        setAccessToken(undefined);
+        setUser(undefined);
         resourcesStore.clearAll();
 
         toast.success(t('global.goodbye'), {

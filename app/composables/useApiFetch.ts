@@ -57,9 +57,6 @@ export function useApiFetch<T = any>(
         if (token) {
             defaultHeaders['Authorization'] = `Bearer ${token}`;
         }
-        else {
-            console.warn(`[AUTH] ${new Date().toISOString()} - No token found for ${method} ${path}`);
-        }
     }
 
     // Compose the final fetch options including interceptors/hooks
