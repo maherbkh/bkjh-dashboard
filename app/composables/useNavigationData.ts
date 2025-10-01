@@ -30,7 +30,7 @@ export const useNavigationData = (): ComputedRef<{
     return computed(() => {
         const userStore = useUserStore();
         const isSuperAdmin = userStore.user?.isSuperAdmin || false;
-        
+
         const allNavigation = {
             apps: [
                 {
@@ -59,14 +59,26 @@ export const useNavigationData = (): ComputedRef<{
                     isActive: true,
                     apps: ['support', 'academy'],
                     items: [
-
+                        {
+                            title: t('company.plural'),
+                            url: '/master-data/companies',
+                            icon: 'solar:buildings-2-outline',
+                            apps: [],
+                            requireSuperAdmin: true,
+                        },
                         {
                             title: t('group.plural'),
                             url: '/master-data/groups',
                             icon: 'solar:buildings-outline',
                             apps: ['support', 'academy'],
                         },
-
+                        {
+                            title: t('address.plural'),
+                            url: '/master-data/addresses',
+                            icon: 'solar:map-point-outline',
+                            apps: ['support'],
+                            requireSuperAdmin: true,
+                        },
                         {
                             title: t('category.plural'),
                             url: '/master-data/categories',
@@ -114,7 +126,7 @@ export const useNavigationData = (): ComputedRef<{
                         },
                     ],
                 },
-               
+
                 {
                     title: t('academy.plural'),
                     url: '#',
@@ -157,20 +169,7 @@ export const useNavigationData = (): ComputedRef<{
                             apps: [],
                             requireSuperAdmin: true,
                         },
-                        {
-                            title: t('company.plural'),
-                            url: '/master-data/companies',
-                            icon: 'solar:buildings-2-outline',
-                            apps: [],
-                            requireSuperAdmin: true,
-                        },
-                        {
-                            title: t('address.plural'),
-                            url: '/master-data/addresses',
-                            icon: 'solar:map-point-outline',
-                            apps: ['support'],
-                            requireSuperAdmin: true,
-                        },
+
                     ],
                 },
             ],

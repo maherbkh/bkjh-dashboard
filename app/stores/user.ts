@@ -7,11 +7,11 @@ import { useAppStore } from '~/stores/app';
 export const useUserStore = defineStore('user', () => {
     const { t } = useNuxtApp().$i18n;
     const user = ref<User | undefined>();
-    const accessToken = useCookie('BKJH_ACCESS_TOKEN', { 
+    const accessToken = useCookie('BKJH_ACCESS_TOKEN', {
         maxAge: 60 * 15, // 15 minutes to match backend
         httpOnly: false,
         secure: false,
-        sameSite: 'lax'
+        sameSite: 'lax',
     });
 
     // Resources store instance - declared once for reuse
@@ -67,16 +67,18 @@ export const useUserStore = defineStore('user', () => {
             // Smart app selection logic
             const userApps = loginData.admin.apps || [];
             const currentAppSlug = appStore.appSlug;
-            
+
             // Check if current appSlug exists and is in user's apps
             if (currentAppSlug && userApps.includes(currentAppSlug)) {
                 // Keep the current appSlug - user has access to it
                 // No need to change it
-            } else if (userApps.length > 0) {
+            }
+            else if (userApps.length > 0) {
                 // Use first app from user's available apps
                 const firstUserApp = userApps[0];
                 appStore.setAppSlug(firstUserApp as 'support' | 'academy');
-            } else {
+            }
+            else {
                 // Fallback to dashboard if user has no apps
                 appStore.setAppSlug('dashboard');
             }
@@ -92,7 +94,7 @@ export const useUserStore = defineStore('user', () => {
                 description: t('auth.login_success'),
                 duration: 5000,
             });
-           
+
             await navigateTo(path as string ? path : '/');
         }
         if (error.value) {
@@ -127,28 +129,28 @@ export const useUserStore = defineStore('user', () => {
         }
     }
     const fetchAuthUser = async () => {
-        await new Promise(resolve => setTimeout(resolve, 100)); 
+        await new Promise(resolve => setTimeout(resolve, 100));
         // Use the auth check endpoint to verify authentication and get updated user data
         const { data: res, error } = await useApiFetch(`/auth/check`, {
             headers: {
                 'Authorization': `Bearer ${accessToken.value}`,
-                credentials: 'include',
+                'credentials': 'include',
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
                 'Pragma': 'no-cache',
-                'Expires': '0'
+                'Expires': '0',
             },
             lazy: true,
             // Force fresh request to avoid cached responses
             key: `/auth/check-${Date.now()}-${Math.random()}`,
             server: false,
-            cache: 'no-store'
+            cache: 'no-store',
         });
         if (res.value) {
             const responseData = (res.value as any).data;
-            
+
             // Update user data with fresh information from the server
             setUser(responseData.admin);
-            
+
             // Only update token if we don't have one
             // Don't update token from server response to avoid overwriting valid tokens
             if (!accessToken.value) {

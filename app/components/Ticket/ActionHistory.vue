@@ -35,7 +35,7 @@
                     —
                 </div>
             </template>
-            
+
             <template #cell-targetUser="{ row }">
                 <div
                     v-if="row.target && isAssignmentAction(row.actionType)"

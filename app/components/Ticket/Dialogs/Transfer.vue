@@ -9,7 +9,7 @@
   - transferAdmins: Admin[] - List of available admins
   - loadingAdmins: boolean - Whether admins are loading
   - isActionLoading: boolean - Whether the transfer action is loading
-  
+
   Emits:
   - update:isOpen: Triggered when dialog open state changes
   - update:transferUserId: Triggered when selected admin changes
@@ -90,6 +90,6 @@ defineProps<{
 defineEmits<{
     'update:isOpen': [value: boolean];
     'update:transferUserId': [value: string | undefined];
-    submit: [];
+    'submit': [];
 }>();
 </script>

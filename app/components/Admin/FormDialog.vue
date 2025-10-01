@@ -145,15 +145,29 @@ watch(() => props.isDialogOpen, (isOpen) => {
 });
 
 const onSubmitAndClose = handleSubmit((values) => {
-    // For update mode, password is already excluded by the schema
-    // For create mode, password is included and required
-    emit('submitAndClose', values);
+    // For update mode, exclude password if it's empty, null, or undefined
+    if (props.dialogMode === 'edit') {
+        const { password, ...valuesWithoutPassword } = values;
+        // Only include password if it has a meaningful value
+        const finalValues = password && password.trim() !== '' ? values : valuesWithoutPassword;
+        emit('submitAndClose', finalValues);
+    } else {
+        // For create mode, password is included and required
+        emit('submitAndClose', values);
+    }
 });
 
 const onSubmitAndAddNew = handleSubmit((values) => {
-    // For update mode, password is already excluded by the schema
-    // For create mode, password is included and required
-    emit('submitAndAddNew', values);
+    // For update mode, exclude password if it's empty, null, or undefined
+    if (props.dialogMode === 'edit') {
+        const { password, ...valuesWithoutPassword } = values;
+        // Only include password if it has a meaningful value
+        const finalValues = password && password.trim() !== '' ? values : valuesWithoutPassword;
+        emit('submitAndAddNew', finalValues);
+    } else {
+        // For create mode, password is included and required
+        emit('submitAndAddNew', values);
+    }
 });
 
 const handleClose = () => {

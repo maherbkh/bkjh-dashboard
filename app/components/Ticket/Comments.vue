@@ -19,8 +19,8 @@
             <CardContent>
                 <div class="space-y-4">
                     <FormItemTextarea
-                        :title="$t('comment.placeholder')"
                         v-model="newCommentContent"
+                        :title="$t('comment.placeholder')"
                         :placeholder="$t('comment.placeholder')"
                         class="w-full"
                     />
@@ -248,14 +248,14 @@ const canDeleteComment = computed(() => {
 // Handle add comment
 const handleAddComment = async () => {
     if (!newCommentContent.value.trim()) return;
-    
+
     await addComment(
         props.ticketId,
         newCommentContent.value.trim(),
         newCommentIsInternal.value,
         props.refresh,
     );
-    
+
     // Reset form
     newCommentContent.value = '';
     newCommentIsInternal.value = true;
@@ -278,7 +278,7 @@ const cancelEdit = () => {
 // Handle update comment
 const handleUpdateComment = async () => {
     if (!editingCommentId.value || !editCommentContent.value.trim()) return;
-    
+
     await updateComment(
         props.ticketId,
         editingCommentId.value,
@@ -286,7 +286,7 @@ const handleUpdateComment = async () => {
         editCommentIsInternal.value,
         props.refresh,
     );
-    
+
     // Reset edit state
     cancelEdit();
 };
@@ -295,7 +295,7 @@ const handleUpdateComment = async () => {
 const handleDeleteComment = async (commentId: string) => {
     // Confirm before deleting
     if (!confirm(t('comment.confirm_delete'))) return;
-    
+
     await deleteComment(props.ticketId, commentId, props.refresh);
 };
 </script>

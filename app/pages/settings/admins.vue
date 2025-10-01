@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Admin, AdminForm, Occupation, TableHeaderItem, ServerParamsTypes } from '~/types';
+import type { Admin, AdminForm, TableHeaderItem, ServerParamsTypes } from '~/types';
 import { createAdminSchema } from '~/composables/adminSchema';
 import { useResourcesStore } from '~/stores/resources';
 
@@ -51,7 +51,7 @@ const headerItems = computed(() => [
     {
         as: 'th',
         name: t('global.name'),
-        id: 'name',
+        id: 'firstName',
     },
     {
         as: 'th',
@@ -60,28 +60,21 @@ const headerItems = computed(() => [
     },
     {
         as: 'th',
-        name: t('occupation.singular'),
-        id: 'occupation',
-    },
-    {
-        as: 'th',
         name: t('common.status'),
         id: 'isActive',
+        sortable: false,
     },
     {
         as: 'th',
         name: t('admin.role'),
         id: 'isSuperAdmin',
+        sortable: false,
     },
     {
         as: 'th',
         name: t('admin.apps'),
         id: 'apps',
-    },
-    {
-        as: 'th',
-        name: t('common.created_at'),
-        id: 'createdAt',
+        sortable: false,
     },
 ]);
 
@@ -359,14 +352,22 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         @update:selected-rows="(rows) => selectedRows = rows.map(String)"
                         @update:model-value="handleSelectAll"
                     >
-                        <template #cell-name="{ row }">
-                            <div class="font-medium flex items-center gap-2">
-                                <div>{{ `${row.firstName} ${row.lastName}` }}</div>
-                                <Icon
-                                    v-if="row.lastLoginAt"
-                                    name="solar:user-circle-outline"
-                                    class="!size-4 rounded-full shrink-0 text-success"
-                                />
+                        <template #cell-firstName="{ row }">
+                            <div>
+                                <div class="font-medium flex items-center gap-2">
+                                    <div>{{ `${row.firstName} ${row.lastName}` }}</div>
+                                    <Icon
+                                        v-if="row.lastLoginAt"
+                                        name="solar:user-circle-outline"
+                                        class="!size-4 rounded-full shrink-0 text-success"
+                                    />
+                                </div>
+                                <div
+                                    v-if="row.occupation?.name"
+                                    class="text-sm"
+                                >
+                                    {{ row.occupation?.name || '-' }}
+                                </div>
                             </div>
                         </template>
 
@@ -375,13 +376,6 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                 {{ row.email }}
                             </div>
                         </template>
-
-                        <template #cell-occupation="{ row }">
-                            <div class="text-sm">
-                                {{ row.occupation?.name || '-' }}
-                            </div>
-                        </template>
-
                         <template #cell-isActive="{ row }">
                             <Badge
                                 :variant="row.isActive ? 'default' : 'secondary'"
@@ -412,11 +406,6 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                 </Badge>
                             </div>
                         </template>
-
-                        <template #cell-createdAt="{ row }">
-                            {{ useGermanDateFormat().formatDate(row.createdAt) }}
-                        </template>
-
                         <template #cell-actions="{ row }">
                             <div class="flex justify-end gap-2">
                                 <LazyButton

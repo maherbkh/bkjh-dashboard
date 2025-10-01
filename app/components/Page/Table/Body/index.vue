@@ -101,7 +101,10 @@ function getValueByPath(obj: any, path: string): any {
                     </slot>
                 </td>
 
-                <td v-if="hasActionsSlot" class="text-right">
+                <td
+                    v-if="hasActionsSlot"
+                    class="text-right"
+                >
                     <slot
                         name="cell-actions"
                         :row="row"

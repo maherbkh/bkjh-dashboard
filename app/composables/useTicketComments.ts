@@ -8,7 +8,7 @@ export const useTicketComments = () => {
 
     /**
      * Add a new comment to a ticket
-     * 
+     *
      * @param ticketId - Ticket UUID
      * @param content - Comment text
      * @param isInternal - Whether comment is internal (default: true)
@@ -55,11 +55,11 @@ export const useTicketComments = () => {
         }
         catch (error: any) {
             console.error('Error adding comment:', error);
-            
+
             // Show error message from API or fallback to generic message
             const errorMessage = error?.data?.message || error?.message || t('comment.message.comment_add_failed');
             toast.error(errorMessage);
-            
+
             throw error; // Re-throw so calling component can handle it
         }
         finally {
@@ -69,7 +69,7 @@ export const useTicketComments = () => {
 
     /**
      * Update an existing comment (author only)
-     * 
+     *
      * @param ticketId - Ticket UUID
      * @param commentId - Comment UUID
      * @param content - Updated comment text
@@ -119,11 +119,11 @@ export const useTicketComments = () => {
         }
         catch (error: any) {
             console.error('Error updating comment:', error);
-            
+
             // Show error message from API or fallback to generic message
             const errorMessage = error?.data?.message || error?.message || t('comment.message.comment_update_failed');
             toast.error(errorMessage);
-            
+
             throw error; // Re-throw so calling component can handle it
         }
         finally {
@@ -133,7 +133,7 @@ export const useTicketComments = () => {
 
     /**
      * Delete a comment (super admin only)
-     * 
+     *
      * @param ticketId - Ticket UUID
      * @param commentId - Comment UUID
      * @param refresh - Optional refresh function to call after success
@@ -172,11 +172,11 @@ export const useTicketComments = () => {
         }
         catch (error: any) {
             console.error('Error deleting comment:', error);
-            
+
             // Show error message from API or fallback to generic message
             const errorMessage = error?.data?.message || error?.message || t('comment.message.comment_delete_failed');
             toast.error(errorMessage);
-            
+
             throw error; // Re-throw so calling component can handle it
         }
         finally {

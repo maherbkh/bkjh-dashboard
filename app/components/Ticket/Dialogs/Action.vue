@@ -8,7 +8,7 @@
   - selectedActionType: string - The selected action type
   - actionNote: string - The action note
   - isActionLoading: boolean - Whether the action is loading
-  
+
   Emits:
   - update:isOpen: Triggered when dialog open state changes
   - update:actionNote: Triggered when note changes
@@ -75,6 +75,6 @@ defineProps<{
 defineEmits<{
     'update:isOpen': [value: boolean];
     'update:actionNote': [value: string];
-    submit: [];
+    'submit': [];
 }>();
 </script>

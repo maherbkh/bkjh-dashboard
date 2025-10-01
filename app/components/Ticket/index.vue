@@ -147,7 +147,6 @@
             :is-action-loading="isActionLoading"
             @submit="submitAction"
         />
-
     </div>
 </template>
 
@@ -264,10 +263,10 @@ const handleEditDialogClose = () => {
 };
 
 // Use ticket actions composable for all ticket actions
-const { 
-    isActionLoading, 
-    assignSelf: assignSelfComposable, 
-    transferTicket: transferTicketComposable, 
+const {
+    isActionLoading,
+    assignSelf: assignSelfComposable,
+    transferTicket: transferTicketComposable,
     addTicketAction: addTicketActionComposable,
 } = useTicketActions();
 
@@ -295,10 +294,10 @@ const actionNote = ref('');
 const transferUserId = ref<string | undefined>(undefined);
 
 // Fetch admins for transfer dialog (exclude current user, only when dialog opens)
-const { 
-    admins: transferAdmins, 
-    loadingAdmins: loadingTransferAdmins, 
-    refreshAdmins: refreshTransferAdmins 
+const {
+    admins: transferAdmins,
+    loadingAdmins: loadingTransferAdmins,
+    refreshAdmins: refreshTransferAdmins,
 } = useAdminsList({
     showSelf: false,
     immediate: false,

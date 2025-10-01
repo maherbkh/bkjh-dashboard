@@ -49,7 +49,7 @@ const newDir = computed<SortDirection>(() => {
         <div class="flex items-center gap-5">
             <span>{{ item.name }}</span>
             <button
-                v-if="sortable"
+                v-if="sortable && item.sortable !== false"
                 class="size-5 p-1 rounded-sm cursor-pointer hover:bg-muted text-muted-foreground flex items-center justify-center"
                 :aria-label="t('global.toggle_sort')"
                 @click="emit('toggleSort', newDir, item.id ?? 'no_id_error')"

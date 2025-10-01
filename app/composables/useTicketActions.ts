@@ -20,7 +20,7 @@ export const useTicketActions = () => {
     /**
      * Core function: Add action to ticket using the unified API endpoint
      * All ticket actions now use POST /support/tickets/:ticketId/add-action
-     * 
+     *
      * @param ticketId - Ticket UUID
      * @param targetId - Admin UUID (target of action) - Required only for assignment actions
      * @param actionType - Type of action from TicketActionType enum
@@ -68,11 +68,11 @@ export const useTicketActions = () => {
         }
         catch (error: any) {
             console.error('Error adding action:', error);
-            
+
             // Show error message from API or fallback to generic message
             const errorMessage = error?.data?.message || error?.message || t('action.message.action_add_failed');
             toast.error(errorMessage);
-            
+
             throw error; // Re-throw so calling component can handle it
         }
         finally {
@@ -104,30 +104,30 @@ export const useTicketActions = () => {
     /**
      * Add a ticket action (legacy compatibility wrapper)
      * Uses the new unified add-action API
-     * 
+     *
      * For assignment actions, uses current user as target.
      * For non-assignment actions, passes undefined as target.
      */
     const addTicketAction = async (
-        ticketId: string, 
-        actionType: string, 
-        note?: string, 
-        refresh?: () => Promise<void>
+        ticketId: string,
+        actionType: string,
+        note?: string,
+        refresh?: () => Promise<void>,
     ) => {
         const currentUserId = userStore.user?.id;
         if (!currentUserId) {
             toast.error('User not found');
             return;
         }
-        
+
         // Convert to uppercase for comparison (action types may come as lowercase)
         const normalizedActionType = actionType.toUpperCase() as TicketActionType;
-        
+
         // Only set target for assignment-related actions
-        const targetId = ASSIGNMENT_ACTION_TYPES.includes(normalizedActionType) 
-            ? currentUserId 
+        const targetId = ASSIGNMENT_ACTION_TYPES.includes(normalizedActionType)
+            ? currentUserId
             : undefined;
-            
+
         await addAction(ticketId, targetId, normalizedActionType, note, refresh);
     };
 

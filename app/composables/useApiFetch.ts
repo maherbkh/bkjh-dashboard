@@ -50,10 +50,11 @@ export function useApiFetch<T = any>(
         let token;
         if (typeof userStore.accessToken === 'string') {
             token = userStore.accessToken;
-        } else {
+        }
+        else {
             token = (userStore.accessToken as any)?.value;
         }
-        
+
         if (token) {
             defaultHeaders['Authorization'] = `Bearer ${token}`;
         }

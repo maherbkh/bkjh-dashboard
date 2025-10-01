@@ -6,7 +6,7 @@
   Props:
   - ticket: SupportTicket - The ticket object
   - isActionLoading: boolean - Whether an action is currently loading
-  
+
   Emits:
   - assignSelf: Triggered when self-assign button is clicked
   - actionSelect: Triggered when an action type is selected from dropdown
@@ -84,7 +84,7 @@
                 />
                 {{ $t("action.self_assign") }}
             </Button>
-            
+
             <!-- Actions Dropdown for TASK type -->
             <DropdownMenu v-else>
                 <DropdownMenuTrigger class="lg:w-fit w-full">
@@ -118,9 +118,9 @@
                         />
                         {{ $t("action.types.TRANSFER") }}
                     </DropdownMenuItem>
-                    
+
                     <DropdownMenuSeparator />
-                    
+
                     <!-- Hardware Actions -->
                     <DropdownMenuLabel>{{ $t("action.groups.hardware") }}</DropdownMenuLabel>
                     <DropdownMenuItem @click="$emit('actionSelect', 'UPGRADE_HARDWARE')">
@@ -137,9 +137,9 @@
                         />
                         {{ $t("action.types.REPAIR_HARDWARE") }}
                     </DropdownMenuItem>
-                    
+
                     <DropdownMenuSeparator />
-                    
+
                     <!-- Software Actions -->
                     <DropdownMenuLabel>{{ $t("action.groups.software") }}</DropdownMenuLabel>
                     <DropdownMenuItem @click="$emit('actionSelect', 'UPGRADE_SOFTWARE')">
@@ -163,9 +163,9 @@
                         />
                         {{ $t("action.types.INSTALL_SOFTWARE") }}
                     </DropdownMenuItem>
-                    
+
                     <DropdownMenuSeparator />
-                    
+
                     <!-- Maintenance Actions -->
                     <DropdownMenuLabel>{{ $t("action.groups.maintenance") }}</DropdownMenuLabel>
                     <DropdownMenuItem @click="$emit('actionSelect', 'CLEAN')">
@@ -189,9 +189,9 @@
                         />
                         {{ $t("action.types.RESTORE") }}
                     </DropdownMenuItem>
-                    
+
                     <DropdownMenuSeparator />
-                    
+
                     <!-- Status Actions -->
                     <DropdownMenuLabel>{{ $t("action.groups.status") }}</DropdownMenuLabel>
                     <DropdownMenuItem @click="$emit('actionSelect', 'MARK_OFF_DUTY')">
@@ -208,9 +208,9 @@
                         />
                         {{ $t("action.types.RETURN_TO_INVENTORY") }}
                     </DropdownMenuItem>
-                    
+
                     <DropdownMenuSeparator />
-                    
+
                     <!-- Support Actions -->
                     <DropdownMenuLabel>{{ $t("action.groups.support") }}</DropdownMenuLabel>
                     <DropdownMenuItem @click="$emit('actionSelect', 'TROUBLESHOOT')">
