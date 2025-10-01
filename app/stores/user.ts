@@ -144,7 +144,6 @@ export const useUserStore = defineStore('user', () => {
             cache: 'no-store'
         });
         if (res.value) {
-            console.log('fetchAuthUser in Store res.value', res.value?.data);
             const responseData = (res.value as any).data;
             
             // Update user data with fresh information from the server
