@@ -6,7 +6,12 @@ import { useResourcesStore } from '~/stores/resources';
 export const useUserStore = defineStore('user', () => {
     const { t } = useNuxtApp().$i18n;
     const user = ref<User | undefined>();
-    const accessToken = useCookie('BKJH_ACCESS_TOKEN', { maxAge: 60 * 60 * 24 }); // 15 minutes to match backend
+    const accessToken = useCookie('BKJH_ACCESS_TOKEN', { 
+        maxAge: 60 * 15, // 15 minutes to match backend
+        httpOnly: false,
+        secure: false,
+        sameSite: 'lax'
+    });
 
     // Resources store instance - declared once for reuse
     const resourcesStore = useResourcesStore();
@@ -55,24 +60,20 @@ export const useUserStore = defineStore('user', () => {
 
             setUser(loginData.admin);
             setAccessToken(loginData.accessToken);
-            console.log('loginData.accessToken after submit', loginData.accessToken);
-            console.log('loginData.admin after submit', loginData.admin);
 
             // Wait for cookie to be set before fetching admin data
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => setTimeout(resolve, 200));
             await resourcesStore.fetchAdminData();
 
             // Wait a bit to ensure cookie is set
-            await new Promise(resolve => setTimeout(resolve, 150));
+            await new Promise(resolve => setTimeout(resolve, 300));
 
             toast.success(t('global.welcome'), {
                 description: t('auth.login_success'),
                 duration: 5000,
             });
-
+           
             await navigateTo(path as string ? path : '/');
-            console.log('loginData.accessToken after navigateTo', loginData.accessToken);
-            console.log('loginData.admin after navigateTo', loginData.admin);
         }
         if (error.value) {
             console.error('❌ Login failed:', error.value);
@@ -106,9 +107,20 @@ export const useUserStore = defineStore('user', () => {
         }
     }
     const fetchAuthUser = async () => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Don't proceed if there's no token
+        if (!accessToken.value) {
+            return;
+        }
+        
         // Use the auth check endpoint to verify authentication and get updated user data
         const { data: res, error } = await useApiFetch(`/auth/check`, {
-            // Remove lazy: true to ensure the request is executed immediately
+            headers: {
+                'Authorization': `Bearer ${accessToken.value}`,
+                credentials: 'include',
+            },
+           lazy: true
         });
         if (res.value) {
             const responseData = (res.value as any).data;
@@ -122,11 +134,11 @@ export const useUserStore = defineStore('user', () => {
             await new Promise(resolve => setTimeout(resolve, 100));
             await resourcesStore.fetchAdminData();
         }
-        if (error && error.value) {
+        if (error.value) {
             console.error('❌ fetchAuthUser: Auth check failed, clearing user data', error.value);
             // Clear user data but don't call logout() to avoid unwanted redirects
             setUser();
-            setAccessToken();
+            // Don't clear the token here - it might be valid but the check failed for other reasons
         }
     };
 

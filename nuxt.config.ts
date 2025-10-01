@@ -90,7 +90,7 @@ export default defineNuxtConfig({
                 },
             },
             '/backend/**': {
-                proxy: `${process.env.NUXT_PUBLIC_API_URL || 'http://api.backhaus-akademie.test:3055/api/v1/academy'}/**`,
+                proxy: `${process.env.NUXT_PUBLIC_API_URL || 'http://api.backhaus.test:3055/api/v1/dashboard'}/**`,
             },
         },
     },

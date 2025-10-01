@@ -46,7 +46,14 @@ export function useApiFetch<T = any>(
     }
 
     if (!skipAuth) {
-        const token = useCookie('BKJH_ACCESS_TOKEN').value;
+        // Handle both cases: when accessToken is a ref and when it's a string
+        let token;
+        if (typeof userStore.accessToken === 'string') {
+            token = userStore.accessToken;
+        } else {
+            token = (userStore.accessToken as any)?.value;
+        }
+        
         if (token) {
             defaultHeaders['Authorization'] = `Bearer ${token}`;
         }

@@ -86,7 +86,7 @@
                                 <Badge
                                     v-if="comment.isInternal"
                                     variant="secondary"
-                                    class="text-xs"
+                                    class="text-xs font-light flex items-center"
                                 >
                                     <Icon
                                         name="solar:lock-password-bold"
