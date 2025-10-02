@@ -37,7 +37,7 @@ const openAddDialog = () => {
 
         <!-- Attendees list content will go here -->
         <div class="text-center text-muted-foreground mt-8">
-            Attendees List Content
+            <MediaExample />
         </div>
     </div>
 </template>

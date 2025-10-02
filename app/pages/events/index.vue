@@ -346,6 +346,29 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                         class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
                                     />
                                 </LazyButton>
+                                <LazyButton
+                                    :title="$t('action.duplicate')"
+                                    variant="default"
+                                    size="icon"
+                                    @click="handleDelete(row.id)"
+                                >
+                                    <Icon
+                                        name="solar:copy-outline"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
+                                    />
+                                </LazyButton>
+                                
+                                <LazyButton
+                                    :title="$t('action.abgesagt')"
+                                    variant="destructive"
+                                    size="icon"
+                                    @click="handleDelete(row.id)"
+                                >
+                                    <Icon
+                                        name="solar:close-circle-outline"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
+                                    />
+                                </LazyButton>
                             </div>
                         </template>
                     </PageTable>

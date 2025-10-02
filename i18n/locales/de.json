@@ -532,5 +532,34 @@
     "qualification_help": "Optional: Beschreiben Sie die Expertise und Qualifikationen des Referenten",
     "add_description": "Einen neuen Referenten zum Akademie-System hinzufügen",
     "edit_description": "Referenteninformationen und Qualifikationen bearbeiten"
+  },
+  "media": {
+    "upload_prompt": "Klicken zum Hochladen oder Dateien hierher ziehen",
+    "drag_drop_or_click": "Dateien hierher ziehen oder klicken zum Auswählen",
+    "uploading": "Wird hochgeladen...",
+    "replace": "Ersetzen",
+    "remove": "Entfernen",
+    "allowed_types": "Erlaubte Typen",
+    "max_size": "Max. Größe",
+    "max_files": "Max. Dateien",
+    "selected": "ausgewählt",
+    "current": "Aktuell",
+    "gallery_title": "Medien-Galerie",
+    "gallery_description": "Dateien aus Ihrer Medienbibliothek auswählen",
+    "search_placeholder": "Mediendateien suchen...",
+    "no_files_found": "Keine Dateien gefunden",
+    "select_files": "Dateien auswählen",
+    "upload_error": "Upload fehlgeschlagen",
+    "load_error": "Medien konnten nicht geladen werden",
+    "open_gallery": "Galerie öffnen",
+    "selected_files": "Ausgewählte Dateien",
+    "validation": {
+      "globally_denied": "Dateityp '{type}' ist aus Sicherheitsgründen nicht erlaubt",
+      "size_exceeded": "Dateigröße ({size}MB) überschreitet die maximal erlaubte Größe ({max}MB)",
+      "type_not_allowed": "Dateityp '{type}' ist nicht erlaubt. Erlaubte Typen: {allowed}",
+      "type_denied": "Dateityp '{type}' ist aus Sicherheitsgründen nicht erlaubt",
+      "svg_superadmin_only": "SVG-Dateien können nur von Super-Administratoren hochgeladen werden",
+      "too_many_files": "Zu viele Dateien ({count}). Maximum erlaubt: {max}"
+    }
   }
 }

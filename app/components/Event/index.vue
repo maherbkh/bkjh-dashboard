@@ -31,6 +31,7 @@ const { t } = useI18n();
                 {{ $t("action.message.not_found_description", { model: $t("academy.singular") }) }}
             </p>
             <div class="flex items-center gap-3">
+              
                 <NuxtLink to="/events">
                     <Button>
                         <Icon
@@ -92,6 +93,13 @@ const { t } = useI18n();
                             {{ $t("action.edit") }}
                         </Button>
                     </NuxtLink>
+                    <Button>
+                        <Icon
+                            name="solar:round-arrow-down-line-duotone"
+                            class="mr-2 h-4 w-4"
+                        />
+                        Down Attendees List (xlsx)
+                    </Button>
                 </div>
             </div>
             <!-- Ticket Details Grid -->

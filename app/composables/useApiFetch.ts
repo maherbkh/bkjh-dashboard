@@ -42,7 +42,13 @@ export function useApiFetch<T = any>(
         'origin': originUrl,
     };
     if (['POST', 'PUT', 'PATCH'].includes(method) && opts.body != null) {
-        defaultHeaders['Content-Type'] = 'application/json';
+        // Don't set Content-Type for FormData (let browser handle it with boundary)
+        const isFormData = opts.body instanceof FormData;
+        const isMediaAPI = path.includes('/shared/media/');
+        
+        if (!isFormData && !isMediaAPI) {
+            defaultHeaders['Content-Type'] = 'application/json';
+        }
     }
 
     if (!skipAuth) {
