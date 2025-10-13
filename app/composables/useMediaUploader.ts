@@ -220,8 +220,8 @@ export function useMediaUploader(options: UseMediaUploaderOptions) {
                 throw new Error(error.value.message || t('media.upload_error'));
             }
 
-            if (data.value?.data) {
-                const uploadedFile = data.value.data;
+            if (data.value?.data?.media) {
+                const uploadedFile = data.value.data.media;
                 files.value = [uploadedFile];
                 options.onUploadSuccess?.(uploadedFile);
             }

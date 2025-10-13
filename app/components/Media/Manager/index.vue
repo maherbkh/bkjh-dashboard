@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { MediaFile, MediaQueryParams } from '~/types/media';
-import { useMediaManager } from '~/composables/useMediaManager';
+import type { MediaFile, MediaQueryParams, MediaPagination } from '~/types/media';
 import { useAuthenticatedImage } from '~/composables/useAuthenticatedImage';
 
 interface Props {
@@ -39,31 +38,12 @@ const { getImageSrc } = useAuthenticatedImage();
 
 // Selection state management - removed unused variable
 
-const {
-    mediaFiles,
-    loading,
-    pagination,
-    searchQuery,
-    selectedFiles,
-    selectFile,
-    deselectFile,
-    isSelected,
-    isOriginal,
-    loadMedia,
-    searchMedia,
-    resetSearch,
-    nextPage,
-    prevPage,
-    goToPage,
-} = useMediaManager({
-    accessLevel: toRef(props, 'accessLevel'),
-    collectionName: toRef(props, 'collectionName'),
-    modelType: toRef(props, 'modelType'),
-    modelId: toRef(props, 'modelId'),
-    multiple: toRef(props, 'multiple'),
-    maxSelection: toRef(props, 'maxSelection'),
-    onSelect: (file) => emit('select', file),
-});
+// Direct state management instead of composable
+const mediaFiles = ref<MediaFile[]>([]);
+const loading = ref(false);
+const pagination = ref<MediaPagination | null>(null);
+const searchQuery = ref('');
+const selectedFiles = ref<MediaFile[]>([]);
 
 // Watch for selectedFiles prop changes
 watch(() => props.selectedFiles, (newFiles) => {
@@ -74,6 +54,125 @@ watch(() => props.selectedFiles, (newFiles) => {
 watch(selectedFiles, (newFiles) => {
     emit('update:selectedFiles', newFiles);
 }, { deep: true });
+
+// Load media function following the guide
+const loadMedia = async (params: Partial<MediaQueryParams> = {}) => {
+    loading.value = true;
+    
+    try {
+        const queryParams: MediaQueryParams = {
+            page: pagination.value?.current_page || 1,
+            length: 24,
+            search: searchQuery.value,
+            accessLevel: props.accessLevel,
+            collectionName: props.collectionName,
+            modelType: props.modelType,
+            modelId: props.modelId,
+            sort_by: 'createdAt',
+            sort_dir: 'desc'
+        };
+
+        // Merge with provided params
+        const finalParams = { ...queryParams, ...params };
+
+        // Remove empty values
+        const cleanParams = Object.fromEntries(
+            Object.entries(finalParams).filter(([_, value]) => value !== '' && value !== null && value !== undefined)
+        );
+
+        const { data, error } = await useApiFetch('/shared/media', {
+            query: cleanParams
+        });
+
+        if (error.value) {
+            throw new Error(error.value.message || 'Failed to load media');
+        }
+
+        if (data.value?.data) {
+            mediaFiles.value = data.value.data.data;
+            pagination.value = data.value.data.meta;
+        }
+    } catch (error) {
+        console.error('Failed to load media:', error);
+        mediaFiles.value = [];
+        pagination.value = null;
+    } finally {
+        loading.value = false;
+    }
+};
+
+// Search and pagination functions
+const searchMedia = async () => {
+    await loadMedia({
+        search: searchQuery.value,
+        page: 1,
+    });
+};
+
+const resetSearch = async () => {
+    searchQuery.value = '';
+    await loadMedia({
+        search: '',
+        page: 1,
+    });
+};
+
+const nextPage = async () => {
+    if (pagination.value && pagination.value.current_page < pagination.value.last_page) {
+        await loadMedia({
+            page: pagination.value.current_page + 1,
+        });
+    }
+};
+
+const prevPage = async () => {
+    if (pagination.value && pagination.value.current_page > 1) {
+        await loadMedia({
+            page: pagination.value.current_page - 1,
+        });
+    }
+};
+
+const goToPage = async (page: number) => {
+    if (pagination.value && page >= 1 && page <= pagination.value.last_page) {
+        await loadMedia({
+            page,
+        });
+    }
+};
+
+// File selection functions
+const selectFile = (file: MediaFile) => {
+    if (!props.multiple) {
+        selectedFiles.value = [file];
+    } else {
+        const index = selectedFiles.value.findIndex(f => f.id === file.id);
+        if (index === -1) {
+            if (selectedFiles.value.length < props.maxSelection) {
+                selectedFiles.value.push(file);
+            }
+        } else {
+            selectedFiles.value.splice(index, 1);
+        }
+    }
+};
+
+const deselectFile = (file: MediaFile) => {
+    const index = selectedFiles.value.findIndex(f => f.id === file.id);
+    if (index !== -1) {
+        selectedFiles.value.splice(index, 1);
+    }
+};
+
+const isSelected = (fileId: string): boolean => {
+    return selectedFiles.value.some(file => file.id === fileId);
+};
+
+const isOriginal = (fileId: string): boolean => {
+    // This would need to be implemented based on your business logic
+    // For now, return false
+    return false;
+};
 
 
 const formatFileSize = (bytes: number) => {

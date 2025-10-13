@@ -108,7 +108,7 @@ watch(safeFiles, (newFiles) => {
     if (props.multiple) {
         emit('update:modelValue', [...newFiles]);
     } else {
-        emit('update:modelValue', newFiles.length > 0 ? { ...newFiles[0] } : null);
+        emit('update:modelValue', newFiles.length > 0 ? newFiles[0] : null);
     }
 }, { deep: true });
 
