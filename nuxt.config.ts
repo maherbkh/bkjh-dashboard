@@ -68,6 +68,9 @@ export default defineNuxtConfig({
             },
         },
     },
+    imports: {
+        dirs: ['types', 'utils']
+      },
     compatibilityDate: '2025-07-15',
     // Reduce development warnings
     nitro: {
@@ -81,7 +84,22 @@ export default defineNuxtConfig({
                 proxy: `http://ip-api.com/json/**`,
             },
             '/api/media/**': {
-                proxy: 'http://api.backhaus.test:3055/api/v1/media/**',
+                proxy: 'http://api.backhaus.test:3055/uploads/**',
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+                    'Access-Control-Expose-Headers': 'Content-Disposition, Content-Length, Content-Type',
+                },
+            },
+            '/get-media/': { 
+                redirect: { 
+                    to: '/api/get-media-blocked', 
+                    statusCode: 404 
+                } 
+            },
+            '/get-media/**': {
+                proxy: 'http://api.backhaus.test:3055/uploads/public/**',
                 headers: {
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'GET, OPTIONS',
