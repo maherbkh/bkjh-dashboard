@@ -16,7 +16,7 @@ const props = withDefaults(defineProps<Props>(), {
   class: ''
 })
 
-const { getImageSrc } = useAuthenticatedImage()
+const { getDirectImageSrc } = useAuthenticatedImage()
 
 const isImage = computed(() => isImageFile(props.media.mimeType))
 
@@ -37,7 +37,7 @@ const sizeClasses = computed(() => {
 
 const imageSrc = computed(() => {
   if (isImage.value) {
-    return getImageSrc(props.media)
+    return getDirectImageSrc(props.media)
   }
   return null
 })

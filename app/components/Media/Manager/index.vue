@@ -7,6 +7,10 @@ import { useAuthenticatedImage } from '~/composables/useAuthenticatedImage'
 import { mediaFormatter } from '~/services/media'
 import MediaLoadingGrid from '~/components/Media/molecules/MediaLoadingGrid.vue'
 import MediaErrorDisplay from '~/components/Media/molecules/MediaErrorDisplay.vue'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Icon } from '#components'
 
 interface Props {
     open?: boolean
@@ -40,7 +44,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { getImageSrc } = useAuthenticatedImage()
+const { getDirectImageSrc } = useAuthenticatedImage()
 
 // Use new composables
 const repository = useMediaRepository()
@@ -71,12 +75,12 @@ watch(() => props.modelType, (type: string | undefined) => {
 
 // Watch for selectedFiles prop changes
 watch(() => props.selectedFiles, (newFiles: MediaEntity[]) => {
-    selection.setSelection(newFiles)
+    selection.setSelection([...newFiles])
 }, { immediate: true, deep: true })
 
 // Watch for selection changes and emit
-watch(selection.selected, (newFiles: MediaEntity[]) => {
-    emit('update:selectedFiles', newFiles)
+watch(selection.selected, (newFiles: readonly MediaEntity[]) => {
+    emit('update:selectedFiles', [...newFiles])
 }, { deep: true })
 
 // Load media using repository
@@ -163,7 +167,7 @@ const handleSelect = () => {
     if (selection.hasSelection.value) {
         if (props.multiple) {
             // Emit full media objects for multiple selection
-            emit('select', selection.selected.value)
+            emit('select', [...selection.selected.value])
             toast.success(t('media.files_selected'), {
                 description: t('media.selected_count', { count: selection.selectionCount.value })
             })
@@ -177,7 +181,7 @@ const handleSelect = () => {
                 })
             }
         }
-        emit('update:selectedFiles', selection.selected.value)
+        emit('update:selectedFiles', [...selection.selected.value])
         handleClose()
     }
 }
@@ -262,7 +266,7 @@ watch(() => props.open, (isOpen: boolean) => {
                             <div class="aspect-square overflow-hidden rounded-lg">
                                 <NuxtImg
                                     v-if="file.mimeType?.startsWith('image/')"
-                                    :src="getImageSrc(file)"
+                                    :src="getDirectImageSrc(file)"
                                     :alt="file.filename"
                                     class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                 />

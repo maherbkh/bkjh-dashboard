@@ -1,4 +1,4 @@
-import type { MimeTypeCategory } from '~/types/media/index'
+import { MimeTypeCategory } from '~/types/media/index'
 import { getMimeTypeCategory } from '~/utils/media'
 
 /**

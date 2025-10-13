@@ -21,19 +21,57 @@ export function useMediaRepository() {
    */
   async function findAll(query: MediaQueryDto): Promise<ApiResponse<MediaEntity[]>> {
     try {
+      console.log('🌐 [useMediaRepository] Fetching media with query:', query)
       const { data, error } = await useApiFetch('/shared/media', {
         method: 'GET',
         query: query as Record<string, any>
       })
 
       if (error.value) {
+        console.error('❌ [useMediaRepository] API error:', error.value)
         throw new UploadError(
           error.value.message || 'Failed to fetch media',
           { code: MediaErrorCode.NETWORK_ERROR, details: error.value }
         )
       }
 
-      const result = data.value as ApiResponse<MediaEntity[]>
+      console.log('✅ [useMediaRepository] API response received:', data.value)
+      
+      // Handle your backend's response structure: { success, message, data: { data: [...], meta: {...} } }
+      const backendResponse = data.value as { 
+        success: boolean
+        message: string
+        data: {
+          data: MediaEntity[]
+          meta: {
+            page: number
+            limit: number
+            total: number
+            totalPages: number
+            hasNextPage: boolean
+            hasPrevPage: boolean
+            nextPage: number | null
+            prevPage: number | null
+          }
+        }
+      }
+
+      // Transform to expected ApiResponse format
+      const result: ApiResponse<MediaEntity[]> = {
+        data: backendResponse.data.data,
+        meta: {
+          page: backendResponse.data.meta.page,
+          limit: backendResponse.data.meta.limit,
+          total: backendResponse.data.meta.total,
+          totalPages: backendResponse.data.meta.totalPages,
+          hasNextPage: backendResponse.data.meta.hasNextPage,
+          hasPrevPage: backendResponse.data.meta.hasPrevPage,
+          nextPage: backendResponse.data.meta.nextPage,
+          prevPage: backendResponse.data.meta.prevPage
+        }
+      }
+      
+      console.log('📊 [useMediaRepository] Transformed response:', result)
       
       // Show info toast for empty results
       if (result.data.length === 0) {
@@ -44,6 +82,7 @@ export function useMediaRepository() {
 
       return result
     } catch (err) {
+      console.error('❌ [useMediaRepository] FindAll error:', err)
       if (err instanceof UploadError) throw err
       throw new UploadError('Failed to fetch media', { code: MediaErrorCode.NETWORK_ERROR, details: err })
     }
@@ -65,7 +104,9 @@ export function useMediaRepository() {
         )
       }
 
-      return data.value as MediaEntity
+      // Handle backend response structure for single media
+      const backendResponse = data.value as { success: boolean; message: string; data: MediaEntity }
+      return backendResponse.data
     } catch (err) {
       if (err instanceof UploadError) throw err
       throw new UploadError('Failed to fetch media', { code: MediaErrorCode.NETWORK_ERROR, details: err })
@@ -260,9 +301,26 @@ export function useMediaRepository() {
         updatedAt: uploadResult.createdAt
       }))
       
+      // Convert MediaEntity[] to UploadResponse[] for BulkUploadResponse
+      const uploadResponses: UploadResponse[] = successfulMedia.map(media => ({
+        id: media.id,
+        uuid: media.uuid,
+        filename: media.filename,
+        mimeType: media.mimeType,
+        size: media.size,
+        width: media.width,
+        height: media.height,
+        url: media.url || '', // Ensure url is not undefined
+        accessLevel: media.accessLevel,
+        authId: media.authId,
+        authType: media.authType,
+        directory: media.directory,
+        createdAt: media.createdAt
+      }))
+      
       const result: BulkUploadResponse = {
         ...bulkResult,
-        successful: successfulMedia
+        successful: uploadResponses
       }
       
       // Show success toast with summary
@@ -296,7 +354,9 @@ export function useMediaRepository() {
         )
       }
 
-      const result = data.value as MediaEntity
+      // Handle backend response structure for update
+      const backendResponse = data.value as { success: boolean; message: string; data: MediaEntity }
+      const result = backendResponse.data
       
       // Show success toast
       toast.success('Media updated successfully', {
@@ -361,7 +421,9 @@ export function useMediaRepository() {
         )
       }
 
-      return data.value as MediaStatsResponse
+      // Handle backend response structure for stats
+      const backendResponse = data.value as { success: boolean; message: string; data: MediaStatsResponse }
+      return backendResponse.data
     } catch (err) {
       if (err instanceof UploadError) throw err
       throw new UploadError('Failed to fetch stats', { code: MediaErrorCode.NETWORK_ERROR, details: err })
@@ -441,7 +503,9 @@ export function useMediaRepository() {
         )
       }
 
-      return data.value as MediaEntity[]
+      // Handle backend response structure for model media
+      const backendResponse = data.value as { success: boolean; message: string; data: MediaEntity[] }
+      return backendResponse.data
     } catch (err) {
       if (err instanceof UploadError) throw err
       throw new UploadError('Failed to fetch model media', { code: MediaErrorCode.NETWORK_ERROR, details: err })

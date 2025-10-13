@@ -67,38 +67,45 @@ export function useAuthenticatedImage() {
             return result;
         }
         
+        // For other URLs, check if they already start with /api/media/ to avoid double prefix
+        if (url.startsWith('/api/media/')) {
+            console.log('🖼️ [useAuthenticatedImage] URL already has /api/media/ prefix, returning as is:', url);
+            return url;
+        }
+        
         // For other URLs, use the proxy with the full URL
         const result = `/api/media/${url}`;
         console.log('🖼️ [useAuthenticatedImage] Default transformation:', result);
         return result;
     };
     
-    const getImageSrc = (mediaFile: any) => {
-        console.log('🖼️ [useAuthenticatedImage] getImageSrc called with:', mediaFile);
-        
-        // Try fullUrl first, then use proxy for url
-        if (mediaFile?.fullUrl) {
-            console.log('🖼️ [useAuthenticatedImage] Using fullUrl:', mediaFile.fullUrl);
-            return mediaFile.fullUrl;
-        }
-        
-        if (mediaFile?.url) {
-            const transformedUrl = getAuthenticatedImageUrl(mediaFile);
-            console.log('🖼️ [useAuthenticatedImage] Transformed URL:', transformedUrl);
-            return transformedUrl;
-        }
-        
-        // If no URL fields are provided, construct the URL using uuid
-        if (mediaFile?.uuid) {
-            // Construct the URL using the uuid field
-            const constructedUrl = `/api/media/${mediaFile.uuid}/show`;
-            console.log('🖼️ [useAuthenticatedImage] Constructed URL:', constructedUrl);
-            return getAuthenticatedImageUrl({ url: constructedUrl });
-        }
-        
-        console.log('🖼️ [useAuthenticatedImage] No valid URL found, returning empty string');
-        return '';
-    };
+const getImageSrc = (mediaFile: any) => {
+    console.log('🖼️ [useAuthenticatedImage] getImageSrc called with:', mediaFile);
+    
+    // Priority 1: Use the url field from API response
+    if (mediaFile?.url) {
+        const transformedUrl = getAuthenticatedImageUrl(mediaFile);
+        console.log('🖼️ [useAuthenticatedImage] Transformed URL from API url field:', transformedUrl);
+        return transformedUrl;
+    }
+    
+    // Priority 2: Fallback to fullUrl if available
+    if (mediaFile?.fullUrl) {
+        console.log('🖼️ [useAuthenticatedImage] Using fullUrl:', mediaFile.fullUrl);
+        return mediaFile.fullUrl;
+    }
+    
+    // Priority 3: Construct URL from uuid (legacy support)
+    if (mediaFile?.uuid) {
+        // Construct the URL using the uuid field - return directly since it's already in the correct format
+        const constructedUrl = `/api/media/${mediaFile.uuid}/show`;
+        console.log('🖼️ [useAuthenticatedImage] Constructed URL from uuid:', constructedUrl);
+        return constructedUrl; // Return directly, don't pass through getAuthenticatedImageUrl
+    }
+    
+    console.log('🖼️ [useAuthenticatedImage] No valid URL found, returning empty string');
+    return '';
+};
 
     // New function to get direct image URL that bypasses IPX
     const getDirectImageSrc = (mediaFile: any) => {
