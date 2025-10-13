@@ -53,6 +53,7 @@
             </Button>
             <MediaManager
                 v-model:open="showManager"
+                v-model:selectedFiles="multipleFiles"
                 :multiple="true"
                 :max-selection="5"
                 :allowed-types="['image']"
@@ -107,25 +108,31 @@ const formatBytes = (bytes: number) => {
 const handleMediaSelect = (selectedFiles: MediaEntity | MediaEntity[] | string | string[]) => {
     console.log('Media selected:', selectedFiles)
     
-    // Handle different selection types based on maxSelection
-    if (typeof selectedFiles === 'string') {
-        // Single selection - received media ID
-        console.log('Single media ID selected:', selectedFiles)
-        // You would need to fetch the full MediaEntity if needed
-    } else if (Array.isArray(selectedFiles)) {
-        // Multiple selection - check if it's MediaEntity[] or string[]
-        if (selectedFiles.length > 0 && typeof selectedFiles[0] === 'string') {
-            // String array - media IDs
-            console.log('Multiple media IDs selected:', selectedFiles)
-            // You would need to fetch the full MediaEntity objects if needed
-        } else {
-            // MediaEntity array
-            multipleFiles.value = selectedFiles as MediaEntity[]
+    try {
+        // Handle different selection types based on maxSelection
+        if (typeof selectedFiles === 'string') {
+            // Single selection - received media ID
+            console.log('Single media ID selected:', selectedFiles)
+            // You would need to fetch the full MediaEntity if needed
+            showManager.value = false
+        } else if (Array.isArray(selectedFiles)) {
+            // Multiple selection - check if it's MediaEntity[] or string[]
+            if (selectedFiles.length > 0 && typeof selectedFiles[0] === 'string') {
+                // String array - media IDs
+                console.log('Multiple media IDs selected:', selectedFiles)
+                // You would need to fetch the full MediaEntity objects if needed
+            } else {
+                // MediaEntity array
+                multipleFiles.value = [...selectedFiles] as MediaEntity[]
+            }
+            showManager.value = false
+        } else if (selectedFiles) {
+            // Single selection - received MediaEntity
+            singleFile.value = selectedFiles
+            showManager.value = false
         }
-        showManager.value = false
-    } else if (selectedFiles) {
-        // Single selection - received MediaEntity
-        singleFile.value = selectedFiles
+    } catch (error) {
+        console.error('Error handling media selection:', error)
         showManager.value = false
     }
 }

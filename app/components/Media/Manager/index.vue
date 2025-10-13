@@ -73,14 +73,53 @@ watch(() => props.modelType, (type: string | undefined) => {
     }
 }, { immediate: true })
 
+// Track if we're updating from props to prevent circular updates
+const isUpdatingFromProps = ref(false)
+
 // Watch for selectedFiles prop changes
 watch(() => props.selectedFiles, (newFiles: MediaEntity[]) => {
-    selection.setSelection([...newFiles])
+    console.log('📥 [MediaManager] Props selectedFiles changed:', newFiles.map(f => f.id))
+    
+    // Prevent circular updates
+    if (isUpdatingFromProps.value) {
+        console.log('⏭️ [MediaManager] Skipping selection update - already updating from props')
+        return
+    }
+    
+    // Only update if the selection is actually different
+    const currentIds = selection.selected.value.map(m => m.id).sort()
+    const newIds = newFiles.map(m => m.id).sort()
+    if (JSON.stringify(currentIds) !== JSON.stringify(newIds)) {
+        console.log('🔄 [MediaManager] Updating selection from props')
+        isUpdatingFromProps.value = true
+        selection.setSelection([...newFiles])
+        nextTick(() => {
+            isUpdatingFromProps.value = false
+        })
+    } else {
+        console.log('⏭️ [MediaManager] Skipping selection update - no change')
+    }
 }, { immediate: true, deep: true })
 
 // Watch for selection changes and emit
 watch(selection.selected, (newFiles: readonly MediaEntity[]) => {
-    emit('update:selectedFiles', [...newFiles])
+    console.log('📤 [MediaManager] Selection changed:', newFiles.map(f => f.id))
+    
+    // Prevent circular updates
+    if (isUpdatingFromProps.value) {
+        console.log('⏭️ [MediaManager] Skipping emit - updating from props')
+        return
+    }
+    
+    // Only emit if the selection is actually different
+    const currentIds = props.selectedFiles?.map(m => m.id).sort() || []
+    const newIds = newFiles.map(m => m.id).sort()
+    if (JSON.stringify(currentIds) !== JSON.stringify(newIds)) {
+        console.log('📡 [MediaManager] Emitting selection change')
+        emit('update:selectedFiles', [...newFiles])
+    } else {
+        console.log('⏭️ [MediaManager] Skipping emit - no change')
+    }
 }, { deep: true })
 
 // Load media using repository
@@ -136,11 +175,23 @@ const goToPage = async (page: number) => {
 
 // File selection functions using selection composable
 const selectFile = (file: MediaEntity) => {
+    console.log('🎯 [MediaManager] Selecting file:', file.id, file.filename)
+    // Prevent circular updates during manual selection
+    isUpdatingFromProps.value = true
     selection.select(file)
+    nextTick(() => {
+        isUpdatingFromProps.value = false
+    })
 }
 
 const deselectFile = (file: MediaEntity) => {
+    console.log('❌ [MediaManager] Deselecting file:', file.id, file.filename)
+    // Prevent circular updates during manual deselection
+    isUpdatingFromProps.value = true
     selection.deselect(file)
+    nextTick(() => {
+        isUpdatingFromProps.value = false
+    })
 }
 
 const isSelected = (fileId: string): boolean => {
@@ -165,6 +216,11 @@ const getFileIcon = (mimeType: string) => {
 // Selection handlers using selection composable
 const handleSelect = () => {
     if (selection.hasSelection.value) {
+        console.log('🎯 [MediaManager] Handling selection:', selection.selected.value.map(f => f.id))
+        
+        // Prevent circular updates during selection
+        isUpdatingFromProps.value = true
+        
         if (props.multiple) {
             // Emit full media objects for multiple selection
             emit('select', [...selection.selected.value])
@@ -182,11 +238,21 @@ const handleSelect = () => {
             }
         }
         emit('update:selectedFiles', [...selection.selected.value])
+        
+        // Close the dialog first
         handleClose()
+        
+        // Reset the flag after closing
+        nextTick(() => {
+            isUpdatingFromProps.value = false
+        })
     }
 }
 
 const handleClose = () => {
+    console.log('🚪 [MediaManager] Closing dialog')
+    // Reset the flag before closing to ensure clean state
+    isUpdatingFromProps.value = false
     emit('update:open', false)
     emit('close')
 }
@@ -260,7 +326,7 @@ watch(() => props.open, (isOpen: boolean) => {
                                 isSelected(file.id) ? 'border-primary ring-2 ring-primary/20 shadow-premium-lg' : 'border-border hover:border-primary/50',
                                 isOriginal(file.id) ? 'opacity-50 cursor-not-allowed' : ''
                             ]"
-                            @click="isOriginal(file.id) ? null : selectFile(file)"
+                            @click="isOriginal(file.id) ? null : (isSelected(file.id) ? deselectFile(file) : selectFile(file))"
                         >
                             <!-- File Preview -->
                             <div class="aspect-square overflow-hidden rounded-lg">
@@ -298,7 +364,10 @@ watch(() => props.open, (isOpen: boolean) => {
                             <!-- Hover Overlay -->
                             <div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
                                 <div class="bg-background/90 backdrop-blur-sm rounded-full p-2">
-                                    <Icon name="solar:eye-outline" class="w-5 h-5 text-primary" />
+                                    <Icon 
+                                        :name="isSelected(file.id) ? 'solar:close-circle-outline' : 'solar:check-circle-outline'" 
+                                        class="w-5 h-5 text-primary" 
+                                    />
                                 </div>
                             </div>
 
@@ -353,6 +422,13 @@ watch(() => props.open, (isOpen: boolean) => {
                     <div class="flex gap-2">
                         <Button variant="outline" @click="handleClose">
                             {{ t('common.cancel') }}
+                        </Button>
+                        <Button 
+                            v-if="selection.hasSelection.value" 
+                            variant="outline" 
+                            @click="selection.clearSelection()"
+                        >
+                            {{ t('media.clear_selection') }}
                         </Button>
                         <Button @click="handleSelect" :disabled="!selection.hasSelection.value">
                             {{ t('media.select_files') }} ({{ selection.selectionCount.value }})
