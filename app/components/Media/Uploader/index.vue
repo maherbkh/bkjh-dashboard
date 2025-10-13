@@ -1,25 +1,29 @@
 <script setup lang="ts">
-import type { MediaFile, MediaUploadOptions } from '~/types/media';
-import { useMediaUploader } from '~/composables/useMediaUploader';
-import { useAuthenticatedImage } from '~/composables/useAuthenticatedImage';
+import type { MediaEntity, AccessLevel, CollectionType } from '~/types/media/index'
+import { AccessLevel as AccessLevelEnum, CollectionType as CollectionTypeEnum } from '~/types/media/index'
+import { useMediaRepository, useMediaPermissions, useMediaErrorHandler, useMediaLoading } from '~/composables/media'
+import { toast } from 'vue-sonner'
+import { useAuthenticatedImage } from '~/composables/useAuthenticatedImage'
+import { mediaValidator, mediaFormatter } from '~/services/media'
+import MediaErrorDisplay from '~/components/Media/molecules/MediaErrorDisplay.vue'
 
 interface Props {
-    modelValue?: MediaFile | MediaFile[] | null;
-    label?: string;
-    name?: string;
-    required?: boolean;
-    multiple?: boolean;
-    maxFiles?: number;
-    maxSize?: number; // in MB
-    allowedTypes?: string[];
-    accessLevel?: 'SELF' | 'SUPPORT' | 'ACADEMY' | 'PUBLIC';
-    collectionName?: 'avatar' | 'cover' | 'gallery' | 'attachments' | 'documents' | 'default';
-    modelType?: string;
-    modelId?: string;
-    directory?: string;
-    errors?: string[];
-    disabled?: boolean;
-    placeholder?: string;
+    modelValue?: MediaEntity | MediaEntity[] | null
+    label?: string
+    name?: string
+    required?: boolean
+    multiple?: boolean
+    maxFiles?: number
+    maxSize?: number // in MB
+    allowedTypes?: string[]
+    accessLevel?: AccessLevel
+    collectionName?: CollectionType
+    modelType?: string
+    modelId?: string
+    directory?: string
+    errors?: string[]
+    disabled?: boolean
+    placeholder?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -31,131 +35,377 @@ const props = withDefaults(defineProps<Props>(), {
     maxFiles: 1,
     maxSize: 10, // 10MB default
     allowedTypes: () => ['image'],
-    accessLevel: 'PUBLIC',
-    collectionName: '',
+    accessLevel: AccessLevelEnum.PUBLIC,
+    collectionName: CollectionTypeEnum.DEFAULT,
     modelType: '',
     modelId: '',
     directory: 'shared',
     errors: () => [],
     disabled: false,
     placeholder: '',
-});
+})
 
 const emit = defineEmits<{
-    'update:modelValue': [value: MediaFile | MediaFile[] | null];
-    'upload:start': [];
-    'upload:success': [file: MediaFile];
-    'upload:error': [error: string];
-}>();
+    'update:modelValue': [value: MediaEntity | MediaEntity[] | null]
+    'upload:start': []
+    'upload:success': [file: MediaEntity]
+    'upload:error': [error: string]
+}>()
 
-const { t } = useI18n();
-const { getImageSrc } = useAuthenticatedImage();
+const { t } = useI18n()
+const { getDirectImageSrc } = useAuthenticatedImage()
+
+// Use new composables
+const repository = useMediaRepository()
+const permissions = useMediaPermissions()
+const errorHandler = useMediaErrorHandler()
+const loading = useMediaLoading()
 
 // Template refs
-const fileInputRef = ref<HTMLInputElement>();
+const fileInputRef = ref<HTMLInputElement>()
+
+// State management
+const files = ref<MediaEntity[]>([])
+const dragging = ref(false)
 
 // Ensure files is always an array
 const safeFiles = computed(() => {
-    if (!files) return [];
-    if (files.value && Array.isArray(files.value)) return files.value;
-    if (Array.isArray(files)) return files;
-    return [];
-});
-
-const mediaUploader = useMediaUploader({
-    modelValue: toRef(props, 'modelValue'),
-    maxFiles: toRef(props, 'maxFiles'),
-    maxSize: toRef(props, 'maxSize'),
-    allowedTypes: toRef(props, 'allowedTypes'),
-    accessLevel: toRef(props, 'accessLevel'),
-    collectionName: toRef(props, 'collectionName'),
-    modelType: toRef(props, 'modelType'),
-    modelId: toRef(props, 'modelId'),
-    directory: toRef(props, 'directory'),
-    onUploadSuccess: (file) => emit('upload:success', file),
-    onUploadError: (error) => emit('upload:error', error),
-    onUploadStart: () => emit('upload:start'),
-});
-
-// Destructure with fallbacks
-const files = mediaUploader.files || ref<MediaFile[]>([]);
-const uploading = mediaUploader.uploading || ref(false);
-const dragging = mediaUploader.dragging || ref(false);
-const validationErrors = mediaUploader.validationErrors || ref<string[]>([]);
-const uploadFile = mediaUploader.uploadFile || (() => {});
-const uploadFiles = mediaUploader.uploadFiles || (() => {});
-const removeFile = mediaUploader.removeFile || (() => {});
-const removeFileAtIndex = mediaUploader.removeFileAtIndex || (() => {});
-const validateFile = mediaUploader.validateFile || (() => false);
-const validateFiles = mediaUploader.validateFiles || (() => false);
-const resetValidation = mediaUploader.resetValidation || (() => {});
+    if (!files.value) return []
+    return Array.isArray(files.value) ? files.value : []
+})
 
 // Watch for modelValue changes
-watch(() => props.modelValue, (newValue) => {
-    if (newValue !== safeFiles.value && files) {
+watch(() => props.modelValue, (newValue: MediaEntity | MediaEntity[] | null) => {
+    if (newValue !== safeFiles.value) {
         if (Array.isArray(newValue)) {
-            files.value = newValue;
+            files.value = newValue
         } else if (newValue) {
-            files.value = [newValue];
+            files.value = [newValue]
         } else {
-            files.value = [];
+            files.value = []
         }
     }
-});
+})
 
 // Watch for files changes and emit
-watch(safeFiles, (newFiles) => {
+watch(safeFiles, (newFiles: MediaEntity[]) => {
     if (props.multiple) {
-        emit('update:modelValue', [...newFiles]);
+        emit('update:modelValue', [...newFiles])
     } else {
-        emit('update:modelValue', newFiles.length > 0 ? newFiles[0] : null);
+        emit('update:modelValue', newFiles.length > 0 ? newFiles[0] as MediaEntity : null)
     }
-}, { deep: true });
+}, { deep: true })
+
+// Upload functions using new architecture
+const uploadFile = async (file: File) => {
+    console.log('🚀 [MediaUploader] Starting single file upload:', {
+        filename: file.name,
+        size: file.size,
+        type: file.type,
+        props: {
+            accessLevel: props.accessLevel,
+            collectionName: props.collectionName,
+            modelType: props.modelType,
+            modelId: props.modelId,
+            directory: props.directory
+        }
+    })
+
+    loading.startUpload('single')
+    errorHandler.clearErrors()
+
+    try {
+        console.log('📋 [MediaUploader] Step 1: Validating file...')
+        // Validate file
+        const validation = mediaValidator.validateFile(file, 'dashboard')
+        console.log('📋 [MediaUploader] Validation result:', validation)
+        
+        if (!validation.isValid) {
+            console.error('❌ [MediaUploader] File validation failed:', validation.errors)
+            validation.errors.forEach(error => errorHandler.addValidationError(error))
+            emit('upload:error', validation.errors.join(', '))
+            return
+        }
+        console.log('✅ [MediaUploader] File validation passed')
+
+        console.log('🔐 [MediaUploader] Step 2: Checking permissions...')
+        // Check permissions
+        console.log('🔐 [MediaUploader] Permission check result:', {
+            canUpload: permissions.canUpload.value,
+            user: permissions.currentUser.value
+        })
+        
+        if (!permissions.canUpload.value) {
+            const error = 'You do not have permission to upload files'
+            console.error('❌ [MediaUploader] Permission denied:', error)
+            errorHandler.addPermissionError(error)
+            emit('upload:error', error)
+            return
+        }
+        console.log('✅ [MediaUploader] Permission check passed')
+
+        console.log('📤 [MediaUploader] Step 3: Emitting upload start event...')
+        emit('upload:start')
+
+        console.log('🌐 [MediaUploader] Step 4: Calling repository.create...')
+        console.log('🌐 [MediaUploader] Repository call parameters:', {
+            file: {
+                name: file.name,
+                size: file.size,
+                type: file.type
+            },
+            options: {
+                accessLevel: props.accessLevel,
+                collectionName: props.collectionName,
+                modelType: props.modelType,
+                modelId: props.modelId,
+                directory: props.directory
+            }
+        })
+
+        // Upload file
+        const result = await repository.create(file, {
+            accessLevel: props.accessLevel,
+            collectionName: props.collectionName,
+            modelType: props.modelType,
+            modelId: props.modelId,
+            directory: props.directory
+        })
+
+        console.log('✅ [MediaUploader] Repository.create completed:', result)
+
+        // Add to files array
+        const newFile = result as MediaEntity
+        console.log('📁 [MediaUploader] Step 5: Adding file to local state...')
+        console.log('📁 [MediaUploader] New file data:', newFile)
+        
+        if (props.multiple) {
+            files.value = [...files.value, newFile]
+            console.log('📁 [MediaUploader] Added to multiple files array. Total files:', files.value.length)
+        } else {
+            files.value = [newFile]
+            console.log('📁 [MediaUploader] Set as single file')
+        }
+
+        console.log('🎉 [MediaUploader] Step 6: Emitting success events...')
+        emit('upload:success', newFile)
+        toast.success(t('media.upload_success'), {
+            description: t('media.file_uploaded', { filename: newFile.filename })
+        })
+        console.log('✅ [MediaUploader] Single file upload completed successfully!')
+        
+    } catch (error) {
+        console.error('❌ [MediaUploader] Upload failed with error:', error)
+        console.error('❌ [MediaUploader] Error details:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined,
+            error
+        })
+        
+        const errorMessage = error instanceof Error ? error.message : 'Upload failed'
+        errorHandler.addUploadError(errorMessage, 'UPLOAD_FAILED', error)
+        emit('upload:error', errorMessage)
+    } finally {
+        console.log('🏁 [MediaUploader] Finishing upload process...')
+        loading.finishUpload('single')
+    }
+}
+
+const uploadFiles = async (fileList: File[]) => {
+    console.log('🚀 [MediaUploader] Starting multiple files upload:', {
+        fileCount: fileList.length,
+        files: fileList.map(f => ({ name: f.name, size: f.size, type: f.type })),
+        props: {
+            accessLevel: props.accessLevel,
+            collectionName: props.collectionName,
+            modelType: props.modelType,
+            modelId: props.modelId,
+            directory: props.directory
+        }
+    })
+
+    try {
+        console.log('📋 [MediaUploader] Step 1: Validating multiple files...')
+        // Validate files
+        const validation = mediaValidator.validateFiles(fileList, 'dashboard')
+        console.log('📋 [MediaUploader] Multiple files validation result:', validation)
+        
+        if (!validation.isValid) {
+            console.error('❌ [MediaUploader] Multiple files validation failed:', validation.errors)
+            validation.errors.forEach(error => errorHandler.addValidationError(error))
+            emit('upload:error', validation.errors.join(', '))
+            return
+        }
+        console.log('✅ [MediaUploader] Multiple files validation passed')
+
+        console.log('🔐 [MediaUploader] Step 2: Checking permissions for multiple files...')
+        // Check permissions
+        console.log('🔐 [MediaUploader] Permission check result:', {
+            canUpload: permissions.canUpload.value,
+            user: permissions.currentUser.value
+        })
+        
+        if (!permissions.canUpload.value) {
+            const error = 'You do not have permission to upload files'
+            console.error('❌ [MediaUploader] Permission denied for multiple files:', error)
+            errorHandler.addPermissionError(error)
+            emit('upload:error', error)
+            return
+        }
+        console.log('✅ [MediaUploader] Permission check passed for multiple files')
+
+        console.log('📤 [MediaUploader] Step 3: Starting multiple files upload process...')
+        loading.startUpload('multiple')
+        emit('upload:start')
+
+        console.log('🌐 [MediaUploader] Step 4: Calling repository.createMany...')
+        console.log('🌐 [MediaUploader] Repository call parameters:', {
+            fileList: fileList.map(f => ({ name: f.name, size: f.size, type: f.type })),
+            options: {
+                accessLevel: props.accessLevel,
+                collectionName: props.collectionName,
+                modelType: props.modelType,
+                modelId: props.modelId,
+                directory: props.directory
+            }
+        })
+
+        // Upload files
+        const result = await repository.createMany(fileList, {
+            accessLevel: props.accessLevel,
+            collectionName: props.collectionName,
+            modelType: props.modelType,
+            modelId: props.modelId,
+            directory: props.directory
+        })
+
+        console.log('✅ [MediaUploader] Repository.createMany completed:', result)
+
+        // Add successful uploads to files array
+        const newFiles = result.successful as MediaEntity[]
+        console.log('📁 [MediaUploader] Step 5: Adding successful files to local state...')
+        console.log('📁 [MediaUploader] Successful files:', newFiles)
+        
+        if (props.multiple) {
+            files.value = [...files.value, ...newFiles]
+            console.log('📁 [MediaUploader] Added to multiple files array. Total files:', files.value.length)
+        } else if (newFiles.length > 0) {
+            files.value = [newFiles[0]!]
+            console.log('📁 [MediaUploader] Set first file as single file')
+        }
+
+        console.log('🎉 [MediaUploader] Step 6: Emitting success events for multiple files...')
+        if (newFiles.length > 0) {
+            emit('upload:success', newFiles[0]!)
+        }
+        toast.success(t('media.upload_success'), {
+            description: t('media.files_uploaded', { count: newFiles.length })
+        })
+        console.log('✅ [MediaUploader] Multiple files upload completed successfully!')
+        
+    } catch (error) {
+        console.error('❌ [MediaUploader] Multiple files upload failed with error:', error)
+        console.error('❌ [MediaUploader] Error details:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined,
+            error
+        })
+        
+        const errorMessage = error instanceof Error ? error.message : 'Upload failed'
+        errorHandler.addUploadError(errorMessage, 'UPLOAD_FAILED', error)
+        emit('upload:error', errorMessage)
+    } finally {
+        console.log('🏁 [MediaUploader] Finishing multiple files upload process...')
+        loading.finishUpload('multiple')
+    }
+}
 
 const handleFileSelect = async (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    if (!target.files?.length) return;
+    console.log('📁 [MediaUploader] File selection triggered:', event)
+    const target = event.target as HTMLInputElement
+    console.log('📁 [MediaUploader] Selected files:', target.files)
+    
+    if (!target.files?.length) {
+        console.log('📁 [MediaUploader] No files selected, returning')
+        return
+    }
+
+    console.log('📁 [MediaUploader] Processing file selection:', {
+        fileCount: target.files.length,
+        multiple: props.multiple,
+        files: Array.from(target.files).map(f => ({ name: f.name, size: f.size, type: f.type }))
+    })
 
     if (props.multiple) {
-        await uploadFiles(Array.from(target.files));
+        console.log('📁 [MediaUploader] Multiple files mode - calling uploadFiles')
+        await uploadFiles(Array.from(target.files))
     } else {
-        const file = target.files[0];
+        const file = target.files[0]
+        console.log('📁 [MediaUploader] Single file mode - calling uploadFile with:', file)
         if (file) {
-            await uploadFile(file);
+            await uploadFile(file)
         }
     }
-};
+}
 
 const handleDrop = async (event: DragEvent) => {
-    event.preventDefault();
+    console.log('🎯 [MediaUploader] File drop triggered:', event)
+    event.preventDefault()
     if (dragging.value) {
-        dragging.value = false;
+        dragging.value = false
     }
 
-    if (!event.dataTransfer?.files.length) return;
+    console.log('🎯 [MediaUploader] Dropped files:', event.dataTransfer?.files)
+    if (!event.dataTransfer?.files.length) {
+        console.log('🎯 [MediaUploader] No files in drop, returning')
+        return
+    }
+
+    console.log('🎯 [MediaUploader] Processing file drop:', {
+        fileCount: event.dataTransfer.files.length,
+        multiple: props.multiple,
+        files: Array.from(event.dataTransfer.files).map(f => ({ name: f.name, size: f.size, type: f.type }))
+    })
 
     if (props.multiple) {
-        await uploadFiles(Array.from(event.dataTransfer.files));
+        console.log('🎯 [MediaUploader] Multiple files mode - calling uploadFiles')
+        await uploadFiles(Array.from(event.dataTransfer.files))
     } else {
-        const file = event.dataTransfer.files[0];
+        const file = event.dataTransfer.files[0]
+        console.log('🎯 [MediaUploader] Single file mode - calling uploadFile with:', file)
         if (file) {
-            await uploadFile(file);
+            await uploadFile(file)
         }
     }
-};
+}
+
+// File removal functions
+const removeFile = (index: number) => {
+    if (index >= 0 && index < files.value.length) {
+        files.value.splice(index, 1)
+    }
+}
+
+const removeFileAtIndex = (index: number) => {
+    removeFile(index)
+}
+
+const resetValidation = () => {
+    errorHandler.clearErrors()
+}
 
 const handleDragOver = (event: DragEvent) => {
-    event.preventDefault();
+    event.preventDefault()
     if (!dragging.value) {
-        dragging.value = true;
+        dragging.value = true
     }
-};
+}
 
 const handleDragLeave = () => {
     if (dragging.value) {
-        dragging.value = false;
+        dragging.value = false
     }
-};
+}
 
 const getFileTypeSubtypes = (category: string) => {
     const types = {
@@ -170,53 +420,12 @@ const getFileTypeSubtypes = (category: string) => {
 };
 
 const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-};
+    return mediaFormatter.formatFileSize(bytes)
+}
 
 const getFileTypeIcon = (mimeType: string) => {
-    if (!mimeType) return 'solar:file-outline';
-    
-    const type = mimeType.toLowerCase();
-    
-    // Document types
-    if (type.includes('pdf')) return 'solar:document-outline';
-    if (type.includes('word') || type.includes('doc')) return 'solar:document-text-outline';
-    if (type.includes('excel') || type.includes('spreadsheet')) return 'solar:chart-outline';
-    if (type.includes('powerpoint') || type.includes('presentation')) return 'solar:presentation-graph-outline';
-    if (type.includes('text/plain')) return 'solar:document-text-outline';
-    if (type.includes('rtf')) return 'solar:document-outline';
-    
-    // Audio types
-    if (type.includes('audio/')) return 'solar:music-note-outline';
-    
-    // Video types
-    if (type.includes('video/')) return 'solar:video-camera-outline';
-    
-    // Archive types
-    if (type.includes('zip') || type.includes('rar') || type.includes('7z') || type.includes('tar') || type.includes('gz')) {
-        return 'solar:archive-outline';
-    }
-    
-    // Code files
-    if (type.includes('javascript') || type.includes('typescript')) return 'solar:code-outline';
-    if (type.includes('json')) return 'solar:code-2-outline';
-    if (type.includes('html')) return 'solar:code-square-outline';
-    if (type.includes('css')) return 'solar:palette-outline';
-    if (type.includes('xml')) return 'solar:code-outline';
-    
-    // Database files
-    if (type.includes('sql')) return 'solar:database-outline';
-    
-    // Spreadsheet files
-    if (type.includes('csv')) return 'solar:chart-outline';
-    
-    // Default file icon
-    return 'solar:file-outline';
-};
+    return mediaFormatter.getFileIcon(mimeType)
+}
 
 const allowedTypesText = computed(() => {
     return props.allowedTypes.map(type => {
@@ -244,7 +453,7 @@ const allowedTypesText = computed(() => {
                 'relative border-2 border-dashed rounded-xl p-6 transition-all duration-300 ease-in-out',
                 'bg-card/50 backdrop-blur-sm shadow-premium',
                 dragging ? 'border-solid border-primary bg-primary/10 shadow-premium-lg' : 'border-border hover:border-primary/50',
-                validationErrors.length > 0 || errors.length > 0 ? 'border-destructive' : '',
+                errorHandler.isError.value ? 'border-destructive' : '',
                 disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover-lift'
             ]"
             @drop.prevent="handleDrop"
@@ -257,8 +466,8 @@ const allowedTypesText = computed(() => {
                 <div class="flex items-center justify-center">
                     <div class="relative group">
                         <NuxtImg
-                            v-if="safeFiles[0]?.fullUrl || safeFiles[0]?.url"
-                            :src="getImageSrc(safeFiles[0])"
+                            v-if="safeFiles[0]"
+                            :src="getDirectImageSrc(safeFiles[0])"
                             :alt="safeFiles[0].filename"
                             class="max-h-48 w-auto rounded-lg object-contain"
                         />
@@ -298,8 +507,8 @@ const allowedTypesText = computed(() => {
                     >
                         <div class="aspect-square overflow-hidden rounded-lg border border-border bg-card/50">
                             <NuxtImg
-                                v-if="file.mimeType?.startsWith('image/') && (file.fullUrl || file.url)"
-                                :src="getImageSrc(file)"
+                                v-if="file.mimeType?.startsWith('image/')"
+                                :src="getDirectImageSrc(file)"
                                 :alt="file.filename"
                                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                             />
@@ -331,9 +540,19 @@ const allowedTypesText = computed(() => {
                 </div>
             </div>
 
+            <!-- Error Display -->
+            <MediaErrorDisplay
+                v-if="errorHandler.isError.value"
+                :errors="errorHandler.errors.value"
+                @clear-all="errorHandler.clearErrors"
+                @clear-validation="errorHandler.clearValidationErrors"
+                @clear-upload="errorHandler.clearUploadErrors"
+                @clear-permission="errorHandler.clearPermissionErrors"
+            />
+
             <!-- Upload Prompt -->
             <div v-else class="text-center">
-                <div v-if="uploading" class="space-y-4">
+                <div v-if="loading.getLoadingState('single').isLoading || loading.getLoadingState('multiple').isLoading" class="space-y-4">
                     <div class="relative">
                         <Icon name="solar:upload-square-outline" class="w-12 h-12 mx-auto text-primary animate-pulse" />
                         <div class="absolute inset-0 flex items-center justify-center">
@@ -341,7 +560,7 @@ const allowedTypesText = computed(() => {
                         </div>
                     </div>
                     <p class="text-sm text-muted-foreground font-medium">
-                        {{ t('media.uploading') }}
+                        {{ loading.getLoadingState('single').message || loading.getLoadingState('multiple').message || t('media.uploading') }}
                     </p>
                 </div>
                 <div v-else class="space-y-4">
@@ -392,15 +611,7 @@ const allowedTypesText = computed(() => {
             >
         </div>
 
-        <!-- Error Messages -->
-        <div v-if="validationErrors.length > 0 || errors.length > 0" class="space-y-1">
-            <p
-                v-for="error in [...validationErrors, ...errors]"
-                :key="error"
-                class="text-sm text-red-600 dark:text-red-400"
-            >
-                {{ error }}
-            </p>
-        </div>
+        <!-- Error Messages are handled by MediaErrorDisplay component -->
     </div>
 </template>
+

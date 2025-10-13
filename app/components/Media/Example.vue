@@ -12,8 +12,8 @@
                 :allowed-types="['image']"
                 :max-size="5"
                 :max-files="1"
-                access-level="PUBLIC"
-                collection-name="default"
+                :access-level="AccessLevel.PUBLIC"
+                :collection-name="CollectionType.DEFAULT"
             />
             <div v-if="singleFile" class="p-4 bg-gray-100 rounded">
                 <p><strong>Selected File:</strong> {{ singleFile.filename }}</p>
@@ -32,8 +32,8 @@
                 :allowed-types="['image', 'document']"
                 :max-size="10"
                 :max-files="5"
-                access-level="PUBLIC"
-                collection-name="gallery"
+                :access-level="AccessLevel.PUBLIC"
+                :collection-name="CollectionType.GALLERY"
             />
             <div v-if="multipleFiles && multipleFiles.length > 0" class="p-4 bg-gray-100 rounded">
                 <p><strong>Selected Files:</strong> {{ multipleFiles.length }}</p>
@@ -54,10 +54,11 @@
             <MediaManager
                 v-model:open="showManager"
                 :multiple="true"
+                :max-selection="5"
                 :allowed-types="['image']"
-                access-level="PUBLIC"
-                collection-name=""
-                @select:media="handleMediaSelect"
+                :access-level="AccessLevel.PUBLIC"
+                :collection-name="CollectionType.GALLERY"
+                @select="handleMediaSelect"
             />
         </div>
 
@@ -72,43 +73,60 @@
                 :allowed-types="['image', 'document']"
                 :max-size="5"
                 :max-files="3"
-                access-level="PUBLIC"
-                collection-name="attachments"
+                :access-level="AccessLevel.PUBLIC"
+                :collection-name="CollectionType.ATTACHMENTS"
             />
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import type { MediaFile } from '~/types/media';
-import MediaUploader from '~/components/Media/Uploader/index.vue';
-import MediaManager from '~/components/Media/Manager/index.vue';
-import FormItemMedia from '~/components/FormItem/Media.vue';
-import { Button } from '@/components/ui/button';
+import type { MediaEntity } from '~/types/media/index'
+import { AccessLevel, CollectionType } from '~/types/media/index'
+import MediaUploader from '~/components/Media/Uploader/index.vue'
+import MediaManager from '~/components/Media/Manager/index.vue'
+import FormItemMedia from '~/components/FormItem/Media.vue'
+import { Button } from '@/components/ui/button'
 
 // Reactive data
-const singleFile = ref<MediaFile | null>(null);
-const multipleFiles = ref<MediaFile[]>([]);
-const formMedia = ref<MediaFile[]>([]);
-const showManager = ref(false);
+const singleFile = ref<MediaEntity | null>(null)
+const multipleFiles = ref<MediaEntity[]>([])
+const formMedia = ref<MediaEntity[]>([])
+const showManager = ref(false)
 
 // Helper function to format bytes
 const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-};
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
 
 // Handle media selection from manager
-const handleMediaSelect = (selectedFiles: MediaFile | MediaFile[]) => {
-    if (Array.isArray(selectedFiles)) {
-        multipleFiles.value = selectedFiles;
-    } else {
-        singleFile.value = selectedFiles;
+const handleMediaSelect = (selectedFiles: MediaEntity | MediaEntity[] | string | string[]) => {
+    console.log('Media selected:', selectedFiles)
+    
+    // Handle different selection types based on maxSelection
+    if (typeof selectedFiles === 'string') {
+        // Single selection - received media ID
+        console.log('Single media ID selected:', selectedFiles)
+        // You would need to fetch the full MediaEntity if needed
+    } else if (Array.isArray(selectedFiles)) {
+        // Multiple selection - check if it's MediaEntity[] or string[]
+        if (selectedFiles.length > 0 && typeof selectedFiles[0] === 'string') {
+            // String array - media IDs
+            console.log('Multiple media IDs selected:', selectedFiles)
+            // You would need to fetch the full MediaEntity objects if needed
+        } else {
+            // MediaEntity array
+            multipleFiles.value = selectedFiles as MediaEntity[]
+        }
+        showManager.value = false
+    } else if (selectedFiles) {
+        // Single selection - received MediaEntity
+        singleFile.value = selectedFiles
+        showManager.value = false
     }
-    showManager.value = false;
-};
+}
 </script>

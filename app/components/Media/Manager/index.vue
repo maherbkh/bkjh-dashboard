@@ -1,17 +1,23 @@
 <script setup lang="ts">
-import type { MediaFile, MediaQueryParams, MediaPagination } from '~/types/media';
-import { useAuthenticatedImage } from '~/composables/useAuthenticatedImage';
+import type { MediaEntity, AccessLevel, CollectionType } from '~/types/media/index'
+import { AccessLevel as AccessLevelEnum, CollectionType as CollectionTypeEnum } from '~/types/media/index'
+import { useMediaRepository, useMediaSelection, useMediaFilters, useMediaPermissions, useMediaErrorHandler, useMediaLoading } from '~/composables/media'
+import { toast } from 'vue-sonner'
+import { useAuthenticatedImage } from '~/composables/useAuthenticatedImage'
+import { mediaFormatter } from '~/services/media'
+import MediaLoadingGrid from '~/components/Media/molecules/MediaLoadingGrid.vue'
+import MediaErrorDisplay from '~/components/Media/molecules/MediaErrorDisplay.vue'
 
 interface Props {
-    open?: boolean;
-    multiple?: boolean;
-    maxSelection?: number;
-    allowedTypes?: string[];
-    accessLevel?: 'SELF' | 'SUPPORT' | 'ACADEMY' | 'PUBLIC';
-    collectionName?: string;
-    modelType?: string;
-    modelId?: string;
-    selectedFiles?: MediaFile[];
+    open?: boolean
+    multiple?: boolean
+    maxSelection?: number
+    allowedTypes?: string[]
+    accessLevel?: AccessLevel
+    collectionName?: CollectionType
+    modelType?: string
+    modelId?: string
+    selectedFiles?: MediaEntity[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -19,238 +25,174 @@ const props = withDefaults(defineProps<Props>(), {
     multiple: false,
     maxSelection: 1,
     allowedTypes: () => ['image'],
-    accessLevel: 'PUBLIC',
-    collectionName: '',
+    accessLevel: AccessLevelEnum.PUBLIC,
+    collectionName: CollectionTypeEnum.DEFAULT,
     modelType: '',
     modelId: '',
     selectedFiles: () => [],
-});
+})
 
 const emit = defineEmits<{
-    'update:open': [value: boolean];
-    'update:selectedFiles': [files: MediaFile[]];
-    'select': [file: MediaFile | MediaFile[]];
-    'close': [];
-}>();
+    'update:open': [value: boolean]
+    'update:selectedFiles': [files: MediaEntity[]]
+    'select': [file: MediaEntity | MediaEntity[] | string | string[]] // Emit IDs when maxSelection is 1
+    'close': []
+}>()
 
-const { t } = useI18n();
-const { getImageSrc } = useAuthenticatedImage();
+const { t } = useI18n()
+const { getImageSrc } = useAuthenticatedImage()
 
-// Selection state management - removed unused variable
+// Use new composables
+const repository = useMediaRepository()
+const selection = useMediaSelection(props.multiple, props.maxSelection)
+const filters = useMediaFilters()
+const permissions = useMediaPermissions()
+const errorHandler = useMediaErrorHandler()
+const loading = useMediaLoading()
 
-// Direct state management instead of composable
-const mediaFiles = ref<MediaFile[]>([]);
-const loading = ref(false);
-const pagination = ref<MediaPagination | null>(null);
-const searchQuery = ref('');
-const selectedFiles = ref<MediaFile[]>([]);
+// Media state
+const mediaFiles = ref<MediaEntity[]>([])
+const pagination = ref<any>(null)
+
+// Initialize filters with props
+watch(() => props.accessLevel, (level: AccessLevel | undefined) => {
+    if (level) filters.setAccessLevel(level)
+}, { immediate: true })
+
+watch(() => props.collectionName, (collection: CollectionType | undefined) => {
+    if (collection) filters.setCollection(collection)
+}, { immediate: true })
+
+watch(() => props.modelType, (type: string | undefined) => {
+    if (type && props.modelId) {
+        filters.setModel(type, props.modelId)
+    }
+}, { immediate: true })
 
 // Watch for selectedFiles prop changes
-watch(() => props.selectedFiles, (newFiles) => {
-    selectedFiles.value = [...newFiles];
-}, { immediate: true, deep: true });
+watch(() => props.selectedFiles, (newFiles: MediaEntity[]) => {
+    selection.setSelection(newFiles)
+}, { immediate: true, deep: true })
 
-// Watch for selectedFiles changes and emit
-watch(selectedFiles, (newFiles) => {
-    emit('update:selectedFiles', newFiles);
-}, { deep: true });
+// Watch for selection changes and emit
+watch(selection.selected, (newFiles: MediaEntity[]) => {
+    emit('update:selectedFiles', newFiles)
+}, { deep: true })
 
-// Load media function following the guide
-const loadMedia = async (params: Partial<MediaQueryParams> = {}) => {
-    loading.value = true;
-    
+// Load media using repository
+const loadMedia = async () => {
+    loading.startFetch('media')
+    errorHandler.clearErrors()
+
     try {
-        const queryParams: MediaQueryParams = {
-            page: pagination.value?.current_page || 1,
-            length: 24,
-            search: searchQuery.value,
-            accessLevel: props.accessLevel,
-            collectionName: props.collectionName,
-            modelType: props.modelType,
-            modelId: props.modelId,
-            sort_by: 'createdAt',
-            sort_dir: 'desc'
-        };
-
-        // Merge with provided params
-        const finalParams = { ...queryParams, ...params };
-
-        // Remove empty values
-        const cleanParams = Object.fromEntries(
-            Object.entries(finalParams).filter(([_, value]) => value !== '' && value !== null && value !== undefined)
-        );
-
-        const { data, error } = await useApiFetch('/shared/media', {
-            query: cleanParams
-        });
-
-        if (error.value) {
-            throw new Error(error.value.message || 'Failed to load media');
-        }
-
-        if (data.value?.data) {
-            mediaFiles.value = data.value.data.data;
-            pagination.value = data.value.data.meta;
+        const response = await repository.findAll(filters.queryDto.value)
+        mediaFiles.value = response.data
+        pagination.value = response.meta
+        
+        if (response.data.length === 0) {
+            toast.info(t('media.no_files_found'), {
+                description: t('media.try_different_search')
+            })
         }
     } catch (error) {
-        console.error('Failed to load media:', error);
-        mediaFiles.value = [];
-        pagination.value = null;
+        console.error('Failed to load media:', error)
+        errorHandler.addError(error as any)
+        mediaFiles.value = []
+        pagination.value = null
     } finally {
-        loading.value = false;
+        loading.finishFetch('media')
     }
-};
+}
 
-// Search and pagination functions
+// Search and pagination functions using filters composable
 const searchMedia = async () => {
-    await loadMedia({
-        search: searchQuery.value,
-        page: 1,
-    });
-};
+    filters.setSearch(filters.searchQuery.value)
+    await loadMedia()
+}
 
 const resetSearch = async () => {
-    searchQuery.value = '';
-    await loadMedia({
-        search: '',
-        page: 1,
-    });
-};
+    filters.resetFilters()
+    await loadMedia()
+}
 
 const nextPage = async () => {
-    if (pagination.value && pagination.value.current_page < pagination.value.last_page) {
-        await loadMedia({
-            page: pagination.value.current_page + 1,
-        });
-    }
-};
+    filters.nextPage()
+    await loadMedia()
+}
 
 const prevPage = async () => {
-    if (pagination.value && pagination.value.current_page > 1) {
-        await loadMedia({
-            page: pagination.value.current_page - 1,
-        });
-    }
-};
+    filters.prevPage()
+    await loadMedia()
+}
 
 const goToPage = async (page: number) => {
-    if (pagination.value && page >= 1 && page <= pagination.value.last_page) {
-        await loadMedia({
-            page,
-        });
-    }
-};
+    filters.goToPage(page)
+    await loadMedia()
+}
 
-// File selection functions
-const selectFile = (file: MediaFile) => {
-    if (!props.multiple) {
-        selectedFiles.value = [file];
-    } else {
-        const index = selectedFiles.value.findIndex(f => f.id === file.id);
-        if (index === -1) {
-            if (selectedFiles.value.length < props.maxSelection) {
-                selectedFiles.value.push(file);
-            }
-        } else {
-            selectedFiles.value.splice(index, 1);
-        }
-    }
-};
+// File selection functions using selection composable
+const selectFile = (file: MediaEntity) => {
+    selection.select(file)
+}
 
-const deselectFile = (file: MediaFile) => {
-    const index = selectedFiles.value.findIndex(f => f.id === file.id);
-    if (index !== -1) {
-        selectedFiles.value.splice(index, 1);
-    }
-};
+const deselectFile = (file: MediaEntity) => {
+    selection.deselect(file)
+}
 
 const isSelected = (fileId: string): boolean => {
-    return selectedFiles.value.some(file => file.id === fileId);
-};
+    return selection.isSelected({ id: fileId } as MediaEntity)
+}
 
 const isOriginal = (fileId: string): boolean => {
     // This would need to be implemented based on your business logic
     // For now, return false
-    return false;
-};
+    return false
+}
 
 
 const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-};
+    return mediaFormatter.formatFileSize(bytes)
+}
 
 const getFileIcon = (mimeType: string) => {
-    if (!mimeType) return 'solar:file-outline';
-    
-    const type = mimeType.toLowerCase();
-    
-    // Document types
-    if (type.includes('pdf')) return 'solar:document-outline';
-    if (type.includes('word') || type.includes('doc')) return 'solar:document-text-outline';
-    if (type.includes('excel') || type.includes('spreadsheet')) return 'solar:chart-outline';
-    if (type.includes('powerpoint') || type.includes('presentation')) return 'solar:presentation-graph-outline';
-    if (type.includes('text/plain')) return 'solar:document-text-outline';
-    if (type.includes('rtf')) return 'solar:document-outline';
-    
-    // Audio types
-    if (type.includes('audio/')) return 'solar:music-note-outline';
-    
-    // Video types
-    if (type.includes('video/')) return 'solar:video-camera-outline';
-    
-    // Archive types
-    if (type.includes('zip') || type.includes('rar') || type.includes('7z') || type.includes('tar') || type.includes('gz')) {
-        return 'solar:archive-outline';
-    }
-    
-    // Code files
-    if (type.includes('javascript') || type.includes('typescript')) return 'solar:code-outline';
-    if (type.includes('json')) return 'solar:code-2-outline';
-    if (type.includes('html')) return 'solar:code-square-outline';
-    if (type.includes('css')) return 'solar:palette-outline';
-    if (type.includes('xml')) return 'solar:code-outline';
-    
-    // Database files
-    if (type.includes('sql')) return 'solar:database-outline';
-    
-    // Spreadsheet files
-    if (type.includes('csv')) return 'solar:chart-outline';
-    
-    // Default file icon
-    return 'solar:file-outline';
-};
+    return mediaFormatter.getFileIcon(mimeType)
+}
 
-// Selection handlers
+// Selection handlers using selection composable
 const handleSelect = () => {
-    if (selectedFiles.value.length > 0) {
+    if (selection.hasSelection.value) {
         if (props.multiple) {
-            emit('select', selectedFiles.value);
+            // Emit full media objects for multiple selection
+            emit('select', selection.selected.value)
+            toast.success(t('media.files_selected'), {
+                description: t('media.selected_count', { count: selection.selectionCount.value })
+            })
         } else {
-            const singleFile = selectedFiles.value[0];
+            // Emit media ID for single selection
+            const singleFile = selection.firstSelected.value
             if (singleFile) {
-                emit('select', singleFile);
+                emit('select', singleFile.id)
+                toast.success(t('media.file_selected'), {
+                    description: singleFile.filename
+                })
             }
         }
-        emit('update:selectedFiles', selectedFiles.value);
-        handleClose();
+        emit('update:selectedFiles', selection.selected.value)
+        handleClose()
     }
-};
+}
 
 const handleClose = () => {
-    emit('update:open', false);
-    emit('close');
-};
+    emit('update:open', false)
+    emit('close')
+}
 
 // Load media when dialog opens
-watch(() => props.open, (isOpen) => {
+watch(() => props.open, (isOpen: boolean) => {
     if (isOpen) {
-        loadMedia();
+        loadMedia()
     }
-});
+})
 </script>
 
 <template>
@@ -269,7 +211,7 @@ watch(() => props.open, (isOpen) => {
                     <div class="relative flex-1">
                         <Icon name="solar:magnifer-outline" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <Input
-                            v-model="searchQuery"
+                            v-model="filters.searchQuery.value"
                             :placeholder="t('media.search_placeholder')"
                             class="pl-10"
                             @keyup.enter="searchMedia"
@@ -291,15 +233,19 @@ watch(() => props.open, (isOpen) => {
                     </Button>
                 </div>
 
+                <!-- Error Display -->
+                <MediaErrorDisplay
+                    v-if="errorHandler.isError.value"
+                    :errors="errorHandler.errors.value"
+                    @clear-all="errorHandler.clearErrors"
+                    @clear-validation="errorHandler.clearValidationErrors"
+                    @clear-upload="errorHandler.clearUploadErrors"
+                    @clear-permission="errorHandler.clearPermissionErrors"
+                />
+
                 <!-- Media Grid -->
-                <div class="max-h-96 overflow-y-auto">
-                    <div v-if="loading" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        <div
-                            v-for="i in 12"
-                            :key="i"
-                            class="aspect-square bg-muted rounded-lg animate-pulse loading-shimmer"
-                        />
-                    </div>
+                       <div class="max-h-96 overflow-y-auto">
+                           <MediaLoadingGrid v-if="loading.getLoadingState('media').isLoading" />
                     <div v-else-if="mediaFiles.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                         <div
                             v-for="file in mediaFiles"
@@ -398,14 +344,14 @@ watch(() => props.open, (isOpen) => {
                 <div class="flex items-center justify-between w-full">
                     <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                         <Icon name="solar:check-circle-outline" class="w-4 h-4" />
-                        {{ selectedFiles.length }} {{ t('media.selected') }}
+                        {{ selection.selectionCount.value }} {{ t('media.selected') }}
                     </div>
                     <div class="flex gap-2">
                         <Button variant="outline" @click="handleClose">
                             {{ t('common.cancel') }}
                         </Button>
-                        <Button @click="handleSelect" :disabled="selectedFiles.length === 0">
-                            {{ t('media.select_files') }} ({{ selectedFiles.length }})
+                        <Button @click="handleSelect" :disabled="!selection.hasSelection.value">
+                            {{ t('media.select_files') }} ({{ selection.selectionCount.value }})
                         </Button>
                     </div>
                 </div>
@@ -413,3 +359,4 @@ watch(() => props.open, (isOpen) => {
         </DialogContent>
     </Dialog>
 </template>
+

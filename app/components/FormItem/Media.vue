@@ -1,25 +1,28 @@
 <script setup lang="ts">
-import type { MediaFile } from '~/types/media';
-import { useAuthenticatedImage } from '~/composables/useAuthenticatedImage';
+import { ref, computed, watch } from 'vue'
+import type { MediaEntity, AccessLevel, CollectionType } from '~/types/media/index'
+import { AccessLevel as AccessLevelEnum, CollectionType as CollectionTypeEnum } from '~/types/media/index'
+import { useAuthenticatedImage } from '~/composables/useAuthenticatedImage'
+import { mediaFormatter } from '~/services/media'
 
 interface Props {
-    id?: string;
-    name?: string;
-    label?: string;
-    required?: boolean;
-    multiple?: boolean;
-    maxFiles?: number;
-    maxSize?: number;
-    allowedTypes?: string[];
-    accessLevel?: 'SELF' | 'SUPPORT' | 'ACADEMY' | 'PUBLIC';
-    collectionName?: 'avatar' | 'cover' | 'gallery' | 'attachments' | 'documents' | 'default';
-    modelType?: string;
-    modelId?: string;
-    directory?: string;
-    errors?: string[];
-    disabled?: boolean;
-    placeholder?: string;
-    showManager?: boolean;
+    id?: string
+    name?: string
+    label?: string
+    required?: boolean
+    multiple?: boolean
+    maxFiles?: number
+    maxSize?: number
+    allowedTypes?: string[]
+    accessLevel?: AccessLevel
+    collectionName?: CollectionType
+    modelType?: string
+    modelId?: string
+    directory?: string
+    errors?: string[]
+    disabled?: boolean
+    placeholder?: string
+    showManager?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -31,8 +34,8 @@ const props = withDefaults(defineProps<Props>(), {
     maxFiles: 1,
     maxSize: 10,
     allowedTypes: () => ['image'],
-    accessLevel: 'PUBLIC',
-    collectionName: '',
+    accessLevel: AccessLevelEnum.PUBLIC,
+    collectionName: CollectionTypeEnum.DEFAULT,
     modelType: '',
     modelId: '',
     directory: 'shared',
@@ -40,18 +43,18 @@ const props = withDefaults(defineProps<Props>(), {
     disabled: false,
     placeholder: '',
     showManager: true,
-});
+})
 
 const emit = defineEmits<{
-    'update:modelValue': [value: MediaFile | MediaFile[] | null];
-}>();
+    'update:modelValue': [value: MediaEntity | MediaEntity[] | null]
+}>()
 
-const { t } = useI18n();
+const { t } = useI18n()
 
 // Reactive state
-const modelValue = ref<MediaFile | MediaFile[] | null>(null);
-const showManagerDialog = ref(false);
-const { getImageSrc } = useAuthenticatedImage();
+const modelValue = ref<MediaEntity | MediaEntity[] | null>(null)
+const showManagerDialog = ref(false)
+const { getImageSrc } = useAuthenticatedImage()
 
 // Watch for modelValue changes
 watch(() => props.modelValue, (newValue) => {
@@ -97,60 +100,17 @@ const removeFile = (index?: number) => {
     }
 };
 
-const getFileDisplayName = (file: MediaFile) => {
-    return file.filename || file.title || 'Unknown file';
-};
+const getFileDisplayName = (file: MediaEntity) => {
+    return file.filename || file.title || 'Unknown file'
+}
 
-const getFileSize = (file: MediaFile) => {
-    if (!file.size) return '';
-    const bytes = file.size;
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-};
+const getFileSize = (file: MediaEntity) => {
+    return mediaFormatter.formatFileSize(file.size)
+}
 
 const getFileTypeIcon = (mimeType: string) => {
-    if (!mimeType) return 'solar:file-outline';
-    
-    const type = mimeType.toLowerCase();
-    
-    // Document types
-    if (type.includes('pdf')) return 'solar:document-outline';
-    if (type.includes('word') || type.includes('doc')) return 'solar:document-text-outline';
-    if (type.includes('excel') || type.includes('spreadsheet')) return 'solar:chart-outline';
-    if (type.includes('powerpoint') || type.includes('presentation')) return 'solar:presentation-graph-outline';
-    if (type.includes('text/plain')) return 'solar:document-text-outline';
-    if (type.includes('rtf')) return 'solar:document-outline';
-    
-    // Audio types
-    if (type.includes('audio/')) return 'solar:music-note-outline';
-    
-    // Video types
-    if (type.includes('video/')) return 'solar:video-camera-outline';
-    
-    // Archive types
-    if (type.includes('zip') || type.includes('rar') || type.includes('7z') || type.includes('tar') || type.includes('gz')) {
-        return 'solar:archive-outline';
-    }
-    
-    // Code files
-    if (type.includes('javascript') || type.includes('typescript')) return 'solar:code-outline';
-    if (type.includes('json')) return 'solar:code-2-outline';
-    if (type.includes('html')) return 'solar:code-square-outline';
-    if (type.includes('css')) return 'solar:palette-outline';
-    if (type.includes('xml')) return 'solar:code-outline';
-    
-    // Database files
-    if (type.includes('sql')) return 'solar:database-outline';
-    
-    // Spreadsheet files
-    if (type.includes('csv')) return 'solar:chart-outline';
-    
-    // Default file icon
-    return 'solar:file-outline';
-};
+    return mediaFormatter.getFileIcon(mimeType)
+}
 </script>
 
 <template>
