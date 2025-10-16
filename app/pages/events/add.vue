@@ -5,9 +5,9 @@ import type { EventForm } from '~/composables/eventSchema';
 
 const { t } = useI18n();
 // Page configuration
-const pageTitle = computed(() => t('action.add') + ' ' + t('event.singular'));
+const pageTitle = computed(() => t('action.add') + ' ' + t('academy.singular'));
 const pageIcon = usePageIcon();
-const pageDescription = computed(() => t('action.add') + ' ' + t('event.singular'));
+const pageDescription = computed(() => t('action.add') + ' ' + t('academy.singular'));
 
 definePageMeta({
     middleware: 'auth',

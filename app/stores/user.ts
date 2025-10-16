@@ -181,7 +181,17 @@ export const useUserStore = defineStore('user', () => {
             return true;
         }
         if (error.value) {
-            const description = (error.value.data?.message ?? error.value.data?.status) || t('auth.failed_to_send_reset_email');
+            let description = t('auth.failed_to_send_reset_email');
+            
+            // Handle array of validation messages
+            if (Array.isArray(error.value.data?.message)) {
+                description = error.value.data.message.join(', ');
+            } else if (error.value.data?.message) {
+                description = error.value.data.message;
+            } else if (error.value.data?.status) {
+                description = error.value.data.status;
+            }
+            
             toast.error(t('global.error'), {
                 description,
                 duration: 5000,
@@ -207,7 +217,17 @@ export const useUserStore = defineStore('user', () => {
             return true;
         }
         if (error.value) {
-            const description = (error.value.data?.message ?? error.value.data?.status) || t('auth.password_reset_failed');
+            let description = t('auth.password_reset_failed');
+            
+            // Handle array of validation messages
+            if (Array.isArray(error.value.data?.message)) {
+                description = error.value.data.message.join(', ');
+            } else if (error.value.data?.message) {
+                description = error.value.data.message;
+            } else if (error.value.data?.status) {
+                description = error.value.data.status;
+            }
+            
             toast.error(t('global.error'), {
                 description,
                 duration: 5000,
@@ -232,7 +252,17 @@ export const useUserStore = defineStore('user', () => {
             return true;
         }
         if (error.value) {
-            const description = (error.value.data?.message ?? error.value.data?.status) || t('auth.failed_to_send_reset_email');
+            let description = t('auth.failed_to_send_reset_email');
+            
+            // Handle array of validation messages
+            if (Array.isArray(error.value.data?.message)) {
+                description = error.value.data.message.join(', ');
+            } else if (error.value.data?.message) {
+                description = error.value.data.message;
+            } else if (error.value.data?.status) {
+                description = error.value.data.status;
+            }
+            
             toast.error(t('global.error'), {
                 description,
                 duration: 5000,

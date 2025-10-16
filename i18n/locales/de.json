@@ -403,9 +403,9 @@
     "singular": "IT-Support"
   },
   "academy": {
-    "plural": "Akademie-Veranstaltungen",
-    "singular": "Akademie-Veranstaltung",
-    "description": "Akademie-Veranstaltungen und Aktivitäten verwalten",
+    "plural": "Veranstaltungen",
+    "singular": "Veranstaltung",
+    "description": "Akademie und Aktivitäten verwalten",
     "type": {
       "online": "Online",
       "in_person": "Vor Ort",
@@ -532,7 +532,7 @@
   "speaker": {
     "singular": "Referent",
     "plural": "Referenten",
-    "description": "Verwalten Sie Referenten für Akademie-Veranstaltungen und Workshops",
+    "description": "Verwalten Sie Referenten für Veranstaltungen und Workshops",
     "name": "Referentenname",
     "name_placeholder": "Referentenname eingeben",
     "qualification": "Qualifikation",

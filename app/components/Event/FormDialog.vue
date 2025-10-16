@@ -56,8 +56,8 @@ const emit = defineEmits<{
 
 const dialogTitle = computed(() => {
     return props.dialogMode === 'add'
-        ? t('action.add') + ' ' + t('common.new') + ' ' + t('event.singular')
-        : t('action.edit') + ' ' + t('event.singular');
+        ? t('action.add') + ' ' + t('common.new') + ' ' + t('academy.singular')
+        : t('action.edit') + ' ' + t('academy.singular');
 });
 
 const dialogDescription = computed(() => {

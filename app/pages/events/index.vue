@@ -201,7 +201,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                 <PageEmptyState
                     v-if="events.length === 0"
                     :search-query="searchQuery"
-                    :add-new-text="$t('action.add') + ' ' + $t('common.new') + ' ' + $t('event.singular')"
+                    :add-new-text="$t('action.add') + ' ' + $t('common.new') + ' ' + $t('academy.singular')"
                 />
                 <template v-else>
                     <PageTable
