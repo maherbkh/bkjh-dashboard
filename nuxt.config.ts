@@ -17,6 +17,9 @@ export default defineNuxtConfig({
         'dayjs-nuxt',
     ],
     ssr: false,
+    imports: {
+        dirs: ['types', 'utils'],
+    },
     devtools: { enabled: true },
     app: {
         buildAssetsDir: '/static/',
@@ -68,9 +71,6 @@ export default defineNuxtConfig({
             },
         },
     },
-    imports: {
-        dirs: ['types', 'utils']
-      },
     compatibilityDate: '2025-07-15',
     // Reduce development warnings
     nitro: {
@@ -92,11 +92,11 @@ export default defineNuxtConfig({
                     'Access-Control-Expose-Headers': 'Content-Disposition, Content-Length, Content-Type',
                 },
             },
-            '/get-media/': { 
-                redirect: { 
-                    to: '/api/get-media-blocked', 
-                    statusCode: 404 
-                } 
+            '/get-media/': {
+                redirect: {
+                    to: '/api/get-media-blocked',
+                    statusCode: 404,
+                },
             },
             '/get-media/**': {
                 proxy: 'http://api.backhaus.test:3055/uploads/public/**',

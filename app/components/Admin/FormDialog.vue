@@ -151,7 +151,8 @@ const onSubmitAndClose = handleSubmit((values) => {
         // Only include password if it has a meaningful value
         const finalValues = password && password.trim() !== '' ? values : valuesWithoutPassword;
         emit('submitAndClose', finalValues);
-    } else {
+    }
+    else {
         // For create mode, password is included and required
         emit('submitAndClose', values);
     }
@@ -164,7 +165,8 @@ const onSubmitAndAddNew = handleSubmit((values) => {
         // Only include password if it has a meaningful value
         const finalValues = password && password.trim() !== '' ? values : valuesWithoutPassword;
         emit('submitAndAddNew', finalValues);
-    } else {
+    }
+    else {
         // For create mode, password is included and required
         emit('submitAndAddNew', values);
     }

@@ -36,13 +36,13 @@ export function useMediaManager(options: UseMediaManagerOptions) {
     // Load media files
     const loadMedia = async (params?: Partial<MediaQueryParams>) => {
         loading.value = true;
-        
+
         try {
             const finalParams = { ...queryParams.value, ...params };
-            
+
             // Only include parameters that have meaningful values
             const cleanParams: Record<string, any> = {};
-            
+
             // Always include pagination
             if (finalParams.page && finalParams.page > 1) {
                 cleanParams.page = finalParams.page;
@@ -50,37 +50,37 @@ export function useMediaManager(options: UseMediaManagerOptions) {
             if (finalParams.length && finalParams.length !== 24) {
                 cleanParams.length = finalParams.length;
             }
-            
+
             // Only include search if it has a value
             if (finalParams.search && finalParams.search.trim() !== '') {
                 cleanParams.search = finalParams.search.trim();
             }
-            
+
             // Only include accessLevel if it's not the default
             if (finalParams.accessLevel && finalParams.accessLevel !== 'PUBLIC') {
                 cleanParams.accessLevel = finalParams.accessLevel;
             }
-            
+
             // Only include collectionName if it has a value
             if (finalParams.collectionName && finalParams.collectionName.trim() !== '') {
                 cleanParams.collectionName = finalParams.collectionName;
             }
-            
+
             // Only include modelType if it has a value
             if (finalParams.modelType && finalParams.modelType.trim() !== '') {
                 cleanParams.modelType = finalParams.modelType;
             }
-            
+
             // Only include modelId if it has a value
             if (finalParams.modelId && finalParams.modelId.trim() !== '') {
                 cleanParams.modelId = finalParams.modelId;
             }
-            
+
             // Only include mimeType if it has a value
             if (finalParams.mimeType && finalParams.mimeType.trim() !== '') {
                 cleanParams.mimeType = finalParams.mimeType;
             }
-            
+
             // Only include sort parameters if they're not defaults
             if (finalParams.sort_by && finalParams.sort_by !== 'createdAt') {
                 cleanParams.sort_by = finalParams.sort_by;
@@ -88,7 +88,7 @@ export function useMediaManager(options: UseMediaManagerOptions) {
             if (finalParams.sort_dir && finalParams.sort_dir !== 'desc') {
                 cleanParams.sort_dir = finalParams.sort_dir;
             }
-            
+
             const { data, error } = await useApiFetch('/shared/media', {
                 params: Object.keys(cleanParams).length > 0 ? cleanParams : undefined,
             });
@@ -103,11 +103,12 @@ export function useMediaManager(options: UseMediaManagerOptions) {
                 if (responseData.data) {
                     // Files are in data.data.data
                     mediaFiles.value = responseData.data;
-                } else {
+                }
+                else {
                     // Fallback: files are directly in data.data
                     mediaFiles.value = responseData;
                 }
-                
+
                 // Handle pagination from the response
                 const response = data.value as any;
                 if (response.data?.meta) {
@@ -121,9 +122,11 @@ export function useMediaManager(options: UseMediaManagerOptions) {
                         from: (meta.page - 1) * meta.limit + 1,
                         to: Math.min(meta.page * meta.limit, meta.total),
                     };
-                } else if (response.pagination) {
+                }
+                else if (response.pagination) {
                     pagination.value = response.pagination;
-                } else if (response.current_page) {
+                }
+                else if (response.current_page) {
                     // Fallback for different response structure
                     pagination.value = {
                         current_page: response.current_page,
@@ -135,11 +138,13 @@ export function useMediaManager(options: UseMediaManagerOptions) {
                     };
                 }
             }
-        } catch (err) {
+        }
+        catch (err) {
             console.error('Failed to load media:', err);
             mediaFiles.value = [];
             pagination.value = null;
-        } finally {
+        }
+        finally {
             loading.value = false;
         }
     };
@@ -190,13 +195,15 @@ export function useMediaManager(options: UseMediaManagerOptions) {
     const selectFile = (file: MediaFile) => {
         if (!options.multiple.value) {
             selectedFiles.value = [file];
-        } else {
+        }
+        else {
             const index = selectedFiles.value.findIndex(f => f.id === file.id);
             if (index === -1) {
                 if (selectedFiles.value.length < options.maxSelection.value) {
                     selectedFiles.value.push(file);
                 }
-            } else {
+            }
+            else {
                 selectedFiles.value.splice(index, 1);
             }
         }

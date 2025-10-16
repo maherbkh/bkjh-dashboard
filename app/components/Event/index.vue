@@ -31,7 +31,6 @@ const { t } = useI18n();
                 {{ $t("action.message.not_found_description", { model: $t("academy.singular") }) }}
             </p>
             <div class="flex items-center gap-3">
-              
                 <NuxtLink to="/events">
                     <Button>
                         <Icon

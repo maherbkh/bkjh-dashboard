@@ -357,7 +357,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                         class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
                                     />
                                 </LazyButton>
-                                
+
                                 <LazyButton
                                     :title="$t('action.abgesagt')"
                                     variant="destructive"

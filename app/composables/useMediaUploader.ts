@@ -30,7 +30,8 @@ export function useMediaUploader(options: UseMediaUploaderOptions) {
     if (options.modelValue.value) {
         if (Array.isArray(options.modelValue.value)) {
             files.value = options.modelValue.value;
-        } else {
+        }
+        else {
             files.value = [options.modelValue.value];
         }
     }
@@ -106,9 +107,11 @@ export function useMediaUploader(options: UseMediaUploaderOptions) {
     watch(() => options.modelValue.value, (newValue) => {
         if (Array.isArray(newValue)) {
             files.value = newValue;
-        } else if (newValue) {
+        }
+        else if (newValue) {
             files.value = [newValue];
-        } else {
+        }
+        else {
             files.value = [];
         }
     }, { immediate: true });
@@ -126,26 +129,26 @@ export function useMediaUploader(options: UseMediaUploaderOptions) {
         // Check file size
         const maxSizeBytes = options.maxSize.value * 1024 * 1024;
         if (file.size > maxSizeBytes) {
-            errors.push(t('media.validation.size_exceeded', { 
+            errors.push(t('media.validation.size_exceeded', {
                 size: Math.round(file.size / 1024 / 1024),
-                max: options.maxSize.value 
+                max: options.maxSize.value,
             }));
         }
 
         // Check allowed types
-        const allowedMimeTypes = options.allowedTypes.value.flatMap(type => 
-            fileTypeConfig[type]?.allowedTypes || []
+        const allowedMimeTypes = options.allowedTypes.value.flatMap(type =>
+            fileTypeConfig[type]?.allowedTypes || [],
         );
 
         if (allowedMimeTypes.length > 0 && !allowedMimeTypes.includes(file.type)) {
-            errors.push(t('media.validation.type_not_allowed', { 
+            errors.push(t('media.validation.type_not_allowed', {
                 type: file.type,
-                allowed: allowedMimeTypes.join(', ')
+                allowed: allowedMimeTypes.join(', '),
             }));
         }
 
         // Check denied types for each allowed type
-        options.allowedTypes.value.forEach(type => {
+        options.allowedTypes.value.forEach((type) => {
             const config = fileTypeConfig[type];
             if (config?.deniedTypes.includes(file.type)) {
                 errors.push(t('media.validation.type_denied', { type: file.type }));
@@ -165,14 +168,14 @@ export function useMediaUploader(options: UseMediaUploaderOptions) {
 
         // Check file count
         if (fileList.length > options.maxFiles.value) {
-            errors.push(t('media.validation.too_many_files', { 
+            errors.push(t('media.validation.too_many_files', {
                 count: fileList.length,
-                max: options.maxFiles.value 
+                max: options.maxFiles.value,
             }));
         }
 
         // Validate each file
-        fileList.forEach(file => {
+        fileList.forEach((file) => {
             const fileErrors = validateFile(file);
             errors.push(...fileErrors);
         });
@@ -203,7 +206,7 @@ export function useMediaUploader(options: UseMediaUploaderOptions) {
             formData.append('accessLevel', options.accessLevel.value.toUpperCase());
             formData.append('collectionName', options.collectionName.value);
             formData.append('directory', options.directory.value);
-            
+
             if (options.modelType.value) {
                 formData.append('modelType', options.modelType.value);
             }
@@ -225,11 +228,13 @@ export function useMediaUploader(options: UseMediaUploaderOptions) {
                 files.value = [uploadedFile];
                 options.onUploadSuccess?.(uploadedFile);
             }
-        } catch (err) {
+        }
+        catch (err) {
             const errorMessage = err instanceof Error ? err.message : t('media.upload_error');
             validationErrors.value = [errorMessage];
             options.onUploadError?.(errorMessage);
-        } finally {
+        }
+        finally {
             uploading.value = false;
         }
     };
@@ -248,14 +253,14 @@ export function useMediaUploader(options: UseMediaUploaderOptions) {
 
         try {
             const formData = new FormData();
-            fileList.forEach(file => {
+            fileList.forEach((file) => {
                 formData.append('files', file);
             });
             formData.append('accessLevel', options.accessLevel.value.toUpperCase());
             formData.append('collectionName', options.collectionName.value);
             formData.append('directory', options.directory.value);
             formData.append('maxFiles', options.maxFiles.value.toString());
-            
+
             if (options.modelType.value) {
                 formData.append('modelType', options.modelType.value);
             }
@@ -277,11 +282,13 @@ export function useMediaUploader(options: UseMediaUploaderOptions) {
                 files.value = [...files.value, ...uploadedFiles];
                 uploadedFiles.forEach((file: MediaFile) => options.onUploadSuccess?.(file));
             }
-        } catch (err) {
+        }
+        catch (err) {
             const errorMessage = err instanceof Error ? err.message : t('media.upload_error');
             validationErrors.value = [errorMessage];
             options.onUploadError?.(errorMessage);
-        } finally {
+        }
+        finally {
             uploading.value = false;
         }
     };

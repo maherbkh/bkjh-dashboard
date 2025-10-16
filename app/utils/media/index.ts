@@ -1,4 +1,4 @@
 /**
  * Barrel export for media utilities
  */
-export * from './constants'
+export * from './constants';

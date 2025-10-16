@@ -60,7 +60,7 @@ const selectedValue = computed(() => {
 
 const selectedItem = computed(() => {
     if (!props.modelValue) return null;
-    return props.data.find(item => item[props.keyValue].toString() === selectedValue.value);
+    return props.data.find(item => (item[props.keyValue]?.toString() ?? '') === selectedValue.value);
 });
 
 const handleSelect = (value: string) => {
@@ -124,19 +124,19 @@ const handleSelect = (value: string) => {
                                 v-for="item in data"
                                 :key="item[keyValue]"
                                 class="cursor-pointer hover:bg-accent hover:text-accent-foreground my-1"
-                                :class="selectedValue === item[keyValue].toString() ? 'bg-accent text-accent-foreground' : ''"
-                                :value="item[keyValue].toString()"
-                                @select="() => handleSelect(item[keyValue].toString())"
+                                :class="selectedValue === (item[keyValue]?.toString() ?? '') ? 'bg-accent text-accent-foreground' : ''"
+                                :value="item[keyValue]?.toString() ?? ''"
+                                @select="() => handleSelect(item[keyValue]?.toString() ?? '')"
                             >
                                 <Icon
                                     name="solar:check-circle-line-duotone"
                                     :class="cn(
                                         'mr-2 !size-4 shrink-0 text-success',
-                                        selectedValue === item[keyValue].toString() ? 'opacity-100' : 'opacity-0',
+                                        selectedValue === (item[keyValue]?.toString() ?? '') ? 'opacity-100' : 'opacity-0',
                                     )"
                                 />
                                 <span
-                                    :class="selectedValue === item[keyValue].toString() ? 'font-semibold' : ''"
+                                    :class="selectedValue === (item[keyValue]?.toString() ?? '') ? 'font-semibold' : ''"
                                     class="line-clamp-1"
                                 >{{ item[nameValue] }}</span>
                             </CommandItem>

@@ -104,7 +104,6 @@ const selectedFile = ref(null);
 
 const handleFileSelect = (file) => {
     selectedFile.value = file;
-    console.log('Selected file:', file);
 };
 </script>
 
@@ -126,7 +125,6 @@ const selectedFiles = ref([]);
 
 const handleFilesSelect = (files) => {
     selectedFiles.value = files;
-    console.log('Selected files:', files);
 };
 </script>
 

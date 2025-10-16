@@ -45,7 +45,7 @@ export function useApiFetch<T = any>(
         // Don't set Content-Type for FormData (let browser handle it with boundary)
         const isFormData = opts.body instanceof FormData;
         const isMediaAPI = path.includes('/shared/media/');
-        
+
         if (!isFormData && !isMediaAPI) {
             defaultHeaders['Content-Type'] = 'application/json';
         }
@@ -72,6 +72,9 @@ export function useApiFetch<T = any>(
         ...(opts.headers as Record<string, string>),
     };
 
+    console.log('🌐 [useApiFetch] Final headers:', finalHeaders);
+    console.log('🌐 [useApiFetch] User authenticated:', !!userStore.accessToken);
+
     const fetchOpts: ApiFetchOptions<T> = {
         ...opts,
         method: method as any,
@@ -90,16 +93,31 @@ export function useApiFetch<T = any>(
         },
     };
 
+    // Generate cache key that includes query parameters for GET requests
+    const generateCacheKey = () => {
+        if (opts.key) return opts.key;
+
+        if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+            return `/backend${path}-${Date.now()}-${Math.random()}`;
+        }
+
+        // For GET requests, include query parameters in cache key to prevent caching issues
+        const queryString = opts.query ? JSON.stringify(opts.query) : '';
+        const queryHash = queryString ? `-${btoa(queryString).replace(/[^a-zA-Z0-9]/g, '')}` : '';
+        return `/backend${path}${queryHash}`;
+    };
+
     // Use server: false (CSR-only), no caching, dedupe cancel, immediate by default
-    return useFetch<ApiResponse<T>>('/backend' + path, {
+    const fullPath = '/backend' + path;
+    console.log('🌐 [useApiFetch] Making request to:', fullPath, 'with options:', fetchOpts);
+
+    return useFetch<ApiResponse<T>>(fullPath, {
         server: false,
         cache: 'no-store',
         dedupe: 'cancel',
         immediate: opts.immediate ?? true,
-        // Force fresh requests for state-changing operations
-        key: opts.key || (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)
-            ? `/backend${path}-${Date.now()}-${Math.random()}`
-            : `/backend${path}`),
+        // Generate unique cache key that includes query parameters
+        key: generateCacheKey(),
         ...fetchOpts,
     });
 }
