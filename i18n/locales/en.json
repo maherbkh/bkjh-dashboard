@@ -65,7 +65,8 @@
     "slug_format": "must contain only lowercase letters, numbers, and hyphens",
     "code_format": "must contain only uppercase letters, numbers, and underscores",
     "uuid": "must be a valid UUID",
-    "password_strength": "must contain at least one lowercase letter, one uppercase letter, and one number"
+    "password_strength": "must contain at least one lowercase letter, one uppercase letter, and one number",
+    "employee_fields_required": "Group and Occupation are required for employees"
   },
   "auth": {
     "login_form": "Login Form",
@@ -458,7 +459,21 @@
   "attendee": {
     "plural": "Attendees",
     "singular": "Attendee",
-    "description": "Manage event attendees"
+    "description": "Manage event attendees",
+    "email": "Email",
+    "employee": "Employee",
+    "employee_status": "Employee Status",
+    "last_login": "Last Login",
+    "registration_status": "Registration Status",
+    "registration_date": "Registration Date",
+    "person": "Person",
+    "employment_details": "Employment Details",
+    "registration_info": "Registration Info",
+    "is_employee": "Is Employee",
+    "is_employee_description": "Check if this attendee is an employee",
+    "is_active_description": "Check if this attendee is active",
+    "add": "Add a new attendee to the system",
+    "edit": "Edit attendee information"
   },
 
   "application": {

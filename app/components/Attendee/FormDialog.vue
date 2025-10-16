@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import type { Attendee, AttendeeForm } from '~/types';
 import { useResourcesStore } from '~/stores/resources';
+import BaseFormDialog from '@/components/FormDialog.vue';
 
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm, loading } = useCrud<
@@ -90,6 +92,17 @@ watch(
     },
 );
 
+// Watch isEmployee to clear group and occupation fields when set to false
+watch(isEmployee, (newValue) => {
+    if (!newValue) {
+        // Clear group and occupation fields when isEmployee is false
+        setValues({
+            groupId: null,
+            occupationId: null,
+        });
+    }
+});
+
 // Methods
 const onSubmitAndClose = handleSubmit((values) => {
     emit('submit-and-close', values);
@@ -105,7 +118,7 @@ const handleClose = () => {
 </script>
 
 <template>
-    <FormDialog
+    <BaseFormDialog
         v-model:open="isOpen"
         :title="dialogTitle"
         :description="dialogDescription"
@@ -116,8 +129,8 @@ const handleClose = () => {
                     <FormItemInput
                         id="firstName"
                         v-model="firstName"
-                        :title="t('global.first_name')"
-                        :placeholder="t('global.first_name')"
+                        :title="t('common.first_name')"
+                        :placeholder="t('common.first_name')"
                         class="col-span-6"
                         :errors="errors.firstName ? [errors.firstName] : []"
                         v-bind="firstNameAttrs"
@@ -127,8 +140,8 @@ const handleClose = () => {
                     <FormItemInput
                         id="lastName"
                         v-model="lastName"
-                        :title="t('global.last_name')"
-                        :placeholder="t('global.last_name')"
+                        :title="t('common.last_name')"
+                        :placeholder="t('common.last_name')"
                         class="col-span-6"
                         :errors="errors.lastName ? [errors.lastName] : []"
                         v-bind="lastNameAttrs"
@@ -138,8 +151,8 @@ const handleClose = () => {
                     <FormItemInput
                         id="email"
                         v-model="email"
-                        :title="t('global.email')"
-                        :placeholder="t('global.email')"
+                        :title="t('common.email')"
+                        :placeholder="t('common.email')"
                         type="email"
                         class="col-span-12"
                         :errors="errors.email ? [errors.email] : []"
@@ -147,8 +160,9 @@ const handleClose = () => {
                         required
                     />
 
-                    <!-- Group Selection -->
+                    <!-- Group Selection - Only show if isEmployee is true -->
                     <FormItemSelect
+                        v-if="isEmployee"
                         id="groupId"
                         v-model="groupId"
                         :title="t('group.singular')"
@@ -156,14 +170,16 @@ const handleClose = () => {
                         class="col-span-6"
                         :errors="errors.groupId ? [errors.groupId] : []"
                         v-bind="groupIdAttrs"
-                        :data="groupsData"
+                        :data="groupsData as any"
                         key-value="id"
                         name-value="name"
                         empty-text="No groups found"
+                        required
                     />
 
-                    <!-- Occupation Selection -->
+                    <!-- Occupation Selection - Only show if isEmployee is true -->
                     <FormItemSelect
+                        v-if="isEmployee"
                         id="occupationId"
                         v-model="occupationId"
                         :title="t('occupation.singular')"
@@ -171,10 +187,11 @@ const handleClose = () => {
                         class="col-span-6"
                         :errors="errors.occupationId ? [errors.occupationId] : []"
                         v-bind="occupationIdAttrs"
-                        :data="occupationsData"
+                        :data="occupationsData as any"
                         key-value="id"
                         name-value="name"
                         empty-text="No occupations found"
+                        required
                     />
 
                     <!-- Employee Status -->
@@ -250,5 +267,5 @@ const handleClose = () => {
                 {{ props.dialogMode === "add" ? t("action.save") : t("action.update") }}
             </Button>
         </template>
-    </FormDialog>
+    </BaseFormDialog>
 </template>

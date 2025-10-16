@@ -64,7 +64,8 @@
     "slug_format": "darf nur Kleinbuchstaben, Zahlen und Bindestriche enthalten",
     "code_format": "darf nur Großbuchstaben, Zahlen und Unterstriche enthalten",
     "uuid": "muss eine gültige UUID sein",
-    "password_strength": "muss mindestens einen Kleinbuchstaben, einen Großbuchstaben und eine Zahl enthalten"
+    "password_strength": "muss mindestens einen Kleinbuchstaben, einen Großbuchstaben und eine Zahl enthalten",
+    "employee_fields_required": "Gruppe und Beruf sind für Mitarbeiter erforderlich"
   },
   "auth": {
     "login_form": "Anmeldeformular",
@@ -455,7 +456,21 @@
   "attendee": {
     "plural": "Teilnehmer",
     "singular": "Teilnehmer",
-    "description": "Veranstaltungsteilnehmer verwalten"
+    "description": "Veranstaltungsteilnehmer verwalten",
+    "email": "E-Mail",
+    "employee": "Mitarbeiter",
+    "employee_status": "Mitarbeiterstatus",
+    "last_login": "Letzter Login",
+    "registration_status": "Anmeldestatus",
+    "registration_date": "Anmeldedatum",
+    "person": "Person",
+    "employment_details": "Beschäftigungsdetails",
+    "registration_info": "Anmeldeinformationen",
+    "is_employee": "Ist Mitarbeiter",
+    "is_employee_description": "Aktivieren, wenn dieser Teilnehmer ein Mitarbeiter ist",
+    "is_active_description": "Aktivieren, wenn dieser Teilnehmer aktiv ist",
+    "add": "Neuen Teilnehmer zum System hinzufügen",
+    "edit": "Teilnehmerinformationen bearbeiten"
   },
 
   "application": {

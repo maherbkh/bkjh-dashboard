@@ -758,6 +758,56 @@ export type EventData = {
 
 };
 
+// Attendee detail types
+export interface AttendeeEvent {
+    id: string;
+    title: string;
+    isActive: boolean;
+    registrationStatus: 'CONFIRMED' | 'PENDING' | 'ATTENDED' | 'REJECTED';
+    registrationDate: string;
+}
+
+export interface AttendeeRegistration {
+    id: string;
+    attendeeId: string;
+    eventId: string;
+    registrationStatus: 'CONFIRMED' | 'PENDING' | 'ATTENDED' | 'REJECTED';
+    createdAt: string;
+    updatedAt: string;
+    event: {
+        id: string;
+        title: string;
+        isActive: boolean;
+    };
+}
+
+export type AttendeeData = {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    groupId: string | null;
+    occupationId: string | null;
+    isEmployee: boolean;
+    isActive: boolean;
+    lastLoginAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    fullName: string;
+    eventsCount: number;
+    avatar?: string | null;
+    group?: {
+        id: string;
+        name: string;
+    } | null;
+    occupation?: {
+        id: string;
+        name: string;
+    } | null;
+    events?: AttendeeEvent[];
+    registrations?: AttendeeRegistration[];
+};
+
 // Attachment types for ticket messages
 export type Attachment = {
     id: number;

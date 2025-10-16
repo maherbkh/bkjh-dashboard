@@ -1,5 +1,12 @@
 <script setup lang="ts">
 import type { EventData, TableHeaderItem } from '~/types';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -113,6 +120,20 @@ async function handleSortChange(dir: 'asc' | 'desc', id: string) {
 // Navigation handlers
 const handleEdit = (event: EventData) => {
     navigateTo(`/events/${event.id}/edit`);
+};
+
+const handleDuplicate = (event: EventData) => {
+    // TODO: Implement duplicate functionality
+    console.log('Duplicate event:', event);
+    // You can implement the duplicate logic here
+    // For example: navigateTo(`/events/add?duplicate=${event.id}`);
+};
+
+const handleClose = (id: string) => {
+    // TODO: Implement close/cancel functionality
+    console.log('Close event:', id);
+    // You can implement the close logic here
+    // This might involve updating the event status or archiving it
 };
 
 const { confirmDelete, confirmBulkDelete } = useConfirmDialog();
@@ -310,6 +331,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
 
                         <template #cell-actions="{ row }">
                             <div class="flex justify-end gap-2">
+                                <!-- View Button - Keep visible -->
                                 <NuxtLink :to="`/events/${row.id}/show`">
                                     <LazyButton
                                         :title="$t('action.view')"
@@ -323,52 +345,56 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                         />
                                     </LazyButton>
                                 </NuxtLink>
-                                <LazyButton
-                                    :title="$t('action.edit')"
-                                    variant="ghost"
-                                    size="icon"
-                                    hydrate-on-interaction="mouseover"
-                                    @click="handleEdit(row)"
-                                >
-                                    <Icon
-                                        name="solar:pen-new-square-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
-                                    />
-                                </LazyButton>
-                                <LazyButton
-                                    :title="$t('action.delete')"
-                                    variant="ghost"
-                                    size="icon"
-                                    @click="handleDelete(row.id)"
-                                >
-                                    <Icon
-                                        name="solar:trash-bin-trash-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
-                                    />
-                                </LazyButton>
-                                <LazyButton
-                                    :title="$t('action.duplicate')"
-                                    variant="default"
-                                    size="icon"
-                                    @click="handleDelete(row.id)"
-                                >
-                                    <Icon
-                                        name="solar:copy-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
-                                    />
-                                </LazyButton>
-
-                                <LazyButton
-                                    :title="$t('action.abgesagt')"
-                                    variant="destructive"
-                                    size="icon"
-                                    @click="handleDelete(row.id)"
-                                >
-                                    <Icon
-                                        name="solar:close-circle-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
-                                    />
-                                </LazyButton>
+                                
+                                <!-- Actions Dropdown Menu -->
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger>
+                                        <Button
+                                            :title="$t('common.actions')"
+                                            variant="ghost"
+                                            size="icon"
+                                        >
+                                            <Icon
+                                                name="solar:menu-dots-outline"
+                                                class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                            />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem @click="handleEdit(row)">
+                                            <Icon
+                                                name="solar:pen-new-square-outline"
+                                                class="mr-2 h-4 w-4"
+                                            />
+                                            {{ $t('action.edit') }}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem @click="handleDelete(row.id)">
+                                            <Icon
+                                                name="solar:trash-bin-trash-outline"
+                                                class="mr-2 h-4 w-4"
+                                            />
+                                            {{ $t('action.delete') }}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem @click="handleDuplicate(row)">
+                                            <Icon
+                                                name="solar:copy-outline"
+                                                class="mr-2 h-4 w-4"
+                                            />
+                                            {{ $t('action.duplicate') }}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem 
+                                            @click="handleClose(row.id)"
+                                            class="text-destructive focus:text-destructive"
+                                        >
+                                            <Icon
+                                                name="solar:close-circle-outline"
+                                                class="mr-2 h-4 w-4"
+                                            />
+                                            {{ $t('action.abgesagt') }}
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
                         </template>
                     </PageTable>
