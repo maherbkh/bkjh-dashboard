@@ -158,6 +158,40 @@ export type SpeakerForm = {
     isActive: boolean;
 };
 
+export type Attendee = {
+    id: string; // UUID from API
+    firstName: string;
+    lastName: string;
+    email: string;
+    groupId: string | null;
+    occupationId: string | null;
+    isEmployee: boolean;
+    isActive: boolean;
+    lastLoginAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    fullName: string; // Computed field: firstName + lastName
+    eventsCount: number;
+    group?: {
+        id: string;
+        name: string;
+    } | null;
+    occupation?: {
+        id: string;
+        name: string;
+    } | null;
+};
+
+export type AttendeeForm = {
+    firstName: string;
+    lastName: string;
+    email: string;
+    groupId?: string | null;
+    occupationId?: string | null;
+    isEmployee: boolean;
+    isActive: boolean;
+};
+
 export type SupportTicket = {
     id: string; // UUID from API
     ticketNumber: string;
