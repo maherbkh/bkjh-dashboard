@@ -73,8 +73,8 @@
     "welcome_back": "Willkommen zurück",
     "description": "Geben Sie Ihre Anmeldedaten ein, um auf Ihr Konto zuzugreifen",
     "forgot_password": "Passwort vergessen?",
-    "forgot_password_description": "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.",
-    "send_reset_link": "Link zum Zurücksetzen senden",
+    "forgot_password_description": "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen 6-stelligen Code zum Zurücksetzen Ihres Passworts.",
+    "send_reset_link": "Reset-Code senden",
     "logout_success": "Sie wurden abgemeldet.",
     "login_success": "Sie haben sich erfolgreich angemeldet.",
     "invalid_credentials": "Die angegebenen Anmeldedaten sind ungültig.",
@@ -87,7 +87,15 @@
     "failed_to_send_reset_email": "E-Mail zum Zurücksetzen konnte nicht gesendet werden.",
     "password_reset": "Passwort zurücksetzen",
     "password_reset_success": "Ihr Passwort wurde erfolgreich zurückgesetzt.",
-    "password_reset_failed": "Passwort-Zurücksetzung fehlgeschlagen."
+    "password_reset_failed": "Passwort-Zurücksetzung fehlgeschlagen.",
+    "reset_code_sent": "Ein 6-stelliger Reset-Code wurde an Ihre E-Mail gesendet.",
+    "enter_reset_code": "Reset-Code eingeben",
+    "reset_code_description": "Geben Sie den 6-stelligen Code ein, der an Ihre E-Mail gesendet wurde.",
+    "resend_code": "Code erneut senden",
+    "code_resent": "Code erfolgreich erneut gesendet",
+    "invalid_code": "Ungültiger oder abgelaufener Code",
+    "reset_password_title": "Passwort zurücksetzen",
+    "reset_password_description": "Geben Sie den Code und Ihr neues Passwort ein."
   },
   "global": {
     "app_name": "BKJH",

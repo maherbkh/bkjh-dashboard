@@ -170,12 +170,15 @@ export const useUserStore = defineStore('user', () => {
         const { data, error } = await useApiFetch('/auth/request-reset', {
             method: 'POST',
             body: { email },
+            cache: 'no-store',
+            key: `/auth/request-reset-${Date.now()}-${Math.random()}`,
         });
         if (data.value) {
             toast.success(t('auth.email_sent'), {
-                description: t('auth.reset_link_sent'),
+                description: t('auth.reset_code_sent'),
                 duration: 5000,
             });
+            return true;
         }
         if (error.value) {
             const description = (error.value.data?.message ?? error.value.data?.status) || t('auth.failed_to_send_reset_email');
@@ -183,28 +186,25 @@ export const useUserStore = defineStore('user', () => {
                 description,
                 duration: 5000,
             });
+            return false;
         }
+        return false;
     };
 
     const resetPassword = async (resetData: ResetPasswordForm) => {
         const { data, error } = await useApiFetch('/auth/verify-reset', {
             method: 'POST',
             body: resetData,
+            cache: 'no-store',
+            key: `/auth/verify-reset-${Date.now()}-${Math.random()}`,
         });
         if (data.value) {
-            const resetResponse = (data.value as any).data;
-            // Reset password API returns admin and accessToken directly
-            if (resetResponse.admin) {
-                setUser(resetResponse.admin);
-            }
-            if (resetResponse.accessToken) {
-                setAccessToken(resetResponse.accessToken);
-            }
             toast.success(t('auth.password_reset'), {
                 description: t('auth.password_reset_success'),
                 duration: 5000,
             });
-            navigateTo('/');
+            navigateTo('/login');
+            return true;
         }
         if (error.value) {
             const description = (error.value.data?.message ?? error.value.data?.status) || t('auth.password_reset_failed');
@@ -212,7 +212,34 @@ export const useUserStore = defineStore('user', () => {
                 description,
                 duration: 5000,
             });
+            return false;
         }
+        return false;
+    };
+
+    const resendResetCode = async (email: string) => {
+        const { data, error } = await useApiFetch('/auth/resend-code', {
+            method: 'POST',
+            body: { email },
+            cache: 'no-store',
+            key: `/auth/resend-code-${Date.now()}-${Math.random()}`,
+        });
+        if (data.value) {
+            toast.success(t('auth.code_resent'), {
+                description: t('auth.reset_code_sent'),
+                duration: 5000,
+            });
+            return true;
+        }
+        if (error.value) {
+            const description = (error.value.data?.message ?? error.value.data?.status) || t('auth.failed_to_send_reset_email');
+            toast.error(t('global.error'), {
+                description,
+                duration: 5000,
+            });
+            return false;
+        }
+        return false;
     };
 
     // Logout all sessions
@@ -307,6 +334,7 @@ export const useUserStore = defineStore('user', () => {
         login,
         forgotPassword,
         resetPassword,
+        resendResetCode,
         logoutAll,
         changePassword,
         updateProfile,

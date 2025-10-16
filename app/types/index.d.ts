@@ -74,10 +74,10 @@ export type CheckAuthResponse = {
 };
 
 export type ResetPasswordForm = {
-    token: string;
     email: string;
-    password: string;
-    password_confirmation: string;
+    code: string;
+    newPassword: string;
+    confirmPassword: string;
 };
 
 // Entity types

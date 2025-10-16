@@ -26,7 +26,10 @@ async function onSubmit(event: Event) {
         const success = await userStore.forgotPassword(email.value);
 
         if (success) {
+            const emailToPass = email.value;
             email.value = '';
+            // Navigate to reset password page with email parameter
+            navigateTo(`/reset-password?email=${encodeURIComponent(emailToPass)}`);
         }
     }
     catch (error) {
