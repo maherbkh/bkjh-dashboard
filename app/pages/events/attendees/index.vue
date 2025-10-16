@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Attendee, TableHeaderItem } from '~/types';
+import { toast } from 'vue-sonner';
 
 const { t } = useI18n();
 const { confirmDelete, confirmBulkDelete } = useConfirmDialog();
