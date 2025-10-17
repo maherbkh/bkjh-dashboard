@@ -123,10 +123,7 @@ const handleEdit = (event: EventData) => {
 };
 
 const handleDuplicate = (event: EventData) => {
-    // TODO: Implement duplicate functionality
-    console.log('Duplicate event:', event);
-    // You can implement the duplicate logic here
-    // For example: navigateTo(`/events/add?duplicate=${event.id}`);
+    navigateTo(`/events/add?duplicate=${event.id}`);
 };
 
 const handleClose = (id: string) => {

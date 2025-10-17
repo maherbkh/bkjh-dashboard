@@ -2,8 +2,11 @@
 import { toast } from 'vue-sonner';
 
 import type { EventForm } from '~/composables/eventSchema';
+import type { EventData } from '~/types';
 
 const { t } = useI18n();
+const route = useRoute();
+
 // Page configuration
 const pageTitle = computed(() => t('action.add') + ' ' + t('academy.singular'));
 const pageIcon = usePageIcon();
@@ -24,6 +27,34 @@ useSeoMeta({
 // State
 const isSubmitting = ref(false);
 const router = useRouter();
+
+// Duplication logic
+const duplicateEventId = computed(() => route.query.duplicate as string);
+const isDuplicating = computed(() => !!duplicateEventId.value);
+
+// Reactive data for duplicate event
+const duplicateEventData = ref<EventData | null>(null);
+const isLoadingDuplicate = ref(false);
+
+// Fetch event data for duplication when ID is available
+watch(duplicateEventId, async (id) => {
+    if (id) {
+        isLoadingDuplicate.value = true;
+        try {
+            const { data } = await useApiFetch<EventData>(`/academy/events/${id}`, {
+                server: false,
+            });
+            duplicateEventData.value = data.value?.data || null;
+        } catch (error) {
+            console.error('Error fetching event for duplication:', error);
+            duplicateEventData.value = null;
+        } finally {
+            isLoadingDuplicate.value = false;
+        }
+    } else {
+        duplicateEventData.value = null;
+    }
+}, { immediate: true });
 
 // Form submission
 const onSubmit = async (values: EventForm) => {
@@ -73,6 +104,7 @@ const handleCancel = () => {
 
         <EventForm
             mode="add"
+            :initial-data="duplicateEventData"
             :is-submitting="isSubmitting"
             @submit="onSubmit"
             @cancel="handleCancel"

@@ -63,7 +63,7 @@ const typeOptions = computed(() => {
 
 // Initialize form data when props change
 watch(() => props.initialData, (newData) => {
-    if (newData && props.mode === 'edit') {
+    if (newData && (props.mode === 'edit' || (props.mode === 'add' && newData))) {
         setValues({
             title: newData.title,
             description: newData.description,
@@ -86,7 +86,7 @@ watch(() => props.initialData, (newData) => {
             })),
         });
     }
-    else if (props.mode === 'add') {
+    else if (props.mode === 'add' && !newData) {
         resetForm();
     }
 }, { immediate: true });
