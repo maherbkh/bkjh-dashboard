@@ -388,7 +388,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                                 name="solar:close-circle-outline"
                                                 class="mr-2 h-4 w-4"
                                             />
-                                            {{ $t('action.abgesagt') }}
+                                            {{ $t('action.cancel') }}
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>

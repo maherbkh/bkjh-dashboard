@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { EventData } from '~/types';
+import type { EventData, Speaker } from '~/types';
 import type { EventForm } from '~/composables/eventSchema';
 import { useResourcesStore } from '~/stores/resources';
 import RTEditor from '~/components/FormItem/RTEditor.vue';
@@ -43,17 +43,22 @@ const [note, noteAttrs] = defineField('note');
 const [type, typeAttrs] = defineField('type');
 const [eventCategoryId, eventCategoryIdAttrs] = defineField('eventCategoryId');
 const [eventTargetId, eventTargetIdAttrs] = defineField('eventTargetId');
-const [adminId, adminIdAttrs] = defineField('adminId');
 const [maxCapacity, maxCapacityAttrs] = defineField('maxCapacity');
 const [room, roomAttrs] = defineField('room');
 const [location, locationAttrs] = defineField('location');
 const [isActive, isActiveAttrs] = defineField('isActive');
-const [schedules, schedulesAttrs] = defineField('schedules');
+const [speakers, speakersAttrs] = defineField('speakers');
+const [schedules] = defineField('schedules');
 
 // Resources for selecting
 const resourcesStore = useResourcesStore();
 const eventCategories = computed(() => resourcesStore.eventCategories || []);
 const eventTargets = computed(() => resourcesStore.eventTargets || []);
+
+// Fetch speakers for multi-select
+const { data: speakersListData, status: isLoadingSpeakers } = await useApiFetch<{ data: Speaker[] }>('/academy/speakers/active', {
+    server: false,
+});
 
 // Event type options with translated names
 const typeOptions = computed(() => {
@@ -77,6 +82,7 @@ watch(() => props.initialData, (newData) => {
             room: (newData as any).conferenceRoom || newData.room || undefined,
             location: newData.location || undefined,
             isActive: newData.isActive,
+            speakers: (newData.speakers || []).map((speaker: any) => speaker.speakerId || speaker.id),
             schedules: (newData.schedules || []).map(schedule => ({
                 ...schedule,
                 date: schedule.date ? new Date(schedule.date).toISOString().split('T')[0] : '',
@@ -172,6 +178,16 @@ const formTitle = computed(() => {
                                 class="col-span-12"
                                 :errors="errors.shortDescription ? [errors.shortDescription] : []"
                                 v-bind="shortDescriptionAttrs"
+                            />
+                            
+                            <FormItemTextarea
+                                id="eventNote"
+                                v-model="note"
+                                :title="t('note.singular')"
+                                :placeholder="t('note.singular')"
+                                class="col-span-12"
+                                :errors="errors.note ? [errors.note] : []"
+                                v-bind="noteAttrs"
                             />
                             <div class="col-span-12">
                                 <label class="block text-sm font-medium mb-2">
@@ -378,6 +394,33 @@ const formTitle = computed(() => {
                                     {{ errors.schedules }}
                                 </div>
                             </div>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card v-if="isLoadingSpeakers !== 'pending'">
+                    <CardHeader>
+                        <CardTitle class="flex items-start gap-2">
+                            <Icon
+                                name="solar:user-speak-rounded-line-duotone"
+                                class="!size-5 opacity-75 shrink-0"
+                            />
+                            {{ $t('academy.speakers') }}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div class="grid grid-cols-12 gap-5">
+                            <LazyFormItemMultiSelect
+                                id="speakers"
+                                v-model="speakers"
+                                :title="$t('academy.speakers')"
+                                :placeholder="$t('action.select') + ' ' + $t('academy.speakers')"
+                                class="col-span-12"
+                                :errors="errors.speakers ? [errors.speakers] : []"
+                                v-bind="speakersAttrs"
+                                :data="speakersListData?.data || []"
+                                itemKey="id"
+                                itemLabel="name"
+                            />
                         </div>
                     </CardContent>
                 </Card>
