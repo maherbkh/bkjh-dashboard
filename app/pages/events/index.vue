@@ -125,12 +125,20 @@ const handleEdit = (event: EventData) => {
 const handleDuplicate = (event: EventData) => {
     navigateTo(`/events/add?duplicate=${event.id}`);
 };
-
-const handleClose = (id: string) => {
+import { toast } from 'vue-sonner';
+const handleCancelEvent = async (id: string) => {
     // TODO: Implement close/cancel functionality
     console.log('Close event:', id);
-    // You can implement the close logic here
-    // This might involve updating the event status or archiving it
+    const { data, error } = await useApiFetch(`/academy/events/${id}/cancel`, {
+        method: 'POST',
+    });
+    if (data.value) {
+        toast.success(t('global.messages.success'));
+        await fetchItems();
+    }
+    if (error.value) {
+        toast.error(t('global.messages.error'));
+    }
 };
 
 const { confirmDelete, confirmBulkDelete } = useConfirmDialog();
@@ -382,7 +390,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem
                                             class="text-destructive focus:text-destructive"
-                                            @click="handleClose(row.id)"
+                                            @click="handleCancelEvent(row.id)"
                                         >
                                             <Icon
                                                 name="solar:close-circle-outline"
