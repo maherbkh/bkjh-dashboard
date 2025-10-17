@@ -15,12 +15,12 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 // Calculate statistics
-const confirmedRegistrations = computed(() => 
-    props.attendee.events?.filter(event => event.registrationStatus === 'CONFIRMED').length || 0
+const confirmedRegistrations = computed(() =>
+    props.attendee.events?.filter(event => event.registrationStatus === 'CONFIRMED').length || 0,
 );
 
-const pendingRegistrations = computed(() => 
-    props.attendee.events?.filter(event => event.registrationStatus === 'PENDING').length || 0
+const pendingRegistrations = computed(() =>
+    props.attendee.events?.filter(event => event.registrationStatus === 'PENDING').length || 0,
 );
 
 const router = useRouter();
@@ -93,7 +93,10 @@ const router = useRouter();
                             <div class="text-sm">
                                 {{ props.attendee.email }}
                             </div>
-                            <div v-if="props.attendee.isEmployee" class="text-sm">
+                            <div
+                                v-if="props.attendee.isEmployee"
+                                class="text-sm"
+                            >
                                 • {{ $t('attendee.employee') }}
                             </div>
                         </div>
@@ -108,13 +111,13 @@ const router = useRouter();
                         <Icon name="solar:arrow-left-outline" />
                         {{ $t("action.back") }}
                     </Button>
-                     <Button
-                         size="sm"
-                         @click="emit('edit')"
-                     >
-                         <Icon name="solar:pen-outline" />
-                         {{ $t("action.edit") }}
-                     </Button>
+                    <Button
+                        size="sm"
+                        @click="emit('edit')"
+                    >
+                        <Icon name="solar:pen-outline" />
+                        {{ $t("action.edit") }}
+                    </Button>
                 </div>
             </div>
             <!-- Statistics Grid -->

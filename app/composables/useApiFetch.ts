@@ -72,8 +72,6 @@ export function useApiFetch<T = any>(
         ...(opts.headers as Record<string, string>),
     };
 
-    console.log('🌐 [useApiFetch] Final headers:', finalHeaders);
-    console.log('🌐 [useApiFetch] User authenticated:', !!userStore.accessToken);
 
     const fetchOpts: ApiFetchOptions<T> = {
         ...opts,
@@ -109,7 +107,6 @@ export function useApiFetch<T = any>(
 
     // Use server: false (CSR-only), no caching, dedupe cancel, immediate by default
     const fullPath = '/backend' + path;
-    console.log('🌐 [useApiFetch] Making request to:', fullPath, 'with options:', fetchOpts);
 
     return useFetch<ApiResponse<T>>(fullPath, {
         server: false,

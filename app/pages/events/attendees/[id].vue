@@ -9,10 +9,10 @@ definePageMeta({
     middleware: 'auth',
 });
 
-interface AttendeeResponse { 
-    statusCode: number; 
-    message: string; 
-    data: AttendeeData 
+interface AttendeeResponse {
+    statusCode: number;
+    message: string;
+    data: AttendeeData;
 }
 
 const { data, status, refresh } = await useApiFetch<AttendeeResponse>(`/academy/attendees/${route.params.id as string}`, {
@@ -89,7 +89,7 @@ const handleDialogClose = () => {
             :attendee="attendeeData as AttendeeData"
             @edit="openEditDialog"
         />
-        
+
         <LazyAttendeeFormDialog
             v-model:is-dialog-open="isDialogOpen"
             v-model:dialog-mode="dialogMode"

@@ -274,7 +274,7 @@ const handlePasswordReset = async (attendee: Attendee) => {
         const { data, status } = await useApiFetch(`/academy/attendees/${attendee.id}/send-reset-email`, {
             method: 'POST',
         });
-        
+
         if (status.value === 'success' && data.value) {
             const responseData = data.value as any;
             // Check if the response indicates success
@@ -380,17 +380,14 @@ const handlePasswordReset = async (attendee: Attendee) => {
                                 </div>
                             </div>
                         </template>
-
-                        <template #cell-email="{ row }">
-                            
-                        </template>
-
                         <template #cell-occupation="{ row }">
                             <div
                                 v-if="row.isEmployee && row.occupation && row.group"
                             >
                                 <div>{{ row.group.name }}</div>
-                                <div class="text-xs text-muted-foreground mt-0.5">{{ row.occupation.name }}</div>
+                                <div class="text-xs text-muted-foreground mt-0.5">
+                                    {{ row.occupation.name }}
+                                </div>
                             </div>
                             <div
                                 v-else

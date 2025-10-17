@@ -27,7 +27,7 @@ onMounted(async () => {
         navigateTo('/login');
         return;
     }
-    
+
     // Start countdown timer for resend button
     startResendCountdown();
 });
@@ -51,11 +51,11 @@ function startResendCountdown() {
 
 async function onResendCode() {
     if (isResending.value || resendCountdown.value > 0) return;
-    
+
     isResending.value = true;
     const success = await userStore.resendResetCode(email.value);
     isResending.value = false;
-    
+
     if (success) {
         startResendCountdown();
     }
@@ -127,9 +127,20 @@ async function onSubmit(event: Event) {
                 <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                     {{ $t('auth.enter_reset_code') }}
                 </label>
-                <PinInput class="w-full grow" v-model="code" :length="6" type="numeric" :disabled="isLoading">
+                <PinInput
+                    v-model="code"
+                    class="w-full grow"
+                    :length="6"
+                    type="numeric"
+                    :disabled="isLoading"
+                >
                     <PinInputGroup>
-                        <PinInputSlot class="w-full grow" v-for="i in 6" :key="i" :index="i - 1" />
+                        <PinInputSlot
+                            v-for="i in 6"
+                            :key="i"
+                            class="w-full grow"
+                            :index="i - 1"
+                        />
                     </PinInputGroup>
                 </PinInput>
                 <p class="text-sm text-muted-foreground">
@@ -162,7 +173,11 @@ async function onSubmit(event: Event) {
             />
 
             <!-- Submit button -->
-            <Button type="submit" :disabled="isLoading" class="w-full">
+            <Button
+                type="submit"
+                :disabled="isLoading"
+                class="w-full"
+            >
                 <Icon
                     v-if="isLoading"
                     name="solar:loading-linear"

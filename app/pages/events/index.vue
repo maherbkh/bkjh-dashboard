@@ -345,7 +345,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                         />
                                     </LazyButton>
                                 </NuxtLink>
-                                
+
                                 <!-- Actions Dropdown Menu -->
                                 <DropdownMenu>
                                     <DropdownMenuTrigger>
@@ -383,9 +383,9 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                             {{ $t('action.duplicate') }}
                                         </DropdownMenuItem>
                                         <DropdownMenuSeparator />
-                                        <DropdownMenuItem 
-                                            @click="handleClose(row.id)"
+                                        <DropdownMenuItem
                                             class="text-destructive focus:text-destructive"
+                                            @click="handleClose(row.id)"
                                         >
                                             <Icon
                                                 name="solar:close-circle-outline"

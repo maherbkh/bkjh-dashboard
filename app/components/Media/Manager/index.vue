@@ -276,7 +276,6 @@ watch(() => props.open, (isOpen: boolean) => {
         loadMedia();
     }
 });
-
 </script>
 
 <template>
