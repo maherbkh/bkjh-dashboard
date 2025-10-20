@@ -72,7 +72,6 @@ export function useApiFetch<T = any>(
         ...(opts.headers as Record<string, string>),
     };
 
-
     const fetchOpts: ApiFetchOptions<T> = {
         ...opts,
         method: method as any,

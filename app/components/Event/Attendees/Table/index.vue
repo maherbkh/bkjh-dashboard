@@ -30,7 +30,7 @@ const headerItems = computed(() => [
 
 const selectedStatusTab = ref<string>('ALL');
 
-const selectStatusTab = (status: "ALL" | "PENDING" | "APPROVED" | "REJECTED") => {
+const selectStatusTab = (status: 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED') => {
     selectedStatusTab.value = status;
 };
 

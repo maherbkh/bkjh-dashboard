@@ -45,13 +45,16 @@ watch(duplicateEventId, async (id) => {
                 server: false,
             });
             duplicateEventData.value = data.value?.data || null;
-        } catch (error) {
+        }
+        catch (error) {
             console.error('Error fetching event for duplication:', error);
             duplicateEventData.value = null;
-        } finally {
+        }
+        finally {
             isLoadingDuplicate.value = false;
         }
-    } else {
+    }
+    else {
         duplicateEventData.value = null;
     }
 }, { immediate: true });

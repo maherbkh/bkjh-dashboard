@@ -7,6 +7,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { toast } from 'vue-sonner';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -125,7 +126,6 @@ const handleEdit = (event: EventData) => {
 const handleDuplicate = (event: EventData) => {
     navigateTo(`/events/add?duplicate=${event.id}`);
 };
-import { toast } from 'vue-sonner';
 const handleCancelEvent = async (id: string) => {
     // TODO: Implement close/cancel functionality
     console.log('Close event:', id);

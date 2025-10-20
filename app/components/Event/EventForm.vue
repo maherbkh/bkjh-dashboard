@@ -179,7 +179,7 @@ const formTitle = computed(() => {
                                 :errors="errors.shortDescription ? [errors.shortDescription] : []"
                                 v-bind="shortDescriptionAttrs"
                             />
-                            
+
                             <FormItemTextarea
                                 id="eventNote"
                                 v-model="note"
@@ -418,8 +418,8 @@ const formTitle = computed(() => {
                                 :errors="errors.speakers ? [errors.speakers] : []"
                                 v-bind="speakersAttrs"
                                 :data="speakersListData?.data || []"
-                                itemKey="id"
-                                itemLabel="name"
+                                item-key="id"
+                                item-label="name"
                             />
                         </div>
                     </CardContent>
