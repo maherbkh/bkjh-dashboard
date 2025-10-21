@@ -122,6 +122,7 @@ export type EventTarget = {
     name: string;
     slug: string;
     position: number;
+    scope: 'INT' | 'EXT' | 'ALL';
     eventsCount?: number;
     createdAt: string;
     updatedAt: string;
@@ -139,6 +140,7 @@ export type EventTargetForm = {
     name: string;
     slug?: string;
     position: number;
+    scope?: 'INT' | 'EXT' | 'ALL';
 };
 
 export type Speaker = {

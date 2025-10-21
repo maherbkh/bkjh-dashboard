@@ -11,6 +11,8 @@ definePageMeta({
     middleware: 'auth',
 });
 
+const { formatDate } = useGermanDateFormat();
+
 useSeoMeta({
     title: pageTitle,
     ogTitle: pageTitle,
@@ -49,11 +51,7 @@ const sortDir = ref<'asc' | 'desc'>('asc');
 const status = computed(() => (isLoading.value ? 'pending' : 'success'));
 
 const headerItems = computed(() => [
-    {
-        as: 'th',
-        name: t('event_target.code'),
-        id: 'code',
-    },
+
     {
         as: 'th',
         name: t('global.name'),
@@ -61,19 +59,15 @@ const headerItems = computed(() => [
     },
     {
         as: 'th',
-        name: t('event_target.slug'),
-        id: 'slug',
+        name: t('event_target.scope'),
+        id: 'scope',
     },
     {
         as: 'th',
         name: t('common.position'),
         id: 'position',
     },
-    {
-        as: 'th',
-        name: t('common.created_at'),
-        id: 'created_at',
-    },
+    
 ]);
 
 // Initialize data
@@ -342,14 +336,6 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         "
                         @update:model-value="handleSelectAll"
                     >
-                        <template #cell-code="{ row }">
-                            <Badge
-                                variant="outline"
-                                class="font-mono"
-                            >
-                                {{ row.code }}
-                            </Badge>
-                        </template>
 
                         <template #cell-name="{ row }">
                             <div class="font-medium">
@@ -357,21 +343,17 @@ const handleRowSelected = (id: string, checked: boolean) => {
                             </div>
                         </template>
 
-                        <template #cell-slug="{ row }">
-                            <div class="text-sm text-muted-foreground font-mono">
-                                {{ row.slug }}
-                            </div>
+                        <template #cell-scope="{ row }">
+                            <Badge :variant="row.scope === 'ALL' ? 'secondary' : (row.scope === 'EXT' ? 'default' : 'success')">
+                                {{ row.scope }}
+                            </Badge>
                         </template>
 
                         <template #cell-position="{ row }">
                             <Badge variant="secondary">
                                 {{ row.position }}
                             </Badge>
-                        </template>
-
-                        <template #cell-created_at="{ row }">
-                            {{ useGermanDateFormat().formatDate(row.createdAt) }}
-                        </template>
+                        </template>                        
 
                         <template #cell-actions="{ row }">
                             <div class="flex justify-end gap-2">

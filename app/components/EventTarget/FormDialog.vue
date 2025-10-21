@@ -73,6 +73,24 @@
                     />
                 </div>
 
+                <div class="space-y-2">
+                    <Label for="scope">{{ $t("event_target.scope") }}</Label>
+                    <FormItemSelect
+                        id="scope"
+                        v-model="scope"
+                        :title="$t('event_target.scope')"
+                        :placeholder="$t('action.select') + ' ' + $t('event_target.scope')"
+                        :errors="errors.scope ? [errors.scope] : []"
+                        :data="[
+                            { id: 'INT', name: $t('event_target.scope_internal') },
+                            { id: 'EXT', name: $t('event_target.scope_external') },
+                            { id: 'ALL', name: $t('event_target.scope_all') }
+                        ]"
+                        key-value="id"
+                        name-value="name"
+                    />
+                </div>
+
                 <DialogFooter>
                     <Button
                         type="button"
@@ -153,6 +171,7 @@ const [code] = defineField('code');
 const [name] = defineField('name');
 const [slug] = defineField('slug');
 const [position] = defineField('position');
+const [scope] = defineField('scope');
 
 // Auto-generate slug from name
 watch(name, (newName) => {
@@ -176,6 +195,7 @@ watch(
                 name: eventTarget.name,
                 slug: eventTarget.slug,
                 position: eventTarget.position,
+                scope: eventTarget.scope,
             });
         }
     },

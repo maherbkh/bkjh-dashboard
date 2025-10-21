@@ -25,6 +25,10 @@ export function createEventTargetSchema(t: (key: string, params?: Record<string,
             .min(0, t('common.position') + ' ' + t('validation.min_value', { min: 0 }))
             .optional()
             .default(0),
+
+        scope: z.enum(['INT', 'EXT', 'ALL'])
+            .optional()
+            .default('ALL'),
     });
 }
 
