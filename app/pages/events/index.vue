@@ -248,7 +248,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                             <div class="font-medium ">
                                 <NuxtLink
                                     :to="`/events/${row.id}/show`"
-                                    class="hover:underline hover:text-primary truncate"
+                                    class="hover:underline hover:text-primary truncate max-w-64 line-clamp-1"
                                 >
                                     {{ row.title }}
                                 </NuxtLink>
@@ -279,21 +279,21 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         </template>
 
                         <template #cell-eventCategory="{ row }">
-                            <div class-font-m="normal truncat">
+                            <div class="font-medium max-w-48 line-clamp-1">
                                 <span v-if="row.eventCategory">{{ row.eventCategory.name }}</span>
                                 <span
                                     v-else
                                     class="text-muted-foreground"
                                 >{{ $t('common.not_assigned') }}</span>
                             </div>
-                            <div class-font-m="normal truncat">
+                            <div class-font-m="normal truncat text-sm">
                                 <span
                                     v-if="row.eventTarget"
-                                    class="text-muted-foreground"
+                                    class="text-muted-foreground text-sm"
                                 >{{ row.eventTarget.name }}</span>
                                 <span
                                     v-else
-                                    class="text-muted-foreground"
+                                    class="text-muted-foreground text-sm"
                                 >{{ $t('common.not_assigned') }}</span>
                             </div>
                         </template>
