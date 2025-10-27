@@ -391,10 +391,12 @@ const isOnline = (lastActiveAt: string | null) => {
                                 <div class="font-medium flex items-center gap-2">
                                     <div>{{ `${row.firstName} ${row.lastName}` }}</div>
                                     <Icon
-                                        v-if="isOnline(row.lastActiveAt)"
                                         :title="$t('global.online') + ' ' + formatRelativeTime(row.lastActiveAt)"
                                         name="solar:user-circle-outline"
-                                        class="!size-4 rounded-full shrink-0 text-success hover:scale-110 ease-in-out duration-300"
+                                        :class="[
+                                            isOnline(row.lastActiveAt) ? 'text-success' : 'text-muted-foreground',
+                                            '!size-4 rounded-full shrink-0 hover:scale-110 ease-in-out duration-300',
+                                        ]"
                                     />
                                 </div>
                                 <div
