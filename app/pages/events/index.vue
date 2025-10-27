@@ -248,6 +248,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                             <div class="font-medium ">
                                 <NuxtLink
                                     :to="`/events/${row.id}/show`"
+                                    :title="row.title"
                                     class="hover:underline hover:text-primary truncate max-w-64 line-clamp-1"
                                 >
                                     {{ row.title }}
