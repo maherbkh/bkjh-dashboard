@@ -24,6 +24,10 @@ const props = defineProps<{
     data: EventRegistrationLite[];
 }>();
 
+const emit = defineEmits<{
+    reload: [];
+}>();
+
 const headerItems = computed(() => [
     { as: 'th' as const, name: t('attendee.person'), id: 'person' },
     { as: 'th' as const, name: t('attendee.employment_details'), id: 'employment' },
@@ -71,12 +75,14 @@ const changeStatus = useDebounceFn(async (id: string, status: 'PENDING' | 'APPRO
         if (error.value) {
             toast.error(error.value.message);
         } else if (data.value) {
-            toast.success(data.value.data.message);
+            toast.success(data.value.message as string);
             // Optimistic update - find and update the item in the data array
             const itemIndex = props.data.findIndex(item => item.id === id);
             if (itemIndex !== -1 && props.data[itemIndex]) {
                 props.data[itemIndex]!.status = status;
             }
+            // Emit reload event to parent
+            emit('reload');
         }
     } catch (err) {
         toast.error('Failed to update status');
@@ -102,7 +108,7 @@ const getStatusClass = (status: string, rowStatus: string) => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-4">
+    <div id="attendees-table" class="flex flex-col gap-4">
         <div>
             <ul class="grid lg:grid-cols-4 gap-4">
                 <li>
@@ -147,7 +153,14 @@ const getStatusClass = (status: string, rowStatus: string) => {
                 </li>
             </ul>
         </div>
+        <PageEmptyState
+            v-if="filteredData.length === 0"
+            :search-query="''"
+            :add-new-text="$t('attendee.plural')"
+            :no-add-new-text="false"
+        />
         <PageTable
+            v-else
             :header-items="headerItems"
             :rows="filteredData"
             :selected-rows="[]"

@@ -23,6 +23,19 @@ onMounted(async () => {
     await refresh();
 });
 
+const handleReload = async () => {
+    await refresh();
+    // Wait for DOM update, then scroll to attendees table
+    await nextTick();
+    const attendeesTable = document.getElementById('attendees-table');
+    if (attendeesTable) {
+        attendeesTable.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+};
+
 const eventTitle = computed(() => eventData.value?.title || '');
 
 useSeoMeta({
@@ -36,6 +49,7 @@ useSeoMeta({
         <Event
             v-if="eventData && status !== 'pending'"
             :event="eventData as EventData"
+            @reload="handleReload"
         />
     </div>
 </template>

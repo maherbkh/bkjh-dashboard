@@ -8,6 +8,10 @@ const props = defineProps<{
     event: EventData;
 }>();
 
+const emit = defineEmits<{
+    reload: [];
+}>();
+
 const { t } = useI18n();
 </script>
 
@@ -170,6 +174,7 @@ const { t } = useI18n();
                             <div>
                                 <EventAttendeesTable
                                     :data="event.registrations as any[]"
+                                    @reload="emit('reload')"
                                 />
                             </div>
                         </CardContent>
