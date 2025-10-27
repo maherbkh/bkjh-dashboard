@@ -3,7 +3,7 @@
         :open="isDialogOpen"
         @update:open="(value) => emit('update:isDialogOpen', value)"
     >
-        <DialogContent class="sm:max-w-md">
+        <DialogContent class="sm:max-w-2xl">
             <DialogHeader>
                 <DialogTitle>
                     {{ dialogMode === "add" ? $t("action.add") : $t("action.edit") }}
@@ -56,7 +56,7 @@
                             v-model="isActive"
                             :error="errors.isActive"
                         />
-                        <Label for="isActive">{{ $t("common.active") }}</Label>
+                        <Label for="isActive">{{ isActive ? $t("common.active") : $t("common.inactive") }}</Label>
                     </div>
                 </div>
 

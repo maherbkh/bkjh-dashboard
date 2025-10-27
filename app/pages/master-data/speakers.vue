@@ -2,6 +2,8 @@
 import type { Speaker, SpeakerForm, TableHeaderItem, ServerParamsTypes } from '~/types';
 import { createSpeakerSchema } from '~/composables/speakerSchema';
 
+import { useGermanDateFormat } from '~/composables/useGermanDateFormat';
+
 const { t } = useI18n();
 
 // Page configuration
@@ -58,12 +60,6 @@ const headerItems = computed((): TableHeaderItem[] => [
     },
     {
         as: 'th',
-        name: t('speaker.qualification'),
-        id: 'qualification',
-        sortable: false,
-    },
-    {
-        as: 'th',
         name: t('common.status'),
         id: 'isActive',
         sortable: true,
@@ -72,12 +68,6 @@ const headerItems = computed((): TableHeaderItem[] => [
         as: 'th',
         name: t('academy.plural'),
         id: 'eventsCount',
-        sortable: true,
-    },
-    {
-        as: 'th',
-        name: t('common.created_at'),
-        id: 'createdAt',
         sortable: true,
     },
 ]);
@@ -344,16 +334,7 @@ const handleToggleActive = async (speaker: Speaker) => {
                             </div>
                             <div
                                 v-if="row.qualification"
-                                class="text-sm text-muted-foreground"
-                            >
-                                {{ row.qualification }}
-                            </div>
-                        </template>
-
-                        <template #cell-qualification="{ row }">
-                            <div
-                                v-if="row.qualification"
-                                class="text-sm"
+                                class="text-sm text-muted-foreground truncate line-clamp-1"
                             >
                                 {{ row.qualification }}
                             </div>
@@ -364,7 +345,6 @@ const handleToggleActive = async (speaker: Speaker) => {
                                 {{ $t("common.not_specified") }}
                             </div>
                         </template>
-
                         <template #cell-isActive="{ row }">
                             <Badge :variant="row.isActive ? 'default' : 'secondary'">
                                 {{ row.isActive ? $t("common.active") : $t("common.inactive") }}
@@ -373,12 +353,8 @@ const handleToggleActive = async (speaker: Speaker) => {
 
                         <template #cell-eventsCount="{ row }">
                             <span class="text-sm text-muted-foreground">
-                                {{ row.eventsCount || 0 }} {{ $t("academy.plural") }}
+                                <span class="font-medium">{{ row.eventsCount || 0 }}</span> {{ $t("academy.plural") }}
                             </span>
-                        </template>
-
-                        <template #cell-created_at="{ row }">
-                            {{ useGermanDateFormat().formatDate(row.createdAt) }}
                         </template>
 
                         <template #cell-actions="{ row }">
@@ -392,18 +368,6 @@ const handleToggleActive = async (speaker: Speaker) => {
                                 >
                                     <Icon
                                         name="solar:pen-new-square-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
-                                    />
-                                </LazyButton>
-                                <LazyButton
-                                    :title="row.isActive ? $t('action.deactivate') : $t('action.activate')"
-                                    variant="ghost"
-                                    size="icon"
-                                    hydrate-on-interaction="mouseover"
-                                    @click="handleToggleActive(row)"
-                                >
-                                    <Icon
-                                        :name="row.isActive ? 'solar:eye-closed-outline' : 'solar:eye-outline'"
                                         class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
                                     />
                                 </LazyButton>

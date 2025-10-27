@@ -460,5 +460,6 @@ const handleRowSelected = (id: string, checked: boolean) => {
             @submit-and-add-new="onSubmitAndAddNew"
             @close-dialog="handleDialogClose"
         />
+        <MediaExample />
     </div>
 </template>
