@@ -84,7 +84,7 @@
                         :data="[
                             { id: 'INT', name: $t('event_target.scope_internal') },
                             { id: 'EXT', name: $t('event_target.scope_external') },
-                            { id: 'ALL', name: $t('event_target.scope_all') }
+                            { id: 'ALL', name: $t('event_target.scope_all') },
                         ]"
                         key-value="id"
                         name-value="name"

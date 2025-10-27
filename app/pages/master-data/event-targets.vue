@@ -67,7 +67,7 @@ const headerItems = computed(() => [
         name: t('common.position'),
         id: 'position',
     },
-    
+
 ]);
 
 // Initialize data
@@ -336,7 +336,6 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         "
                         @update:model-value="handleSelectAll"
                     >
-
                         <template #cell-name="{ row }">
                             <div class="font-medium">
                                 {{ row.name }}
@@ -353,7 +352,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                             <Badge variant="secondary">
                                 {{ row.position }}
                             </Badge>
-                        </template>                        
+                        </template>
 
                         <template #cell-actions="{ row }">
                             <div class="flex justify-end gap-2">

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { useInitials } from '@/composables/useInitials';
+import { toast } from 'vue-sonner';
+import { useDebounceFn } from '@vueuse/core';
 
 const { t } = useI18n();
 const { formatDateParts } = useGermanDateFormat();
@@ -23,9 +25,9 @@ const props = defineProps<{
 }>();
 
 const headerItems = computed(() => [
-    { as: 'th', name: t('attendee.person'), id: 'person' },
-    { as: 'th', name: t('attendee.employment_details'), id: 'employment' },
-    { as: 'th', name: t('attendee.registration_info'), id: 'registration' },
+    { as: 'th' as const, name: t('attendee.person'), id: 'person' },
+    { as: 'th' as const, name: t('attendee.employment_details'), id: 'employment' },
+    { as: 'th' as const, name: t('attendee.registration_info'), id: 'registration' },
 ]);
 
 const selectedStatusTab = ref<string>('ALL');
@@ -48,6 +50,55 @@ const filteredData = computed(() => {
         }
     });
 });
+const statuses = ref<string[]>(['PENDING', 'APPROVED', 'REJECTED']);
+const loadingStates = ref<Record<string, boolean>>({});
+
+// Debounced status change function
+const changeStatus = useDebounceFn(async (id: string, status: 'PENDING' | 'APPROVED' | 'REJECTED') => {
+    if (loadingStates.value[id]) return; // Prevent multiple calls for same item
+    
+    loadingStates.value[id] = true;
+    
+    try {
+        const { data, error } = await useApiFetch(`/academy/events/registrations/${id}/status`, {
+            method: 'PATCH',
+            body: {
+                status: status,
+                note: 'note',
+            },
+        });
+        
+        if (error.value) {
+            toast.error(error.value.message);
+        } else if (data.value) {
+            toast.success(data.value.data.message);
+            // Optimistic update - find and update the item in the data array
+            const itemIndex = props.data.findIndex(item => item.id === id);
+            if (itemIndex !== -1 && props.data[itemIndex]) {
+                props.data[itemIndex]!.status = status;
+            }
+        }
+    } catch (err) {
+        toast.error('Failed to update status');
+    } finally {
+        loadingStates.value[id] = false;
+    }
+}, 300);
+
+// Computed class function for better performance
+const getStatusClass = (status: string, rowStatus: string) => {
+    const baseClasses = 'cursor-pointer hover:bg-accent';
+    const conditionalClasses = [];
+    
+    if (status === 'PENDING') conditionalClasses.push('text-muted-foreground');
+    if (status === 'APPROVED') conditionalClasses.push('hover:!bg-success/10 hover:!text-success');
+    if (status === 'REJECTED') conditionalClasses.push('hover:!bg-destructive/10 hover:!text-destructive');
+    if (status === rowStatus) conditionalClasses.push('font-medium');
+    if (rowStatus === status && status === 'APPROVED') conditionalClasses.push('text-success');
+    if (rowStatus === status && status === 'REJECTED') conditionalClasses.push('text-destructive');
+    
+    return [baseClasses, ...conditionalClasses];
+};
 </script>
 
 <template>
@@ -153,6 +204,41 @@ const filteredData = computed(() => {
                             />
                         </LazyButton>
                     </NuxtLink>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger as-child>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                            >
+                                <Icon
+                                    name="solar:menu-dots-bold"
+                                    class="size-5 shrink-0"
+                                />
+                                <span class="sr-only">{{ $t('common.actions') }}</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent class="min-w-40">
+                            <DropdownMenuRadioGroup v-model="row.status">
+                                <DropdownMenuRadioItem
+                                    v-for="status in statuses"
+                                    :key="status"
+                                    @click="changeStatus(row.id as string, status as 'PENDING' | 'APPROVED' | 'REJECTED')"
+                                    :value="status"
+                                    :class="getStatusClass(status, row.status)"
+                                    :disabled="loadingStates[row.id as string]"
+                                >
+                                    <div class="flex items-center gap-2">
+                                        <span>{{ status }}</span>
+                                        <Icon
+                                            v-if="loadingStates[row.id as string]"
+                                            name="solar:loading-bold"
+                                            class="size-3 animate-spin"
+                                        />
+                                    </div>
+                                </DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </template>
 
