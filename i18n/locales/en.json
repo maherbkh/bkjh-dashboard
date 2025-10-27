@@ -489,6 +489,7 @@
     "are_you_sure": "Are you sure?",
     "button_above": "button above to add a new record",
     "close": "Close",
+    "online": "Online",
     "common": {
       "confirm_bulk_delete_title": "Confirm Bulk Delete",
       "confirm_delete_title": "Confirm Delete",

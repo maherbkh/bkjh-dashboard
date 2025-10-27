@@ -4,6 +4,35 @@ import { createAdminSchema } from '~/composables/adminSchema';
 import { useResourcesStore } from '~/stores/resources';
 
 const { t } = useI18n();
+const { formatRelative } = useGermanDateFormat();
+
+// Custom relative time formatter using our translation keys
+const formatRelativeTime = (dateString: string | null): string => {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) {
+        return t('time.just_now');
+    } else if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `${minutes} ${minutes === 1 ? t('time.minute') : t('time.minutes')} ${t('time.ago')}`;
+    } else if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `${hours} ${hours === 1 ? t('time.hour') : t('time.hours')} ${t('time.ago')}`;
+    } else if (diffInSeconds < 2592000) {
+        const days = Math.floor(diffInSeconds / 86400);
+        return `${days} ${days === 1 ? t('time.day') : t('time.days')} ${t('time.ago')}`;
+    } else if (diffInSeconds < 31536000) {
+        const months = Math.floor(diffInSeconds / 2592000);
+        return `${months} ${months === 1 ? t('time.month') : t('time.months')} ${t('time.ago')}`;
+    } else {
+        const years = Math.floor(diffInSeconds / 31536000);
+        return `${years} ${years === 1 ? t('time.year') : t('time.years')} ${t('time.ago')}`;
+    }
+};
 
 // Page configuration
 const pageTitle = computed(() => t('admin.plural'));
@@ -290,6 +319,11 @@ const handleRowSelected = (id: string, checked: boolean) => {
         selectedRows.value = selectedRows.value.filter(rowId => rowId !== id);
     }
 };
+
+const isOnline = (lastActiveAt: string | null) => {
+    if (!lastActiveAt) return false;
+    return new Date(lastActiveAt).getTime() > new Date().getTime() - 1000 * 60 * 5;
+};
 </script>
 
 <template>
@@ -357,9 +391,10 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                 <div class="font-medium flex items-center gap-2">
                                     <div>{{ `${row.firstName} ${row.lastName}` }}</div>
                                     <Icon
-                                        v-if="row.lastLoginAt"
+                                        v-if="isOnline(row.lastActiveAt)"
+                                        :title="$t('global.online') + ' ' + formatRelativeTime(row.lastActiveAt)"
                                         name="solar:user-circle-outline"
-                                        class="!size-4 rounded-full shrink-0 text-success"
+                                        class="!size-4 rounded-full shrink-0 text-success hover:scale-110 ease-in-out duration-300"
                                     />
                                 </div>
                                 <div
