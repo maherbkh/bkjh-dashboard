@@ -147,6 +147,8 @@ export type Speaker = {
     id: string;
     name: string;
     qualification: string;
+    avatar?: string | import('~/types/media/index').MediaEntity | null; // Avatar media ID or entity
+    avatarUrl?: string; // Avatar URL from API
     isActive: boolean;
     eventsCount?: number;
     events?: Event[];
@@ -157,6 +159,7 @@ export type Speaker = {
 export type SpeakerForm = {
     name: string;
     qualification?: string;
+    avatar?: string | null;
     isActive: boolean;
 };
 

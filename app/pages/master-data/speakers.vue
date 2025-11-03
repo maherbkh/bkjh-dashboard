@@ -5,6 +5,7 @@ import { createSpeakerSchema } from '~/composables/speakerSchema';
 import { useGermanDateFormat } from '~/composables/useGermanDateFormat';
 
 const { t } = useI18n();
+const { getDirectImageSrc } = useAuthenticatedImage();
 
 // Page configuration
 const pageTitle = computed(() => t('speaker.plural'));
@@ -52,6 +53,12 @@ const sortDir = ref<'asc' | 'desc'>('asc');
 const status = computed(() => (isLoading.value ? 'pending' : 'success'));
 
 const headerItems = computed((): TableHeaderItem[] => [
+    {
+        as: 'th',
+        name: t('speaker.avatar'),
+        id: 'avatar',
+        sortable: false,
+    },
     {
         as: 'th',
         name: t('global.name'),
@@ -268,6 +275,35 @@ const handleToggleActive = async (speaker: Speaker) => {
         console.error('Error toggling speaker status:', error);
     }
 };
+
+// Get avatar image source
+const getAvatarImageSrc = (speaker: Speaker) => {
+    // Priority 1: Use avatarUrl if provided by the API
+    const avatarUrl = (speaker as any).avatarUrl;
+    if (avatarUrl) {
+        return getDirectImageSrc({ url: avatarUrl });
+    }
+
+    // Priority 2: Use avatar field if available
+    if (!speaker.avatar) return null;
+
+    // Handle different avatar formats
+    if (typeof speaker.avatar === 'string') {
+        const avatarId = speaker.avatar.trim();
+        if (avatarId.length > 0) {
+            const mediaObject = { uuid: avatarId };
+            return getDirectImageSrc(mediaObject);
+        }
+        return null;
+    }
+
+    // If it's a MediaEntity object, use getDirectImageSrc
+    if (speaker.avatar && typeof speaker.avatar === 'object' && 'id' in speaker.avatar) {
+        return getDirectImageSrc(speaker.avatar);
+    }
+
+    return null;
+};
 </script>
 
 <template>
@@ -328,6 +364,25 @@ const handleToggleActive = async (speaker: Speaker) => {
                         @update:selected-rows="(rows: (string | number)[]) => selectedRows = rows.map(String)"
                         @update:model-value="handleSelectAll"
                     >
+                        <template #cell-avatar="{ row }">
+                            <div class="flex items-center justify-center">
+                                <NuxtImg
+                                    v-if="getAvatarImageSrc(row)"
+                                    :src="getAvatarImageSrc(row)"
+                                    alt="Avatar"
+                                    class="w-10 h-10 rounded-full object-cover border border-border"
+                                />
+                                <div
+                                    v-else
+                                    class="w-10 h-10 rounded-full border border-border bg-muted flex items-center justify-center"
+                                >
+                                    <Icon
+                                        name="solar:user-outline"
+                                        class="size-5 text-muted-foreground"
+                                    />
+                                </div>
+                            </div>
+                        </template>
                         <template #cell-name="{ row }">
                             <div class="font-medium">
                                 {{ row.name }}

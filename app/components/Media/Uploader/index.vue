@@ -75,22 +75,17 @@ const safeFiles = computed(() => {
 
 // Watch for modelValue changes
 watch(() => props.modelValue, (newValue: MediaEntity | MediaEntity[] | null) => {
-    console.log('🖼️ [MediaUploader] props.modelValue changed:', newValue);
     // Always update files when modelValue changes
     if (Array.isArray(newValue)) {
         files.value = newValue;
-        console.log('🖼️ [MediaUploader] Set files.value (array):', files.value);
     }
     else if (newValue) {
         // Single MediaEntity - wrap in array for consistency
         files.value = [newValue];
-        console.log('🖼️ [MediaUploader] Set files.value (single):', files.value);
     }
     else {
         files.value = [];
-        console.log('🖼️ [MediaUploader] Set files.value to empty array');
     }
-    console.log('🖼️ [MediaUploader] safeFiles computed:', safeFiles.value);
 }, { immediate: true, deep: true });
 
 // Watch for files changes and emit

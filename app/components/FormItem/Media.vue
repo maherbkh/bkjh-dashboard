@@ -57,10 +57,6 @@ const { t } = useI18n();
 const showManagerDialog = ref(false);
 const { getImageSrc, getDirectImageSrc } = useAuthenticatedImage();
 
-// Watch for modelValue changes to debug
-watch(() => props.modelValue, (newValue) => {
-    console.log('📸 [FormItemMedia] props.modelValue changed:', newValue);
-}, { immediate: true, deep: true });
 
 const handleUploadSuccess = (file: MediaFile) => {
     if (props.multiple) {

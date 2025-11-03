@@ -12,6 +12,8 @@ export function createSpeakerSchema(t: (key: string, params?: Record<string, str
             .max(500, t('speaker.qualification') + ' ' + t('validation.max_length', { max: 500 }))
             .optional(),
 
+        avatar: z.string().uuid().optional().nullable(),
+
         isActive: z.boolean().optional().default(true),
     });
 }

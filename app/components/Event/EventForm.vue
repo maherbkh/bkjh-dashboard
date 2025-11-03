@@ -57,10 +57,6 @@ const [schedules] = defineField('schedules');
 const coverMedia = ref<MediaEntity | null>(null);
 const coverId = computed(() => coverMedia.value?.id || null);
 
-// Debug watch for coverMedia changes
-watch(coverMedia, (newValue) => {
-    console.log('🎨 [EventForm] coverMedia watch triggered with:', newValue);
-}, { deep: true });
 
 // Resources for selecting
 const resourcesStore = useResourcesStore();
@@ -207,13 +203,10 @@ watch(() => props.initialData, async (newData) => {
                 accessLevel: coverEntity.accessLevel || AccessLevel.PUBLIC,
             } as MediaEntity;
             
-            console.log('🎨 [EventForm] Setting coverMedia:', validEntity);
             // Force reactivity by creating a new object reference
             coverMedia.value = { ...validEntity };
-            console.log('🎨 [EventForm] coverMedia.value after setting:', coverMedia.value);
         }
         else {
-            console.log('🎨 [EventForm] No coverEntity, setting coverMedia to null');
             coverMedia.value = null;
         }
 

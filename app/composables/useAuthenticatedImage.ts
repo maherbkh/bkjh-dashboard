@@ -92,11 +92,8 @@ export function useAuthenticatedImage() {
 
     // New function to get direct image URL that bypasses IPX
     const getDirectImageSrc = (mediaFile: any) => {
-        console.log('🖼️ [useAuthenticatedImage] getDirectImageSrc input:', mediaFile);
-        
         // Get the transformed URL
         let transformedUrl = getImageSrc(mediaFile);
-        console.log('🖼️ [useAuthenticatedImage] transformedUrl after getImageSrc:', transformedUrl);
 
         // If it's already a full URL from the backend, transform it to use proxy
         if (transformedUrl.startsWith('http')) {
@@ -104,18 +101,15 @@ export function useAuthenticatedImage() {
             if (transformedUrl.includes('api.backhaus.test') || transformedUrl.includes('/uploads/')) {
                 // Transform to use proxy instead
                 transformedUrl = getAuthenticatedImageUrl({ url: transformedUrl });
-                console.log('🖼️ [useAuthenticatedImage] transformedUrl after proxy:', transformedUrl);
             }
             else {
                 // External URL, return as is
-                console.log('🖼️ [useAuthenticatedImage] External URL, returning as is');
                 return transformedUrl;
             }
         }
 
         // For relative URLs (proxy paths), construct the full URL to bypass IPX
         const fullUrl = `${window.location.origin}${transformedUrl}`;
-        console.log('🖼️ [useAuthenticatedImage] Final fullUrl:', fullUrl);
         return fullUrl;
     };
 

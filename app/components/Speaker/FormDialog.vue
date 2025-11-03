@@ -49,6 +49,19 @@
                     </p>
                 </div>
 
+                <FormItemMedia
+                    id="avatar"
+                    v-model="avatarMedia"
+                    :label="$t('speaker.avatar') || 'Avatar'"
+                    name="avatar"
+                    :multiple="false"
+                    :max-files="1"
+                    :allowed-types="['image']"
+                    :access-level="AccessLevel.PUBLIC"
+                    :collection-name="CollectionType.AVATAR"
+                    :errors="errors.avatar ? [errors.avatar] : []"
+                />
+
                 <div class="space-y-2">
                     <div class="flex items-center space-x-2">
                         <FormItemSwitch
@@ -105,7 +118,10 @@
 
 <script setup lang="ts">
 import type { Speaker, SpeakerForm } from '~/types';
+import type { MediaEntity } from '~/types/media/index';
+import { AccessLevel, CollectionType } from '~/types/media/index';
 import { createSpeakerSchema } from '~/composables/speakerSchema';
+import FormItemMedia from '~/components/FormItem/Media.vue';
 
 const { t } = useI18n();
 
@@ -145,14 +161,141 @@ const [name] = defineField('name');
 const [qualification] = defineField('qualification');
 const [isActive] = defineField('isActive');
 
+// Avatar media field - stored as MediaEntity in component, but form schema expects ID
+const avatarMedia = ref<MediaEntity | null>(null);
+const avatarId = computed(() => avatarMedia.value?.id || null);
+
 // Watch for editing speaker changes
 watch(
     () => props.editingSpeaker,
-    (speaker) => {
+    async (speaker) => {
         if (speaker) {
+            // Handle avatar media - could be ID string or MediaEntity object
+            let avatarEntity: MediaEntity | null = null;
+            const avatarData = (speaker as any).avatar;
+            const avatarUrl = (speaker as any).avatarUrl;
+
+            if (avatarData) {
+                if (typeof avatarData === 'string') {
+                    // If it's an ID, fetch the media entity
+                    try {
+                        const { data, error } = await useApiFetch<{ success: boolean; message: string; data: MediaEntity }>(`/shared/media/${avatarData}`, {
+                            server: false,
+                        });
+
+                        if (error.value) {
+                            console.error('Error fetching avatar media:', error.value);
+                            // If fetch fails but we have avatarUrl, create a minimal entity
+                            if (avatarUrl) {
+                                avatarEntity = {
+                                    id: avatarData,
+                                    uuid: avatarData,
+                                    filename: '',
+                                    storedName: '',
+                                    path: '',
+                                    url: avatarUrl,
+                                    mimeType: 'image/png',
+                                    extension: '.png',
+                                    size: 0,
+                                    metadata: {},
+                                    accessLevel: AccessLevel.PUBLIC,
+                                } as MediaEntity;
+                            }
+                        }
+                        else if (data.value?.data) {
+                            avatarEntity = data.value.data;
+                            if (avatarUrl && !avatarEntity.url) {
+                                avatarEntity = {
+                                    ...avatarEntity,
+                                    url: avatarUrl,
+                                } as MediaEntity;
+                            }
+                        }
+                        else if (avatarUrl) {
+                            avatarEntity = {
+                                id: avatarData,
+                                uuid: avatarData,
+                                filename: '',
+                                storedName: '',
+                                path: '',
+                                url: avatarUrl,
+                                mimeType: 'image/png',
+                                extension: '.png',
+                                size: 0,
+                                metadata: {},
+                                accessLevel: AccessLevel.PUBLIC,
+                            } as MediaEntity;
+                        }
+                    }
+                    catch (error) {
+                        console.error('Error fetching avatar media:', error);
+                        if (avatarUrl) {
+                            avatarEntity = {
+                                id: avatarData,
+                                uuid: avatarData,
+                                filename: '',
+                                storedName: '',
+                                path: '',
+                                url: avatarUrl,
+                                mimeType: 'image/png',
+                                extension: '.png',
+                                size: 0,
+                                metadata: {},
+                                accessLevel: AccessLevel.PUBLIC,
+                            } as MediaEntity;
+                        }
+                    }
+                }
+                else if (avatarData.id) {
+                    avatarEntity = avatarData as MediaEntity;
+                }
+            }
+            else if (avatarUrl && typeof avatarUrl === 'string') {
+                const urlParts = avatarUrl.split('/');
+                const filename = urlParts[urlParts.length - 1];
+                const uuidMatch = filename.match(/^([a-f0-9-]+)/);
+                const uuid = uuidMatch ? uuidMatch[1] : '';
+
+                avatarEntity = {
+                    id: uuid || '',
+                    uuid: uuid || '',
+                    filename: filename,
+                    storedName: filename,
+                    path: avatarUrl.replace('http://api.backhaus.test:3055/', ''),
+                    url: avatarUrl,
+                    mimeType: 'image/png',
+                    extension: filename.split('.').pop() || '.png',
+                    size: 0,
+                    metadata: {},
+                    accessLevel: AccessLevel.PUBLIC,
+                } as MediaEntity;
+            }
+
+            await nextTick();
+            if (avatarEntity) {
+                const validEntity: MediaEntity = {
+                    id: avatarEntity.id || '',
+                    uuid: avatarEntity.uuid || avatarEntity.id || '',
+                    filename: avatarEntity.filename || '',
+                    storedName: avatarEntity.storedName || avatarEntity.filename || '',
+                    path: avatarEntity.path || '',
+                    url: avatarEntity.url || avatarUrl || '',
+                    mimeType: avatarEntity.mimeType || 'image/png',
+                    extension: avatarEntity.extension || '.png',
+                    size: typeof avatarEntity.size === 'string' ? parseInt(avatarEntity.size) : (avatarEntity.size || 0),
+                    metadata: avatarEntity.metadata || {},
+                    accessLevel: avatarEntity.accessLevel || AccessLevel.PUBLIC,
+                } as MediaEntity;
+                avatarMedia.value = { ...validEntity };
+            }
+            else {
+                avatarMedia.value = null;
+            }
+
             setValues({
                 name: speaker.name,
                 qualification: speaker.qualification,
+                avatar: avatarEntity?.id || null,
                 isActive: speaker.isActive,
             });
         }
@@ -166,17 +309,26 @@ watch(
     (mode) => {
         if (mode === 'add') {
             resetForm();
+            avatarMedia.value = null;
         }
     },
 );
 
 // Form submission handlers
 const handleSubmit = handleFormSubmit((values) => {
-    emit('submit-and-close', values);
+    const submitValues = {
+        ...values,
+        avatar: avatarId.value,
+    };
+    emit('submit-and-close', submitValues as SpeakerForm);
 });
 
 const handleSubmitAndAddNew = handleFormSubmit((values) => {
-    emit('submit-and-add-new', values);
+    const submitValues = {
+        ...values,
+        avatar: avatarId.value,
+    };
+    emit('submit-and-add-new', submitValues as SpeakerForm);
 });
 
 const handleClose = () => {
