@@ -55,7 +55,7 @@ const { t } = useI18n();
 
 // Reactive state
 const showManagerDialog = ref(false);
-const { getImageSrc } = useAuthenticatedImage();
+const { getImageSrc, getDirectImageSrc } = useAuthenticatedImage();
 
 // Watch for modelValue changes to debug
 watch(() => props.modelValue, (newValue) => {
@@ -172,9 +172,9 @@ const getFileTypeIcon = (mimeType: string) => {
             </Button>
         </div>
 
-        <!-- Selected Files Display -->
+        <!-- Selected Files Display (Only for Multiple Files) -->
         <div
-            v-if="props.modelValue && (Array.isArray(props.modelValue) ? props.modelValue.length > 0 : true)"
+            v-if="multiple && props.modelValue && Array.isArray(props.modelValue) && props.modelValue.length > 0"
             class="space-y-3"
         >
             <div class="flex items-center gap-2 text-sm font-medium text-foreground">
@@ -185,67 +185,8 @@ const getFileTypeIcon = (mimeType: string) => {
                 <span>{{ t('media.selected_files') }}:</span>
             </div>
 
-            <!-- Single File Display -->
-            <div
-                v-if="!multiple && props.modelValue"
-                class="flex items-center justify-between p-4 bg-card/50 backdrop-blur-sm rounded-lg border border-border shadow-premium hover-lift"
-            >
-                <div class="flex items-center gap-3">
-                    <div class="relative">
-                        <NuxtImg
-                            v-if="props.modelValue.mimeType?.startsWith('image/')"
-                            :src="getImageSrc(props.modelValue)"
-                            :alt="getFileDisplayName(props.modelValue)"
-                            class="w-12 h-12 object-cover rounded-lg border border-border"
-                        />
-                        <div
-                            v-else
-                            class="w-12 h-12 bg-muted rounded-lg border border-border flex items-center justify-center"
-                        >
-                            <Icon
-                                :name="getFileTypeIcon(props.modelValue.mimeType || '')"
-                                class="w-6 h-6 text-muted-foreground"
-                            />
-                        </div>
-                        <div class="absolute -top-1 -right-1 w-4 h-4 bg-success rounded-full flex items-center justify-center">
-                            <Icon
-                                name="solar:check-circle-bold"
-                                class="w-3 h-3 text-success-foreground"
-                            />
-                        </div>
-                    </div>
-                    <div>
-                        <div class="font-medium text-sm text-foreground">
-                            {{ getFileDisplayName(props.modelValue) }}
-                        </div>
-                        <div class="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Icon
-                                name="solar:hard-drive-outline"
-                                class="shrink-0 size-3"
-                            />
-                            <span>{{ getFileSize(props.modelValue) }}</span>
-                        </div>
-                    </div>
-                </div>
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    :disabled="disabled"
-                    @click="removeFile()"
-                >
-                    <Icon
-                        name="solar:trash-bin-minimalistic-outline"
-                        class="w-4 h-4"
-                    />
-                </Button>
-            </div>
-
             <!-- Multiple Files Display -->
-            <div
-                v-else-if="multiple && Array.isArray(props.modelValue) && props.modelValue.length > 0"
-                class="space-y-3"
-            >
+            <div class="space-y-3">
                 <div
                     v-for="(file, index) in props.modelValue"
                     :key="file.id"
@@ -255,7 +196,7 @@ const getFileTypeIcon = (mimeType: string) => {
                         <div class="relative">
                             <NuxtImg
                                 v-if="file.mimeType?.startsWith('image/')"
-                                :src="getImageSrc(file)"
+                                :src="getDirectImageSrc(file)"
                                 :alt="getFileDisplayName(file)"
                                 class="w-12 h-12 object-cover rounded-lg border border-border"
                             />
