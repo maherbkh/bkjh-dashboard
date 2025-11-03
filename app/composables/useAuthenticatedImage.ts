@@ -76,7 +76,8 @@ export function useAuthenticatedImage() {
 
         // Priority 2: Fallback to fullUrl if available
         if (mediaFile?.fullUrl) {
-            return mediaFile.fullUrl;
+            const transformedUrl = getAuthenticatedImageUrl({ url: mediaFile.fullUrl });
+            return transformedUrl;
         }
 
         // Priority 3: Construct URL from uuid (legacy support)
@@ -92,14 +93,22 @@ export function useAuthenticatedImage() {
     // New function to get direct image URL that bypasses IPX
     const getDirectImageSrc = (mediaFile: any) => {
         // Get the transformed URL
-        const transformedUrl = getImageSrc(mediaFile);
+        let transformedUrl = getImageSrc(mediaFile);
 
-        // If it's already a full URL, return as is
+        // If it's already a full URL from the backend, transform it to use proxy
         if (transformedUrl.startsWith('http')) {
-            return transformedUrl;
+            // Check if it's a backend URL that needs proxying
+            if (transformedUrl.includes('api.backhaus.test') || transformedUrl.includes('/uploads/')) {
+                // Transform to use proxy instead
+                transformedUrl = getAuthenticatedImageUrl({ url: transformedUrl });
+            }
+            else {
+                // External URL, return as is
+                return transformedUrl;
+            }
         }
 
-        // For relative URLs, construct the full URL to bypass IPX
+        // For relative URLs (proxy paths), construct the full URL to bypass IPX
         const fullUrl = `${window.location.origin}${transformedUrl}`;
         return fullUrl;
     };

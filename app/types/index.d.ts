@@ -745,6 +745,7 @@ export type EventData = {
     eventCategoryId: string | null;
     eventTargetId: string | null;
     adminId: string;
+    cover?: string | import('~/types/media/index').MediaEntity | null; // Cover image media ID or entity
     createdAt: string;
     updatedAt: string;
     eventCategory?: EventListCategory | null;

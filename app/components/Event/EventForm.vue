@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import type { EventData, Speaker } from '~/types';
 import type { EventForm } from '~/composables/eventSchema';
+import type { MediaEntity } from '~/types/media/index';
+import { AccessLevel, CollectionType } from '~/types/media/index';
 import { useResourcesStore } from '~/stores/resources';
 import RTEditor from '~/components/FormItem/RTEditor.vue';
+import FormItemMedia from '~/components/FormItem/Media.vue';
 
 const { t } = useI18n();
 
@@ -50,6 +53,10 @@ const [isActive, isActiveAttrs] = defineField('isActive');
 const [speakers, speakersAttrs] = defineField('speakers');
 const [schedules] = defineField('schedules');
 
+// Cover media field - stored as MediaEntity in component, but form schema expects ID
+const coverMedia = ref<MediaEntity | null>(null);
+const coverId = computed(() => coverMedia.value?.id || null);
+
 // Resources for selecting
 const resourcesStore = useResourcesStore();
 const eventCategories = computed(() => resourcesStore.eventCategories || []);
@@ -67,8 +74,32 @@ const typeOptions = computed(() => {
 });
 
 // Initialize form data when props change
-watch(() => props.initialData, (newData) => {
+watch(() => props.initialData, async (newData) => {
     if (newData && (props.mode === 'edit' || (props.mode === 'add' && newData))) {
+        // Handle cover media - could be ID string or MediaEntity object
+        let coverEntity: MediaEntity | null = null;
+        const coverData = (newData as any).cover;
+        if (coverData) {
+            if (typeof coverData === 'string') {
+                // If it's an ID, fetch the media entity
+                try {
+                    const { data } = await useApiFetch<{ data: MediaEntity }>(`/shared/media/${coverData}`);
+                    if (data.value?.data) {
+                        coverEntity = data.value.data;
+                    }
+                }
+                catch (error) {
+                    console.error('Error fetching cover media:', error);
+                }
+            }
+            else if (coverData.id) {
+                // If it's already a MediaEntity object
+                coverEntity = coverData as MediaEntity;
+            }
+        }
+
+        coverMedia.value = coverEntity;
+
         setValues({
             title: newData.title,
             description: newData.description,
@@ -82,6 +113,7 @@ watch(() => props.initialData, (newData) => {
             room: (newData as any).conferenceRoom || newData.room || undefined,
             location: newData.location || undefined,
             isActive: newData.isActive,
+            cover: coverEntity?.id || null,
             speakers: (newData.speakers || []).map((speaker: any) => speaker.speakerId || speaker.id),
             schedules: (newData.schedules || []).map(schedule => ({
                 ...schedule,
@@ -94,12 +126,18 @@ watch(() => props.initialData, (newData) => {
     }
     else if (props.mode === 'add' && !newData) {
         resetForm();
+        coverMedia.value = null;
     }
 }, { immediate: true });
 
 // Form submission
 const onSubmit = handleSubmit((values) => {
-    emit('submit', values);
+    // Transform cover MediaEntity to ID for submission
+    const submitValues = {
+        ...values,
+        cover: coverId.value,
+    };
+    emit('submit', submitValues as EventForm);
 });
 
 // Schedule management
@@ -209,6 +247,19 @@ const formTitle = computed(() => {
                                     {{ errors.description }}
                                 </div>
                             </div>
+                            <FormItemMedia
+                                id="cover"
+                                v-model="coverMedia"
+                                :label="t('event.cover') || 'Cover Image'"
+                                name="cover"
+                                :multiple="false"
+                                :max-files="1"
+                                :allowed-types="['image']"
+                                :access-level="AccessLevel.PUBLIC"
+                                :collection-name="CollectionType.COVER"
+                                :errors="errors.cover ? [errors.cover] : []"
+                                class="col-span-12"
+                            />
                         </div>
                     </CardContent>
                 </Card>

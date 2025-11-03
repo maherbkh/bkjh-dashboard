@@ -12,6 +12,7 @@ import { toast } from 'vue-sonner';
 const { t } = useI18n();
 const router = useRouter();
 const { formatDateShort } = useGermanDateFormat();
+const { getDirectImageSrc } = useAuthenticatedImage();
 
 // Page configuration
 const pageTitle = computed(() => t('academy.plural'));
@@ -57,6 +58,7 @@ const sortBy = ref('createdAt');
 const sortDir = ref<'asc' | 'desc'>('desc');
 
 const headerItems = computed((): TableHeaderItem[] => [
+    { as: 'th', name: t('common.cover'), id: 'cover' },
     { as: 'th', name: t('event.title'), id: 'title' },
     { as: 'th', name: t('event.type'), id: 'type' },
     { as: 'th', name: t('academy.information'), id: 'eventCategory' },
@@ -179,6 +181,41 @@ const handleRowSelected = (id: string, checked: boolean) => {
     if (checked) selectedRows.value.push(id);
     else selectedRows.value = selectedRows.value.filter(rowId => rowId !== id);
 };
+
+// Helper function to get cover image URL
+const getCoverImageSrc = (event: EventData) => {
+    // Priority 1: Use coverUrl if provided by the API
+    // coverUrl format: http://api.backhaus.test:3055/uploads/public/...
+    // This will be transformed to /get-media/... via proxy
+    const coverUrl = (event as any).coverUrl;
+    if (coverUrl) {
+        // getDirectImageSrc will transform full backend URLs to use /get-media/ proxy
+        return getDirectImageSrc({ url: coverUrl });
+    }
+    
+    // Priority 2: Use cover field if available
+    if (!event.cover) return null;
+    
+    // Handle different cover formats
+    if (typeof event.cover === 'string') {
+        // If it's just an ID/UUID, construct a minimal media object with uuid
+        const coverId = event.cover.trim();
+        
+        if (coverId.length > 0) {
+            const mediaObject = { uuid: coverId };
+            return getDirectImageSrc(mediaObject);
+        }
+        
+        return null;
+    }
+    
+    // If it's a MediaEntity object, use getDirectImageSrc
+    if (event.cover && typeof event.cover === 'object' && 'id' in event.cover) {
+        return getDirectImageSrc(event.cover);
+    }
+    
+    return null;
+};
 </script>
 
 <template>
@@ -244,6 +281,25 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         @update:selected-rows="(rows: (string | number)[]) => selectedRows = rows.map(String)"
                         @update:model-value="handleSelectAll"
                     >
+
+                        <template #cell-cover="{ row }">
+                            <NuxtImg
+                                v-if="getCoverImageSrc(row)"
+                                :src="getCoverImageSrc(row)"
+                                alt="Cover"
+                                class="w-24 h-10 object-cover object-center rounded-md border border-border"
+                            />
+                            <div
+                                v-else
+                                class="w-24 h-10 rounded-md border border-border bg-muted flex items-center justify-center"
+                            >
+                                <Icon
+                                    name="solar:image-outline"
+                                    class="size-5 text-muted-foreground"
+                                />
+                            </div>
+                        </template>
+                        
                         <template #cell-title="{ row }">
                             <div class="font-medium ">
                                 <NuxtLink

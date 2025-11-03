@@ -126,6 +126,8 @@ export function createEventSchema(
         location: z.string().max(200, t('event.location') + ' ' + t('validation.max_length', { max: 200 })).optional(),
         isActive: z.boolean().optional().default(true),
 
+        cover: z.string().uuid().optional().nullable(),
+
         speakers: z.array(z.string().uuid(t('speaker.singular') + ' ' + t('validation.uuid'))).optional().default([]),
         schedules: scheduleArrayWithGlobalRules(t).default([]),
     });
@@ -165,6 +167,7 @@ export function updateEventSchema(
         room: z.string().max(200, t('event.room') + ' ' + t('validation.max_length', { max: 200 })).optional(),
         location: z.string().max(200, t('event.location') + ' ' + t('validation.max_length', { max: 200 })).optional(),
         isActive: z.boolean().optional().default(true),
+        cover: z.string().uuid().optional().nullable(),
         speakers: z.array(z.string().uuid(t('speaker.singular') + ' ' + t('validation.uuid'))).optional().default([]),
         schedules: scheduleArrayWithGlobalRules(t).default([]),
     });
