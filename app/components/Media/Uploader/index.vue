@@ -69,24 +69,29 @@ const dragging = ref(false);
 
 // Ensure files is always an array
 const safeFiles = computed(() => {
-    if (!files.value) return [];
-    return Array.isArray(files.value) ? files.value : [];
+    if (!files.value || files.value.length === 0) return [];
+    return Array.isArray(files.value) ? files.value : [files.value];
 });
 
 // Watch for modelValue changes
 watch(() => props.modelValue, (newValue: MediaEntity | MediaEntity[] | null) => {
-    if (newValue !== safeFiles.value) {
-        if (Array.isArray(newValue)) {
-            files.value = newValue;
-        }
-        else if (newValue) {
-            files.value = [newValue];
-        }
-        else {
-            files.value = [];
-        }
+    console.log('🖼️ [MediaUploader] props.modelValue changed:', newValue);
+    // Always update files when modelValue changes
+    if (Array.isArray(newValue)) {
+        files.value = newValue;
+        console.log('🖼️ [MediaUploader] Set files.value (array):', files.value);
     }
-});
+    else if (newValue) {
+        // Single MediaEntity - wrap in array for consistency
+        files.value = [newValue];
+        console.log('🖼️ [MediaUploader] Set files.value (single):', files.value);
+    }
+    else {
+        files.value = [];
+        console.log('🖼️ [MediaUploader] Set files.value to empty array');
+    }
+    console.log('🖼️ [MediaUploader] safeFiles computed:', safeFiles.value);
+}, { immediate: true, deep: true });
 
 // Watch for files changes and emit
 watch(safeFiles, (newFiles: MediaEntity[]) => {
@@ -343,7 +348,7 @@ const allowedTypesText = computed(() => {
                         <NuxtImg
                             v-if="safeFiles[0]"
                             :src="getDirectImageSrc(safeFiles[0])"
-                            :alt="safeFiles[0].filename"
+                            :alt="safeFiles[0].filename || safeFiles[0].title || 'Preview'"
                             class="max-h-48 w-auto rounded-lg object-contain"
                         />
                         <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">

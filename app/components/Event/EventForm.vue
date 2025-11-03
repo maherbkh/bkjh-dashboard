@@ -57,6 +57,11 @@ const [schedules] = defineField('schedules');
 const coverMedia = ref<MediaEntity | null>(null);
 const coverId = computed(() => coverMedia.value?.id || null);
 
+// Debug watch for coverMedia changes
+watch(coverMedia, (newValue) => {
+    console.log('🎨 [EventForm] coverMedia watch triggered with:', newValue);
+}, { deep: true });
+
 // Resources for selecting
 const resourcesStore = useResourcesStore();
 const eventCategories = computed(() => resourcesStore.eventCategories || []);
@@ -79,17 +84,80 @@ watch(() => props.initialData, async (newData) => {
         // Handle cover media - could be ID string or MediaEntity object
         let coverEntity: MediaEntity | null = null;
         const coverData = (newData as any).cover;
+        const coverUrl = (newData as any).coverUrl;
+        
         if (coverData) {
             if (typeof coverData === 'string') {
                 // If it's an ID, fetch the media entity
                 try {
-                    const { data } = await useApiFetch<{ data: MediaEntity }>(`/shared/media/${coverData}`);
-                    if (data.value?.data) {
+                    const { data, error } = await useApiFetch<{ success: boolean; message: string; data: MediaEntity }>(`/shared/media/${coverData}`, {
+                        server: false,
+                    });
+                    
+                    if (error.value) {
+                        console.error('Error fetching cover media:', error.value);
+                        // If fetch fails but we have coverUrl, create a minimal entity
+                        if (coverUrl) {
+                            coverEntity = {
+                                id: coverData,
+                                uuid: coverData,
+                                filename: '',
+                                storedName: '',
+                                path: '',
+                                url: coverUrl,
+                                mimeType: 'image/png',
+                                extension: '.png',
+                                size: 0,
+                                metadata: {},
+                                accessLevel: AccessLevel.PUBLIC,
+                            } as MediaEntity;
+                        }
+                    }
+                    else if (data.value?.data) {
                         coverEntity = data.value.data;
+                        // Ensure url field is set from coverUrl if available
+                        if (coverUrl && !coverEntity.url) {
+                            coverEntity = {
+                                ...coverEntity,
+                                url: coverUrl,
+                            } as MediaEntity;
+                        }
+                    }
+                    // Fallback: if fetch didn't return data but we have coverUrl, create minimal entity
+                    else if (coverUrl) {
+                        coverEntity = {
+                            id: coverData,
+                            uuid: coverData,
+                            filename: '',
+                            storedName: '',
+                            path: '',
+                            url: coverUrl,
+                            mimeType: 'image/png',
+                            extension: '.png',
+                            size: 0,
+                            metadata: {},
+                            accessLevel: AccessLevel.PUBLIC,
+                        } as MediaEntity;
                     }
                 }
                 catch (error) {
                     console.error('Error fetching cover media:', error);
+                    // Fallback: create minimal entity from coverUrl if available
+                    if (coverUrl) {
+                        coverEntity = {
+                            id: coverData,
+                            uuid: coverData,
+                            filename: '',
+                            storedName: '',
+                            path: '',
+                            url: coverUrl,
+                            mimeType: 'image/png',
+                            extension: '.png',
+                            size: 0,
+                            metadata: {},
+                            accessLevel: AccessLevel.PUBLIC,
+                        } as MediaEntity;
+                    }
                 }
             }
             else if (coverData.id) {
@@ -97,8 +165,57 @@ watch(() => props.initialData, async (newData) => {
                 coverEntity = coverData as MediaEntity;
             }
         }
+        // If no cover data but we have coverUrl, try to construct from URL
+        else if (coverUrl && typeof coverUrl === 'string') {
+            // Extract ID from URL or use a placeholder
+            const urlParts = coverUrl.split('/');
+            const filename = urlParts[urlParts.length - 1];
+            const uuidMatch = filename.match(/^([a-f0-9-]+)/);
+            const uuid = uuidMatch ? uuidMatch[1] : '';
+            
+            coverEntity = {
+                id: uuid || '',
+                uuid: uuid || '',
+                filename: filename,
+                storedName: filename,
+                path: coverUrl.replace('http://api.backhaus.test:3055/', ''),
+                url: coverUrl,
+                mimeType: 'image/png',
+                extension: filename.split('.').pop() || '.png',
+                size: 0,
+                metadata: {},
+                accessLevel: AccessLevel.PUBLIC,
+            } as MediaEntity;
+        }
 
-        coverMedia.value = coverEntity;
+        // Set coverMedia after ensuring we have a valid entity
+        // Use nextTick to ensure reactivity
+        await nextTick();
+        if (coverEntity) {
+            // Ensure all required fields are present for preview
+            const validEntity: MediaEntity = {
+                id: coverEntity.id || '',
+                uuid: coverEntity.uuid || coverEntity.id || '',
+                filename: coverEntity.filename || '',
+                storedName: coverEntity.storedName || coverEntity.filename || '',
+                path: coverEntity.path || '',
+                url: coverEntity.url || coverUrl || '',
+                mimeType: coverEntity.mimeType || 'image/png',
+                extension: coverEntity.extension || '.png',
+                size: typeof coverEntity.size === 'string' ? parseInt(coverEntity.size) : (coverEntity.size || 0),
+                metadata: coverEntity.metadata || {},
+                accessLevel: coverEntity.accessLevel || AccessLevel.PUBLIC,
+            } as MediaEntity;
+            
+            console.log('🎨 [EventForm] Setting coverMedia:', validEntity);
+            // Force reactivity by creating a new object reference
+            coverMedia.value = { ...validEntity };
+            console.log('🎨 [EventForm] coverMedia.value after setting:', coverMedia.value);
+        }
+        else {
+            console.log('🎨 [EventForm] No coverEntity, setting coverMedia to null');
+            coverMedia.value = null;
+        }
 
         setValues({
             title: newData.title,

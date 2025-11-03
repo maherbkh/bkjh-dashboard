@@ -9,6 +9,7 @@ interface Props {
     id?: string;
     name?: string;
     label?: string;
+    modelValue?: MediaEntity | MediaEntity[] | null;
     required?: boolean;
     multiple?: boolean;
     maxFiles?: number;
@@ -29,6 +30,7 @@ const props = withDefaults(defineProps<Props>(), {
     id: '',
     name: '',
     label: '',
+    modelValue: null,
     required: false,
     multiple: false,
     maxFiles: 1,
@@ -52,36 +54,31 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 // Reactive state
-const modelValue = ref<MediaEntity | MediaEntity[] | null>(null);
 const showManagerDialog = ref(false);
 const { getImageSrc } = useAuthenticatedImage();
 
-// Watch for modelValue changes
+// Watch for modelValue changes to debug
 watch(() => props.modelValue, (newValue) => {
-    modelValue.value = newValue;
-}, { immediate: true });
-
-// Watch for internal modelValue changes and emit
-watch(modelValue, (newValue) => {
-    emit('update:modelValue', newValue);
-}, { deep: true });
+    console.log('📸 [FormItemMedia] props.modelValue changed:', newValue);
+}, { immediate: true, deep: true });
 
 const handleUploadSuccess = (file: MediaFile) => {
     if (props.multiple) {
-        const currentFiles = Array.isArray(modelValue.value) ? modelValue.value : [];
-        modelValue.value = [...currentFiles, file];
+        const currentFiles = Array.isArray(props.modelValue) ? props.modelValue : [];
+        emit('update:modelValue', [...currentFiles, file]);
     }
     else {
-        modelValue.value = file;
+        emit('update:modelValue', file);
     }
+    emit('upload:success', file);
 };
 
 const handleManagerSelect = (files: MediaFile[]) => {
     if (props.multiple) {
-        modelValue.value = files;
+        emit('update:modelValue', files);
     }
     else {
-        modelValue.value = files[0] || null;
+        emit('update:modelValue', files[0] || null);
     }
     showManagerDialog.value = false;
 };
@@ -91,16 +88,18 @@ const openManager = () => {
 };
 
 const removeFile = (index?: number) => {
-    if (props.multiple && Array.isArray(modelValue.value)) {
+    if (props.multiple && Array.isArray(props.modelValue)) {
+        const files = [...props.modelValue];
         if (typeof index === 'number') {
-            modelValue.value.splice(index, 1);
+            files.splice(index, 1);
+            emit('update:modelValue', files);
         }
         else {
-            modelValue.value = [];
+            emit('update:modelValue', []);
         }
     }
     else {
-        modelValue.value = null;
+        emit('update:modelValue', null);
     }
 };
 
@@ -134,7 +133,7 @@ const getFileTypeIcon = (mimeType: string) => {
 
         <!-- Media Uploader -->
         <MediaUploader
-            :model-value="modelValue"
+            :model-value="props.modelValue"
             :name="name"
             :required="required"
             :multiple="multiple"
@@ -149,7 +148,7 @@ const getFileTypeIcon = (mimeType: string) => {
             :errors="errors"
             :disabled="disabled"
             :placeholder="placeholder"
-            @update:model-value="modelValue = $event"
+            @update:model-value="(value) => { emit('update:modelValue', value); }"
             @upload:success="handleUploadSuccess"
         />
 
@@ -175,7 +174,7 @@ const getFileTypeIcon = (mimeType: string) => {
 
         <!-- Selected Files Display -->
         <div
-            v-if="modelValue && (Array.isArray(modelValue) ? modelValue.length > 0 : true)"
+            v-if="props.modelValue && (Array.isArray(props.modelValue) ? props.modelValue.length > 0 : true)"
             class="space-y-3"
         >
             <div class="flex items-center gap-2 text-sm font-medium text-foreground">
@@ -188,15 +187,15 @@ const getFileTypeIcon = (mimeType: string) => {
 
             <!-- Single File Display -->
             <div
-                v-if="!multiple && modelValue"
+                v-if="!multiple && props.modelValue"
                 class="flex items-center justify-between p-4 bg-card/50 backdrop-blur-sm rounded-lg border border-border shadow-premium hover-lift"
             >
                 <div class="flex items-center gap-3">
                     <div class="relative">
                         <NuxtImg
-                            v-if="modelValue.mimeType?.startsWith('image/')"
-                            :src="getImageSrc(modelValue)"
-                            :alt="getFileDisplayName(modelValue)"
+                            v-if="props.modelValue.mimeType?.startsWith('image/')"
+                            :src="getImageSrc(props.modelValue)"
+                            :alt="getFileDisplayName(props.modelValue)"
                             class="w-12 h-12 object-cover rounded-lg border border-border"
                         />
                         <div
@@ -204,7 +203,7 @@ const getFileTypeIcon = (mimeType: string) => {
                             class="w-12 h-12 bg-muted rounded-lg border border-border flex items-center justify-center"
                         >
                             <Icon
-                                :name="getFileTypeIcon(modelValue.mimeType || '')"
+                                :name="getFileTypeIcon(props.modelValue.mimeType || '')"
                                 class="w-6 h-6 text-muted-foreground"
                             />
                         </div>
@@ -217,14 +216,14 @@ const getFileTypeIcon = (mimeType: string) => {
                     </div>
                     <div>
                         <div class="font-medium text-sm text-foreground">
-                            {{ getFileDisplayName(modelValue) }}
+                            {{ getFileDisplayName(props.modelValue) }}
                         </div>
                         <div class="flex items-center gap-1 text-xs text-muted-foreground">
                             <Icon
                                 name="solar:hard-drive-outline"
                                 class="shrink-0 size-3"
                             />
-                            <span>{{ getFileSize(modelValue) }}</span>
+                            <span>{{ getFileSize(props.modelValue) }}</span>
                         </div>
                     </div>
                 </div>
@@ -244,11 +243,11 @@ const getFileTypeIcon = (mimeType: string) => {
 
             <!-- Multiple Files Display -->
             <div
-                v-else-if="multiple && Array.isArray(modelValue) && modelValue.length > 0"
+                v-else-if="multiple && Array.isArray(props.modelValue) && props.modelValue.length > 0"
                 class="space-y-3"
             >
                 <div
-                    v-for="(file, index) in modelValue"
+                    v-for="(file, index) in props.modelValue"
                     :key="file.id"
                     class="flex items-center justify-between p-4 bg-card/50 backdrop-blur-sm rounded-lg border border-border shadow-premium hover-lift"
                 >
@@ -329,7 +328,7 @@ const getFileTypeIcon = (mimeType: string) => {
             :collection-name="collectionName"
             :model-type="modelType"
             :model-id="modelId"
-            :selected-files="Array.isArray(modelValue) ? modelValue : modelValue ? [modelValue] : []"
+            :selected-files="Array.isArray(props.modelValue) ? props.modelValue : props.modelValue ? [props.modelValue] : []"
             @update:selected-files="handleManagerSelect"
         />
     </div>
