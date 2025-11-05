@@ -389,7 +389,7 @@ const getAvatarImageSrc = (speaker: Speaker) => {
                             </div>
                             <div
                                 v-if="row.qualification"
-                                class="text-sm text-muted-foreground truncate line-clamp-1"
+                                class="text-sm text-muted-foreground truncate line-clamp-1 max-w-64"
                             >
                                 {{ row.qualification }}
                             </div>
