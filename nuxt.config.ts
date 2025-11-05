@@ -100,7 +100,7 @@ export default defineNuxtConfig({
                 },
             },
             '/get-media/**': {
-                proxy: 'http://api.backhaus.test:3055/uploads/public/**',
+                proxy: 'http://api.backhaus.de/uploads/public/**',
                 headers: {
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'GET, OPTIONS',
