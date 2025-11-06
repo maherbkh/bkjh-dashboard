@@ -413,7 +413,8 @@
     "short_description": "Kurzbeschreibung",
     "start_time": "Startzeit",
     "title": "Veranstaltungstitel",
-    "type": "Veranstaltungstyp"
+    "type": "Veranstaltungstyp",
+    "for_kids": "Für Kinder"
   },
   "event_category": {
     "description": "Veranstaltungskategorien für die Organisation von Akademieveranstaltungen verwalten",

@@ -413,7 +413,8 @@
     "short_description": "Short Description",
     "start_time": "Start Time",
     "title": "Event Title",
-    "type": "Event Type"
+    "type": "Event Type",
+    "for_kids": "For Kids"
   },
   "event_category": {
     "description": "Manage event categories for organizing academy events",

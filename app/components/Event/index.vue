@@ -3,6 +3,7 @@ import type { EventData } from '~/types';
 import { useInitials } from '~/composables/useInitials';
 
 const { formatDateShort, formatTimeOnly } = useGermanDateFormat();
+const { getDirectImageSrc } = useAuthenticatedImage();
 
 const props = defineProps<{
     event: EventData;
@@ -13,6 +14,36 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+
+// Get avatar image source for speaker
+const getSpeakerAvatarSrc = (speaker: any) => {
+    // Priority 1: Use avatarUrl if provided by the API
+    const avatarUrl = speaker.speaker?.avatarUrl || speaker.avatarUrl;
+    if (avatarUrl) {
+        return getDirectImageSrc({ url: avatarUrl });
+    }
+
+    // Priority 2: Use avatar field if available
+    const avatar = speaker.speaker?.avatar || speaker.avatar;
+    if (!avatar) return null;
+
+    // Handle different avatar formats
+    if (typeof avatar === 'string') {
+        const avatarId = avatar.trim();
+        if (avatarId.length > 0) {
+            const mediaObject = { uuid: avatarId };
+            return getDirectImageSrc(mediaObject);
+        }
+        return null;
+    }
+
+    // If it's a MediaEntity object, use getDirectImageSrc
+    if (avatar && typeof avatar === 'object' && 'id' in avatar) {
+        return getDirectImageSrc(avatar);
+    }
+
+    return null;
+};
 </script>
 
 <template>
@@ -226,6 +257,11 @@ const { t } = useI18n();
                             />
 
                             <AppListItem
+                                :title="$t('event.for_kids')"
+                                :value="event.forKids ? $t('common.yes') : $t('common.no')"
+                            />
+
+                            <AppListItem
                                 :title="$t('academy.createdBy')"
                                 :value="event.admin?.firstName + ' ' + event.admin?.lastName"
                             />
@@ -253,8 +289,9 @@ const { t } = useI18n();
                                    group-data-[state=open]:bg-sidebar-accent group-data-[state=open]:text-sidebar-accent-foreground"
                                 >
                                     <AvatarImage
+                                        v-if="getSpeakerAvatarSrc(speaker)"
                                         class="bg-background"
-                                        :src="speaker.speaker.avatar"
+                                        :src="getSpeakerAvatarSrc(speaker)"
                                         :alt="speaker.speaker.name"
                                     />
                                     <AvatarFallback class="rounded-full bg-background">

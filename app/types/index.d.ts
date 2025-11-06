@@ -692,7 +692,13 @@ export type EventSpeakerLite = {
     speakerId: string;
     createdAt: string;
     updatedAt: string;
-    speaker: { id: string; avatar: string; name: string; qualification?: string | null };
+    speaker: { 
+        id: string; 
+        avatar?: string | import('~/types/media/index').MediaEntity | null; 
+        avatarUrl?: string; // Avatar URL from API
+        name: string; 
+        qualification?: string | null; 
+    };
 };
 
 export type EventListCategory = { id: string; name: string };
@@ -745,6 +751,7 @@ export type EventData = {
     room?: string | null;
     location?: string | null;
     isActive: boolean;
+    forKids?: boolean;
     eventCategoryId: string | null;
     eventTargetId: string | null;
     adminId: string;

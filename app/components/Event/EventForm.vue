@@ -50,6 +50,7 @@ const [maxCapacity, maxCapacityAttrs] = defineField('maxCapacity');
 const [room, roomAttrs] = defineField('room');
 const [location, locationAttrs] = defineField('location');
 const [isActive, isActiveAttrs] = defineField('isActive');
+const [forKids, forKidsAttrs] = defineField('forKids');
 const [speakers, speakersAttrs] = defineField('speakers');
 const [schedules] = defineField('schedules');
 
@@ -223,6 +224,7 @@ watch(() => props.initialData, async (newData) => {
             room: (newData as any).conferenceRoom || newData.room || undefined,
             location: newData.location || undefined,
             isActive: newData.isActive,
+            forKids: (newData as any).forKids ?? false,
             cover: coverEntity?.id || null,
             speakers: (newData.speakers || []).map((speaker: any) => speaker.speakerId || speaker.id),
             schedules: (newData.schedules || []).map(schedule => ({
@@ -304,7 +306,7 @@ const formTitle = computed(() => {
                                 v-model="title"
                                 :title="t('common.title')"
                                 :placeholder="t('common.title')"
-                                class="col-span-12 lg:col-span-8"
+                                class="col-span-12 lg:col-span-6"
                                 :errors="errors.title ? [errors.title] : []"
                                 v-bind="titleAttrs"
                                 required
@@ -315,8 +317,17 @@ const formTitle = computed(() => {
                                 true-label="Active"
                                 false-label="Inactive"
                                 :title="t('common.active')"
-                                class="col-span-12 lg:col-span-4"
+                                class="col-span-12 lg:col-span-3"
                                 v-bind="isActiveAttrs"
+                            />
+                            <FormItemSwitch
+                                id="forKids"
+                                v-model="forKids"
+                                true-label="Ja"
+                                false-label="Nein"
+                                :title="t('event.for_kids')"
+                                class="col-span-12 lg:col-span-3"
+                                v-bind="forKidsAttrs"
                             />
                             <FormItemTextarea
                                 id="shortDescription"
