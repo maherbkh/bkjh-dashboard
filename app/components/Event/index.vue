@@ -15,29 +15,30 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-// Get avatar image source for speaker
+// Get avatar image source for speaker using media composable
 const getSpeakerAvatarSrc = (speaker: any) => {
+    const speakerData = speaker.speaker || speaker;
+    
     // Priority 1: Use avatarUrl if provided by the API
-    const avatarUrl = speaker.speaker?.avatarUrl || speaker.avatarUrl;
+    const avatarUrl = (speakerData as any)?.avatarUrl;
     if (avatarUrl) {
         return getDirectImageSrc({ url: avatarUrl });
     }
 
     // Priority 2: Use avatar field if available
-    const avatar = speaker.speaker?.avatar || speaker.avatar;
+    const avatar = speakerData?.avatar;
     if (!avatar) return null;
 
-    // Handle different avatar formats
+    // Handle different avatar formats - use media composable
     if (typeof avatar === 'string') {
         const avatarId = avatar.trim();
         if (avatarId.length > 0) {
-            const mediaObject = { uuid: avatarId };
-            return getDirectImageSrc(mediaObject);
+            return getDirectImageSrc({ uuid: avatarId });
         }
         return null;
     }
 
-    // If it's a MediaEntity object, use getDirectImageSrc
+    // If it's a MediaEntity object, use getDirectImageSrc directly
     if (avatar && typeof avatar === 'object' && 'id' in avatar) {
         return getDirectImageSrc(avatar);
     }
@@ -290,9 +291,9 @@ const getSpeakerAvatarSrc = (speaker: any) => {
                                 >
                                     <AvatarImage
                                         v-if="getSpeakerAvatarSrc(speaker)"
-                                        class="bg-background"
                                         :src="getSpeakerAvatarSrc(speaker)"
                                         :alt="speaker.speaker.name"
+                                        class="bg-background object-cover object-center"
                                     />
                                     <AvatarFallback class="rounded-full bg-background">
                                         {{ useInitials(speaker.speaker.name) }}
@@ -300,7 +301,7 @@ const getSpeakerAvatarSrc = (speaker: any) => {
                                 </Avatar>
                                 <div class="grid flex-1 text-left text-sm leading-tight">
                                     <span class="truncate font-semibold">{{ speaker.speaker.name }}</span>
-                                    <span class="truncate text-xs">{{ speaker.speaker.qualification }}</span>
+                                    <span class="truncate text-xs max-w-52">{{ speaker.speaker.qualification }}</span>
                                 </div>
                             </div>
                         </CardContent>
