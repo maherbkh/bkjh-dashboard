@@ -49,7 +49,8 @@
                     </p>
                 </div>
 
-                <FormItemMedia
+                <div class="grid lg:grid-cols-2 gap-4 items-start">
+                    <FormItemMedia
                     id="avatar"
                     v-model="avatarMedia"
                     :label="$t('speaker.avatar') || 'Avatar'"
@@ -61,6 +62,20 @@
                     :collection-name="CollectionType.AVATAR"
                     :errors="errors.avatar ? [errors.avatar] : []"
                 />
+
+                <FormItemMedia
+                    id="logo"
+                    v-model="logoMedia"
+                    :label="$t('speaker.logo') || 'Logo'"
+                    name="logo"
+                    :multiple="false"
+                    :max-files="1"
+                    :allowed-types="['image']"
+                    :access-level="AccessLevel.PUBLIC"
+                    :collection-name="CollectionType.COVER"
+                    :errors="errors.logo ? [errors.logo] : []"
+                />
+                </div>
 
                 <div class="space-y-2">
                     <div class="flex items-center space-x-2">
@@ -164,6 +179,10 @@ const [isActive] = defineField('isActive');
 // Avatar media field - stored as MediaEntity in component, but form schema expects ID
 const avatarMedia = ref<MediaEntity | null>(null);
 const avatarId = computed(() => avatarMedia.value?.id || null);
+
+// Logo media field - stored as MediaEntity in component, but form schema expects ID
+const logoMedia = ref<MediaEntity | null>(null);
+const logoId = computed(() => logoMedia.value?.id || null);
 
 // Watch for editing speaker changes
 watch(
@@ -292,10 +311,133 @@ watch(
                 avatarMedia.value = null;
             }
 
+            // Handle logo media - could be ID string or MediaEntity object
+            let logoEntity: MediaEntity | null = null;
+            const logoData = (speaker as any).logo;
+            const logoUrl = (speaker as any).logoUrl;
+
+            if (logoData) {
+                if (typeof logoData === 'string') {
+                    // If it's an ID, fetch the media entity
+                    try {
+                        const { data, error } = await useApiFetch<{ success: boolean; message: string; data: MediaEntity }>(`/shared/media/${logoData}`, {
+                            server: false,
+                        });
+
+                        if (error.value) {
+                            console.error('Error fetching logo media:', error.value);
+                            // If fetch fails but we have logoUrl, create a minimal entity
+                            if (logoUrl) {
+                                logoEntity = {
+                                    id: logoData,
+                                    uuid: logoData,
+                                    filename: '',
+                                    storedName: '',
+                                    path: '',
+                                    url: logoUrl,
+                                    mimeType: 'image/png',
+                                    extension: '.png',
+                                    size: 0,
+                                    metadata: {},
+                                    accessLevel: AccessLevel.PUBLIC,
+                                } as MediaEntity;
+                            }
+                        }
+                        else if (data.value?.data) {
+                            logoEntity = data.value.data;
+                            if (logoUrl && !logoEntity.url) {
+                                logoEntity = {
+                                    ...logoEntity,
+                                    url: logoUrl,
+                                } as MediaEntity;
+                            }
+                        }
+                        else if (logoUrl) {
+                            logoEntity = {
+                                id: logoData,
+                                uuid: logoData,
+                                filename: '',
+                                storedName: '',
+                                path: '',
+                                url: logoUrl,
+                                mimeType: 'image/png',
+                                extension: '.png',
+                                size: 0,
+                                metadata: {},
+                                accessLevel: AccessLevel.PUBLIC,
+                            } as MediaEntity;
+                        }
+                    }
+                    catch (error) {
+                        console.error('Error fetching logo media:', error);
+                        if (logoUrl) {
+                            logoEntity = {
+                                id: logoData,
+                                uuid: logoData,
+                                filename: '',
+                                storedName: '',
+                                path: '',
+                                url: logoUrl,
+                                mimeType: 'image/png',
+                                extension: '.png',
+                                size: 0,
+                                metadata: {},
+                                accessLevel: AccessLevel.PUBLIC,
+                            } as MediaEntity;
+                        }
+                    }
+                }
+                else if (logoData.id) {
+                    logoEntity = logoData as MediaEntity;
+                }
+            }
+            else if (logoUrl && typeof logoUrl === 'string') {
+                const urlParts = logoUrl.split('/');
+                const filename = urlParts[urlParts.length - 1];
+                const uuidMatch = filename.match(/^([a-f0-9-]+)/);
+                const uuid = uuidMatch ? uuidMatch[1] : '';
+
+                logoEntity = {
+                    id: uuid || '',
+                    uuid: uuid || '',
+                    filename: filename,
+                    storedName: filename,
+                    path: logoUrl.replace('http://api.backhaus.test:3055/', ''),
+                    url: logoUrl,
+                    mimeType: 'image/png',
+                    extension: filename.split('.').pop() || '.png',
+                    size: 0,
+                    metadata: {},
+                    accessLevel: AccessLevel.PUBLIC,
+                } as MediaEntity;
+            }
+
+            await nextTick();
+            if (logoEntity) {
+                const validLogoEntity: MediaEntity = {
+                    id: logoEntity.id || '',
+                    uuid: logoEntity.uuid || logoEntity.id || '',
+                    filename: logoEntity.filename || '',
+                    storedName: logoEntity.storedName || logoEntity.filename || '',
+                    path: logoEntity.path || '',
+                    url: logoEntity.url || logoUrl || '',
+                    mimeType: logoEntity.mimeType || 'image/png',
+                    extension: logoEntity.extension || '.png',
+                    size: typeof logoEntity.size === 'string' ? parseInt(logoEntity.size) : (logoEntity.size || 0),
+                    metadata: logoEntity.metadata || {},
+                    accessLevel: logoEntity.accessLevel || AccessLevel.PUBLIC,
+                } as MediaEntity;
+                logoMedia.value = { ...validLogoEntity };
+            }
+            else {
+                logoMedia.value = null;
+            }
+
             setValues({
                 name: speaker.name,
                 qualification: speaker.qualification,
                 avatar: avatarEntity?.id || null,
+                logo: logoEntity?.id || null,
                 isActive: speaker.isActive,
             });
         }
@@ -310,6 +452,7 @@ watch(
         if (mode === 'add') {
             resetForm();
             avatarMedia.value = null;
+            logoMedia.value = null;
         }
     },
 );
@@ -319,6 +462,7 @@ const handleSubmit = handleFormSubmit((values) => {
     const submitValues = {
         ...values,
         avatar: avatarId.value,
+        logo: logoId.value,
     };
     emit('submit-and-close', submitValues as SpeakerForm);
 });
@@ -327,6 +471,7 @@ const handleSubmitAndAddNew = handleFormSubmit((values) => {
     const submitValues = {
         ...values,
         avatar: avatarId.value,
+        logo: logoId.value,
     };
     emit('submit-and-add-new', submitValues as SpeakerForm);
 });

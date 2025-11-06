@@ -13,6 +13,7 @@ export function createSpeakerSchema(t: (key: string, params?: Record<string, str
             .optional(),
 
         avatar: z.string().uuid().optional().nullable(),
+        logo: z.string().uuid().optional().nullable(),
 
         isActive: z.boolean().optional().default(true),
     });

@@ -402,6 +402,7 @@
   },
   "event": {
     "add": "Veranstaltung hinzufügen",
+    "cover": "Titelbild",
     "date": "Veranstaltungsdatum",
     "edit": "Veranstaltung bearbeiten",
     "end_time": "Endzeit",
@@ -960,9 +961,11 @@
   "speaker": {
     "add_description": "Einen neuen Referenten zum Akademie-System hinzufügen",
     "add_success": "Referent erfolgreich hinzugefügt",
+    "avatar": "Avatar",
     "delete_success": "Referent erfolgreich gelöscht",
     "description": "Verwalten Sie Referenten für Veranstaltungen und Workshops",
     "edit_description": "Referenteninformationen und Qualifikationen bearbeiten",
+    "logo": "Logo",
     "name": "Referentenname",
     "name_placeholder": "Referentenname eingeben",
     "plural": "Referenten",

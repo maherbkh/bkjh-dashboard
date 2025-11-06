@@ -402,6 +402,7 @@
   },
   "event": {
     "add": "Add Event",
+    "cover": "Cover Image",
     "date": "Event Date",
     "edit": "Edit Event",
     "end_time": "End Time",
@@ -960,9 +961,11 @@
   "speaker": {
     "add_description": "Add a new speaker to the academy system",
     "add_success": "Speaker added successfully",
+    "avatar": "Avatar",
     "delete_success": "Speaker deleted successfully",
     "description": "Manage speakers for academy events and workshops",
     "edit_description": "Edit speaker information and qualifications",
+    "logo": "Logo",
     "name": "Speaker Name",
     "name_placeholder": "Enter speaker name",
     "plural": "Speakers",

@@ -322,7 +322,7 @@ const allowedTypesText = computed(() => {
         <!-- Upload Area -->
         <div
             :class="[
-                'relative border-2 border-dashed rounded-xl p-6 transition-all duration-300 ease-in-out',
+                'relative border-2 border-dashed rounded-xl p-6 transition-all duration-300 ease-in-out h-full',
                 'bg-card/50 backdrop-blur-sm shadow-premium',
                 dragging ? 'border-solid border-primary bg-primary/10 shadow-premium-lg' : 'border-border hover:border-primary/50',
                 errorHandler.isError.value ? 'border-destructive' : '',
