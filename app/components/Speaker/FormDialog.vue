@@ -49,32 +49,38 @@
                     </p>
                 </div>
 
-                <div class="grid lg:grid-cols-2 gap-4 items-start">
-                    <FormItemMedia
-                    id="avatar"
-                    v-model="avatarMedia"
-                    :label="$t('speaker.avatar') || 'Avatar'"
-                    name="avatar"
-                    :multiple="false"
-                    :max-files="1"
-                    :allowed-types="['image']"
-                    :access-level="AccessLevel.PUBLIC"
-                    :collection-name="CollectionType.AVATAR"
-                    :errors="errors.avatar ? [errors.avatar] : []"
-                />
+                <div class="grid lg:grid-cols-2 gap-4 items-stretch">
+                    <div class="flex flex-col">
+                        <FormItemMedia
+                            id="avatar"
+                            v-model="avatarMedia"
+                            :label="$t('speaker.avatar') || 'Avatar'"
+                            name="avatar"
+                            :multiple="false"
+                            :max-files="1"
+                            :allowed-types="['image']"
+                            :access-level="AccessLevel.PUBLIC"
+                            :collection-name="CollectionType.AVATAR"
+                            :errors="errors.avatar ? [errors.avatar] : []"
+                            class="flex-1"
+                        />
+                    </div>
 
-                <FormItemMedia
-                    id="logo"
-                    v-model="logoMedia"
-                    :label="$t('speaker.logo') || 'Logo'"
-                    name="logo"
-                    :multiple="false"
-                    :max-files="1"
-                    :allowed-types="['image']"
-                    :access-level="AccessLevel.PUBLIC"
-                    :collection-name="CollectionType.COVER"
-                    :errors="errors.logo ? [errors.logo] : []"
-                />
+                    <div class="flex flex-col">
+                        <FormItemMedia
+                            id="logo"
+                            v-model="logoMedia"
+                            :label="$t('speaker.logo') || 'Logo'"
+                            name="logo"
+                            :multiple="false"
+                            :max-files="1"
+                            :allowed-types="['image']"
+                            :access-level="AccessLevel.PUBLIC"
+                            :collection-name="CollectionType.COVER"
+                            :errors="errors.logo ? [errors.logo] : []"
+                            class="flex-1"
+                        />
+                    </div>
                 </div>
 
                 <div class="space-y-2">

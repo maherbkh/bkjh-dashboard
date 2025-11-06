@@ -305,7 +305,7 @@ const allowedTypesText = computed(() => {
 </script>
 
 <template>
-    <div class="space-y-2">
+    <div class="space-y-2 flex flex-col flex-1 min-h-0">
         <!-- Label -->
         <label
             v-if="label"
@@ -322,7 +322,7 @@ const allowedTypesText = computed(() => {
         <!-- Upload Area -->
         <div
             :class="[
-                'relative border-2 border-dashed rounded-xl p-6 transition-all duration-300 ease-in-out h-full',
+                'relative border-2 border-dashed rounded-xl p-6 transition-all duration-300 ease-in-out flex-1 flex flex-col min-h-0',
                 'bg-card/50 backdrop-blur-sm shadow-premium',
                 dragging ? 'border-solid border-primary bg-primary/10 shadow-premium-lg' : 'border-border hover:border-primary/50',
                 errorHandler.isError.value ? 'border-destructive' : '',

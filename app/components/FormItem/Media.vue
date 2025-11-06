@@ -113,7 +113,7 @@ const getFileTypeIcon = (mimeType: string) => {
 </script>
 
 <template>
-    <div class="space-y-2">
+    <div class="space-y-2 flex flex-col h-full">
         <!-- Label -->
         <label
             v-if="label"
