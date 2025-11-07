@@ -58,7 +58,6 @@ const sortBy = ref('createdAt');
 const sortDir = ref<'asc' | 'desc'>('desc');
 
 const headerItems = computed((): TableHeaderItem[] => [
-    { as: 'th', name: t('common.cover'), id: 'cover' },
     { as: 'th', name: t('event.title'), id: 'title' },
     { as: 'th', name: t('event.type'), id: 'type' },
     { as: 'th', name: t('academy.information'), id: 'eventCategory' },
@@ -281,9 +280,10 @@ const getCoverImageSrc = (event: EventData) => {
                         @update:selected-rows="(rows: (string | number)[]) => selectedRows = rows.map(String)"
                         @update:model-value="handleSelectAll"
                     >
-
-                        <template #cell-cover="{ row }">
-                            <NuxtImg
+                        <template #cell-title="{ row }">
+                        <div class="flex items-center gap-2">
+                            <div>
+                                <NuxtImg
                                 v-if="getCoverImageSrc(row)"
                                 :src="getCoverImageSrc(row)"
                                 alt="Cover"
@@ -298,9 +298,7 @@ const getCoverImageSrc = (event: EventData) => {
                                     class="size-5 text-muted-foreground"
                                 />
                             </div>
-                        </template>
-                        
-                        <template #cell-title="{ row }">
+                            </div>
                             <div class="font-medium ">
                                 <NuxtLink
                                     :to="`/events/${row.id}/show`"
@@ -327,6 +325,8 @@ const getCoverImageSrc = (event: EventData) => {
                                     </template>
                                 </div>
                             </div>
+                        </div>
+                           
                         </template>
 
                         <template #cell-type="{ row }">
