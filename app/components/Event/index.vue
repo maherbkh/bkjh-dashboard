@@ -230,11 +230,15 @@ const getSpeakerAvatarSrc = (speaker: any) => {
                             />
                             <AppListItem
                                 :title="$t('category.singular')"
-                                :value="event.eventCategory?.name"
+                                :value="event.categories && event.categories.length > 0 
+                                    ? event.categories.map((cat: any) => cat.eventCategory?.name || cat.name).join(', ')
+                                    : (event.eventCategory?.name || $t('common.not_assigned'))"
                             />
                             <AppListItem
                                 :title="$t('target.singular')"
-                                :value="event.eventTarget?.name"
+                                :value="event.targets && event.targets.length > 0
+                                    ? event.targets.map((target: any) => target.eventTarget?.name || target.name).join(', ')
+                                    : (event.eventTarget?.name || $t('common.not_assigned'))"
                             />
 
                             <AppListItem

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useResourcesStore } from '~/stores/resources';
 import type { EventData } from '~/types';
+import FormItemMultiSelect from '~/components/FormItem/MultiSelect.vue';
 
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm, loading } = useCrud<
@@ -17,8 +18,8 @@ const [description, descriptionAttrs] = defineField('description');
 const [shortDescription, shortDescriptionAttrs] = defineField('shortDescription');
 const [note, noteAttrs] = defineField('note');
 const [type, typeAttrs] = defineField('type');
-const [eventCategoryId, eventCategoryIdAttrs] = defineField('eventCategoryId');
-const [eventTargetId, eventTargetIdAttrs] = defineField('eventTargetId');
+const [eventCategoryIds, eventCategoryIdsAttrs] = defineField('eventCategoryIds');
+const [eventTargetIds, eventTargetIdsAttrs] = defineField('eventTargetIds');
 const [adminId, adminIdAttrs] = defineField('adminId');
 const [maxCapacity, maxCapacityAttrs] = defineField('maxCapacity');
 const [room, roomAttrs] = defineField('room');
@@ -73,14 +74,23 @@ watch(
     () => props.editingEvent,
     (ev) => {
         if (ev && props.dialogMode === 'edit') {
+            // Extract category and target IDs from new response structure
+            const categoryIds = (ev as any).categories
+                ? (ev as any).categories.map((cat: any) => cat.eventCategory?.id || cat.eventCategoryId || cat.id).filter(Boolean)
+                : (ev as any).eventCategoryIds || ((ev as any).eventCategoryId ? [(ev as any).eventCategoryId] : []);
+            
+            const targetIds = (ev as any).targets
+                ? (ev as any).targets.map((target: any) => target.eventTarget?.id || target.eventTargetId || target.id).filter(Boolean)
+                : (ev as any).eventTargetIds || ((ev as any).eventTargetId ? [(ev as any).eventTargetId] : []);
+
             setValues({
                 title: ev.title,
                 description: ev.description,
                 shortDescription: ev.shortDescription,
                 note: ev.note || undefined,
                 type: (ev.type?.toUpperCase?.() || ev.type) as any,
-                eventCategoryId: (ev as any).eventCategoryId || (ev as any).categoryId || null,
-                eventTargetId: (ev as any).eventTargetId || (ev as any).targetGroupId || null,
+                eventCategoryIds: categoryIds.length > 0 ? categoryIds : [],
+                eventTargetIds: targetIds.length > 0 ? targetIds : [],
                 adminId: (ev as any).adminId,
                 maxCapacity: (ev as any).maxCapacity ?? (ev as any).maxTrainee ?? 1,
                 room: (ev as any).conferenceRoom || ev.room || undefined,
@@ -176,30 +186,34 @@ const handleClose = () => {
                         required
                     />
 
-                    <FormItemSelect
-                        id="eventCategoryId"
-                        v-model="eventCategoryId"
+                    <FormItemMultiSelect
+                        id="eventCategoryIds"
+                        v-model="eventCategoryIds"
                         :title="t('event_category.singular')"
                         :placeholder="t('action.select') + ' ' + t('event_category.singular')"
                         class="col-span-12 sm:col-span-6"
-                        :errors="errors.eventCategoryId ? [errors.eventCategoryId] : []"
-                        v-bind="eventCategoryIdAttrs"
+                        :errors="errors.eventCategoryIds ? [errors.eventCategoryIds] : []"
+                        v-bind="eventCategoryIdsAttrs"
                         :data="eventCategories"
-                        key-value="id"
-                        name-value="name"
+                        item-key="id"
+                        item-label="name"
+                        :max="10"
+                        required
                     />
 
-                    <FormItemSelect
-                        id="eventTargetId"
-                        v-model="eventTargetId"
+                    <FormItemMultiSelect
+                        id="eventTargetIds"
+                        v-model="eventTargetIds"
                         :title="t('event_target.singular')"
                         :placeholder="t('action.select') + ' ' + t('event_target.singular')"
                         class="col-span-12 sm:col-span-6"
-                        :errors="errors.eventTargetId ? [errors.eventTargetId] : []"
-                        v-bind="eventTargetIdAttrs"
+                        :errors="errors.eventTargetIds ? [errors.eventTargetIds] : []"
+                        v-bind="eventTargetIdsAttrs"
                         :data="eventTargets"
-                        key-value="id"
-                        name-value="name"
+                        item-key="id"
+                        item-label="name"
+                        :max="10"
+                        required
                     />
 
                     <FormItemInput

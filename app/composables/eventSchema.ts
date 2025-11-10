@@ -108,12 +108,14 @@ export function createEventSchema(
 
         type: EventType,
 
-        eventCategoryId: z
-            .string({ required_error: t('event_category.singular') + ' ' + t('validation.required') })
-            .uuid(t('event_category.singular') + ' ' + t('validation.uuid')),
-        eventTargetId: z
-            .string({ required_error: t('event_target.singular') + ' ' + t('validation.required') })
-            .uuid(t('event_target.singular') + ' ' + t('validation.uuid')),
+        eventCategoryIds: z
+            .array(z.string().uuid(t('event_category.singular') + ' ' + t('validation.uuid')))
+            .min(1, t('event_category.singular') + ' ' + t('validation.required'))
+            .max(10, t('event_category.singular') + ' ' + t('validation.max_length', { max: 10 })),
+        eventTargetIds: z
+            .array(z.string().uuid(t('event_target.singular') + ' ' + t('validation.uuid')))
+            .min(1, t('event_target.singular') + ' ' + t('validation.required'))
+            .max(10, t('event_target.singular') + ' ' + t('validation.max_length', { max: 10 })),
         adminId: z.string().uuid(t('user.admin') + ' ' + t('validation.uuid')).optional(),
 
         maxCapacity: z
@@ -153,12 +155,14 @@ export function updateEventSchema(
             .max(500, t('event.short_description') + ' ' + t('validation.max_length', { max: 500 })),
         note: z.string().max(1000, t('note.singular') + ' ' + t('validation.max_length', { max: 1000 })).optional(),
         type: EventType,
-        eventCategoryId: z
-            .string({ required_error: t('event_category.singular') + ' ' + t('validation.required') })
-            .uuid(t('event_category.singular') + ' ' + t('validation.uuid')),
-        eventTargetId: z
-            .string({ required_error: t('event_target.singular') + ' ' + t('validation.required') })
-            .uuid(t('event_target.singular') + ' ' + t('validation.uuid')),
+        eventCategoryIds: z
+            .array(z.string().uuid(t('event_category.singular') + ' ' + t('validation.uuid')))
+            .min(1, t('event_category.singular') + ' ' + t('validation.required'))
+            .max(10, t('event_category.singular') + ' ' + t('validation.max_length', { max: 10 })),
+        eventTargetIds: z
+            .array(z.string().uuid(t('event_target.singular') + ' ' + t('validation.uuid')))
+            .min(1, t('event_target.singular') + ' ' + t('validation.required'))
+            .max(10, t('event_target.singular') + ' ' + t('validation.max_length', { max: 10 })),
         adminId: z.string().uuid(t('user.admin') + ' ' + t('validation.uuid')).optional(),
         maxCapacity: z
             .number({ required_error: t('event.max_capacity') + ' ' + t('validation.required') })

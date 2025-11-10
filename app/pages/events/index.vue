@@ -337,7 +337,12 @@ const getCoverImageSrc = (event: EventData) => {
 
                         <template #cell-eventCategory="{ row }">
                             <div class="font-medium max-w-48 line-clamp-1">
-                                <span v-if="row.eventCategory">{{ row.eventCategory.name }}</span>
+                                <span v-if="row.categories && row.categories.length > 0">
+                                    {{ row.categories.map((cat: any) => cat.eventCategory?.name || cat.name).join(', ') }}
+                                </span>
+                                <span
+                                    v-else-if="row.eventCategory"
+                                >{{ row.eventCategory.name }}</span>
                                 <span
                                     v-else
                                     class="text-muted-foreground"
@@ -345,7 +350,11 @@ const getCoverImageSrc = (event: EventData) => {
                             </div>
                             <div class-font-m="normal truncat text-sm">
                                 <span
-                                    v-if="row.eventTarget"
+                                    v-if="row.targets && row.targets.length > 0"
+                                    class="text-muted-foreground text-sm"
+                                >{{ row.targets.map((target: any) => target.eventTarget?.name || target.name).join(', ') }}</span>
+                                <span
+                                    v-else-if="row.eventTarget"
                                     class="text-muted-foreground text-sm"
                                 >{{ row.eventTarget.name }}</span>
                                 <span

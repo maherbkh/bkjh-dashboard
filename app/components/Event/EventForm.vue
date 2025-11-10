@@ -6,6 +6,7 @@ import { AccessLevel, CollectionType } from '~/types/media/index';
 import { useResourcesStore } from '~/stores/resources';
 import RTEditor from '~/components/FormItem/RTEditor.vue';
 import FormItemMedia from '~/components/FormItem/Media.vue';
+import FormItemMultiSelect from '~/components/FormItem/MultiSelect.vue';
 
 const { t } = useI18n();
 
@@ -44,8 +45,8 @@ const [description, descriptionAttrs] = defineField('description');
 const [shortDescription, shortDescriptionAttrs] = defineField('shortDescription');
 const [note, noteAttrs] = defineField('note');
 const [type, typeAttrs] = defineField('type');
-const [eventCategoryId, eventCategoryIdAttrs] = defineField('eventCategoryId');
-const [eventTargetId, eventTargetIdAttrs] = defineField('eventTargetId');
+const [eventCategoryIds, eventCategoryIdsAttrs] = defineField('eventCategoryIds');
+const [eventTargetIds, eventTargetIdsAttrs] = defineField('eventTargetIds');
 const [maxCapacity, maxCapacityAttrs] = defineField('maxCapacity');
 const [room, roomAttrs] = defineField('room');
 const [location, locationAttrs] = defineField('location');
@@ -211,14 +212,23 @@ watch(() => props.initialData, async (newData) => {
             coverMedia.value = null;
         }
 
+        // Extract category and target IDs from new response structure
+        const categoryIds = (newData as any).categories
+            ? (newData as any).categories.map((cat: any) => cat.eventCategory?.id || cat.eventCategoryId || cat.id).filter(Boolean)
+            : (newData as any).eventCategoryIds || ((newData as any).eventCategoryId ? [(newData as any).eventCategoryId] : []);
+        
+        const targetIds = (newData as any).targets
+            ? (newData as any).targets.map((target: any) => target.eventTarget?.id || target.eventTargetId || target.id).filter(Boolean)
+            : (newData as any).eventTargetIds || ((newData as any).eventTargetId ? [(newData as any).eventTargetId] : []);
+
         setValues({
             title: newData.title,
             description: newData.description,
             shortDescription: newData.shortDescription,
             note: newData.note || undefined,
             type: (newData.type?.toUpperCase?.() || newData.type) as any,
-            eventCategoryId: (newData as any).eventCategoryId || (newData as any).categoryId || null,
-            eventTargetId: (newData as any).eventTargetId || (newData as any).targetGroupId || null,
+            eventCategoryIds: categoryIds.length > 0 ? categoryIds : [],
+            eventTargetIds: targetIds.length > 0 ? targetIds : [],
             adminId: (newData as any).adminId,
             maxCapacity: (newData as any).maxCapacity ?? (newData as any).maxTrainee ?? 1,
             room: (newData as any).conferenceRoom || newData.room || undefined,
@@ -410,29 +420,33 @@ const formTitle = computed(() => {
                                 name-value="name"
                                 required
                             />
-                            <FormItemSelect
-                                id="eventCategoryId"
-                                v-model="eventCategoryId"
+                            <FormItemMultiSelect
+                                id="eventCategoryIds"
+                                v-model="eventCategoryIds"
                                 :title="t('event_category.singular')"
                                 :placeholder="t('action.select') + ' ' + t('event_category.singular')"
                                 class="col-span-12 lg:col-span-4"
-                                :errors="errors.eventCategoryId ? [errors.eventCategoryId] : []"
-                                v-bind="eventCategoryIdAttrs"
+                                :errors="errors.eventCategoryIds ? [errors.eventCategoryIds] : []"
+                                v-bind="eventCategoryIdsAttrs"
                                 :data="eventCategories as any"
-                                key-value="id"
-                                name-value="name"
+                                item-key="id"
+                                item-label="name"
+                                :max="10"
+                                required
                             />
-                            <FormItemSelect
-                                id="eventTargetId"
-                                v-model="eventTargetId"
+                            <FormItemMultiSelect
+                                id="eventTargetIds"
+                                v-model="eventTargetIds"
                                 :title="t('event_target.singular')"
                                 :placeholder="t('action.select') + ' ' + t('event_target.singular')"
                                 class="col-span-12 lg:col-span-4"
-                                :errors="errors.eventTargetId ? [errors.eventTargetId] : []"
-                                v-bind="eventTargetIdAttrs"
+                                :errors="errors.eventTargetIds ? [errors.eventTargetIds] : []"
+                                v-bind="eventTargetIdsAttrs"
                                 :data="eventTargets as any"
-                                key-value="id"
-                                name-value="name"
+                                item-key="id"
+                                item-label="name"
+                                :max="10"
+                                required
                             />
                             <FormItemInput
                                 id="maxCapacity"

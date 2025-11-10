@@ -755,12 +755,33 @@ export type EventData = {
     location?: string | null;
     isActive: boolean;
     forKids?: boolean;
-    eventCategoryId: string | null;
-    eventTargetId: string | null;
+    // Form data fields (for create/update)
+    eventCategoryIds?: string[];
+    eventTargetIds?: string[];
+    // Legacy single value fields (deprecated, kept for backward compatibility)
+    eventCategoryId?: string | null;
+    eventTargetId?: string | null;
     adminId: string;
     cover?: string | import('~/types/media/index').MediaEntity | null; // Cover image media ID or entity
     createdAt: string;
     updatedAt: string;
+    // Response structure (many-to-many with junction table)
+    categories?: Array<{
+        id: string; // Junction table ID
+        eventCategory: {
+            id: string;
+            name: string;
+        };
+    }>;
+    targets?: Array<{
+        id: string; // Junction table ID
+        eventTarget: {
+            id: string;
+            name: string;
+            code: string;
+        };
+    }>;
+    // Legacy single object fields (deprecated, kept for backward compatibility)
     eventCategory?: EventListCategory | null;
     eventTarget?: EventListTarget | null;
     admin?: EventAdminLite | null;
