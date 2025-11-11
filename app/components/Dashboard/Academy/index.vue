@@ -109,6 +109,9 @@
                 </div>
                 
             </div>
+
+            <!-- Recent Registrations Table -->
+            <DashboardAcademyPendingRegistrationsTable />
             
         </template>
     </div>

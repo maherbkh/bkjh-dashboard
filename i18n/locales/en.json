@@ -35,7 +35,10 @@
       "non_employee": "Non-Employee",
       "pending": "Pending",
       "approved": "Approved",
-      "rejected": "Rejected"
+      "rejected": "Rejected",
+      "recent_registrations": "Recent Registrations",
+      "recent_registrations_description": "Pending event registrations requiring action",
+      "event_info": "Event Information"
     }
   },
   "action": {

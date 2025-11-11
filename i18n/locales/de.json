@@ -35,7 +35,10 @@
       "non_employee": "Nicht-Mitarbeiter",
       "pending": "Ausstehend",
       "approved": "Genehmigt",
-      "rejected": "Abgelehnt"
+      "rejected": "Abgelehnt",
+      "recent_registrations": "Aktuelle Anmeldungen",
+      "recent_registrations_description": "Ausstehende Veranstaltungsanmeldungen, die eine Aktion erfordern",
+      "event_info": "Veranstaltungsinformationen"
     }
   },
   "action": {
