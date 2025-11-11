@@ -4,6 +4,7 @@ import type {
     TicketStatus,
     TableHeaderItem,
 } from '~/types';
+import { useUserStore } from '~/stores/user';
 
 const { t } = useI18n();
 const { formatDate } = useGermanDateFormat();
@@ -316,6 +317,7 @@ const getStatusVariant = (status: string) => {
             return 'secondary';
     }
 };
+const userStore = useUserStore();
 </script>
 
 <template>
@@ -407,20 +409,33 @@ const getStatusVariant = (status: string) => {
                         </template>
 
                         <template #cell-status="{ row }">
-                            <Badge
-                                v-if="row.statuses"
-                                :variant="
-                                    getStatusVariant(getLatestStatus(row.statuses)?.status || 'PENDING')
-                                "
-                            >
-                                {{
-                                    $t(
-                                        `common.${getLatestStatus(
-                                            row.statuses,
-                                        )?.status?.toLowerCase()}`,
-                                    )
-                                }}
-                            </Badge>
+                            <div>
+                                <Badge
+                                    v-if="row.statuses"
+                                    :variant="
+                                        getStatusVariant(getLatestStatus(row.statuses)?.status || 'PENDING')
+                                    "
+                                >
+                                    {{
+                                        $t(
+                                            `common.${getLatestStatus(
+                                                row.statuses,
+                                            )?.status?.toLowerCase()}`,
+                                        )
+                                    }}
+                                </Badge>
+                                <div
+                                    v-if="row.admin"
+                                    :class="[(userStore.user?.id === row.admin?.id && 'text-success')]"
+                                    class="text-xs flex items-center gap-2 rounded-full font-medium bg-background w-fit border px-2 py-0.5 border-border/50 mt-1 text-sm"
+                                >
+                                    <Icon
+                                        name="solar:user-circle-line-duotone"
+                                        class="!size-4 shrink-0 opacity-50"
+                                    />
+                                    {{ row.admin?.firstName + ' ' + row.admin?.lastName }}
+                                </div>
+                            </div>
                         </template>
 
                         <template #cell-category="{ row }">

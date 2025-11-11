@@ -20,6 +20,22 @@
       "hybrid": "Hybrid",
       "in_person": "In person",
       "online": "Online"
+    },
+    "dashboard": {
+      "upcoming_events": "Upcoming Events",
+      "pending_registrations": "Pending Registrations",
+      "total_attendees": "Total Attendees",
+      "event_registrations_by_attendee_type": "Event Registrations by Attendee Type",
+      "event_registrations_by_attendee_type_description": "Monthly registration trends for employees vs non-employees",
+      "top_categories_by_registrations": "Top Categories by Event Registrations",
+      "top_categories_by_registrations_description": "Categories with most registrations",
+      "top_event_targets_by_registrations": "Top Event Targets by Registrations",
+      "top_event_targets_by_registrations_description": "Targets with most registrations",
+      "employee": "Employee",
+      "non_employee": "Non-Employee",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
     }
   },
   "action": {
@@ -308,6 +324,10 @@
     "days": "Days",
     "deleted_at": "Deleted At",
     "description": "Description",
+    "error": {
+      "loading_failed": "Failed to load statistics",
+      "generic": "An error occurred while loading data"
+    },
     "details": "Details",
     "edit": "Edit",
     "edited": "edited",
