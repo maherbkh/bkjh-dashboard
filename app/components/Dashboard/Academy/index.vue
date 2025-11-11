@@ -45,6 +45,9 @@
                     :value="statsData.counts.totalAttendees"
                 />
             </div>
+            
+            <!-- Recent Registrations Table -->
+            <DashboardAcademyPendingRegistrationsTable />
 
             <!-- Row 2-4: Charts and Metrics - Responsive Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
@@ -110,8 +113,6 @@
                 
             </div>
 
-            <!-- Recent Registrations Table -->
-            <DashboardAcademyPendingRegistrationsTable />
             
         </template>
     </div>

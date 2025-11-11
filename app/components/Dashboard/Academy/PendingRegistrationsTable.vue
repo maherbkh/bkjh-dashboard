@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner';
+import { useDebounceFn } from '@vueuse/core';
+
 
 const { t } = useI18n();
 const { formatDateParts, formatDateShort } = useGermanDateFormat();
@@ -43,11 +45,15 @@ interface PendingRegistrationsResponse {
 // Fetch data from API
 const { data, pending, error, refresh } = useApiFetch<PendingRegistrationsResponse>('/academy/overview/pending-registrations');
 
-const registrations = computed(() => data.value?.data || []);
+const registrations = computed((): PendingRegistration[] => {
+    if (!data.value?.data) return [];
+    return Array.isArray(data.value.data) ? data.value.data : [];
+});
 
 const headerItems = computed(() => [
     { as: 'th' as const, name: t('academy.dashboard.event_info'), id: 'event' },
     { as: 'th' as const, name: t('attendee.person'), id: 'person' },
+    { as: 'th' as const, name: t('attendee.employment_details'), id: 'employment' },
     { as: 'th' as const, name: t('attendee.registration_info'), id: 'registration' },
 ]);
 
@@ -110,7 +116,8 @@ const formatEventType = (type: string): string => {
 
 // Get full name from attendee
 const getFullName = (attendee: PendingRegistration['attendee']): string => {
-    return `${attendee.firstName} ${attendee.lastName}`;
+    if (!attendee) return '';
+    return `${attendee.firstName || ''} ${attendee.lastName || ''}`.trim() || '';
 };
 
 // Get status label
@@ -126,22 +133,22 @@ const getStatusLabel = (status: string): string => {
 
 <template>
     <div id="pending-registrations-table" class="flex flex-col gap-4">
-        <Card class="bg-muted/50 border-border/50">
-            <CardHeader class="pb-3">
-                <div class="flex items-center gap-3">
+                <div>
+                    <div class="flex items-center gap-3">
                     <Icon
                         name="solar:clock-circle-bold"
                         class="!size-5 shrink-0 text-muted-foreground"
                     />
-                    <CardTitle class="text-sm font-medium">
+                    <h3 class="text-base font-medium">
                         {{ t('academy.dashboard.recent_registrations') }}
-                    </CardTitle>
+                    </h3>
                 </div>
-                <CardDescription class="text-xs">
+                <p class="text-xs">
                     {{ t('academy.dashboard.recent_registrations_description') }}
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
+                </p>
+                </div>
+
+
                 <!-- Loading State -->
                 <div v-if="pending" class="space-y-3">
                     <Skeleton v-for="i in 3" :key="i" class="h-16 w-full" />
@@ -157,7 +164,7 @@ const getStatusLabel = (status: string): string => {
 
                 <!-- Empty State -->
                 <PageEmptyState
-                    v-else-if="registrations.length === 0"
+                    v-else-if="!registrations || registrations.length === 0"
                     :search-query="''"
                     :add-new-text="t('academy.dashboard.recent_registrations')"
                     :no-add-new-text="true"
@@ -183,7 +190,7 @@ const getStatusLabel = (status: string): string => {
                                 v-if="row.event.schedules && row.event.schedules.length > 0"
                                 class="mt-1 text-muted-foreground flex items-center gap-1 whitespace-nowrap text-xs"
                             >
-                                <div>
+                                <div class="font-medium">
                                     {{ formatDateShort(row.event.schedules[0]?.date) }}
                                 </div>
                                 <template v-if="row.event.schedules.length > 1">
@@ -191,20 +198,12 @@ const getStatusLabel = (status: string): string => {
                                         name="solar:arrow-right-bold-duotone"
                                         class="size-5 shrink-0 opacity-75"
                                     />
-                                    <div>
+                                    <div class="font-medium">
                                         {{ formatDateShort(row.event.schedules[(row.event.schedules.length - 1)]?.date) }}
                                     </div>
                                 </template>
                             </div>
-                            <div class="mt-1 text-xs text-muted-foreground">
-                                <span>{{ formatEventType(row.event.type) }}</span>
-                                <template v-if="row.event.location || row.event.room">
-                                    <span v-if="row.event.type"> • </span>
-                                    <span v-if="row.event.location">{{ row.event.location }}</span>
-                                    <template v-if="row.event.location && row.event.room">, </template>
-                                    <span v-if="row.event.room">{{ row.event.room }}</span>
-                                </template>
-                            </div>
+                            
                         </div>
                     </template>
 
@@ -219,9 +218,10 @@ const getStatusLabel = (status: string): string => {
                                            group-data-[state=open]:bg-sidebar-accent group-data-[state=open]:text-sidebar-accent-foreground"
                                         >
                                             <AvatarImage
+                                                v-if="row.attendee?.avatar"
                                                 class="bg-background"
-                                                :src="undefined"
-                                                :alt="getFullName(row.attendee)"
+                                                :src="row.attendee.avatar"
+                                                :alt="getFullName(row.attendee) || 'User'"
                                             />
                                             <AvatarFallback class="rounded-full bg-background">
                                                 {{ useInitials(getFullName(row.attendee)) }}
@@ -235,19 +235,35 @@ const getStatusLabel = (status: string): string => {
                                         <div class="text-muted-foreground text-xs">
                                             {{ row.attendee.email }}
                                         </div>
-                                        <div class="text-muted-foreground text-xs mt-0.5">
-                                            <Badge
-                                                :variant="row.attendee.isEmployee ? 'default' : 'outline'"
-                                                class="text-xs"
-                                            >
-                                                {{ row.attendee.isEmployee ? t('academy.dashboard.employee') : t('academy.dashboard.non_employee') }}
-                                            </Badge>
-                                        </div>
+                                    
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </template>
+
+                    <template #cell-employment="{ row }">
+                <template v-if="row.attendee?.isEmployee">
+                    <div class="flex flex-col">
+                        <div
+                            v-if="row.attendee?.occupation?.name"
+                            class="font-medium truncate"
+                        >
+                            {{ row.attendee.occupation.name }}
+                        </div>
+                        <div
+                            v-if="row.attendee?.group?.name"
+                            class="text-muted-foreground truncate text-sm"
+                        >
+                            {{ row.attendee.group.name }}
+                        </div>
+                    </div>
+                </template>
+                <span
+                    v-else
+                    class="text-muted-foreground"
+                >—</span>
+            </template>
 
                     <template #cell-registration="{ row }">
                         <div class="flex flex-col">
@@ -285,30 +301,28 @@ const getStatusLabel = (status: string): string => {
                     <template #cell-actions="{ row }">
                         <div class="flex justify-end gap-2">
                             <NuxtLink :to="`/events/${row.event.id}`">
-                                <LazyButton
+                                <Button
                                     :title="$t('action.view') + ' ' + $t('academy.singular')"
                                     variant="ghost"
                                     size="icon"
-                                    hydrate-on-interaction="mouseover"
                                 >
                                     <Icon
                                         name="solar:eye-outline"
                                         class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
                                     />
-                                </LazyButton>
+                                </Button>
                             </NuxtLink>
                             <NuxtLink :to="`/events/attendees/${row.attendee.id}`">
-                                <LazyButton
+                                <Button
                                     :title="$t('action.view') + ' ' + $t('attendee.singular')"
                                     variant="ghost"
                                     size="icon"
-                                    hydrate-on-interaction="mouseover"
                                 >
                                     <Icon
                                         name="solar:user-outline"
                                         class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
                                     />
-                                </LazyButton>
+                                </Button>
                             </NuxtLink>
                             <DropdownMenu>
                                 <DropdownMenuTrigger as-child>
@@ -347,9 +361,6 @@ const getStatusLabel = (status: string): string => {
                             </DropdownMenu>
                         </div>
                     </template>
-                </PageTable>
-            </CardContent>
-        </Card>
-    </div>
-</template>
+                </PageTable>    </div>
+</template
 

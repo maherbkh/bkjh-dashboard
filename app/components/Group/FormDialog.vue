@@ -82,6 +82,25 @@ watch(
     },
 );
 
+// Watch for dialog mode changes to reset form when switching to add mode
+watch(
+    () => props.dialogMode,
+    (newMode, oldMode) => {
+        if (newMode === 'add' && (oldMode === 'edit' || oldMode === 'add')) {
+            // Reset form when switching to add mode (submitAndAddNew scenario)
+            nextTick(() => {
+                resetForm({
+                    values: {
+                        name: '',
+                        addressId: null,
+                        companyIds: [],
+                    },
+                });
+            });
+        }
+    },
+);
+
 // Methods
 const onSubmitAndClose = handleSubmit((values) => {
     emit('submit-and-close', values);
