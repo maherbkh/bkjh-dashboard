@@ -239,10 +239,15 @@ export type SupportTicket = {
 
 export type TicketStatus = {
     id: string;
-    status: 'PENDING' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED' | 'CANCELLED';
+    status: 'PENDING' | 'IN_PROGRESS' | 'PENDING_ACTION' | 'TRANSFERRED' | 'SOLVED' | 'CLOSED';
     note: string | null;
     createdAt: string;
     updatedAt: string;
+};
+
+export type TicketStatusChangePayload = {
+    status: 'PENDING' | 'IN_PROGRESS' | 'PENDING_ACTION' | 'TRANSFERRED' | 'SOLVED' | 'CLOSED';
+    note?: string;
 };
 
 export type TicketActionType

@@ -57,10 +57,10 @@
                         <HoverCardTrigger
                             class="line-clamp-2 max-w-64 cursor-pointer hover:text-primary ease-in-out duration-300"
                         >
-                            {{ row.note }}
+                            {{ formatActionNote(row.note, row.actionType) }}
                         </HoverCardTrigger>
                         <HoverCardContent side="right">
-                            {{ row.note }}
+                            {{ formatActionNote(row.note, row.actionType) }}
                         </HoverCardContent>
                     </HoverCard>
                 </div>
@@ -100,6 +100,42 @@ const ASSIGNMENT_ACTION_TYPES = ['ASSIGN', 'REASSIGN', 'UNASSIGN', 'TEMPORARY_AS
 // Helper function to check if an action type requires a target
 const isAssignmentAction = (actionType: string) => {
     return ASSIGNMENT_ACTION_TYPES.includes(actionType.toUpperCase());
+};
+
+// Format action note - translate status change messages while preserving note values
+const formatActionNote = (note: string, actionType: string): string => {
+    // Only process STATUS_CHANGE actions
+    if (actionType !== 'STATUS_CHANGE') {
+        return note;
+    }
+
+    // Pattern: "Status Changed to {STATUS} with note "{NOTE_VALUE}""
+    const statusChangePattern = /^Status Changed to ([A-Z_]+) with note "([^"]*)"$/;
+    const match = note.match(statusChangePattern);
+
+    if (match) {
+        const [, status, noteValue] = match;
+        // Translate the status name
+        const translatedStatus = t(`ticket.status.${status.toLowerCase()}`);
+        // Reconstruct with translated status, keeping the note value unchanged
+        return t('action.message.status_changed_with_note', {
+            status: translatedStatus,
+            note: noteValue,
+        });
+    }
+
+    // Pattern: "Status Changed to {STATUS}" (without note)
+    const statusChangeWithoutNotePattern = /^Status Changed to ([A-Z_]+)$/;
+    const matchWithoutNote = note.match(statusChangeWithoutNotePattern);
+
+    if (matchWithoutNote) {
+        const [, status] = matchWithoutNote;
+        const translatedStatus = t(`ticket.status.${status.toLowerCase()}`);
+        return t('action.message.status_changed', { status: translatedStatus });
+    }
+
+    // If pattern doesn't match, return original note
+    return note;
 };
 
 // Action history table configuration

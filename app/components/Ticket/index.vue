@@ -64,6 +64,7 @@
                 @assign-self="assignSelf"
                 @action-select="handleActionSelect"
                 @transfer-select="handleTransferSelect"
+                @status-changed="refresh"
             />
 
             <!-- Ticket Details Grid -->

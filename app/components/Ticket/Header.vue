@@ -63,6 +63,14 @@
             </div>
         </div>
         <div class="flex lg:flex-row flex-col items-center gap-5">
+            <!-- Ticket Status Change -->
+            <TicketStatusChange
+                :ticket-id="ticket.id"
+                :current-status="currentStatus"
+                :is-loading="isActionLoading"
+                @status-changed="$emit('statusChanged')"
+            />
+
             <!-- Self-Assign Button for TICKET type -->
             <Button
                 v-if="ticket.type === 'TICKET'"
@@ -236,7 +244,7 @@
 <script lang="ts" setup>
 import type { SupportTicket, TicketStatus } from '~/types';
 
-defineProps<{
+const props = defineProps<{
     ticket: SupportTicket;
     isActionLoading: boolean;
 }>();
@@ -245,6 +253,7 @@ defineEmits<{
     assignSelf: [];
     actionSelect: [actionType: string];
     transferSelect: [];
+    statusChanged: [];
 }>();
 
 const pageIcon = usePageIcon();
@@ -257,6 +266,13 @@ const getLatestStatus = (statuses: TicketStatus[]) => {
     )[0];
 };
 
+// Get current status for StatusChange component
+const currentStatus = computed(() => {
+    if (!props.ticket?.statuses) return 'PENDING';
+    const latest = getLatestStatus(props.ticket.statuses);
+    return latest?.status || 'PENDING';
+});
+
 // Helper function to get status badge variant
 const getStatusVariant = (status: string) => {
     switch (status) {
@@ -264,10 +280,16 @@ const getStatusVariant = (status: string) => {
             return 'secondary';
         case 'IN_PROGRESS':
             return 'default';
-        case 'RESOLVED':
+        case 'PENDING_ACTION':
+            return 'secondary';
+        case 'TRANSFERRED':
+            return 'outline';
+        case 'SOLVED':
             return 'success';
         case 'CLOSED':
             return 'outline';
+        case 'RESOLVED':
+            return 'success';
         case 'CANCELLED':
             return 'destructive';
         default:
