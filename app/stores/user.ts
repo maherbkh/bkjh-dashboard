@@ -131,10 +131,9 @@ export const useUserStore = defineStore('user', () => {
     const fetchAuthUser = async () => {
         await new Promise(resolve => setTimeout(resolve, 100));
         // Use the auth check endpoint to verify authentication and get updated user data
+        // Note: useApiFetch automatically adds Authorization header if token exists
         const { data: res, error } = await useApiFetch(`/auth/check`, {
             headers: {
-                'Authorization': `Bearer ${accessToken.value}`,
-                'credentials': 'include',
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
                 'Pragma': 'no-cache',
                 'Expires': '0',
