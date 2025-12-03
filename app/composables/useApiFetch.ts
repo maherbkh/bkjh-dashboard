@@ -76,6 +76,7 @@ export function useApiFetch<T = any>(
         ...opts,
         method: method as any,
         headers: finalHeaders,
+        credentials: 'include',
 
         onResponseError({ response, options }) {
             try {
