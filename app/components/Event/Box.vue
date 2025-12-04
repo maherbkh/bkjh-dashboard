@@ -3,17 +3,33 @@ interface Props {
     title?: string;
     icon?: string;
     value: string | number;
+    variant?: 'default' | 'destructive';
 }
 
 const props = withDefaults(defineProps<Props>(), {
     title: 'Box Title',
     icon: 'solar:square-academic-cap-linear',
+    variant: 'default',
+});
+
+const containerClasses = computed(() => {
+    if (props.variant === 'destructive') {
+        return 'bg-destructive/10 text-destructive border-destructive/50 px-5 py-4 rounded-2xl border';
+    }
+    return 'bg-muted/50 text-muted-foreground px-5 py-4 rounded-2xl border border-border/50';
+});
+
+const valueClasses = computed(() => {
+    if (props.variant === 'destructive') {
+        return 'font-semibold text-xl mt-2 text-destructive';
+    }
+    return 'font-semibold text-xl mt-2 text-foreground/85';
 });
 </script>
 
 <template>
     <div>
-        <div class="bg-muted/50 text-muted-foreground px-5 py-4 rounded-2xl border border-border/50">
+        <div :class="containerClasses">
             <div class="text-sm flex items-start gap-2">
                 <Icon
                     v-if="props.icon"
@@ -24,9 +40,7 @@ const props = withDefaults(defineProps<Props>(), {
                 <span>{{ props.title }}</span>
             </div>
 
-            <div
-                class="font-semibold text-xl mt-2 text-foreground/85"
-            >
+            <div :class="valueClasses">
                 {{ props.value }}
             </div>
         </div>

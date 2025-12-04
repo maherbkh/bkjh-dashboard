@@ -456,7 +456,8 @@
     "not_active": "Veranstaltung ist nicht aktiv",
     "attendees": "Teilnehmer",
     "approved": "Genehmigt",
-    "rejected": "Abgelehnt"
+    "rejected": "Abgelehnt",
+    "manually_set_full": "Diese Veranstaltung wurde manuell als voll gesetzt"
   },
   "event_category": {
     "description": "Veranstaltungskategorien für die Organisation von Akademieveranstaltungen verwalten",

@@ -378,13 +378,17 @@ const getCoverImageSrc = (event: EventData) => {
                                 </div>
                                 <div>
                                     <Button
-                                        variant="secondary"
+                                        :variant="(row.isFull || (row.maxCapacity === row.approvedRegistrationsCount)) ? 'destructive' : 'secondary'"
                                         size="icon-sm"
-                                        class="!cursor-default font-normal border !border-border aspect-square !size-5 text-xs"
+                                        :class="[
+                                            'font-normal border aspect-square !size-5 text-xs',
+                                            (row.isFull && row.maxCapacity !== row.approvedRegistrationsCount) ? '!cursor-pointer' : '!cursor-default'
+                                        ]"
+                                        :title="(row.isFull && row.maxCapacity !== row.approvedRegistrationsCount) ? $t('event.manually_set_full') : ''"
                                     >
                                         {{ row.approvedRegistrationsCount || 0 }}
                                     </Button>
-                                    <span class="text-muted-foreground ml-1.5 text-xs font-normal">{{ $t('event.approved') }}</span>
+                                    <span :class="(row.isFull || (row.maxCapacity === row.approvedRegistrationsCount)) ? 'text-destructive ml-1.5 text-xs font-normal' : 'text-muted-foreground ml-1.5 text-xs font-normal'">{{ $t('event.approved') }}</span>
                                 </div>
                             </div>
                         </template>

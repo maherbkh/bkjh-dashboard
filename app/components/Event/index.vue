@@ -147,6 +147,7 @@ const getSpeakerAvatarSrc = (speaker: any) => {
                             :title="$t('event.approved_attendees')"
                             icon="solar:user-id-line-duotone"
                             :value="event.approvedRegistrationsCount as number"
+                            :variant="(event.isFull || (event.maxCapacity === event.approvedRegistrationsCount)) ? 'destructive' : 'default'"
                         />
                         <EventBox
                             :title="$t('event.pending_attendees')"
@@ -250,6 +251,23 @@ const getSpeakerAvatarSrc = (speaker: any) => {
                                 :title="$t('academy.capacity')"
                                 :value="event.maxCapacity"
                             />
+
+                            <div class="flex items-start gap-4 md:flex-row flex-col justify-between first:pt-0 last:pb-0 py-1.5">
+                                <div class="font-medium text-muted-foreground">
+                                    {{ $t('event.approved_attendees') }}
+                                </div>
+                                <div class="font-light font-mono">
+                                    <span
+                                        :class="[
+                                            (event.isFull || (event.maxCapacity === event.approvedRegistrationsCount)) ? 'text-destructive' : '',
+                                            (event.isFull && event.maxCapacity !== event.approvedRegistrationsCount) ? 'cursor-pointer' : ''
+                                        ]"
+                                        :title="(event.isFull && event.maxCapacity !== event.approvedRegistrationsCount) ? $t('event.manually_set_full') : ''"
+                                    >
+                                        {{ event.approvedRegistrationsCount || 0 }}
+                                    </span>
+                                </div>
+                            </div>
 
                             <AppListItem
                                 :title="$t('academy.room')"

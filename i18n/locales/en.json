@@ -456,7 +456,8 @@
     "not_active": "Event is not active",
     "attendees": "Attendees",
     "approved": "Approved",
-    "rejected": "Rejected"
+    "rejected": "Rejected",
+    "manually_set_full": "This event was manually set to be full"
   },
   "event_category": {
     "description": "Manage event categories for organizing academy events",
