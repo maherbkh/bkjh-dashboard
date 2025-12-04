@@ -128,6 +128,8 @@ export function createEventSchema(
         location: z.string().max(200, t('event.location') + ' ' + t('validation.max_length', { max: 200 })).optional(),
         isActive: z.boolean().optional().default(true),
         forKids: z.boolean().optional().default(false),
+        disableRegistration: z.boolean().optional().default(false),
+        isFull: z.boolean().optional().default(false),
 
         cover: z.string().uuid().optional().nullable(),
 
@@ -173,6 +175,8 @@ export function updateEventSchema(
         location: z.string().max(200, t('event.location') + ' ' + t('validation.max_length', { max: 200 })).optional(),
         isActive: z.boolean().optional().default(true),
         forKids: z.boolean().optional().default(false),
+        disableRegistration: z.boolean().optional().default(false),
+        isFull: z.boolean().optional().default(false),
         cover: z.string().uuid().optional().nullable(),
         speakers: z.array(z.string().uuid(t('speaker.singular') + ' ' + t('validation.uuid'))).optional().default([]),
         schedules: scheduleArrayWithGlobalRules(t).default([]),

@@ -52,6 +52,8 @@ const [room, roomAttrs] = defineField('room');
 const [location, locationAttrs] = defineField('location');
 const [isActive, isActiveAttrs] = defineField('isActive');
 const [forKids, forKidsAttrs] = defineField('forKids');
+const [disableRegistration, disableRegistrationAttrs] = defineField('disableRegistration');
+const [isFull, isFullAttrs] = defineField('isFull');
 const [speakers, speakersAttrs] = defineField('speakers');
 const [schedules] = defineField('schedules');
 
@@ -235,6 +237,8 @@ watch(() => props.initialData, async (newData) => {
             location: newData.location || undefined,
             isActive: newData.isActive,
             forKids: (newData as any).forKids ?? false,
+            disableRegistration: (newData as any).disableRegistration ?? false,
+            isFull: (newData as any).isFull ?? false,
             cover: coverEntity?.id || null,
             speakers: (newData.speakers || []).map((speaker: any) => speaker.speakerId || speaker.id),
             schedules: (newData.schedules || []).map(schedule => ({
@@ -338,6 +342,24 @@ const formTitle = computed(() => {
                                 :title="t('event.for_kids')"
                                 class="col-span-12 lg:col-span-3"
                                 v-bind="forKidsAttrs"
+                            />
+                            <FormItemSwitch
+                                id="disableRegistration"
+                                v-model="disableRegistration"
+                                true-label="Ja"
+                                false-label="Nein"
+                                :title="t('event.disable_registration')"
+                                class="col-span-12 lg:col-span-3"
+                                v-bind="disableRegistrationAttrs"
+                            />
+                            <FormItemSwitch
+                                id="isFull"
+                                v-model="isFull"
+                                true-label="Ja"
+                                false-label="Nein"
+                                :title="t('event.is_full')"
+                                class="col-span-12 lg:col-span-3"
+                                v-bind="isFullAttrs"
                             />
                             <FormItemTextarea
                                 id="shortDescription"

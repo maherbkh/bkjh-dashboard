@@ -85,11 +85,27 @@ const changeStatus = useDebounceFn(async (id: string, status: 'PENDING' | 'APPRO
             emit('reload');
         }
     } catch (err) {
-        toast.error('Failed to update status');
+        toast.error(t('global.messages.error'));
     } finally {
         loadingStates.value[id] = false;
     }
 }, 300);
+
+// Helper function to translate status values
+const getStatusLabel = (status: string) => {
+    switch (status) {
+        case 'ALL':
+            return t('academy.all');
+        case 'PENDING':
+            return t('academy.pending');
+        case 'APPROVED':
+            return t('event.approved');
+        case 'REJECTED':
+            return t('event.rejected');
+        default:
+            return status;
+    }
+};
 
 // Computed class function for better performance
 const getStatusClass = (status: string, rowStatus: string) => {
@@ -118,7 +134,7 @@ const getStatusClass = (status: string, rowStatus: string) => {
                         size="sm"
                         @click="selectStatusTab('ALL')"
                     >
-                        All
+                        {{ $t('academy.all') }}
                     </Button>
                 </li>
                 <li>
@@ -128,7 +144,7 @@ const getStatusClass = (status: string, rowStatus: string) => {
                         size="sm"
                         @click="selectStatusTab('PENDING')"
                     >
-                        Pending
+                        {{ $t('academy.pending') }}
                     </Button>
                 </li>
                 <li>
@@ -138,7 +154,7 @@ const getStatusClass = (status: string, rowStatus: string) => {
                         size="sm"
                         @click="selectStatusTab('APPROVED')"
                     >
-                        Approved
+                        {{ $t('event.approved') }}
                     </Button>
                 </li>
                 <li>
@@ -148,7 +164,7 @@ const getStatusClass = (status: string, rowStatus: string) => {
                         size="sm"
                         @click="selectStatusTab('REJECTED')"
                     >
-                        Rejected
+                        {{ $t('event.rejected') }}
                     </Button>
                 </li>
             </ul>
@@ -241,7 +257,7 @@ const getStatusClass = (status: string, rowStatus: string) => {
                                     :disabled="loadingStates[row.id as string]"
                                 >
                                     <div class="flex items-center gap-2">
-                                        <span>{{ status }}</span>
+                                        <span>{{ getStatusLabel(status) }}</span>
                                         <Icon
                                             v-if="loadingStates[row.id as string]"
                                             name="solar:loading-bold"
@@ -305,7 +321,7 @@ const getStatusClass = (status: string, rowStatus: string) => {
                             :variant="row.status === 'APPROVED' ? 'success' : row.status === 'PENDING' ? 'pending' : 'destructive'"
                             class="w-fit"
                         >
-                            {{ row.status }}
+                            {{ getStatusLabel(row.status || '') }}
                         </Badge>
                     </div>
                 </div>

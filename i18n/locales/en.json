@@ -1,9 +1,11 @@
 {
   "academy": {
+    "all": "All",
     "capacity": "Capacity",
     "createdBy": "Created By",
     "description": "Manage academy events and activities",
     "duration": "Duration",
+    "pending": "Pending",
     "events": {
       "filters": {
         "select_date": "Select Date"
@@ -443,7 +445,18 @@
     "start_time": "Start Time",
     "title": "Event Title",
     "type": "Event Type",
-    "for_kids": "For Kids"
+    "for_kids": "For Kids",
+    "disable_registration": "Disable Registration",
+    "is_full": "Is Full",
+    "approved_attendees": "Approved Attendees",
+    "pending_attendees": "Pending Attendees",
+    "event_days": "Event Days",
+    "download_attendees_list": "Download Attendees List (xlsx)",
+    "currently_active": "Event Currently Active",
+    "not_active": "Event is not active",
+    "attendees": "Attendees",
+    "approved": "Approved",
+    "rejected": "Rejected"
   },
   "event_category": {
     "description": "Manage event categories for organizing academy events",

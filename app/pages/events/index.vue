@@ -286,7 +286,7 @@ const getCoverImageSrc = (event: EventData) => {
                                 <NuxtImg
                                 v-if="getCoverImageSrc(row)"
                                 :src="getCoverImageSrc(row)"
-                                alt="Cover"
+                                :alt="$t('event.cover')"
                                 class="w-24 h-10 object-cover object-center rounded-md border border-border"
                             />
                             <div
@@ -374,7 +374,7 @@ const getCoverImageSrc = (event: EventData) => {
                                     >
                                         {{ row.maxCapacity || 0 }}
                                     </Button>
-                                    <span class="text-muted-foreground ml-1.5 text-xs font-normal">Attenden</span>
+                                    <span class="text-muted-foreground ml-1.5 text-xs font-normal">{{ $t('event.attendees') }}</span>
                                 </div>
                                 <div>
                                     <Button
@@ -384,7 +384,7 @@ const getCoverImageSrc = (event: EventData) => {
                                     >
                                         {{ row.approvedRegistrationsCount || 0 }}
                                     </Button>
-                                    <span class="text-muted-foreground ml-1.5 text-xs font-normal">Aprroved</span>
+                                    <span class="text-muted-foreground ml-1.5 text-xs font-normal">{{ $t('event.approved') }}</span>
                                 </div>
                             </div>
                         </template>

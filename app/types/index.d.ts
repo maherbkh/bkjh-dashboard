@@ -760,6 +760,8 @@ export type EventData = {
     location?: string | null;
     isActive: boolean;
     forKids?: boolean;
+    disableRegistration?: boolean;
+    isFull?: boolean;
     // Form data fields (for create/update)
     eventCategoryIds?: string[];
     eventTargetIds?: string[];

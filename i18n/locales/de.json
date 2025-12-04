@@ -1,9 +1,11 @@
 {
   "academy": {
+    "all": "Alle",
     "capacity": "Kapazität",
     "createdBy": "Erstellt von",
     "description": "Akademie und Aktivitäten verwalten",
     "duration": "Dauer",
+    "pending": "Ausstehend",
     "events": {
       "filters": {
         "select_date": "Datum auswählen"
@@ -443,7 +445,18 @@
     "start_time": "Startzeit",
     "title": "Veranstaltungstitel",
     "type": "Veranstaltungstyp",
-    "for_kids": "Für Kinder"
+    "for_kids": "Für Kinder",
+    "disable_registration": "Registrierung deaktivieren",
+    "is_full": "Ist voll",
+    "approved_attendees": "Genehmigte Teilnehmer",
+    "pending_attendees": "Ausstehende Teilnehmer",
+    "event_days": "Veranstaltungstage",
+    "download_attendees_list": "Teilnehmerliste herunterladen (xlsx)",
+    "currently_active": "Veranstaltung ist aktiv",
+    "not_active": "Veranstaltung ist nicht aktiv",
+    "attendees": "Teilnehmer",
+    "approved": "Genehmigt",
+    "rejected": "Abgelehnt"
   },
   "event_category": {
     "description": "Veranstaltungskategorien für die Organisation von Akademieveranstaltungen verwalten",

@@ -94,7 +94,7 @@ const getSpeakerAvatarSrc = (speaker: any) => {
                         <div class="text-lg font-bold flex items-center gap-4">
                             <div>{{ event.title }}</div>
                             <Icon
-                                :title="event.isActive ? 'Event Currently Active' : 'Event is not active'"
+                                :title="event.isActive ? $t('event.currently_active') : $t('event.not_active')"
                                 :name="event.isActive ? 'solar:check-circle-bold' : 'solar:close-circle-bold'"
                                 :class="[(event.isActive ? 'text-success' : 'text-muted-foreground'), 'shrink-0 size-5']"
                             />
@@ -133,7 +133,7 @@ const getSpeakerAvatarSrc = (speaker: any) => {
                             name="solar:round-arrow-down-line-duotone"
                             class="mr-2 h-4 w-4"
                         />
-                        Down Attendees List (xlsx)
+                        {{ $t("event.download_attendees_list") }}
                     </Button>
                 </div>
             </div>
@@ -144,17 +144,17 @@ const getSpeakerAvatarSrc = (speaker: any) => {
                     <!-- Description and Content Card -->
                     <div class="grid lg:grid-cols-3 gap-4">
                         <EventBox
-                            title="Approved Attendees"
+                            :title="$t('event.approved_attendees')"
                             icon="solar:user-id-line-duotone"
                             :value="event.approvedRegistrationsCount as number"
                         />
                         <EventBox
-                            title="Pending Attendees"
+                            :title="$t('event.pending_attendees')"
                             icon="solar:users-group-two-rounded-linear"
                             :value="Number((event.registrationsCount as number) - (event.approvedRegistrationsCount as number))"
                         />
                         <EventBox
-                            title="Event Days"
+                            :title="$t('event.event_days')"
                             icon="solar:calendar-line-duotone"
                             :value="event.schedulesCount as number"
                         />
@@ -264,6 +264,16 @@ const getSpeakerAvatarSrc = (speaker: any) => {
                             <AppListItem
                                 :title="$t('event.for_kids')"
                                 :value="event.forKids ? $t('common.yes') : $t('common.no')"
+                            />
+
+                            <AppListItem
+                                :title="$t('event.disable_registration')"
+                                :value="event.disableRegistration ? $t('common.yes') : $t('common.no')"
+                            />
+
+                            <AppListItem
+                                :title="$t('event.is_full')"
+                                :value="event.isFull ? $t('common.yes') : $t('common.no')"
                             />
 
                             <AppListItem
