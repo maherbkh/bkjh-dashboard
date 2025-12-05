@@ -76,6 +76,7 @@
 
 <script lang="ts" setup>
 import type { TicketAttachment } from '~/types';
+import { useInternalMediaProxy } from '~/composables/useInternalMediaProxy';
 
 const props = defineProps<{
     attachment: TicketAttachment;
@@ -89,8 +90,8 @@ const {
     handleAttachmentClick,
 } = useFileIcon();
 
-// Use the media proxy utility
-const { getProxyUrl } = useMediaProxy();
+// Use the internal media proxy utility for ticket attachments
+const { getProxyUrl } = useInternalMediaProxy();
 
 // Loading state for downloads
 const isDownloading = ref(false);

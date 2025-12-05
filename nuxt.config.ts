@@ -93,6 +93,15 @@ export default defineNuxtConfig({
                     'Access-Control-Expose-Headers': 'Content-Disposition, Content-Length, Content-Type',
                 },
             },
+            '/get-media-internal/**': {
+                proxy: 'https://api.backhaus.de/api/v1/media/internal/**',
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+                    'Access-Control-Expose-Headers': 'Content-Disposition, Content-Length, Content-Type',
+                },
+            },
             '/get-media/': {
                 redirect: {
                     to: '/api/get-media-blocked',

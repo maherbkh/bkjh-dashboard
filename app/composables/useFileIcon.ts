@@ -3,10 +3,11 @@
  */
 
 import type { TicketAttachment } from '~/types';
+import { useInternalMediaProxy } from './useInternalMediaProxy';
 
 export const useFileIcon = () => {
-    // Get media proxy utility
-    const { getProxyUrl } = useMediaProxy();
+    // Get internal media proxy utility for ticket attachments
+    const { getProxyUrl } = useInternalMediaProxy();
     /**
      * Get the appropriate icon for a file based on its properties
      */
