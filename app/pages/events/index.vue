@@ -313,7 +313,7 @@ const getCoverImageSrc = (event: EventData) => {
                             >
                                 <Icon
                                     name="solar:image-outline"
-                                    class="size-5 text-muted-foreground"
+                                    class="!size-5 shrink-0 text-muted-foreground"
                                 />
                             </div>
                             </div>
