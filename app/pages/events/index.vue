@@ -300,16 +300,16 @@ const getCoverImageSrc = (event: EventData) => {
                     >
                         <template #cell-title="{ row }">
                         <div class="flex items-center gap-2">
-                            <div>
+                            <div class="w-24 shrink-0">
                                 <NuxtImg
                                 v-if="getCoverImageSrc(row)"
                                 :src="getCoverImageSrc(row)"
                                 :alt="$t('event.cover')"
-                                class="w-24 h-10 shrink-0 object-cover object-center rounded-md border border-border"
+                                class="w-full h-10 shrink-0 object-cover object-center rounded-md border border-border"
                             />
                             <div
                                 v-else
-                                class="w-24 h-10 rounded-md border border-border bg-muted flex items-center justify-center"
+                                class="w-full h-10 rounded-md border border-border bg-muted flex items-center justify-center"
                             >
                                 <Icon
                                     name="solar:image-outline"
