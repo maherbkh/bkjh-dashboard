@@ -18,7 +18,9 @@
         <!-- Error State -->
         <template v-else-if="error">
             <div class="bg-destructive/10 border border-destructive/20 rounded-2xl p-6 text-center">
-                <p class="text-destructive font-medium">{{ t('common.error.loading_failed') }}</p>
+                <p class="text-destructive font-medium">
+                    {{ t('common.error.loading_failed') }}
+                </p>
                 <p class="text-sm text-muted-foreground mt-2">
                     {{ error?.message || error?.data?.message || t('common.error.generic') }}
                 </p>
@@ -45,7 +47,7 @@
                     :value="statsData.counts.totalAttendees"
                 />
             </div>
-            
+
             <!-- Recent Registrations Table -->
             <DashboardAcademyPendingRegistrationsTable />
 
@@ -63,8 +65,8 @@
                         :colors="chartColors2"
                         :margin="{ top: 10, bottom: 40, left: 50, right: 20 }"
                         :category-labels="{
-                            'employee': t('academy.dashboard.employee'),
-                            'nonEmployee': t('academy.dashboard.non_employee')
+                            employee: t('academy.dashboard.employee'),
+                            nonEmployee: t('academy.dashboard.non_employee'),
                         }"
                     />
                 </div>
@@ -83,9 +85,9 @@
                         :margin="{ top: 10, bottom: 40, left: 50, right: 20 }"
                         :x-formatter="categoryXFormatter"
                         :category-labels="{
-                            'pending': t('academy.dashboard.pending'),
-                            'approved': t('academy.dashboard.approved'),
-                            'rejected': t('academy.dashboard.rejected')
+                            pending: t('academy.dashboard.pending'),
+                            approved: t('academy.dashboard.approved'),
+                            rejected: t('academy.dashboard.rejected'),
                         }"
                     />
                 </div>
@@ -104,16 +106,13 @@
                         :margin="{ top: 10, bottom: 40, left: 50, right: 20 }"
                         :x-formatter="targetXFormatter"
                         :category-labels="{
-                            'pending': t('academy.dashboard.pending'),
-                            'approved': t('academy.dashboard.approved'),
-                            'rejected': t('academy.dashboard.rejected')
+                            pending: t('academy.dashboard.pending'),
+                            approved: t('academy.dashboard.approved'),
+                            rejected: t('academy.dashboard.rejected'),
                         }"
                     />
                 </div>
-                
             </div>
-
-            
         </template>
     </div>
 </template>
@@ -131,26 +130,25 @@ const { data, pending, error } = useApiFetch<OverviewStatsResponse>('/academy/ov
 
 const statsData = computed(() => data.value?.data as OverviewStatsData | undefined);
 
-
 // Helper function to get CSS variable color value (resolves nested variables recursively)
 const getCssVarColor = (varName: string, fallback: string, visited = new Set<string>()): string => {
     if (typeof window === 'undefined') {
         return fallback;
     }
-    
+
     // Prevent infinite loops
     if (visited.has(varName)) {
         return fallback;
     }
     visited.add(varName);
-    
+
     const root = getComputedStyle(document.documentElement);
-    let value = root.getPropertyValue(varName).trim();
-    
+    const value = root.getPropertyValue(varName).trim();
+
     if (!value) {
         return fallback;
     }
-    
+
     // If the value is a var() reference, resolve it recursively
     if (value.startsWith('var(')) {
         const varMatch = value.match(/var\(([^)]+)\)/);
@@ -160,7 +158,7 @@ const getCssVarColor = (varName: string, fallback: string, visited = new Set<str
             return getCssVarColor(nestedVarName, fallback, visited);
         }
     }
-    
+
     return value || fallback;
 };
 
@@ -169,12 +167,12 @@ const getCssVarColor = (varName: string, fallback: string, visited = new Set<str
 const chartColors = computed(() => [
     getCssVarColor('--chart-2', 'oklch(0.6 0.118 184.704)'), // pending - secondary
     getCssVarColor('--chart-3', 'oklch(0.398 0.07 227.392)'), // approved - success
-    getCssVarColor('--chart-5', 'oklch(0.769 0.188 70.08)')  // rejected - destructive
+    getCssVarColor('--chart-5', 'oklch(0.769 0.188 70.08)'), // rejected - destructive
 ]);
 
 const chartColors2 = computed(() => [
     getCssVarColor('--chart-1', 'oklch(0.646 0.222 41.116)'),
-    getCssVarColor('--chart-2', 'oklch(0.6 0.118 184.704)')
+    getCssVarColor('--chart-2', 'oklch(0.6 0.118 184.704)'),
 ]);
 
 // Helper function to truncate long text for chart labels
@@ -196,7 +194,7 @@ const topCategoriesByRegistrationsData = computed(() => {
         category: cat.category,
         pending: cat.pending,
         approved: cat.approved,
-        rejected: cat.rejected
+        rejected: cat.rejected,
     }));
 });
 
@@ -206,7 +204,7 @@ const topEventTargetsByRegistrationsData = computed(() => {
         eventTarget: target.eventTarget,
         pending: target.pending,
         approved: target.approved,
-        rejected: target.rejected
+        rejected: target.rejected,
     }));
 });
 
@@ -224,5 +222,4 @@ const targetXFormatter = (tick: number | Date, i: number, ticks: number[] | Date
     const target = statsData.value.topEventTargetsByRegistrations[tick]?.eventTarget || '';
     return truncateLabel(target, 12);
 };
-
 </script>

@@ -10,9 +10,9 @@
             </p>
         </div>
 
-       <div>
-       <div>Dashboard Stats</div>
-       </div>
+        <div>
+            <div>Dashboard Stats</div>
+        </div>
     </div>
 </template>
 
@@ -21,5 +21,4 @@ import { useUserStore } from '~/stores/user';
 
 const { t } = useI18n();
 const userStore = useUserStore();
-
 </script>

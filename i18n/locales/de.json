@@ -210,6 +210,7 @@
     "description": "Veranstaltungsteilnehmer verwalten",
     "edit": "Teilnehmerinformationen bearbeiten",
     "email": "E-Mail",
+    "email_verified": "E-Mail verifiziert",
     "employee": "Mitarbeiter",
     "employee_status": "Mitarbeiterstatus",
     "employment_details": "Beschäftigungsdetails",
@@ -229,8 +230,11 @@
     "registration_date": "Anmeldedatum",
     "registration_info": "Anmeldeinformationen",
     "registration_status": "Anmeldestatus",
+    "resend_verification_email": "Verifizierungs-E-Mail erneut senden",
     "send_password_reset": "Passwort-Reset-E-Mail senden",
-    "singular": "Teilnehmer"
+    "singular": "Teilnehmer",
+    "verification_email_error": "Verifizierungs-E-Mail konnte nicht gesendet werden",
+    "verification_email_sent": "Verifizierungs-E-Mail erfolgreich gesendet"
   },
   "auth": {
     "code_resent": "Code erfolgreich erneut gesendet",
@@ -314,6 +318,7 @@
     "actions": "Aktionen",
     "active": "Aktiv",
     "add": "Hinzufügen",
+    "at": "am",
     "analytics": "Analytik",
     "and": "und",
     "app_not_found": "App nicht gefunden",

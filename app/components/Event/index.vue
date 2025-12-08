@@ -18,7 +18,7 @@ const { t } = useI18n();
 // Get avatar image source for speaker using media composable
 const getSpeakerAvatarSrc = (speaker: any) => {
     const speakerData = speaker.speaker || speaker;
-    
+
     // Priority 1: Use avatarUrl if provided by the API
     const avatarUrl = (speakerData as any)?.avatarUrl;
     if (avatarUrl) {
@@ -231,7 +231,7 @@ const getSpeakerAvatarSrc = (speaker: any) => {
                             />
                             <AppListItem
                                 :title="$t('category.singular')"
-                                :value="event.categories && event.categories.length > 0 
+                                :value="event.categories && event.categories.length > 0
                                     ? event.categories.map((cat: any) => cat.eventCategory?.name || cat.name).join(', ')
                                     : (event.eventCategory?.name || $t('common.not_assigned'))"
                             />
@@ -260,7 +260,7 @@ const getSpeakerAvatarSrc = (speaker: any) => {
                                     <span
                                         :class="[
                                             (event.isFull || (event.maxCapacity === event.approvedRegistrationsCount)) ? 'text-destructive' : '',
-                                            (event.isFull && event.maxCapacity !== event.approvedRegistrationsCount) ? 'cursor-pointer' : ''
+                                            (event.isFull && event.maxCapacity !== event.approvedRegistrationsCount) ? 'cursor-pointer' : '',
                                         ]"
                                         :title="(event.isFull && event.maxCapacity !== event.approvedRegistrationsCount) ? $t('event.manually_set_full') : ''"
                                     >

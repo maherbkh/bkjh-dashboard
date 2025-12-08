@@ -60,9 +60,9 @@ const loadingStates = ref<Record<string, boolean>>({});
 // Debounced status change function
 const changeStatus = useDebounceFn(async (id: string, status: 'PENDING' | 'APPROVED' | 'REJECTED') => {
     if (loadingStates.value[id]) return; // Prevent multiple calls for same item
-    
+
     loadingStates.value[id] = true;
-    
+
     try {
         const { data, error } = await useApiFetch(`/academy/events/registrations/${id}/status`, {
             method: 'PATCH',
@@ -71,10 +71,11 @@ const changeStatus = useDebounceFn(async (id: string, status: 'PENDING' | 'APPRO
                 note: 'note',
             },
         });
-        
+
         if (error.value) {
             toast.error(error.value.message);
-        } else if (data.value) {
+        }
+        else if (data.value) {
             toast.success(data.value.message as string);
             // Optimistic update - find and update the item in the data array
             const itemIndex = props.data.findIndex(item => item.id === id);
@@ -84,9 +85,11 @@ const changeStatus = useDebounceFn(async (id: string, status: 'PENDING' | 'APPRO
             // Emit reload event to parent
             emit('reload');
         }
-    } catch (err) {
+    }
+    catch (err) {
         toast.error(t('global.messages.error'));
-    } finally {
+    }
+    finally {
         loadingStates.value[id] = false;
     }
 }, 300);
@@ -111,20 +114,23 @@ const getStatusLabel = (status: string) => {
 const getStatusClass = (status: string, rowStatus: string) => {
     const baseClasses = 'cursor-pointer hover:bg-accent';
     const conditionalClasses = [];
-    
+
     if (status === 'PENDING') conditionalClasses.push('text-muted-foreground');
     if (status === 'APPROVED') conditionalClasses.push('hover:!bg-success/10 hover:!text-success');
     if (status === 'REJECTED') conditionalClasses.push('hover:!bg-destructive/10 hover:!text-destructive');
     if (status === rowStatus) conditionalClasses.push('font-medium');
     if (rowStatus === status && status === 'APPROVED') conditionalClasses.push('text-success');
     if (rowStatus === status && status === 'REJECTED') conditionalClasses.push('text-destructive');
-    
+
     return [baseClasses, ...conditionalClasses];
 };
 </script>
 
 <template>
-    <div id="attendees-table" class="flex flex-col gap-4">
+    <div
+        id="attendees-table"
+        class="flex flex-col gap-4"
+    >
         <div>
             <ul class="grid lg:grid-cols-4 gap-4">
                 <li>
@@ -251,10 +257,10 @@ const getStatusClass = (status: string, rowStatus: string) => {
                                 <DropdownMenuRadioItem
                                     v-for="status in statuses"
                                     :key="status"
-                                    @click="changeStatus(row.id as string, status as 'PENDING' | 'APPROVED' | 'REJECTED')"
                                     :value="status"
                                     :class="getStatusClass(status, row.status)"
                                     :disabled="loadingStates[row.id as string]"
+                                    @click="changeStatus(row.id as string, status as 'PENDING' | 'APPROVED' | 'REJECTED')"
                                 >
                                     <div class="flex items-center gap-2">
                                         <span>{{ getStatusLabel(status) }}</span>

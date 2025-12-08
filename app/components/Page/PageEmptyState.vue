@@ -27,19 +27,18 @@ defineProps({
             </h4>
             <template v-if="noAddNewText">
                 <p
-                v-if="searchQuery"
-                class="text-sm font-light"
-            >
-                {{ $t('global.no_search_results') }} <span class="text-red-400">{{ searchQuery }}</span>
-            </p>
-            <p
-                v-else
-                class="text-sm font-light"
-            >
-                {{ $t('global.add_new_hint') }} <span class="font-semibold">{{ addNewText }}</span> {{ $t('global.button_above') }}
-            </p>
+                    v-if="searchQuery"
+                    class="text-sm font-light"
+                >
+                    {{ $t('global.no_search_results') }} <span class="text-red-400">{{ searchQuery }}</span>
+                </p>
+                <p
+                    v-else
+                    class="text-sm font-light"
+                >
+                    {{ $t('global.add_new_hint') }} <span class="font-semibold">{{ addNewText }}</span> {{ $t('global.button_above') }}
+                </p>
             </template>
-           
         </div>
     </div>
 </template>

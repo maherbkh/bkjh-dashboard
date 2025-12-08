@@ -1,27 +1,57 @@
 <template>
     <Card :class="cardClass">
-        <CardHeader v-if="title || titleIcon || description" class="pb-3">
-            <div v-if="title || titleIcon" class="flex items-center gap-2">
+        <CardHeader
+            v-if="title || titleIcon || description"
+            class="pb-3"
+        >
+            <div
+                v-if="title || titleIcon"
+                class="flex items-center gap-2"
+            >
                 <Icon
                     v-if="titleIcon"
                     :name="titleIcon"
                     class="size-4 text-muted-foreground"
                 />
-                <CardTitle v-if="title" class="text-sm font-medium">{{ title }}</CardTitle>
+                <CardTitle
+                    v-if="title"
+                    class="text-sm font-medium"
+                >
+                    {{ title }}
+                </CardTitle>
             </div>
-            <CardDescription v-if="description" class="text-xs">{{ description }}</CardDescription>
+            <CardDescription
+                v-if="description"
+                class="text-xs"
+            >
+                {{ description }}
+            </CardDescription>
         </CardHeader>
         <CardContent>
             <!-- Empty State -->
-            <div v-if="!chartData || chartData.length === 0" class="flex items-center justify-center text-muted-foreground" :style="{ height: chartHeight }">
+            <div
+                v-if="!chartData || chartData.length === 0"
+                class="flex items-center justify-center text-muted-foreground"
+                :style="{ height: chartHeight }"
+            >
                 <div class="text-center">
-                    <p class="text-sm font-medium">No data available</p>
-                    <p v-if="emptyMessage" class="text-xs mt-1">{{ emptyMessage }}</p>
+                    <p class="text-sm font-medium">
+                        No data available
+                    </p>
+                    <p
+                        v-if="emptyMessage"
+                        class="text-xs mt-1"
+                    >
+                        {{ emptyMessage }}
+                    </p>
                 </div>
             </div>
 
             <!-- Chart -->
-            <div v-else :style="{ height: chartHeight }">
+            <div
+                v-else
+                :style="{ height: chartHeight }"
+            >
                 <DonutChart
                     :data="chartData"
                     :index="indexKey"
@@ -98,9 +128,8 @@ const props = withDefaults(defineProps<Props>(), {
     chartHeight: '192px',
     cardClass: 'bg-muted/50 border-border/50',
     valueFormatter: (tick: number) => tick.toLocaleString(),
-    sortFunction: () => undefined
+    sortFunction: () => undefined,
 });
 
 const chartData = computed(() => props.data);
 </script>
-

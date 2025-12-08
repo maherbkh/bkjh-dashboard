@@ -29,9 +29,9 @@ const handleReload = async () => {
     await nextTick();
     const attendeesTable = document.getElementById('attendees-table');
     if (attendeesTable) {
-        attendeesTable.scrollIntoView({ 
+        attendeesTable.scrollIntoView({
             behavior: 'smooth',
-            block: 'start'
+            block: 'start',
         });
     }
 };

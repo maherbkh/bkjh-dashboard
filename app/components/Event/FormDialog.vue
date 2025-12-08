@@ -78,7 +78,7 @@ watch(
             const categoryIds = (ev as any).categories
                 ? (ev as any).categories.map((cat: any) => cat.eventCategory?.id || cat.eventCategoryId || cat.id).filter(Boolean)
                 : (ev as any).eventCategoryIds || ((ev as any).eventCategoryId ? [(ev as any).eventCategoryId] : []);
-            
+
             const targetIds = (ev as any).targets
                 ? (ev as any).targets.map((target: any) => target.eventTarget?.id || target.eventTargetId || target.id).filter(Boolean)
                 : (ev as any).eventTargetIds || ((ev as any).eventTargetId ? [(ev as any).eventTargetId] : []);

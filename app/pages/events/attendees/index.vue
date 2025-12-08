@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import type { Attendee, TableHeaderItem } from '~/types';
+import type { Attendee, TableHeaderItem, SortDirection } from '~/types';
 import { toast } from 'vue-sonner';
 
 const { t } = useI18n();
 const { confirmDelete, confirmBulkDelete } = useConfirmDialog();
+const { formatDate } = useGermanDateFormat();
+const { sendVerificationEmail, isSendingVerificationEmail } = useAttendeeActions();
 
 // Page configuration
 const pageTitle = computed(() => t('attendee.plural'));
@@ -115,16 +117,16 @@ const handleSearchSubmit = async () => {
     selectedRows.value = [];
 };
 
-const handleSortChange = async (field: string, direction: 'asc' | 'desc') => {
-    sortBy.value = field;
-    sortDir.value = direction;
+async function handleSortChange(dir: SortDirection, id: string) {
+    sortDir.value = dir;
+    sortBy.value = id;
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
     });
     selectedRows.value = [];
-};
+}
 
 const handlePageChange = async (page: number) => {
     currentPage.value = page;
@@ -264,7 +266,6 @@ const handleRowSelected = (id: string, checked: boolean) => {
         selectedRows.value = selectedRows.value.filter(rowId => rowId !== id);
     }
 };
-
 </script>
 
 <template>
@@ -299,7 +300,9 @@ const handleRowSelected = (id: string, checked: boolean) => {
                 <PageEmptyState
                     v-if="attendees.length === 0"
                     :search-query="searchQuery"
-                    :add-new-text="$t('action.add') + ' ' + $t('common.new') + ' ' + $t('attendee.singular')"
+                    :add-new-text="
+                        $t('action.add') + ' ' + $t('common.new') + ' ' + $t('attendee.singular')
+                    "
                 />
                 <template v-else>
                     <PageTable
@@ -322,13 +325,21 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         :model-value="isAllSelected"
                         @toggle-sort="handleSortChange"
                         @row-selected="(id: number | string, checked: boolean) => handleRowSelected(String(id), checked)"
-                        @update:selected-rows="(rows: (string | number)[]) => selectedRows = rows.map(String)"
+                        @update:selected-rows="
+                            (rows: (string | number)[]) => (selectedRows = rows.map(String))
+                        "
                         @update:model-value="handleSelectAll"
                     >
                         <template #cell-fullName="{ row }">
                             <div>
-                                <div class="font-medium">
+                                <div class="font-medium flex items-center gap-2">
                                     {{ row.fullName }}
+                                    <Icon
+                                        v-if="row.emailVerifiedAt"
+                                        :title="$t('attendee.email_verified') + ' ' + $t('common.at') + ' ' + formatDate(row.emailVerifiedAt)"
+                                        name="solar:verified-check-bold-duotone"
+                                        class="cursor-pointer hover:scale-110 ease-in-out duration-300 !size-4 shrink-0 text-success"
+                                    />
                                 </div>
                                 <div class="text-xs text-muted-foreground mt-0.5">
                                     {{ row.email }}
@@ -336,9 +347,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                             </div>
                         </template>
                         <template #cell-occupation="{ row }">
-                            <div
-                                v-if="row.isEmployee && row.occupation && row.group"
-                            >
+                            <div v-if="row.isEmployee && row.occupation && row.group">
                                 <div>{{ row.group.name }}</div>
                                 <div class="text-xs text-muted-foreground mt-0.5">
                                     {{ row.occupation.name }}
@@ -354,7 +363,9 @@ const handleRowSelected = (id: string, checked: boolean) => {
 
                         <template #cell-isEmployee="{ row }">
                             <Badge :variant="row.isEmployee ? 'default' : 'secondary'">
-                                {{ row.isEmployee ? $t("attendee.employee") : $t("attendee.non_employee") }}
+                                {{
+                                    row.isEmployee ? $t("attendee.employee") : $t("attendee.non_employee")
+                                }}
                             </Badge>
                         </template>
 
@@ -372,16 +383,36 @@ const handleRowSelected = (id: string, checked: boolean) => {
 
                         <template #cell-lastLoginAt="{ row }">
                             <div class="text-sm">
-                                {{ row.lastLoginAt ? useGermanDateFormat().formatDate(row.lastLoginAt) : $t("common.never") }}
+                                {{ row.lastLoginAt ? formatDate(row.lastLoginAt) : $t("common.never") }}
                             </div>
                         </template>
 
                         <template #cell-createdAt="{ row }">
-                            {{ useGermanDateFormat().formatDate(row.createdAt) }}
+                            {{ formatDate(row.createdAt) }}
                         </template>
 
                         <template #cell-actions="{ row }">
                             <div class="flex justify-end gap-2">
+                                <LazyButton
+                                    v-if="!row.emailVerifiedAt"
+                                    :title="$t('attendee.resend_verification_email')"
+                                    variant="ghost"
+                                    size="icon"
+                                    :disabled="isSendingVerificationEmail"
+                                    hydrate-on-interaction="mouseover"
+                                    @click="sendVerificationEmail(row.id, () => fetchItems(currentPage, perPage, { sort_by: sortBy, sort_dir: sortDir, search: searchQuery }))"
+                                >
+                                    <Icon
+                                        v-if="isSendingVerificationEmail"
+                                        name="solar:refresh-linear"
+                                        class="!size-5 animate-spin"
+                                    />
+                                    <Icon
+                                        v-else
+                                        name="solar:letter-unread-outline"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                    />
+                                </LazyButton>
                                 <LazyButton
                                     :title="$t('action.edit')"
                                     variant="ghost"
@@ -406,6 +437,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                         class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
                                     />
                                 </LazyButton>
+                                
                             </div>
                         </template>
                     </PageTable>

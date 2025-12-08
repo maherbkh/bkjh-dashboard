@@ -201,28 +201,28 @@ const getCoverImageSrc = (event: EventData) => {
         // getDirectImageSrc will transform full backend URLs to use /get-media/ proxy
         return getDirectImageSrc({ url: coverUrl });
     }
-    
+
     // Priority 2: Use cover field if available
     if (!event.cover) return null;
-    
+
     // Handle different cover formats
     if (typeof event.cover === 'string') {
         // If it's just an ID/UUID, construct a minimal media object with uuid
         const coverId = event.cover.trim();
-        
+
         if (coverId.length > 0) {
             const mediaObject = { uuid: coverId };
             return getDirectImageSrc(mediaObject);
         }
-        
+
         return null;
     }
-    
+
     // If it's a MediaEntity object, use getDirectImageSrc
     if (event.cover && typeof event.cover === 'object' && 'id' in event.cover) {
         return getDirectImageSrc(event.cover);
     }
-    
+
     return null;
 };
 </script>
@@ -254,7 +254,7 @@ const getCoverImageSrc = (event: EventData) => {
                         {{ $t('action.add') }} {{ $t('common.new') }} {{ $t('academy.singular') }}
                     </Button>
                 </NuxtLink>
-               
+
                 <LazyButton
                     v-if="selectedRows.length > 0"
                     class="cursor-pointer"
@@ -299,52 +299,51 @@ const getCoverImageSrc = (event: EventData) => {
                         @update:model-value="handleSelectAll"
                     >
                         <template #cell-title="{ row }">
-                        <div class="flex items-center gap-2">
-                            <div class="w-24 shrink-0">
-                                <NuxtImg
-                                v-if="getCoverImageSrc(row)"
-                                :src="getCoverImageSrc(row)"
-                                :alt="$t('event.cover')"
-                                class="w-full h-10 shrink-0 object-cover object-center rounded-md border border-border"
-                            />
-                            <div
-                                v-else
-                                class="w-full h-10 rounded-md border border-border bg-muted flex items-center justify-center"
-                            >
-                                <Icon
-                                    name="solar:image-outline"
-                                    class="!size-5 shrink-0 text-muted-foreground"
-                                />
-                            </div>
-                            </div>
-                            <div class="font-medium ">
-                                <NuxtLink
-                                    :to="`/events/${row.id}/show`"
-                                    :title="row.title"
-                                    class="hover:underline hover:text-primary truncate max-w-64 line-clamp-1"
-                                >
-                                    {{ row.title }}
-                                </NuxtLink>
-                                <div
-                                    v-if="row.schedules && row.schedules.length > 0"
-                                    class="mt-1 text-muted-foreground flex items-center gap-1 whitespace-nowrap text-xs"
-                                >
-                                    <div>
-                                        {{ formatDateShort(row.schedules[0]?.date) }}
-                                    </div>
-                                    <template v-if="row.schedules.length > 1">
+                            <div class="flex items-center gap-2">
+                                <div class="w-24 shrink-0">
+                                    <NuxtImg
+                                        v-if="getCoverImageSrc(row)"
+                                        :src="getCoverImageSrc(row)"
+                                        :alt="$t('event.cover')"
+                                        class="w-full h-10 shrink-0 object-cover object-center rounded-md border border-border"
+                                    />
+                                    <div
+                                        v-else
+                                        class="w-full h-10 rounded-md border border-border bg-muted flex items-center justify-center"
+                                    >
                                         <Icon
-                                            name="solar:arrow-right-bold-duotone"
-                                            class="size-5 shrink-0 opacity-75"
+                                            name="solar:image-outline"
+                                            class="!size-5 shrink-0 text-muted-foreground"
                                         />
+                                    </div>
+                                </div>
+                                <div class="font-medium ">
+                                    <NuxtLink
+                                        :to="`/events/${row.id}/show`"
+                                        :title="row.title"
+                                        class="hover:underline hover:text-primary truncate max-w-64 line-clamp-1"
+                                    >
+                                        {{ row.title }}
+                                    </NuxtLink>
+                                    <div
+                                        v-if="row.schedules && row.schedules.length > 0"
+                                        class="mt-1 text-muted-foreground flex items-center gap-1 whitespace-nowrap text-xs"
+                                    >
                                         <div>
-                                            {{ formatDateShort(row.schedules[(row.schedules.length - 1)]?.date) }}
+                                            {{ formatDateShort(row.schedules[0]?.date) }}
                                         </div>
-                                    </template>
+                                        <template v-if="row.schedules.length > 1">
+                                            <Icon
+                                                name="solar:arrow-right-bold-duotone"
+                                                class="size-5 shrink-0 opacity-75"
+                                            />
+                                            <div>
+                                                {{ formatDateShort(row.schedules[(row.schedules.length - 1)]?.date) }}
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                           
                         </template>
 
                         <template #cell-type="{ row }">
@@ -400,7 +399,7 @@ const getCoverImageSrc = (event: EventData) => {
                                         size="icon-sm"
                                         :class="[
                                             'font-normal border aspect-square !size-5 text-xs',
-                                            (row.isFull && row.maxCapacity !== row.approvedRegistrationsCount) ? '!cursor-pointer' : '!cursor-default'
+                                            (row.isFull && row.maxCapacity !== row.approvedRegistrationsCount) ? '!cursor-pointer' : '!cursor-default',
                                         ]"
                                         :title="(row.isFull && row.maxCapacity !== row.approvedRegistrationsCount) ? $t('event.manually_set_full') : ''"
                                     >

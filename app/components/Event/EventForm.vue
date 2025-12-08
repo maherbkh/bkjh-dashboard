@@ -61,7 +61,6 @@ const [schedules] = defineField('schedules');
 const coverMedia = ref<MediaEntity | null>(null);
 const coverId = computed(() => coverMedia.value?.id || null);
 
-
 // Resources for selecting
 const resourcesStore = useResourcesStore();
 const eventCategories = computed(() => resourcesStore.eventCategories || []);
@@ -85,7 +84,7 @@ watch(() => props.initialData, async (newData) => {
         let coverEntity: MediaEntity | null = null;
         const coverData = (newData as any).cover;
         const coverUrl = (newData as any).coverUrl;
-        
+
         if (coverData) {
             if (typeof coverData === 'string') {
                 // If it's an ID, fetch the media entity
@@ -93,7 +92,7 @@ watch(() => props.initialData, async (newData) => {
                     const { data, error } = await useApiFetch<{ success: boolean; message: string; data: MediaEntity }>(`/shared/media/${coverData}`, {
                         server: false,
                     });
-                    
+
                     if (error.value) {
                         console.error('Error fetching cover media:', error.value);
                         // If fetch fails but we have coverUrl, create a minimal entity
@@ -172,7 +171,7 @@ watch(() => props.initialData, async (newData) => {
             const filename = urlParts[urlParts.length - 1];
             const uuidMatch = filename.match(/^([a-f0-9-]+)/);
             const uuid = uuidMatch ? uuidMatch[1] : '';
-            
+
             coverEntity = {
                 id: uuid || '',
                 uuid: uuid || '',
@@ -206,7 +205,7 @@ watch(() => props.initialData, async (newData) => {
                 metadata: coverEntity.metadata || {},
                 accessLevel: coverEntity.accessLevel || AccessLevel.PUBLIC,
             } as MediaEntity;
-            
+
             // Force reactivity by creating a new object reference
             coverMedia.value = { ...validEntity };
         }
@@ -218,7 +217,7 @@ watch(() => props.initialData, async (newData) => {
         const categoryIds = (newData as any).categories
             ? (newData as any).categories.map((cat: any) => cat.eventCategory?.id || cat.eventCategoryId || cat.id).filter(Boolean)
             : (newData as any).eventCategoryIds || ((newData as any).eventCategoryId ? [(newData as any).eventCategoryId] : []);
-        
+
         const targetIds = (newData as any).targets
             ? (newData as any).targets.map((target: any) => target.eventTarget?.id || target.eventTargetId || target.id).filter(Boolean)
             : (newData as any).eventTargetIds || ((newData as any).eventTargetId ? [(newData as any).eventTargetId] : []);

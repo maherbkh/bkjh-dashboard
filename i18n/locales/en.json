@@ -210,6 +210,7 @@
     "description": "Manage event attendees",
     "edit": "Edit attendee information",
     "email": "Email",
+    "email_verified": "Email verified",
     "employee": "Employee",
     "employee_status": "Employee Status",
     "employment_details": "Employment Details",
@@ -229,8 +230,11 @@
     "registration_date": "Registration Date",
     "registration_info": "Registration Info",
     "registration_status": "Registration Status",
+    "resend_verification_email": "Resend Verification Email",
     "send_password_reset": "Send Password Reset Email",
-    "singular": "Attendee"
+    "singular": "Attendee",
+    "verification_email_error": "Failed to send verification email",
+    "verification_email_sent": "Verification email sent successfully"
   },
   "auth": {
     "code_resent": "Code resent successfully",
@@ -314,6 +318,7 @@
     "actions": "Actions",
     "active": "Active",
     "add": "Add",
+    "at": "at",
     "analytics": "Analytics",
     "and": "and",
     "app_not_found": "App Not Found",

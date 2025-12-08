@@ -1,31 +1,57 @@
 <template>
     <div :class="containerClass">
         <!-- Header Section -->
-        <div v-if="title || titleIcon" class="flex items-center gap-3 mb-2">
+        <div
+            v-if="title || titleIcon"
+            class="flex items-center gap-3 mb-2"
+        >
             <Icon
                 v-if="titleIcon"
                 :name="titleIcon"
                 :class="cn(titleIconClass, '!size-5 shrink-0')"
             />
-            <div v-if="title" :class="titleClass">{{ title }}</div>
+            <div
+                v-if="title"
+                :class="titleClass"
+            >
+                {{ title }}
+            </div>
         </div>
 
         <!-- Value Section -->
-        <div v-if="value !== undefined" class="flex items-baseline gap-3 mb-1">
+        <div
+            v-if="value !== undefined"
+            class="flex items-baseline gap-3 mb-1"
+        >
             <Icon
                 v-if="valueIcon"
                 :name="valueIcon"
                 :class="cn(valueIconClass, '!size-5 shrink-0')"
             />
-            <div :class="valueClass">{{ formatValue(value, valueFormatter) }}</div>
-            <div v-if="valueSuffix" :class="valueSuffixClass">{{ valueSuffix }}</div>
+            <div :class="valueClass">
+                {{ formatValue(value, valueFormatter) }}
+            </div>
+            <div
+                v-if="valueSuffix"
+                :class="valueSuffixClass"
+            >
+                {{ valueSuffix }}
+            </div>
         </div>
 
         <!-- Subtitle Section -->
-        <div v-if="subtitle" :class="subtitleClass">{{ subtitle }}</div>
+        <div
+            v-if="subtitle"
+            :class="subtitleClass"
+        >
+            {{ subtitle }}
+        </div>
 
         <!-- Items List -->
-        <ul v-if="items && items.length > 0" :class="itemsListClass">
+        <ul
+            v-if="items && items.length > 0"
+            :class="itemsListClass"
+        >
             <li
                 v-for="(item, index) in items"
                 :key="index"
@@ -47,20 +73,30 @@
             </li>
         </ul>
 
-               <!-- Trend Section -->
-               <div v-if="trend || trendText" class="mt-2 flex items-center gap-3" :class="trendClass">
-                   <Icon
-                       v-if="trendIcon || trend"
-                       :name="trendIcon || getTrendIcon(trend)"
-                       :class="cn(trendIconClass, '!size-5 shrink-0')"
-                   />
-            <span v-if="trendText" :class="trendTextClass">
+        <!-- Trend Section -->
+        <div
+            v-if="trend || trendText"
+            class="mt-2 flex items-center gap-3"
+            :class="trendClass"
+        >
+            <Icon
+                v-if="trendIcon || trend"
+                :name="trendIcon || getTrendIcon(trend)"
+                :class="cn(trendIconClass, '!size-5 shrink-0')"
+            />
+            <span
+                v-if="trendText"
+                :class="trendTextClass"
+            >
                 {{ trendText }}
             </span>
         </div>
 
         <!-- Action Slot -->
-        <div v-if="$slots.actions" class="mt-3">
+        <div
+            v-if="$slots.actions"
+            class="mt-3"
+        >
             <slot name="actions" />
         </div>
     </div>
@@ -117,7 +153,7 @@ const props = withDefaults(defineProps<Props>(), {
     variant: 'default',
     size: 'md',
     containerClass: '',
-    valueFormatter: undefined
+    valueFormatter: undefined,
 });
 
 // Size-based classes
@@ -128,7 +164,7 @@ const sizeClasses = {
         value: 'text-xl',
         subtitle: 'text-xs',
         item: 'text-xs',
-        icon: 'size-3.5'
+        icon: 'size-3.5',
     },
     md: {
         padding: 'px-4 py-3',
@@ -136,7 +172,7 @@ const sizeClasses = {
         value: 'text-2xl',
         subtitle: 'text-xs',
         item: 'text-sm',
-        icon: 'size-4'
+        icon: 'size-4',
     },
     lg: {
         padding: 'px-5 py-4',
@@ -144,8 +180,8 @@ const sizeClasses = {
         value: 'text-3xl',
         subtitle: 'text-sm',
         item: 'text-base',
-        icon: 'size-5'
-    }
+        icon: 'size-5',
+    },
 };
 
 const currentSize = computed(() => sizeClasses[props.size]);
@@ -170,7 +206,7 @@ const containerClass = computed(() => {
         variantClasses.value,
         currentSize.value.padding,
         'text-muted-foreground',
-        props.containerClass
+        props.containerClass,
     );
 });
 
@@ -195,8 +231,8 @@ const trendIconClass = computed(() => {
         {
             'text-success': trend === 'up',
             'text-destructive': trend === 'down',
-            'text-muted-foreground': trend === 'neutral'
-        }
+            'text-muted-foreground': trend === 'neutral',
+        },
     );
 });
 const trendTextClass = computed(() => {
@@ -205,7 +241,7 @@ const trendTextClass = computed(() => {
     return cn({
         'text-success': trend === 'up',
         'text-destructive': trend === 'down',
-        'text-muted-foreground': trend === 'neutral'
+        'text-muted-foreground': trend === 'neutral',
     });
 });
 
@@ -222,19 +258,19 @@ const getTrendIcon = (trend?: 'up' | 'down' | 'neutral'): string => {
 
 const formatValue = (val: number | string | undefined, customFormatter?: (val: number | string) => string): string => {
     if (val === undefined || val === null) return '0';
-    
+
     if (customFormatter) {
         return customFormatter(val);
     }
-    
+
     if (props.valueFormatter) {
         return props.valueFormatter(val);
     }
-    
+
     if (typeof val === 'number') {
         return val.toLocaleString();
     }
-    
+
     return String(val);
 };
 </script>

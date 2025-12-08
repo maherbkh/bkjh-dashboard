@@ -57,7 +57,6 @@ const { t } = useI18n();
 const showManagerDialog = ref(false);
 const { getImageSrc, getDirectImageSrc } = useAuthenticatedImage();
 
-
 const handleUploadSuccess = (file: MediaFile) => {
     if (props.multiple) {
         const currentFiles = Array.isArray(props.modelValue) ? props.modelValue : [];
