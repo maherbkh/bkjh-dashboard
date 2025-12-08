@@ -305,7 +305,7 @@ const getCoverImageSrc = (event: EventData) => {
                                 v-if="getCoverImageSrc(row)"
                                 :src="getCoverImageSrc(row)"
                                 :alt="$t('event.cover')"
-                                class="w-24 h-10 object-cover object-center rounded-md border border-border"
+                                class="w-24 h-10 shrink-0 object-cover object-center rounded-md border border-border"
                             />
                             <div
                                 v-else
