@@ -54,8 +54,9 @@ const selectedRows = ref<string[]>([]);
 const searchQuery = ref('');
 const currentPage = ref(1);
 const perPage = ref(25);
-const sortBy = ref('createdAt');
-const sortDir = ref<'asc' | 'desc'>('desc');
+const sortBy = ref<string | null>(null);
+const sortDir = ref<'asc' | 'desc' | null>(null);
+const old = ref(false);
 
 const headerItems = computed((): TableHeaderItem[] => [
     { as: 'th', name: t('event.title'), id: 'title' },
@@ -65,45 +66,58 @@ const headerItems = computed((): TableHeaderItem[] => [
     { as: 'th', name: t('common.status'), id: 'isActive' },
 ]);
 
+// Computed properties for table params (provide defaults when null)
+const tableSortBy = computed(() => sortBy.value ?? '');
+const tableSortDir = computed(() => sortDir.value ?? 'asc');
+
+// Helper function to build params object (only includes sort params if not null)
+const buildParams = (includeSearch = false) => {
+    const params: Record<string, any> = {
+        old: old.value,
+    };
+    if (includeSearch && searchQuery.value) {
+        params.search = searchQuery.value;
+    }
+    if (sortBy.value !== null) {
+        params.sort_by = sortBy.value;
+    }
+    if (sortDir.value !== null) {
+        params.sort_dir = sortDir.value;
+    }
+    return params;
+};
+
 // Initialize data
 onMounted(async () => {
-    await fetchItems(currentPage.value, perPage.value, {
-        sort_by: sortBy.value,
-        sort_dir: sortDir.value,
-    });
+    await fetchItems(currentPage.value, perPage.value, buildParams());
+});
+
+// Watch for old value changes and refresh data
+watch(old, async () => {
+    currentPage.value = 1; // Reset to first page when toggling
+    await fetchItems(currentPage.value, perPage.value, buildParams(true));
 });
 
 // Search and pagination handlers
 const handleReset = async () => {
     searchQuery.value = '';
     currentPage.value = 1;
-    sortBy.value = 'createdAt';
-    sortDir.value = 'desc';
-    await fetchItems(currentPage.value, perPage.value, {
-        search: searchQuery.value,
-        sort_by: sortBy.value,
-        sort_dir: sortDir.value,
-    });
+    sortBy.value = null;
+    sortDir.value = null;
+    old.value = false;
+    await fetchItems(currentPage.value, perPage.value, buildParams(true));
     selectedRows.value = [];
 };
 
 const handleSearchSubmit = async () => {
     currentPage.value = 1;
-    await fetchItems(currentPage.value, perPage.value, {
-        search: searchQuery.value,
-        sort_by: sortBy.value,
-        sort_dir: sortDir.value,
-    });
+    await fetchItems(currentPage.value, perPage.value, buildParams(true));
     selectedRows.value = [];
 };
 
 const handlePageChange = async (page: number) => {
     currentPage.value = page;
-    await fetchItems(currentPage.value, perPage.value, {
-        search: searchQuery.value,
-        sort_by: sortBy.value,
-        sort_dir: sortDir.value,
-    });
+    await fetchItems(currentPage.value, perPage.value, buildParams(true));
     selectedRows.value = [];
 };
 
@@ -111,11 +125,7 @@ async function handleSortChange(dir: 'asc' | 'desc', id: string) {
     sortDir.value = dir;
     sortBy.value = id;
     currentPage.value = 1;
-    await fetchItems(currentPage.value, perPage.value, {
-        search: searchQuery.value,
-        sort_by: sortBy.value,
-        sort_dir: sortDir.value,
-    });
+    await fetchItems(currentPage.value, perPage.value, buildParams(true));
     selectedRows.value = [];
 }
 
@@ -135,7 +145,7 @@ const handleCancelEvent = async (id: string) => {
     });
     if (data.value) {
         toast.success(t('global.messages.success'));
-        await fetchItems();
+        await fetchItems(currentPage.value, perPage.value, buildParams(true));
     }
     if (error.value) {
         toast.error(t('global.messages.error'));
@@ -225,6 +235,13 @@ const getCoverImageSrc = (event: EventData) => {
             :page-icon="pageIcon || 'solar:calendar-outline'"
         >
             <template #actions>
+                <FormItemSwitch
+                    id="old-events"
+                    v-model="old"
+                    :true-label="$t('event.old_events')"
+                    :false-label="$t('event.current_events')"
+                    class="flex items-center gap-2"
+                />
                 <NuxtLink to="/events/add">
                     <Button
                         variant="default"
@@ -237,6 +254,7 @@ const getCoverImageSrc = (event: EventData) => {
                         {{ $t('action.add') }} {{ $t('common.new') }} {{ $t('academy.singular') }}
                     </Button>
                 </NuxtLink>
+               
                 <LazyButton
                     v-if="selectedRows.length > 0"
                     class="cursor-pointer"
@@ -273,7 +291,7 @@ const getCoverImageSrc = (event: EventData) => {
                         :loading="isLoading"
                         :skeleton-rows="perPage"
                         :selectable="true"
-                        :params="{ page: currentPage, length: perPage, sortBy, sortDir, search: searchQuery }"
+                        :params="{ page: currentPage, length: perPage, sortBy: tableSortBy, sortDir: tableSortDir, search: searchQuery }"
                         :model-value="isAllSelected"
                         @toggle-sort="handleSortChange"
                         @row-selected="(id: number | string, checked: boolean) => handleRowSelected(String(id), checked)"

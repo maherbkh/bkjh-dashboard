@@ -457,7 +457,9 @@
     "attendees": "Teilnehmer",
     "approved": "Genehmigt",
     "rejected": "Abgelehnt",
-    "manually_set_full": "Diese Veranstaltung wurde manuell als voll gesetzt"
+    "manually_set_full": "Diese Veranstaltung wurde manuell als voll gesetzt",
+    "old_events": "Alte Veranstaltungen einschließen",
+    "current_events": "Laufende & Zukünftige Veranstaltungen"
   },
   "event_category": {
     "description": "Veranstaltungskategorien für die Organisation von Akademieveranstaltungen verwalten",

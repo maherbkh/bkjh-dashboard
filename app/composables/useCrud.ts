@@ -63,8 +63,12 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
                 ...additionalParams,
             };
 
-            const cacheKey = forceRefresh
-                ? `${tenant}-${crudPath}-list-${page}-${perPage}-${JSON.stringify(additionalParams)}-${forceRefresh}`
+            // For events, always disable caching by adding timestamp
+            const shouldDisableCache = crudPath === 'events';
+            const timestamp = forceRefresh || shouldDisableCache ? (forceRefresh || Date.now()) : undefined;
+            
+            const cacheKey = timestamp
+                ? `${tenant}-${crudPath}-list-${page}-${perPage}-${JSON.stringify(additionalParams)}-${timestamp}`
                 : `${tenant}-${crudPath}-list-${page}-${perPage}-${JSON.stringify(additionalParams)}`;
 
             const { data, status } = await useApiFetch(buildApiPath(), {

@@ -47,48 +47,48 @@ const selectedRows = ref<string[]>([]);
 const searchQuery = ref('');
 const currentPage = ref(1);
 const perPage = ref(25);
-const sortBy = ref('createdAt');
-const sortDir = ref<'asc' | 'desc'>('desc');
+const sortBy = ref<string | null>(null);
+const sortDir = ref<'asc' | 'desc' | null>(null);
+
+// Helper function to build params object (only includes sort params if not null)
+const buildParams = (includeSearch = false) => {
+    const params: Record<string, any> = {};
+    if (includeSearch && searchQuery.value) {
+        params.search = searchQuery.value;
+    }
+    if (sortBy.value !== null) {
+        params.sort_by = sortBy.value;
+    }
+    if (sortDir.value !== null) {
+        params.sort_dir = sortDir.value;
+    }
+    return params;
+};
 
 // Initialize data
 onMounted(async () => {
-    await fetchItems(currentPage.value, perPage.value, {
-        sort_by: sortBy.value,
-        sort_dir: sortDir.value,
-    });
+    await fetchItems(currentPage.value, perPage.value, buildParams());
 });
 
 // Search and pagination handlers
 const handleReset = async () => {
     searchQuery.value = '';
     currentPage.value = 1;
-    sortBy.value = 'createdAt';
-    sortDir.value = 'desc';
-    await fetchItems(currentPage.value, perPage.value, {
-        search: searchQuery.value,
-        sort_by: sortBy.value,
-        sort_dir: sortDir.value,
-    });
+    sortBy.value = null;
+    sortDir.value = null;
+    await fetchItems(currentPage.value, perPage.value, buildParams(true));
     selectedRows.value = [];
 };
 
 const handleSearchSubmit = async () => {
     currentPage.value = 1;
-    await fetchItems(currentPage.value, perPage.value, {
-        search: searchQuery.value,
-        sort_by: sortBy.value,
-        sort_dir: sortDir.value,
-    });
+    await fetchItems(currentPage.value, perPage.value, buildParams(true));
     selectedRows.value = [];
 };
 
 const handlePageChange = async (page: number) => {
     currentPage.value = page;
-    await fetchItems(currentPage.value, perPage.value, {
-        search: searchQuery.value,
-        sort_by: sortBy.value,
-        sort_dir: sortDir.value,
-    });
+    await fetchItems(currentPage.value, perPage.value, buildParams(true));
     selectedRows.value = [];
 };
 
@@ -96,11 +96,7 @@ async function handleSortChange(dir: 'asc' | 'desc', id: string) {
     sortDir.value = dir;
     sortBy.value = id;
     currentPage.value = 1;
-    await fetchItems(currentPage.value, perPage.value, {
-        search: searchQuery.value,
-        sort_by: sortBy.value,
-        sort_dir: sortDir.value,
-    });
+    await fetchItems(currentPage.value, perPage.value, buildParams(true));
     selectedRows.value = [];
 }
 

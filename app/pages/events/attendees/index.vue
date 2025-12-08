@@ -265,51 +265,6 @@ const handleRowSelected = (id: string, checked: boolean) => {
     }
 };
 
-// Password reset functionality
-const isResettingPassword = ref<string | null>(null);
-
-const handlePasswordReset = async (attendee: Attendee) => {
-    isResettingPassword.value = attendee.id;
-    try {
-        const { data, status } = await useApiFetch(`/academy/attendees/${attendee.id}/send-reset-email`, {
-            method: 'POST',
-        });
-
-        if (status.value === 'success' && data.value) {
-            const responseData = data.value as any;
-            // Check if the response indicates success
-            if (responseData.success) {
-                toast.success(responseData.message || t('attendee.password_reset_sent'));
-            }
-            else {
-                // Handle API error response
-                if (responseData.statusCode === 400) {
-                    toast.error(t('attendee.password_reset_invalid_email'));
-                }
-                else if (responseData.statusCode === 404) {
-                    toast.error(t('attendee.password_reset_email_not_found'));
-                }
-                else if (responseData.statusCode === 429) {
-                    toast.error(t('attendee.password_reset_rate_limit'));
-                }
-                else {
-                    toast.error(responseData.message || t('attendee.password_reset_error'));
-                }
-            }
-        }
-        else {
-            // Handle network or other errors
-            toast.error(t('attendee.password_reset_error'));
-        }
-    }
-    catch (error: any) {
-        console.error('Error sending password reset:', error);
-        toast.error(t('attendee.password_reset_error'));
-    }
-    finally {
-        isResettingPassword.value = null;
-    }
-};
 </script>
 
 <template>
@@ -436,25 +391,6 @@ const handlePasswordReset = async (attendee: Attendee) => {
                                 >
                                     <Icon
                                         name="solar:pen-new-square-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
-                                    />
-                                </LazyButton>
-                                <LazyButton
-                                    :title="$t('attendee.send_password_reset')"
-                                    variant="ghost"
-                                    size="icon"
-                                    :disabled="isResettingPassword === row.id"
-                                    hydrate-on-interaction="mouseover"
-                                    @click="handlePasswordReset(row)"
-                                >
-                                    <Icon
-                                        v-if="isResettingPassword === row.id"
-                                        name="solar:refresh-linear"
-                                        class="!size-5 animate-spin"
-                                    />
-                                    <Icon
-                                        v-else
-                                        name="solar:lock-password-outline"
                                         class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
                                     />
                                 </LazyButton>
