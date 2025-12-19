@@ -400,7 +400,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                     size="icon"
                                     :disabled="isSendingVerificationEmail"
                                     hydrate-on-interaction="mouseover"
-                                    @click="sendVerificationEmail(row.id, () => fetchItems(currentPage, perPage, { sort_by: sortBy, sort_dir: sortDir, search: searchQuery }))"
+                                    @click="sendVerificationEmail(row.id, async () => { await fetchItems(currentPage, perPage, { sort_by: sortBy, sort_dir: sortDir, search: searchQuery }); })"
                                 >
                                     <Icon
                                         v-if="isSendingVerificationEmail"
@@ -437,7 +437,6 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                         class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
                                     />
                                 </LazyButton>
-                                
                             </div>
                         </template>
                     </PageTable>

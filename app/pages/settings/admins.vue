@@ -2,8 +2,21 @@
 import type { Admin, AdminForm, TableHeaderItem, ServerParamsTypes } from '~/types';
 import { createAdminSchema } from '~/composables/adminSchema';
 import { useResourcesStore } from '~/stores/resources';
+import { useUserStore } from '~/stores/user';
 
 const { t } = useI18n();
+
+// Check superAdmin permission
+const userStore = useUserStore();
+await userStore.fetchAuthUser();
+if (!userStore.user?.isSuperAdmin) {
+    throw createError({
+        statusCode: 403,
+        statusMessage: 'Forbidden',
+        message: 'You do not have permission to access this page',
+    });
+}
+
 const { formatRelative } = useGermanDateFormat();
 
 // Custom relative time formatter using our translation keys

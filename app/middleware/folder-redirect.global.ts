@@ -2,7 +2,7 @@ export default defineNuxtRouteMiddleware((to) => {
     // Define folder redirects mapping
     const folderRedirects: Record<string, string> = {
         '/master-data': '/master-data/companies',
-        '/settings': '/settings/users',
+        // '/settings': '/settings/users',
         // Add more folder redirects as needed
         // '/other-folder': '/other-folder/default-page',
     };

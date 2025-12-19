@@ -895,6 +895,40 @@ declare global {
     };
 }
 
+// Settings types
+// Note: Enums (SettingValueType, AppDomain) must be imported from ~/types/settings
+// as .d.ts files cannot export runtime values
+export type Setting = {
+    id: string;
+    key: string;
+    name: string;
+    description: string | null;
+    type: SettingValueType;
+    value: unknown; // JSON value
+    apps: AppDomain[];
+    isPublic: boolean;
+    parentId: string | null;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type SettingForm = {
+    key: string;
+    name: string;
+    description?: string | null;
+    type?: SettingValueType;
+    value: unknown;
+    apps?: AppDomain[];
+    isPublic?: boolean;
+    parentId?: string | null;
+};
+
+export type SettingSection = {
+    id: string;
+    name: string;
+    type: SettingValueType;
+};
+
 // This ensures the file is treated as a module
 export {};
 

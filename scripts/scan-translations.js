@@ -73,6 +73,7 @@ function isValidTranslationKey(key) {
 }
 
 // Function to build nested object from dot notation keys
+// eslint-disable-next-line no-unused-vars
 function buildNestedObject(keys) {
     const result = {};
 
@@ -175,7 +176,7 @@ try {
     enTranslations = JSON.parse(fs.readFileSync(enPath, 'utf8'));
     console.log('📖 Loaded existing English translations');
 }
-catch (e) {
+catch {
     console.log('⚠️  No existing English translations found');
 }
 
@@ -183,7 +184,7 @@ try {
     deTranslations = JSON.parse(fs.readFileSync(dePath, 'utf8'));
     console.log('📖 Loaded existing German translations');
 }
-catch (e) {
+catch {
     console.log('⚠️  No existing German translations found');
 }
 
@@ -204,6 +205,7 @@ const sortedDe = sortObjectKeys(mergedDe);
 const missingInEn = [];
 const missingInDe = [];
 
+// eslint-disable-next-line no-unused-vars
 function findMissing(obj, prefix = '') {
     for (const key in obj) {
         const fullKey = prefix ? `${prefix}.${key}` : key;

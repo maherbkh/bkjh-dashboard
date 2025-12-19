@@ -86,7 +86,7 @@ import { computed } from 'vue';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { BarChart } from '~/components/ui/chart-bar';
 
-export interface BarChartDataItem extends Record<string, string | number> {}
+export type BarChartDataItem = Record<string, string | number>;
 
 interface Props {
     /** Chart title displayed in card header */

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import type { MediaEntity, AccessLevel, CollectionType } from '~/types/media/index';
+import type { MediaFile } from '~/types/media';
 import { AccessLevel as AccessLevelEnum, CollectionType as CollectionTypeEnum } from '~/types/media/index';
 import { useAuthenticatedImage } from '~/composables/useAuthenticatedImage';
 import { mediaFormatter } from '~/services/media';
@@ -49,6 +50,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
     'update:modelValue': [value: MediaEntity | MediaEntity[] | null];
+    'upload:success': [file: MediaFile];
 }>();
 
 const { t } = useI18n();

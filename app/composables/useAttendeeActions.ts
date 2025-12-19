@@ -6,7 +6,7 @@ export const useAttendeeActions = () => {
 
     /**
      * Send verification email to attendee
-     * 
+     *
      * @param attendeeId - Attendee UUID or ID
      * @param refresh - Optional refresh function to call after success
      * @returns Promise that resolves when email is sent
@@ -57,4 +57,3 @@ export const useAttendeeActions = () => {
         isSendingVerificationEmail: readonly(isSendingVerificationEmail),
     };
 };
-

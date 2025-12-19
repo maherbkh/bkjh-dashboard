@@ -163,9 +163,23 @@ export const useNavigationData = (): ComputedRef<{
                     requireSuperAdmin: true,
                     items: [
                         {
+                            title: t('setting.plural'),
+                            url: '/settings',
+                            icon: 'solar:settings-outline',
+                            apps: [],
+                            requireSuperAdmin: true,
+                        },
+                        {
                             title: t('admin.plural'),
                             url: '/settings/admins',
                             icon: 'solar:users-group-rounded-outline',
+                            apps: [],
+                            requireSuperAdmin: true,
+                        },
+                        {
+                            title: 'Update Settings',
+                            url: '/settings/update-settings',
+                            icon: 'solar:refresh-outline',
                             apps: [],
                             requireSuperAdmin: true,
                         },

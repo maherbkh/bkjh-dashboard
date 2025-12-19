@@ -78,7 +78,7 @@ import { computed } from 'vue';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { DonutChart } from '~/components/ui/chart-donut';
 
-export interface DonutChartDataItem extends Record<string, string | number> {}
+export type DonutChartDataItem = Record<string, string | number>;
 
 interface Props {
     /** Chart title displayed in card header */

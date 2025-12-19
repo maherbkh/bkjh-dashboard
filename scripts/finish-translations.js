@@ -121,7 +121,10 @@ for (const [key, value] of Object.entries(veryFinalTranslations.en)) {
     const parts = key.split('.');
     let current = enTranslations, exists = true;
     for (const part of parts) {
-        if (!current[part]) { exists = false; break; }
+        if (!current[part]) {
+            exists = false;
+            break;
+        }
         current = current[part];
     }
     if (!exists || (typeof current === 'string' && current.startsWith('[MISSING:'))) {
@@ -134,7 +137,10 @@ for (const [key, value] of Object.entries(veryFinalTranslations.de)) {
     const parts = key.split('.');
     let current = deTranslations, exists = true;
     for (const part of parts) {
-        if (!current[part]) { exists = false; break; }
+        if (!current[part]) {
+            exists = false;
+            break;
+        }
         current = current[part];
     }
     if (!exists || (typeof current === 'string' && current.startsWith('[MISSING:'))) {
