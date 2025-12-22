@@ -6,9 +6,12 @@ import { useUserStore } from '~/stores/user';
 
 const { t } = useI18n();
 
-// Check superAdmin permission
+/**
+ * Check superAdmin permission
+ */
 const userStore = useUserStore();
 await userStore.fetchAuthUser();
+
 if (!userStore.user?.isSuperAdmin) {
     throw createError({
         statusCode: 403,
@@ -52,11 +55,13 @@ const {
 
 const selectedRows = ref<string[]>([]);
 
-// Search and pagination state
-const searchQuery = ref('');
-const currentPage = ref(1);
-const perPage = ref(25);
-const sortBy = ref('key');
+/**
+ * Search and pagination state
+ */
+const searchQuery = ref<string>('');
+const currentPage = ref<number>(1);
+const perPage = ref<number>(25);
+const sortBy = ref<string>('key');
 const sortDir = ref<'asc' | 'desc'>('asc');
 
 // Computed properties
@@ -100,40 +105,56 @@ await fetchItems(currentPage.value, perPage.value, {
     sort_dir: sortDir.value,
 });
 
-// Dialog state management
-const isDialogOpen = ref(false);
+/**
+ * Dialog state management
+ */
+const isDialogOpen = ref<boolean>(false);
 const dialogMode = ref<'add' | 'edit'>('add');
 const editingSetting = ref<Setting | null>(null);
-const isSubmitting = ref(false);
+const isSubmitting = ref<boolean>(false);
 
-const openAddDialog = () => {
+/**
+ * Open add dialog
+ */
+const openAddDialog = (): void => {
     dialogMode.value = 'add';
     resetForm();
     editingSetting.value = null;
     isDialogOpen.value = true;
 };
 
-const handleEdit = async (setting: Setting) => {
+/**
+ * Handle edit setting
+ */
+const handleEdit = (setting: Setting): void => {
+    if (!setting || !setting.id) {
+        console.warn('Invalid setting provided for edit:', setting);
+        return;
+    }
+
     dialogMode.value = 'edit';
     editingSetting.value = setting;
 
     setValues({
         key: setting.key,
         name: setting.name,
-        description: setting.description || null,
+        description: setting.description ?? null,
         type: setting.type,
         value: setting.value,
-        apps: setting.apps || [],
-        isPublic: setting.isPublic || false,
-        parentId: setting.parentId || null,
+        apps: setting.apps ?? [],
+        isPublic: setting.isPublic ?? false,
+        parentId: setting.parentId ?? null,
     });
     isDialogOpen.value = true;
 };
 
-const onSubmitAndClose = async (values: SettingForm) => {
+/**
+ * Submit form and close dialog
+ */
+const onSubmitAndClose = async (values: SettingForm): Promise<void> => {
     isSubmitting.value = true;
     try {
-        if (editingSetting.value) {
+        if (editingSetting.value?.id) {
             // Edit existing setting
             await updateItem(editingSetting.value.id, values);
         }
@@ -148,7 +169,7 @@ const onSubmitAndClose = async (values: SettingForm) => {
         editingSetting.value = null;
         resetForm();
     }
-    catch (error) {
+    catch (error: unknown) {
         console.error('Error submitting form:', error);
         // Keep dialog open to show errors - error handling is done in the CRUD composable
     }
@@ -157,10 +178,13 @@ const onSubmitAndClose = async (values: SettingForm) => {
     }
 };
 
-const onSubmitAndAddNew = async (values: SettingForm) => {
+/**
+ * Submit form and add new item
+ */
+const onSubmitAndAddNew = async (values: SettingForm): Promise<void> => {
     isSubmitting.value = true;
     try {
-        if (editingSetting.value) {
+        if (editingSetting.value?.id) {
             // Edit existing setting
             await updateItem(editingSetting.value.id, values);
             // After update, switch to add mode
@@ -180,7 +204,7 @@ const onSubmitAndAddNew = async (values: SettingForm) => {
         // Reset form but keep dialog open for adding new item
         resetForm();
     }
-    catch (error) {
+    catch (error: unknown) {
         console.error('Error submitting form:', error);
         // Keep dialog open to show errors - error handling is done in the CRUD composable
     }
@@ -189,46 +213,70 @@ const onSubmitAndAddNew = async (values: SettingForm) => {
     }
 };
 
-const handleDialogClose = () => {
+/**
+ * Handle dialog close
+ */
+const handleDialogClose = (): void => {
     isDialogOpen.value = false;
     resetForm();
     editingSetting.value = null;
 };
 
-// Delete handlers
+/**
+ * Delete handlers
+ */
 const { confirmDelete, confirmBulkDelete } = useConfirmDialog();
 
-async function handleDelete(settingId: string) {
+/**
+ * Handle single setting deletion
+ */
+const handleDelete = async (settingId: string): Promise<void> => {
+    if (!settingId || typeof settingId !== 'string') {
+        console.warn('Invalid setting ID for deletion:', settingId);
+        return;
+    }
+
     const confirmed = await confirmDelete();
-    if (!confirmed) return;
+    if (!confirmed) {
+        return;
+    }
 
     try {
         await deleteItem(settingId);
         // No need to manually refresh - useCrud handles it automatically
     }
-    catch (error) {
+    catch (error: unknown) {
         console.error('Error deleting setting:', error);
     }
-}
+};
 
-async function handleBulkDelete() {
-    if (selectedRows.value.length === 0) return;
+/**
+ * Handle bulk deletion
+ */
+const handleBulkDelete = async (): Promise<void> => {
+    if (selectedRows.value.length === 0) {
+        return;
+    }
 
     const confirmed = await confirmBulkDelete(selectedRows.value.length);
-    if (!confirmed) return;
+    if (!confirmed) {
+        return;
+    }
 
     try {
         await deleteManyItems(selectedRows.value);
         selectedRows.value = [];
         // No need to manually refresh - useCrud handles it automatically
     }
-    catch (error) {
+    catch (error: unknown) {
         console.error('Error deleting settings:', error);
     }
-}
+};
 
-// Search and pagination handlers
-const handleReset = async () => {
+/**
+ * Search and pagination handlers
+ */
+const handleReset = async (): Promise<void> => {
     searchQuery.value = '';
     currentPage.value = 1;
     sortBy.value = 'key';
@@ -241,7 +289,10 @@ const handleReset = async () => {
     selectedRows.value = [];
 };
 
-const handleSearchSubmit = async () => {
+/**
+ * Handle search submit
+ */
+const handleSearchSubmit = async (): Promise<void> => {
     currentPage.value = 1;
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
@@ -251,7 +302,15 @@ const handleSearchSubmit = async () => {
     selectedRows.value = [];
 };
 
-const handlePageChange = async (page: number) => {
+/**
+ * Handle page change
+ */
+const handlePageChange = async (page: number): Promise<void> => {
+    if (typeof page !== 'number' || page < 1) {
+        console.warn('Invalid page number:', page);
+        return;
+    }
+
     currentPage.value = page;
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
@@ -261,7 +320,20 @@ const handlePageChange = async (page: number) => {
     selectedRows.value = [];
 };
 
-async function handleSortChange(dir: 'asc' | 'desc', id: string) {
+/**
+ * Handle sort change
+ */
+const handleSortChange = async (dir: 'asc' | 'desc', id: string): Promise<void> => {
+    if (!id || typeof id !== 'string') {
+        console.warn('Invalid sort ID:', id);
+        return;
+    }
+
+    if (dir !== 'asc' && dir !== 'desc') {
+        console.warn('Invalid sort direction:', dir);
+        return;
+    }
+
     sortDir.value = dir;
     sortBy.value = id;
     currentPage.value = 1;
@@ -271,32 +343,66 @@ async function handleSortChange(dir: 'asc' | 'desc', id: string) {
         sort_dir: sortDir.value,
     });
     selectedRows.value = [];
-}
+};
 
-// Row selection handlers
-const isAllSelected = computed(() => {
+/**
+ * Row selection handlers
+ */
+const isAllSelected = computed<boolean>(() => {
     return settings.value.length > 0 && selectedRows.value.length === settings.value.length;
 });
 
-const handleSelectAll = (checked: boolean) => {
+/**
+ * Handle select all rows
+ */
+const handleSelectAll = (checked: boolean): void => {
     if (checked) {
-        selectedRows.value = settings.value.map(setting => setting.id);
+        selectedRows.value = settings.value.map((setting: Setting) => setting.id);
     }
     else {
         selectedRows.value = [];
     }
 };
 
-const handleRowSelected = (id: string, checked: boolean) => {
+/**
+ * Handle row selection
+ */
+const handleRowSelected = (id: string, checked: boolean): void => {
+    if (!id || typeof id !== 'string') {
+        console.warn('Invalid row ID for selection:', id);
+        return;
+    }
+
     if (checked) {
-        selectedRows.value.push(id);
+        if (!selectedRows.value.includes(id)) {
+            selectedRows.value.push(id);
+        }
     }
     else {
-        selectedRows.value = selectedRows.value.filter(rowId => rowId !== id);
+        selectedRows.value = selectedRows.value.filter((rowId: string) => rowId !== id);
     }
 };
 
-// Helper functions for displaying values
+/**
+ * Type guard for uploader value
+ */
+interface UploaderValueDisplay {
+    mediaId?: string | null;
+    alt?: string;
+    title?: string;
+}
+
+const isUploaderValueDisplay = (value: unknown): value is UploaderValueDisplay => {
+    return (
+        typeof value === 'object'
+        && value !== null
+        && ('mediaId' in value || 'alt' in value || 'title' in value)
+    );
+};
+
+/**
+ * Helper function for displaying setting values
+ */
 const formatValue = (value: unknown, type: SettingValueType | string): string => {
     if (value === null || value === undefined) {
         return '-';
@@ -308,7 +414,8 @@ const formatValue = (value: unknown, type: SettingValueType | string): string =>
         // Check if it's a JSON-encoded string (starts and ends with quotes)
         if (strValue.startsWith('"') && strValue.endsWith('"')) {
             try {
-                return JSON.parse(strValue);
+                const parsed = JSON.parse(strValue);
+                return typeof parsed === 'string' ? parsed : strValue;
             }
             catch {
                 return strValue;
@@ -327,10 +434,9 @@ const formatValue = (value: unknown, type: SettingValueType | string): string =>
 
     // Handle uploader type
     if (type === SettingValueType.UPLOADER || type === 'UPLOADER') {
-        if (typeof value === 'object' && value !== null) {
-            const uploaderValue = value as { mediaId?: string | null; alt?: string; title?: string };
-            if (uploaderValue.mediaId) {
-                return uploaderValue.title || uploaderValue.alt || 'Media';
+        if (isUploaderValueDisplay(value)) {
+            if (value.mediaId) {
+                return value.title ?? value.alt ?? 'Media';
             }
             return 'No media';
         }
@@ -349,7 +455,8 @@ const formatValue = (value: unknown, type: SettingValueType | string): string =>
             }
         case SettingValueType.DATE:
             try {
-                return new Date(value as string).toLocaleDateString();
+                const dateValue = typeof value === 'string' ? value : String(value);
+                return new Date(dateValue).toLocaleDateString();
             }
             catch {
                 return String(value);
@@ -361,35 +468,65 @@ const formatValue = (value: unknown, type: SettingValueType | string): string =>
     }
 };
 
+/**
+ * Get type label for display
+ */
 const getTypeLabel = (type: SettingValueType): string => {
     return type;
 };
 
-// Fetch sections for parent name lookup
-const sections = ref<Array<{ id: string; name: string }>>([]);
+/**
+ * Section type for parent lookup
+ */
+interface SectionLookup {
+    readonly id: string;
+    readonly name: string;
+}
 
-const fetchSections = async () => {
+/**
+ * Sections API response
+ */
+interface SectionsApiResponse {
+    readonly data: Array<{
+        readonly id: string;
+        readonly name: string;
+        readonly type: string;
+    }>;
+}
+
+/**
+ * Fetch sections for parent name lookup
+ */
+const sections = ref<SectionLookup[]>([]);
+
+const fetchSections = async (): Promise<void> => {
     try {
-        const { data } = await useApiFetch<{ data: Array<{ id: string; name: string; type: string }> }>('/shared/settings/sections', {
+        const { data } = await useApiFetch<SectionsApiResponse>('/shared/settings/sections', {
             method: 'GET',
         });
-        if (data.value?.data) {
-            sections.value = data.value.data.map(section => ({
+
+        if (data.value?.data && Array.isArray(data.value.data)) {
+            sections.value = data.value.data.map((section: { id: string; name: string }) => ({
                 id: section.id,
                 name: section.name,
             }));
         }
     }
-    catch (error) {
+    catch (error: unknown) {
         console.error('Error fetching sections:', error);
     }
 };
 
-// Get parent name by ID
+/**
+ * Get parent name by ID
+ */
 const getParentName = (parentId: string | null): string | null => {
-    if (!parentId) return null;
-    const parent = sections.value.find(section => section.id === parentId);
-    return parent?.name || null;
+    if (!parentId || typeof parentId !== 'string') {
+        return null;
+    }
+
+    const parent = sections.value.find((section: SectionLookup) => section.id === parentId);
+    return parent?.name ?? null;
 };
 
 // Fetch sections on mount

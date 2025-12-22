@@ -96,21 +96,94 @@
                     v-else
                     class="space-y-3"
                 >
-                    <div
-                        v-for="(jsonValue, jsonKey) in parsedJsonValues[index]"
-                        :key="jsonKey"
-                        class="space-y-2"
-                    >
-                        <FormItemInput
-                            :id="`setting-${setting.id}-json-${jsonKey}`"
-                            v-model="parsedJsonValues[index][jsonKey]"
-                            :title="String(jsonKey)"
-                            :placeholder="`Enter ${jsonKey}`"
+                    <!-- Array View -->
+                    <template v-if="Array.isArray(parsedJsonValues[index])">
+                        <div
+                            v-for="(item, itemIndex) in parsedJsonValues[index]"
+                            :key="itemIndex"
+                            class="border rounded-lg p-4 space-y-3"
+                        >
+                            <div class="flex items-center justify-between mb-2">
+                                <Collapsible
+                                    :default-open="true"
+                                    class="flex-1 group/collapsible"
+                                >
+                                    <CollapsibleTrigger
+                                        class="flex items-center gap-2 w-full text-left font-medium hover:opacity-80 transition-opacity"
+                                    >
+                                        <Icon
+                                            name="solar:alt-arrow-down-outline"
+                                            class="!size-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-0 rotate-90"
+                                        />
+                                        <span>Item {{ itemIndex + 1 }}</span>
+                                    </CollapsibleTrigger>
+                                    <CollapsibleContent class="mt-2 space-y-3">
+                                        <div
+                                            v-for="(propValue, propKey) in item"
+                                            :key="propKey"
+                                            class="space-y-2"
+                                        >
+                                            <FormItemInput
+                                                :id="`setting-${setting.id}-array-${itemIndex}-${propKey}`"
+                                                v-model="parsedJsonValues[index][itemIndex][propKey]"
+                                                :title="String(propKey)"
+                                                :placeholder="`Enter ${propKey}`"
+                                                :disabled="disabled || readonly"
+                                                :readonly="readonly"
+                                                @update:model-value="() => handleJsonStructuredChange(index)"
+                                            />
+                                        </div>
+                                    </CollapsibleContent>
+                                </Collapsible>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    class="ml-2 text-destructive hover:text-destructive"
+                                    :disabled="disabled || readonly"
+                                    @click="removeArrayItem(index, itemIndex)"
+                                >
+                                    <Icon
+                                        name="solar:trash-bin-minimalistic-outline"
+                                        class="!size-4"
+                                    />
+                                </Button>
+                            </div>
+                        </div>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            class="w-full"
                             :disabled="disabled || readonly"
-                            :readonly="readonly"
-                            @update:model-value="() => handleJsonStructuredChange(index)"
-                        />
-                    </div>
+                            @click="addArrayItem(index)"
+                        >
+                            <Icon
+                                name="solar:add-circle-outline"
+                                class="!size-4 mr-2"
+                            />
+                            Add Item
+                        </Button>
+                    </template>
+
+                    <!-- Object View -->
+                    <template v-else>
+                        <div
+                            v-for="(jsonValue, jsonKey) in parsedJsonValues[index]"
+                            :key="jsonKey"
+                            class="space-y-2"
+                        >
+                            <FormItemInput
+                                :id="`setting-${setting.id}-json-${jsonKey}`"
+                                v-model="parsedJsonValues[index][jsonKey]"
+                                :title="String(jsonKey)"
+                                :placeholder="`Enter ${jsonKey}`"
+                                :disabled="disabled || readonly"
+                                :readonly="readonly"
+                                @update:model-value="() => handleJsonStructuredChange(index)"
+                            />
+                        </div>
+                    </template>
                 </div>
             </div>
 
@@ -230,6 +303,7 @@ import type { MediaEntity } from '~/types/media/index';
 import { SettingValueType } from '~/types/settings';
 import { CollectionType as CollectionTypeEnum } from '~/types/media/index';
 import { Label } from '@/components/ui/label';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface Props {
     settings: Setting[];
@@ -262,8 +336,8 @@ const localSettings = ref<Setting[]>([...props.settings]);
 // Values for each setting (string representation for inputs)
 const settingValues = ref<(string | number | boolean)[]>([]);
 
-// Parsed JSON values for structured view
-const parsedJsonValues = ref<Record<number, Record<string, any>>>({});
+// Parsed JSON values for structured view (can be object or array)
+const parsedJsonValues = ref<Record<number, Record<string, any> | any[]>>({});
 
 // JSON view mode: 'text' or 'structured'
 const jsonViewMode = ref<Record<number, 'text' | 'structured'>>({});
@@ -298,7 +372,16 @@ const initializeValues = () => {
                 if (typeof value === 'string') {
                     try {
                         const parsed = JSON.parse(value);
-                        parsedJsonValues.value[index] = parsed;
+                        // Handle both arrays and objects
+                        if (Array.isArray(parsed)) {
+                            parsedJsonValues.value[index] = [...parsed];
+                        }
+                        else if (typeof parsed === 'object' && parsed !== null) {
+                            parsedJsonValues.value[index] = { ...parsed as Record<string, any> };
+                        }
+                        else {
+                            parsedJsonValues.value[index] = {};
+                        }
                         return value;
                     }
                     catch {
@@ -307,7 +390,13 @@ const initializeValues = () => {
                     }
                 }
                 else if (typeof value === 'object' && value !== null) {
-                    parsedJsonValues.value[index] = { ...value as Record<string, any> };
+                    // Handle both arrays and objects
+                    if (Array.isArray(value)) {
+                        parsedJsonValues.value[index] = [...value];
+                    }
+                    else {
+                        parsedJsonValues.value[index] = { ...value as Record<string, any> };
+                    }
                     return JSON.stringify(value, null, 2);
                 }
                 parsedJsonValues.value[index] = {};
@@ -376,7 +465,16 @@ const toggleJsonView = (index: number) => {
         // Switch to structured view - parse JSON
         try {
             const parsed = JSON.parse(settingValues.value[index] as string || '{}');
-            parsedJsonValues.value[index] = parsed;
+            // Handle both arrays and objects
+            if (Array.isArray(parsed)) {
+                parsedJsonValues.value[index] = [...parsed];
+            }
+            else if (typeof parsed === 'object' && parsed !== null) {
+                parsedJsonValues.value[index] = { ...parsed as Record<string, any> };
+            }
+            else {
+                parsedJsonValues.value[index] = {};
+            }
             jsonViewMode.value[index] = 'structured';
         }
         catch (error) {
@@ -439,7 +537,16 @@ const handleJsonTextChange = (index: number, val: string) => {
 
     try {
         const parsed = JSON.parse(val);
-        parsedJsonValues.value[index] = parsed;
+        // Handle both arrays and objects
+        if (Array.isArray(parsed)) {
+            parsedJsonValues.value[index] = [...parsed];
+        }
+        else if (typeof parsed === 'object' && parsed !== null) {
+            parsedJsonValues.value[index] = { ...parsed as Record<string, any> };
+        }
+        else {
+            parsedJsonValues.value[index] = parsed;
+        }
 
         const updatedSetting = {
             ...localSettings.value[index],
@@ -460,7 +567,20 @@ const handleJsonTextChange = (index: number, val: string) => {
 // Handle JSON structured change
 const handleJsonStructuredChange = (index: number) => {
     try {
-        const jsonValue = { ...parsedJsonValues.value[index] };
+        const currentValue = parsedJsonValues.value[index];
+        let jsonValue: any;
+
+        // Handle both arrays and objects
+        if (Array.isArray(currentValue)) {
+            jsonValue = [...currentValue];
+        }
+        else if (typeof currentValue === 'object' && currentValue !== null) {
+            jsonValue = { ...currentValue as Record<string, any> };
+        }
+        else {
+            jsonValue = currentValue;
+        }
+
         const updatedSetting = {
             ...localSettings.value[index],
             value: jsonValue,
@@ -478,6 +598,41 @@ const handleJsonStructuredChange = (index: number) => {
     catch (error) {
         settingErrors.value[index] = ['Error updating JSON'];
     }
+};
+
+// Add array item
+const addArrayItem = (index: number) => {
+    const currentValue = parsedJsonValues.value[index];
+    if (!Array.isArray(currentValue)) {
+        return;
+    }
+
+    // Create a new item based on the structure of existing items
+    // If there are existing items, clone the first one; otherwise create an empty object
+    const newItem = currentValue.length > 0
+        ? { ...currentValue[0] }
+        : {};
+
+    // Clear all string values in the new item
+    Object.keys(newItem).forEach((key) => {
+        if (typeof newItem[key] === 'string') {
+            newItem[key] = '';
+        }
+    });
+
+    parsedJsonValues.value[index] = [...currentValue, newItem];
+    handleJsonStructuredChange(index);
+};
+
+// Remove array item
+const removeArrayItem = (index: number, itemIndex: number) => {
+    const currentValue = parsedJsonValues.value[index];
+    if (!Array.isArray(currentValue)) {
+        return;
+    }
+
+    parsedJsonValues.value[index] = currentValue.filter((_, i) => i !== itemIndex);
+    handleJsonStructuredChange(index);
 };
 
 // Handle array change

@@ -35,7 +35,7 @@
                 <div class="sticky top-4  lg:col-span-3 md:col-span-4 col-span-12 self-start">
                     <nav class="flex flex-col gap-1 p-2 bg-accent/50 rounded-lg text-left">
                         <div
-                            v-for="section in data"
+                            v-for="section in sectionsData"
                             :key="section.id"
                             :class="[
                                 'flex items-center gap-2 px-2 py-1.5 rounded-md transition-colors cursor-pointer',
@@ -113,6 +113,20 @@ import { toast } from 'vue-sonner';
 import type { Setting } from '~/types';
 import { SettingValueType } from '~/types/settings';
 import SettingsForm from '~/components/Settings/Form/index.vue';
+import type {
+    AppDomainType,
+    SettingSectionWithChildren,
+    UploaderValue,
+    SettingUpdatePayloadItem,
+    SettingsUpdateRequest,
+    SettingsUpdateResponse,
+    ApiErrorResponse,
+} from '~/types/settings-api';
+import {
+    isUploaderValue,
+    isSettingSectionsArray,
+    isApiErrorResponse,
+} from '~/types/settings-api';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -126,226 +140,306 @@ useHead({
 definePageMeta({
     middleware: 'auth',
 });
-const apps = ref<string[]>(['SHARED', 'DASHBOARD', 'SUPPORT', 'ACADEMY', 'SIGNATURE']);
+
+/**
+ * Available application domains
+ */
+const APPS: readonly AppDomainType[] = ['SHARED', 'DASHBOARD', 'SUPPORT', 'ACADEMY', 'SIGNATURE'] as const;
+const DEFAULT_APP: AppDomainType = 'SHARED';
+
+const apps = ref<readonly AppDomainType[]>(APPS);
+
+/**
+ * Get app from query params with validation
+ */
+const getAppFromQuery = (): AppDomainType => {
+    const appQuery = route.query.app;
+    if (typeof appQuery === 'string' && APPS.includes(appQuery as AppDomainType)) {
+        return appQuery as AppDomainType;
+    }
+    return DEFAULT_APP;
+};
+
+/**
+ * Get section ID from query params
+ */
+const getSectionFromQuery = (): string | null => {
+    const sectionQuery = route.query.section;
+    return typeof sectionQuery === 'string' ? sectionQuery : null;
+};
 
 // Initialize from URL params or defaults
-const selectedApp = ref<string>((route.query.app as string) || 'SHARED');
-const selectedSection = ref<string | null>((route.query.section as string) || null);
+const selectedApp = ref<AppDomainType>(getAppFromQuery());
+const selectedSection = ref<string | null>(getSectionFromQuery());
 
 // Ref to access SettingsForm component
 const settingsFormRef = ref<InstanceType<typeof SettingsForm> | null>(null);
 
-// Update URL query params
-const updateUrlParams = () => {
-    router.replace({
-        query: {
-            ...route.query,
-            app: selectedApp.value,
-            ...(selectedSection.value ? { section: selectedSection.value } : {}),
-        },
-    });
+/**
+ * Update URL query parameters
+ */
+const updateUrlParams = (): void => {
+    const query: Record<string, string> = {
+        ...route.query,
+        app: selectedApp.value,
+    };
+
+    if (selectedSection.value) {
+        query.section = selectedSection.value;
+    }
+
+    router.replace({ query });
 };
 
-// Fetch data from API (no caching - always fresh)
-const queryParams = reactive({
+/**
+ * Query parameters for sections API
+ */
+const queryParams = reactive<{ apps: AppDomainType }>({
     apps: selectedApp.value,
 });
 
-// Create a reactive cache key with timestamp for cache busting
-const cacheKey = ref(`settings-sections-${selectedApp.value}-${Date.now()}`);
-
-const { data, error, status, refresh: originalRefresh } = await useApiFetch('/shared/settings-actions/sections', {
+/**
+ * Fetch sections data from API
+ */
+const { data, error, status, refresh } = await useApiFetch<SettingSectionWithChildren[]>('/shared/settings-actions/sections', {
     method: 'GET',
-    transform: data => data.data,
     query: queryParams,
-    key: cacheKey.value,
 });
 
-// Override refresh to update cache busting timestamp (client-side only)
-const refresh = async () => {
-    cacheKey.value = `settings-sections-${selectedApp.value}-${Date.now()}`;
-    await originalRefresh();
-};
+/**
+ * Extract and validate sections data from API response
+ */
+const sectionsData = computed<readonly SettingSectionWithChildren[]>(() => {
+    if (!data.value) {
+        return [];
+    }
 
-// Select app
-const selectApp = async (app: string) => {
+    // Handle array response
+    if (isSettingSectionsArray(data.value)) {
+        return data.value;
+    }
+
+    // Handle nested data structure
+    if (typeof data.value === 'object' && data.value !== null && 'data' in data.value) {
+        const nestedData = (data.value as { data: unknown }).data;
+        if (isSettingSectionsArray(nestedData)) {
+            return nestedData;
+        }
+    }
+
+    return [];
+});
+
+/**
+ * Select application domain
+ */
+const selectApp = async (app: AppDomainType): Promise<void> => {
+    if (!APPS.includes(app)) {
+        console.warn(`Invalid app selected: ${app}`);
+        return;
+    }
+
     selectedApp.value = app;
     queryParams.apps = app;
-    cacheKey.value = `settings-sections-${app}-${Date.now()}`; // Update cache key
-    // Reset to first section when app changes
     selectedSection.value = null;
     updateUrlParams();
-    // Refresh data when selected app changes
-    await originalRefresh();
+
+    try {
+        await refresh();
+    }
+    catch (err: unknown) {
+        console.error('Error refreshing sections:', err);
+        toast.error(t('global.messages.error') || 'Error', {
+            description: 'Failed to load sections',
+            duration: 5000,
+        });
+    }
 };
 
-// Select section
-const selectSection = (sectionId: string) => {
+/**
+ * Select section by ID
+ */
+const selectSection = (sectionId: string): void => {
+    if (!sectionId || typeof sectionId !== 'string') {
+        console.warn('Invalid section ID:', sectionId);
+        return;
+    }
+
     selectedSection.value = sectionId;
     updateUrlParams();
 };
 
-// Get the selected section object
-const selectedSectionData = computed(() => {
-    if (!selectedSection.value || !data.value) return null;
-    return data.value.find(section => section.id === selectedSection.value);
+/**
+ * Get the currently selected section data
+ */
+const selectedSectionData = computed<SettingSectionWithChildren | null>(() => {
+    if (!selectedSection.value || sectionsData.value.length === 0) {
+        return null;
+    }
+
+    return sectionsData.value.find(
+        (section: SettingSectionWithChildren) => section.id === selectedSection.value,
+    ) ?? null;
 });
 
-// Set section at index 0 as selected when data loads or changes (only if no section in URL)
-watch(data, (newData) => {
-    if (newData && newData.length > 0) {
-        // If no section is selected (from URL or otherwise), select the first one
-        if (!selectedSection.value) {
-            selectedSection.value = newData[0].id;
-            updateUrlParams();
-        }
-        // If section from URL doesn't exist in new data, select first one
-        else if (!newData.find(section => section.id === selectedSection.value)) {
-            selectedSection.value = newData[0].id;
+/**
+ * Auto-select first section when data loads (if no section is selected)
+ */
+watch(sectionsData, (newSections: readonly SettingSectionWithChildren[]) => {
+    if (newSections.length === 0) {
+        return;
+    }
+
+    const hasSelectedSection = selectedSection.value !== null;
+    const selectedSectionExists = hasSelectedSection
+        && newSections.some(
+            (section: SettingSectionWithChildren) => section.id === selectedSection.value,
+        );
+
+    if (!hasSelectedSection || !selectedSectionExists) {
+        selectedSection.value = newSections[0]?.id ?? null;
+        if (selectedSection.value) {
             updateUrlParams();
         }
     }
 }, { immediate: true });
 
-// Handle settings update - keep parent state in sync with form
-const handleSettingsUpdate = (updatedSettings: Setting[]) => {
-    if (!selectedSectionData.value) return;
+/**
+ * Handle settings update - keep parent state in sync with form
+ */
+const handleSettingsUpdate = (updatedSettings: readonly Setting[]): void => {
+    if (!selectedSectionData.value || !Array.isArray(updatedSettings)) {
+        return;
+    }
 
-    // Update the selected section's children with the latest values
-    selectedSectionData.value.children = updatedSettings.map(setting => ({ ...setting }));
+    // Create a new array to maintain immutability
+    selectedSectionData.value.children = [...updatedSettings];
 };
 
-// Handle individual setting change
-const handleSettingChange = (setting: any, index: number) => {
-    console.log('Setting changed:', setting, 'at index:', index);
-    // Handle individual change if needed
+/**
+ * Handle individual setting change
+ */
+const handleSettingChange = (setting: Setting, index: number): void => {
+    if (!setting || typeof index !== 'number' || index < 0) {
+        console.warn('Invalid setting change:', { setting, index });
+        return;
+    }
+
+    // Log for debugging (can be removed in production)
+    if (process.env.NODE_ENV === 'development') {
+        console.log('Setting changed:', { setting, index });
+    }
 };
 
-// Transform settings to API format
-const transformSettingsForAPI = (settings: Setting[]) => {
-    return settings.map((setting) => {
-        let value: any = setting.value;
+/**
+ * Transform uploader value to proper format
+ */
+const transformUploaderValue = (value: unknown): UploaderValue | null => {
+    if (isUploaderValue(value)) {
+        return {
+            alt: value.alt ?? '',
+            title: value.title ?? '',
+            mediaId: value.mediaId ?? null,
+            collection: value.collection ?? 'default',
+        };
+    }
+
+    if (typeof value === 'string' && value.length > 0) {
+        return {
+            alt: '',
+            title: '',
+            mediaId: value,
+            collection: 'default',
+        };
+    }
+
+    return null;
+};
+
+/**
+ * Transform settings to API format
+ */
+const transformSettingsForAPI = (settings: readonly Setting[]): SettingUpdatePayloadItem[] => {
+    return settings.map((setting: Setting): SettingUpdatePayloadItem => {
+        let transformedValue: unknown = setting.value;
 
         // Handle UPLOADER type - send full object with alt, title, mediaId, collection
         if (setting.type === SettingValueType.UPLOADER) {
-            if (value && typeof value === 'object' && value !== null) {
-                // Ensure we have the full object structure
-                value = {
-                    alt: value.alt || '',
-                    title: value.title || '',
-                    mediaId: value.mediaId || value.id || null,
-                    collection: value.collection || 'default',
-                };
-            }
-            else if (typeof value === 'string' && value) {
-                // If it's a string (mediaId), convert to object format
-                value = {
-                    alt: '',
-                    title: '',
-                    mediaId: value,
-                    collection: 'default',
-                };
-            }
-            else {
-                // If null or empty, send null
-                value = null;
-            }
+            transformedValue = transformUploaderValue(setting.value);
         }
 
         return {
             id: setting.id,
-            value,
+            value: transformedValue,
         };
     });
 };
 
-// Handle batch submit - called from SettingsForm @submit event or button click
-const handleSettingsSubmit = async (updatedSettings: Setting[]) => {
-    // Ensure we have the latest settings - use the ones passed in
-    if (!updatedSettings || updatedSettings.length === 0) {
+/**
+ * Validate settings before submission
+ */
+const validateSettings = (settings: readonly Setting[]): boolean => {
+    if (!Array.isArray(settings) || settings.length === 0) {
+        return false;
+    }
+
+    return settings.every((setting: Setting) => {
+        return (
+            typeof setting === 'object'
+            && setting !== null
+            && typeof setting.id === 'string'
+            && setting.id.length > 0
+        );
+    });
+};
+
+/**
+ * Handle batch submit - called from SettingsForm @submit event or button click
+ */
+const handleSettingsSubmit = async (updatedSettings: readonly Setting[]): Promise<void> => {
+    // Validate settings
+    if (!validateSettings(updatedSettings)) {
         toast.error(t('global.messages.error') || 'Error', {
-            description: 'No settings to update',
+            description: 'No valid settings to update',
         });
         return;
     }
 
-    // Debug: Log the settings being sent
-    console.log('Submitting settings:', updatedSettings.map(s => ({
-        id: s.id,
-        key: s.key,
-        type: s.type,
-        value: s.value,
-        valueType: typeof s.value,
-        isNull: s.value === null,
-        isUndefined: s.value === undefined,
-    })));
-    if (!updatedSettings || updatedSettings.length === 0) {
-        toast.error(t('global.messages.error') || 'Error', {
-            description: 'No settings to update',
-        });
-        return;
+    // Debug logging (only in development)
+    if (process.env.NODE_ENV === 'development') {
+        console.log('Submitting settings:', updatedSettings.map((s: Setting) => ({
+            id: s.id,
+            key: s.key,
+            type: s.type,
+            value: s.value,
+            valueType: typeof s.value,
+        })));
     }
 
     try {
         // Transform settings to API format
-        const payload = {
+        const payload: SettingsUpdateRequest = {
             settings: transformSettingsForAPI(updatedSettings),
         };
 
         // Make API call
-        const { data, error } = await useApiFetch<{
-            success: boolean;
-            message: string;
-            data: {
-                success: boolean;
-                updatedCount: number;
-                errors: Array<{
-                    settingId: string;
-                    settingKey: string;
-                    error: string;
-                }>;
-                updatedSettings: Setting[];
-            };
-        }>('/shared/settings-actions/update-many', {
-            method: 'PUT',
-            body: payload,
-        });
+        const { data: responseData, error: responseError } = await useApiFetch<SettingsUpdateResponse>(
+            '/shared/settings-actions/update-many',
+            {
+                method: 'PUT',
+                body: payload,
+            },
+        );
 
-        if (error.value) {
-            // Handle API error response
-            const errorData = error.value.data;
-            if (errorData?.success === false) {
-                // Validation or other errors
-                if (errorData.errors && Array.isArray(errorData.errors)) {
-                    // Validation errors
-                    const firstError = errorData.errors[0];
-                    const errorMessage = firstError?.constraints
-                        ? Object.values(firstError.constraints)[0]
-                        : errorData.message || 'Validation failed';
-                    toast.error(t('global.messages.validation_error') || 'Validation Error', {
-                        description: errorMessage,
-                        duration: 5000,
-                    });
-                }
-                else {
-                    toast.error(t('global.messages.error') || 'Error', {
-                        description: errorData.message || 'Failed to update settings',
-                        duration: 5000,
-                    });
-                }
-            }
-            else {
-                toast.error(t('global.messages.error') || 'Error', {
-                    description: errorData?.message || 'Failed to update settings',
-                    duration: 5000,
-                });
-            }
+        // Handle API error response
+        if (responseError.value) {
+            handleUpdateError(responseError.value);
             return;
         }
 
-        const responseData = data.value?.data;
-
-        if (!responseData) {
+        // Validate response data
+        const response = responseData.value as SettingsUpdateResponse | null;
+        if (!response?.data) {
             toast.error(t('global.messages.error') || 'Error', {
                 description: 'Invalid response from server',
                 duration: 5000,
@@ -353,71 +447,152 @@ const handleSettingsSubmit = async (updatedSettings: Setting[]) => {
             return;
         }
 
-        // Handle different response cases
-        if (responseData.success && responseData.errors.length === 0) {
-            // All settings updated successfully
-            toast.success(t('global.messages.success') || 'Success', {
-                description: data.value?.message || `Successfully updated ${responseData.updatedCount} ${responseData.updatedCount === 1 ? 'setting' : 'settings'}`,
-                duration: 3000,
-            });
+        const resultData = response.data;
+        const responseMessage = response.message ?? '';
 
-            // Refresh data on full success
-            await refresh();
-        }
-        else if (responseData.updatedCount > 0 && responseData.errors.length > 0) {
-            // Partial success - some settings updated, some failed
-            const errorMessages = responseData.errors.map(err => `${err.settingKey}: ${err.error}`).join(', ');
-            toast.warning(t('global.messages.partial_success') || 'Partial Success', {
-                description: `${data.value?.message || `Updated ${responseData.updatedCount} ${responseData.updatedCount === 1 ? 'setting' : 'settings'}`}. Errors: ${errorMessages}`,
-                duration: 6000,
-            });
-        }
-        else if (responseData.updatedCount === 0 && responseData.errors.length > 0) {
-            // All settings failed
-            const errorMessages = responseData.errors.map(err => `${err.settingKey}: ${err.error}`).join(', ');
-            toast.error(t('global.messages.error') || 'Error', {
-                description: `${data.value?.message || 'Failed to update settings'}. Errors: ${errorMessages}`,
-                duration: 6000,
-            });
-        }
-        else {
-            // Fallback
-            toast.info(data.value?.message || 'Settings update completed', {
-                duration: 3000,
-            });
-        }
+        // Handle different response cases
+        handleUpdateResponse(resultData, responseMessage);
     }
-    catch (err: any) {
-        console.error('Error updating settings:', err);
+    catch (err: unknown) {
+        handleUpdateException(err);
+    }
+};
+
+/**
+ * Handle API error response
+ */
+const handleUpdateError = (error: unknown): void => {
+    if (isApiErrorResponse(error)) {
+        const errorMessage = extractErrorMessage(error);
         toast.error(t('global.messages.error') || 'Error', {
-            description: err?.message || 'An unexpected error occurred while updating settings',
+            description: errorMessage,
+            duration: 5000,
+        });
+    }
+    else {
+        toast.error(t('global.messages.error') || 'Error', {
+            description: 'Failed to update settings',
             duration: 5000,
         });
     }
 };
 
-// Handle submit button click - get latest values from form
-const handleSubmitClick = async () => {
-    if (!selectedSectionData.value || !selectedSectionData.value.children) {
+/**
+ * Extract error message from API error response
+ */
+const extractErrorMessage = (error: ApiErrorResponse): string => {
+    if (error.errors && Array.isArray(error.errors) && error.errors.length > 0) {
+        const firstError = error.errors[0];
+        if (firstError?.constraints) {
+            const constraintValues = Object.values(firstError.constraints);
+            if (constraintValues.length > 0) {
+                return constraintValues[0] as string;
+            }
+        }
+    }
+    return error.message ?? 'Validation failed';
+};
+
+/**
+ * Handle successful update response
+ */
+const handleUpdateResponse = async (
+    resultData: SettingsUpdateResponseData,
+    responseMessage: string,
+): Promise<void> => {
+    const { success, updatedCount, errors } = resultData;
+    const hasErrors = errors.length > 0;
+    const hasUpdates = updatedCount > 0;
+
+    if (success && !hasErrors) {
+        // All settings updated successfully
+        const message = responseMessage || `Successfully updated ${updatedCount} ${updatedCount === 1 ? 'setting' : 'settings'}`;
+        toast.success(t('global.messages.success') || 'Success', {
+            description: message,
+            duration: 3000,
+        });
+
+        // Refresh data on full success
+        try {
+            await refresh();
+        }
+        catch (refreshError: unknown) {
+            console.error('Error refreshing data:', refreshError);
+        }
+    }
+    else if (hasUpdates && hasErrors) {
+        // Partial success
+        const errorMessages = errors
+            .map((err: { settingKey: string; error: string }) => `${err.settingKey}: ${err.error}`)
+            .join(', ');
+        const message = responseMessage || `Updated ${updatedCount} ${updatedCount === 1 ? 'setting' : 'settings'}`;
+        toast.warning(t('global.messages.partial_success') || 'Partial Success', {
+            description: `${message}. Errors: ${errorMessages}`,
+            duration: 6000,
+        });
+    }
+    else if (!hasUpdates && hasErrors) {
+        // All settings failed
+        const errorMessages = errors
+            .map((err: { settingKey: string; error: string }) => `${err.settingKey}: ${err.error}`)
+            .join(', ');
+        const message = responseMessage || 'Failed to update settings';
+        toast.error(t('global.messages.error') || 'Error', {
+            description: `${message}. Errors: ${errorMessages}`,
+            duration: 6000,
+        });
+    }
+    else {
+        // Fallback
+        toast.info(responseMessage || 'Settings update completed', {
+            duration: 3000,
+        });
+    }
+};
+
+/**
+ * Handle exception during update
+ */
+const handleUpdateException = (err: unknown): void => {
+    console.error('Error updating settings:', err);
+    const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred while updating settings';
+    toast.error(t('global.messages.error') || 'Error', {
+        description: errorMessage,
+        duration: 5000,
+    });
+};
+
+/**
+ * Handle submit button click - get latest values from form
+ */
+const handleSubmitClick = async (): Promise<void> => {
+    const sectionData = selectedSectionData.value;
+    if (!sectionData?.children || sectionData.children.length === 0) {
+        toast.warning(t('global.messages.warning') || 'Warning', {
+            description: 'No settings available to save',
+            duration: 3000,
+        });
         return;
     }
 
     // Try to get latest settings from form component if available
-    let latestSettings = selectedSectionData.value.children;
+    let latestSettings: readonly Setting[] = sectionData.children;
 
     if (settingsFormRef.value && typeof settingsFormRef.value.getCurrentSettings === 'function') {
-        // Get the most up-to-date settings from the form component
-        latestSettings = settingsFormRef.value.getCurrentSettings();
+        const formSettings = settingsFormRef.value.getCurrentSettings();
+        if (Array.isArray(formSettings) && formSettings.length > 0) {
+            latestSettings = formSettings;
+        }
     }
 
-    // Debug log to see what we're sending
-    console.log('Current settings before submit:', latestSettings.map(s => ({
-        id: s.id,
-        key: s.key,
-        type: s.type,
-        value: s.value,
-        valueType: typeof s.value,
-    })));
+    // Debug logging (only in development)
+    if (process.env.NODE_ENV === 'development') {
+        console.log('Current settings before submit:', latestSettings.map((s: Setting) => ({
+            id: s.id,
+            key: s.key,
+            type: s.type,
+        })));
+    }
 
     await handleSettingsSubmit(latestSettings);
 };

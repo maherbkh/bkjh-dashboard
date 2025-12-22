@@ -91,29 +91,24 @@ export function useApiFetch<T = any>(
         },
     };
 
-    // Generate cache key that includes query parameters for GET requests
+    // Generate unique cache key for each request to prevent caching
     const generateCacheKey = () => {
         if (opts.key) return opts.key;
-
-        if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-            return `/backend${path}-${Date.now()}-${Math.random()}`;
-        }
-
-        // For GET requests, include query parameters in cache key to prevent caching issues
+        // Always generate unique key with timestamp and random to prevent caching
         const queryString = opts.query ? JSON.stringify(opts.query) : '';
         const queryHash = queryString ? `-${btoa(queryString).replace(/[^a-zA-Z0-9]/g, '')}` : '';
-        return `/backend${path}${queryHash}`;
+        return `/backend${path}${queryHash}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     };
 
-    // Use server: false (CSR-only), no caching, dedupe cancel, immediate by default
+    // Use server: false (CSR-only), no caching, no deduplication, immediate by default
     const fullPath = '/backend' + path;
 
     return useFetch<ApiResponse<T>>(fullPath, {
         server: false,
         cache: 'no-store',
-        dedupe: 'cancel',
+        dedupe: false, // Disable deduplication to prevent AbortError
         immediate: opts.immediate ?? true,
-        // Generate unique cache key that includes query parameters
+        // Generate unique cache key for each request to prevent any caching
         key: generateCacheKey(),
         ...fetchOpts,
     });
