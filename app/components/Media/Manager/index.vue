@@ -183,11 +183,22 @@ const goToPage = async (page: number) => {
 
 // File selection functions using selection composable
 const selectFile = (file: MediaEntity) => {
+    console.log('🔵 [MediaManager] selectFile called', {
+        file,
+        fileId: file.id,
+        currentSelection: selection.selected.value,
+        hasSelection: selection.hasSelection.value,
+    });
     // Prevent circular updates during manual selection
     isUpdatingFromProps.value = true;
     selection.select(file);
     nextTick(() => {
         isUpdatingFromProps.value = false;
+        console.log('🔵 [MediaManager] After selectFile, new selection:', {
+            selected: selection.selected.value,
+            hasSelection: selection.hasSelection.value,
+            selectionCount: selection.selectionCount.value,
+        });
     });
 };
 
@@ -220,13 +231,22 @@ const getFileIcon = (mimeType: string) => {
 
 // Selection handlers using selection composable
 const handleSelect = () => {
+    console.log('🔵 [MediaManager] handleSelect called', {
+        hasSelection: selection.hasSelection.value,
+        selectionCount: selection.selectionCount.value,
+        selected: selection.selected.value,
+        multiple: props.multiple,
+    });
+
     if (selection.hasSelection.value) {
         // Prevent circular updates during selection
         isUpdatingFromProps.value = true;
 
         if (props.multiple) {
             // Emit full media objects for multiple selection
-            emit('select', [...selection.selected.value]);
+            const selectedFiles = [...selection.selected.value];
+            console.log('🔵 [MediaManager] Emitting multiple selection:', selectedFiles);
+            emit('select', selectedFiles);
             toast.success(t('media.files_selected'), {
                 description: t('media.selected_count', { count: selection.selectionCount.value }),
             });
@@ -235,13 +255,17 @@ const handleSelect = () => {
             // Emit media ID for single selection
             const singleFile = selection.firstSelected.value;
             if (singleFile) {
+                console.log('🔵 [MediaManager] Emitting single selection (ID):', singleFile.id);
+                console.log('🔵 [MediaManager] Emitting single selection (full object):', singleFile);
                 emit('select', singleFile.id);
                 toast.success(t('media.file_selected'), {
                     description: singleFile.filename,
                 });
             }
         }
-        emit('update:selectedFiles', [...selection.selected.value]);
+        const selectedFilesArray = [...selection.selected.value];
+        console.log('🔵 [MediaManager] Emitting update:selectedFiles:', selectedFilesArray);
+        emit('update:selectedFiles', selectedFilesArray);
 
         // Close the dialog first
         handleClose();
@@ -250,6 +274,9 @@ const handleSelect = () => {
         nextTick(() => {
             isUpdatingFromProps.value = false;
         });
+    }
+    else {
+        console.warn('🔵 [MediaManager] handleSelect called but no selection available');
     }
 };
 
@@ -270,6 +297,18 @@ const isOpen = computed({
     },
 });
 
+// Debug computed for button visibility
+const insertButtonState = computed(() => {
+    const state = {
+        hasSelection: selection.hasSelection.value,
+        selectionCount: selection.selectionCount.value,
+        selected: selection.selected.value,
+        disabled: !selection.hasSelection.value,
+    };
+    console.log('🔵 [MediaManager] Insert button state:', state);
+    return state;
+});
+
 // Load media when dialog opens
 watch(() => props.open, (isOpen: boolean) => {
     if (isOpen) {
@@ -280,7 +319,7 @@ watch(() => props.open, (isOpen: boolean) => {
 
 <template>
     <Dialog v-model:open="isOpen">
-        <DialogContent class="max-w-6xl max-h-[80vh] overflow-hidden">
+        <DialogContent class="max-w-6xl max-h-[85vh] overflow-y-auto flex flex-col">
             <DialogHeader>
                 <DialogTitle>{{ t('media.gallery_title') }}</DialogTitle>
                 <DialogDescription>
@@ -288,7 +327,7 @@ watch(() => props.open, (isOpen: boolean) => {
                 </DialogDescription>
             </DialogHeader>
 
-            <div class="space-y-4">
+            <div class="space-y-4 flex-1 overflow-y-auto">
                 <!-- Search and Filters -->
                 <MediaFilters
                     v-model:search-query="filters.searchQuery.value"
@@ -449,7 +488,7 @@ watch(() => props.open, (isOpen: boolean) => {
                 </div>
             </div>
 
-            <DialogFooter>
+            <DialogFooter class="mt-4 border-t pt-4">
                 <div class="flex items-center justify-between w-full">
                     <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                         <Icon
@@ -457,6 +496,7 @@ watch(() => props.open, (isOpen: boolean) => {
                             class="w-4 h-4"
                         />
                         {{ selection.selectionCount.value }} {{ t('media.selected') }}
+                        <span class="text-xs">(hasSelection: {{ selection.hasSelection.value }})</span>
                     </div>
                     <div class="flex gap-2">
                         <Button
@@ -473,10 +513,12 @@ watch(() => props.open, (isOpen: boolean) => {
                             {{ t('media.clear_selection') }}
                         </Button>
                         <Button
-                            :disabled="!selection.hasSelection.value"
+                            :disabled="!insertButtonState.hasSelection"
+                            class="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                            :title="insertButtonState.hasSelection ? t('media.insert') : t('media.no_files_selected')"
                             @click="handleSelect"
                         >
-                            {{ t('media.select_files') }} ({{ selection.selectionCount.value }})
+                            {{ t('media.insert') }} ({{ insertButtonState.selectionCount }})
                         </Button>
                     </div>
                 </div>

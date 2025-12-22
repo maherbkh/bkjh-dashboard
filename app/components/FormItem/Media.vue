@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import type { MediaEntity, AccessLevel, CollectionType } from '~/types/media/index';
-import type { MediaFile } from '~/types/media';
 import { AccessLevel as AccessLevelEnum, CollectionType as CollectionTypeEnum } from '~/types/media/index';
 import { useAuthenticatedImage } from '~/composables/useAuthenticatedImage';
 import { mediaFormatter } from '~/services/media';
@@ -50,7 +49,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
     'update:modelValue': [value: MediaEntity | MediaEntity[] | null];
-    'upload:success': [file: MediaFile];
+    'upload:success': [file: MediaEntity];
 }>();
 
 const { t } = useI18n();
@@ -59,7 +58,7 @@ const { t } = useI18n();
 const showManagerDialog = ref(false);
 const { getImageSrc, getDirectImageSrc } = useAuthenticatedImage();
 
-const handleUploadSuccess = (file: MediaFile) => {
+const handleUploadSuccess = (file: MediaEntity) => {
     if (props.multiple) {
         const currentFiles = Array.isArray(props.modelValue) ? props.modelValue : [];
         emit('update:modelValue', [...currentFiles, file]);
@@ -70,14 +69,63 @@ const handleUploadSuccess = (file: MediaFile) => {
     emit('upload:success', file);
 };
 
-const handleManagerSelect = (files: MediaFile[]) => {
+const handleManagerSelect = (files: MediaEntity[]) => {
+    console.log('🟢 [FormItem/Media] handleManagerSelect called (from @update:selected-files)', {
+        files,
+        filesCount: files.length,
+        multiple: props.multiple,
+        currentModelValue: props.modelValue,
+    });
+
     if (props.multiple) {
+        console.log('🟢 [FormItem/Media] Updating modelValue with multiple files:', files);
         emit('update:modelValue', files);
     }
     else {
-        emit('update:modelValue', files[0] || null);
+        const selectedFile = files[0] || null;
+        console.log('🟢 [FormItem/Media] Updating modelValue with single file:', selectedFile);
+        emit('update:modelValue', selectedFile);
     }
     showManagerDialog.value = false;
+    console.log('🟢 [FormItem/Media] Dialog closed, new modelValue:', props.modelValue);
+};
+
+const handleManagerSelectFromSelectEvent = (selection: MediaEntity | MediaEntity[] | string | string[]) => {
+    console.log('🟡 [FormItem/Media] handleManagerSelectFromSelectEvent called (from @select)', {
+        selection,
+        selectionType: typeof selection,
+        isArray: Array.isArray(selection),
+        multiple: props.multiple,
+        currentModelValue: props.modelValue,
+    });
+
+    // Handle the 'select' event which emits IDs for single selection or full objects for multiple
+    // Note: For single selection, MediaManager emits just the ID, so we rely on @update:selected-files
+    // for the full object. This handler primarily handles multiple selection with full objects.
+    if (props.multiple) {
+        if (Array.isArray(selection) && selection.length > 0 && typeof selection[0] === 'object') {
+            console.log('🟡 [FormItem/Media] Updating modelValue with multiple files from @select:', selection);
+            emit('update:modelValue', selection as MediaEntity[]);
+            showManagerDialog.value = false;
+        }
+        else {
+            console.warn('🟡 [FormItem/Media] Multiple selection but invalid format:', selection);
+        }
+    }
+    else {
+        // For single selection, MediaManager emits just the ID (string)
+        // We skip handling it here and let @update:selected-files handle it with the full object
+        // But if we somehow get a full object, handle it
+        if (typeof selection === 'object' && !Array.isArray(selection)) {
+            console.log('🟡 [FormItem/Media] Updating modelValue with single file from @select:', selection);
+            emit('update:modelValue', selection as MediaEntity);
+            showManagerDialog.value = false;
+        }
+        else if (typeof selection === 'string') {
+            console.log('🟡 [FormItem/Media] Received ID string, waiting for @update:selected-files to provide full object:', selection);
+        }
+        // If it's a string (ID), we don't have the full object, so skip and let update:selected-files handle it
+    }
 };
 
 const openManager = () => {
@@ -267,6 +315,7 @@ const getFileTypeIcon = (mimeType: string) => {
             :model-type="modelType"
             :model-id="modelId"
             :selected-files="Array.isArray(props.modelValue) ? props.modelValue : props.modelValue ? [props.modelValue] : []"
+            @select="handleManagerSelectFromSelectEvent"
             @update:selected-files="handleManagerSelect"
         />
     </div>
