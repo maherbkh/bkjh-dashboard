@@ -14,4 +14,6 @@ export enum AppDomain {
     DASHBOARD = 'DASHBOARD',
     ACADEMY = 'ACADEMY',
     SUPPORT = 'SUPPORT',
+    SHARED = 'SHARED',
+    SIGNATURE = 'SIGNATURE',
 }
