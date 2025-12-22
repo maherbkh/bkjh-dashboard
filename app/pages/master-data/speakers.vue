@@ -84,7 +84,7 @@ onMounted(async () => {
     await fetchItems(currentPage.value, perPage.value, {
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    });
+    }, Date.now());
 });
 
 // Search and pagination handlers
@@ -94,7 +94,7 @@ const handleReset = async () => {
     await fetchItems(currentPage.value, perPage.value, {
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    });
+    }, Date.now());
 };
 
 const handleSearchSubmit = async () => {
@@ -103,7 +103,7 @@ const handleSearchSubmit = async () => {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    });
+    }, Date.now());
 };
 
 const handleSortChange = async (field: string, direction: 'asc' | 'desc') => {
@@ -113,7 +113,7 @@ const handleSortChange = async (field: string, direction: 'asc' | 'desc') => {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    });
+    }, Date.now());
 };
 
 const handlePageChange = async (page: number) => {
@@ -122,7 +122,7 @@ const handlePageChange = async (page: number) => {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    });
+    }, Date.now());
 };
 
 // Form dialog state
@@ -153,8 +153,16 @@ const onSubmitAndClose = async (values: SpeakerForm) => {
         else if (editingSpeaker.value) {
             await updateItem(editingSpeaker.value.id, values);
         }
+        selectedRows.value = [];
+
+        // Refresh with current params to preserve pagination, search, and sort
+        await fetchItems(currentPage.value, perPage.value, {
+            search: searchQuery.value,
+            sort_by: sortBy.value,
+            sort_dir: sortDir.value,
+        }, Date.now());
+
         isDialogOpen.value = false;
-    // No need to manually refresh - useCrud handles it automatically
     }
     catch (error) {
         console.error('Error submitting form:', error);
@@ -185,6 +193,13 @@ const onSubmitAndAddNew = async (values: SpeakerForm) => {
             dialogMode.value = 'add';
         }
         selectedRows.value = [];
+
+        // Refresh with current params to preserve pagination, search, and sort
+        await fetchItems(currentPage.value, perPage.value, {
+            search: searchQuery.value,
+            sort_by: sortBy.value,
+            sort_dir: sortDir.value,
+        }, Date.now());
 
         // Reset form but keep dialog open for adding new item
         resetForm();

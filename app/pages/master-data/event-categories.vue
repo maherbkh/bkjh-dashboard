@@ -81,7 +81,7 @@ onMounted(async () => {
     await fetchItems(currentPage.value, perPage.value, {
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    });
+    }, Date.now());
 });
 
 // Search and pagination handlers
@@ -94,7 +94,7 @@ const handleReset = async () => {
         search: searchQuery.value,
         sortBy: sortBy.value,
         sortDir: sortDir.value,
-    });
+    }, Date.now());
     selectedRows.value = [];
 };
 
@@ -104,7 +104,7 @@ const handleSearchSubmit = async () => {
         search: searchQuery.value,
         sortBy: sortBy.value,
         sortDir: sortDir.value,
-    });
+    }, Date.now());
     selectedRows.value = [];
 };
 
@@ -114,7 +114,7 @@ const handlePageChange = async (page: number) => {
         search: searchQuery.value,
         sortBy: sortBy.value,
         sortDir: sortDir.value,
-    });
+    }, Date.now());
     selectedRows.value = [];
 };
 
@@ -126,7 +126,7 @@ async function handleSortChange(dir: 'asc' | 'desc', id: string) {
         search: searchQuery.value,
         sortBy: sortBy.value,
         sortDir: sortDir.value,
-    });
+    }, Date.now());
     selectedRows.value = [];
 }
 
@@ -168,6 +168,13 @@ const onSubmitAndClose = async (values: EventCategoryForm) => {
         }
         selectedRows.value = [];
 
+        // Refresh with current params to preserve pagination, search, and sort
+        await fetchItems(currentPage.value, perPage.value, {
+            search: searchQuery.value,
+            sortBy: sortBy.value,
+            sortDir: sortDir.value,
+        }, Date.now());
+
         // Close dialog on success
         isDialogOpen.value = false;
         editingEventCategory.value = null;
@@ -202,6 +209,13 @@ const onSubmitAndAddNew = async (values: EventCategoryForm) => {
             dialogMode.value = 'add';
         }
         selectedRows.value = [];
+
+        // Refresh with current params to preserve pagination, search, and sort
+        await fetchItems(currentPage.value, perPage.value, {
+            search: searchQuery.value,
+            sortBy: sortBy.value,
+            sortDir: sortDir.value,
+        }, Date.now());
 
         // Reset form but keep dialog open for adding new item
         resetForm();

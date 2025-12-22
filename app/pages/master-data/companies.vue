@@ -68,7 +68,7 @@ const headerItems = computed(() => [
 await fetchItems(currentPage.value, perPage.value, {
     sort_by: sortBy.value,
     sort_dir: sortDir.value,
-});
+}, Date.now());
 
 // Dialog state management
 const isDialogOpen = ref(false);
@@ -114,6 +114,13 @@ const onSubmitAndClose = async (values: CompanyForm) => {
         }
         selectedRows.value = [];
 
+        // Refresh with current params to preserve pagination, search, and sort
+        await fetchItems(currentPage.value, perPage.value, {
+            search: searchQuery.value,
+            sort_by: sortBy.value,
+            sort_dir: sortDir.value,
+        }, Date.now());
+
         // Close dialog on success
         isDialogOpen.value = false;
         editingCompany.value = null;
@@ -148,6 +155,13 @@ const onSubmitAndAddNew = async (values: CompanyForm) => {
             dialogMode.value = 'add';
         }
         selectedRows.value = [];
+
+        // Refresh with current params to preserve pagination, search, and sort
+        await fetchItems(currentPage.value, perPage.value, {
+            search: searchQuery.value,
+            sort_by: sortBy.value,
+            sort_dir: sortDir.value,
+        }, Date.now());
 
         // Reset form but keep dialog open for adding new item
         resetForm();
@@ -210,7 +224,7 @@ const handleReset = async () => {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    });
+    }, Date.now());
     selectedRows.value = [];
 };
 
@@ -220,7 +234,7 @@ const handleSearchSubmit = async () => {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    });
+    }, Date.now());
     selectedRows.value = [];
 };
 
@@ -230,7 +244,7 @@ const handlePageChange = async (page: number) => {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    });
+    }, Date.now());
     selectedRows.value = [];
 };
 
@@ -242,7 +256,7 @@ async function handleSortChange(dir: 'asc' | 'desc', id: string) {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    });
+    }, Date.now());
     selectedRows.value = [];
 }
 
