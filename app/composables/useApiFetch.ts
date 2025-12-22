@@ -1,6 +1,7 @@
 // composables/useApiFetch.ts
 import type { UseFetchOptions } from 'nuxt/app';
 import { useCookie, useFetch } from 'nuxt/app';
+import { computed, toRaw, watch } from 'vue';
 import { useUserStore } from '~/stores/user';
 import { useGlobalErrorHandler } from '~/composables/useGlobalErrorHandler';
 
@@ -40,6 +41,10 @@ export function useApiFetch<T = any>(
         'x-requested-with': 'XMLHttpRequest',
         'referer': originUrl,
         'origin': originUrl,
+        // Explicitly prevent caching
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
     };
     if (['POST', 'PUT', 'PATCH'].includes(method) && opts.body != null) {
         // Don't set Content-Type for FormData (let browser handle it with boundary)
@@ -91,25 +96,72 @@ export function useApiFetch<T = any>(
         },
     };
 
-    // Generate unique cache key for each request to prevent caching
-    const generateCacheKey = () => {
-        if (opts.key) return opts.key;
-        // Always generate unique key with timestamp and random to prevent caching
-        const queryString = opts.query ? JSON.stringify(opts.query) : '';
+    // Generate ALWAYS unique cache key with timestamp to prevent ANY caching
+    // Force unique key generation on every call - never reuse keys
+    const generateUniqueCacheKey = (): string => {
+        // Always include timestamp to ensure uniqueness and prevent caching
+        const timestamp = Date.now();
+        const random = Math.random().toString(36).substring(2, 15);
+        
+        if (opts.key) {
+            // Even if key is provided, append timestamp to make it unique
+            const baseKey = typeof opts.key === 'function' ? opts.key() : opts.key;
+            return `${baseKey}-${timestamp}-${random}`;
+        }
+
+        // Always generate completely unique key with timestamp and random
+        // Include query params in the key so it changes when query changes
+        const query = opts.query;
+        let queryString = '';
+        
+        // Handle reactive query objects - get current value
+        if (query) {
+            try {
+                // If query is reactive, toRaw will get the underlying value
+                const queryValue = toRaw(query);
+                queryString = JSON.stringify(queryValue);
+            }
+            catch {
+                // Fallback to stringify
+                queryString = JSON.stringify(query);
+            }
+        }
+
         const queryHash = queryString ? `-${btoa(queryString).replace(/[^a-zA-Z0-9]/g, '')}` : '';
-        return `/backend${path}${queryHash}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        // ALWAYS include timestamp and random - ensures NO caching can occur
+        // Timestamp ensures every request gets a unique key
+        return `/backend${path}${queryHash}-${timestamp}-${random}`;
     };
 
-    // Use server: false (CSR-only), no caching, no deduplication, immediate by default
+    // Use server: false (CSR-only), ABSOLUTELY no caching, no deduplication
     const fullPath = '/backend' + path;
 
-    return useFetch<ApiResponse<T>>(fullPath, {
-        server: false,
-        cache: 'no-store',
-        dedupe: false, // Disable deduplication to prevent AbortError
+    // Override any cache-related options to ensure no caching
+    const fetchResult = useFetch<ApiResponse<T>>(fullPath, {
+        server: false, // Client-side only
+        cache: 'no-store', // Explicitly disable HTTP caching
+        dedupe: false, // Disable deduplication completely
         immediate: opts.immediate ?? true,
-        // Generate unique cache key for each request to prevent any caching
-        key: generateCacheKey(),
+        // Generate unique key on every call - prevents any internal caching
+        key: generateUniqueCacheKey(),
+        // Watch query params and refresh when they change
+        watch: opts.watch !== false && opts.query ? [opts.query] : opts.watch,
+        // Disable any default caching behavior
+        getCachedData: () => undefined, // Never return cached data
         ...fetchOpts,
     });
+
+    // Watch query params and force refresh when they change
+    if (opts.query && typeof opts.query === 'object') {
+        watch(
+            () => opts.query,
+            () => {
+                // Force refresh with new unique key when query changes
+                fetchResult.refresh();
+            },
+            { deep: true },
+        );
+    }
+
+    return fetchResult;
 }

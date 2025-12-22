@@ -61,15 +61,17 @@ export default defineNuxtConfig({
             'vee-validate',
             'vue-sonner',
         ],
-
-    }, routeRules: {
+    },
+    routeRules: {
         '/*/**': {
             ssr: false, // everything under it
             headers: {
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
                 'Pragma': 'no-cache',
                 'Expires': '0',
             },
+            // Disable all caching at route level
+            prerender: false,
         },
     },
     compatibilityDate: '2025-07-15',

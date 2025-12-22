@@ -164,6 +164,13 @@ const onSubmitAndClose = async (values: SettingForm): Promise<void> => {
         }
         selectedRows.value = [];
 
+        // Refresh with current params to preserve pagination, search, and sort
+        await fetchItems(currentPage.value, perPage.value, {
+            search: searchQuery.value,
+            sort_by: sortBy.value,
+            sort_dir: sortDir.value,
+        }, Date.now());
+
         // Close dialog on success
         isDialogOpen.value = false;
         editingSetting.value = null;
@@ -200,6 +207,13 @@ const onSubmitAndAddNew = async (values: SettingForm): Promise<void> => {
             dialogMode.value = 'add';
         }
         selectedRows.value = [];
+
+        // Refresh with current params to preserve pagination, search, and sort
+        await fetchItems(currentPage.value, perPage.value, {
+            search: searchQuery.value,
+            sort_by: sortBy.value,
+            sort_dir: sortDir.value,
+        }, Date.now());
 
         // Reset form but keep dialog open for adding new item
         resetForm();
@@ -285,7 +299,7 @@ const handleReset = async (): Promise<void> => {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    });
+    }, Date.now());
     selectedRows.value = [];
 };
 
@@ -298,7 +312,7 @@ const handleSearchSubmit = async (): Promise<void> => {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    });
+    }, Date.now());
     selectedRows.value = [];
 };
 
@@ -316,7 +330,7 @@ const handlePageChange = async (page: number): Promise<void> => {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    });
+    }, Date.now());
     selectedRows.value = [];
 };
 
@@ -341,7 +355,7 @@ const handleSortChange = async (dir: 'asc' | 'desc', id: string): Promise<void> 
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
-    });
+    }, Date.now());
     selectedRows.value = [];
 };
 
@@ -498,8 +512,12 @@ interface SectionsApiResponse {
  * Fetch sections for parent name lookup
  */
 const sections = ref<SectionLookup[]>([]);
+const sectionsFetched = ref(false);
 
 const fetchSections = async (): Promise<void> => {
+    if (sectionsFetched.value) return; // Prevent duplicate calls
+    sectionsFetched.value = true;
+
     try {
         const { data } = await useApiFetch<SectionsApiResponse>('/shared/settings/sections', {
             method: 'GET',
@@ -513,6 +531,7 @@ const fetchSections = async (): Promise<void> => {
         }
     }
     catch (error: unknown) {
+        sectionsFetched.value = false; // Reset on error so it can retry
         console.error('Error fetching sections:', error);
     }
 };

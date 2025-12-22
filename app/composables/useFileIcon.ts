@@ -94,6 +94,9 @@ export const useFileIcon = () => {
                         method: 'GET',
                         headers: {
                             Accept: '*/*',
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0',
                         },
                     });
 

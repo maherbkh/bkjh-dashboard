@@ -63,13 +63,11 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
                 ...additionalParams,
             };
 
-            // For events, always disable caching by adding timestamp
-            const shouldDisableCache = crudPath === 'events';
-            const timestamp = forceRefresh || shouldDisableCache ? (forceRefresh || Date.now()) : undefined;
-
-            const cacheKey = timestamp
-                ? `${tenant}-${crudPath}-list-${page}-${perPage}-${JSON.stringify(additionalParams)}-${timestamp}`
-                : `${tenant}-${crudPath}-list-${page}-${perPage}-${JSON.stringify(additionalParams)}`;
+            // ALWAYS include timestamp to ensure every call is unique
+            // This prevents any caching, even for identical URLs and parameters
+            const timestamp = forceRefresh || Date.now();
+            const random = Math.random().toString(36).substring(2, 15);
+            const cacheKey = `${tenant}-${crudPath}-list-${page}-${perPage}-${JSON.stringify(additionalParams)}-${timestamp}-${random}`;
 
             const { data, status } = await useApiFetch(buildApiPath(), {
                 query: params,
@@ -113,8 +111,11 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
         error.value = null;
 
         try {
+            // Always include timestamp and random to prevent caching
+            const timestamp = Date.now();
+            const random = Math.random().toString(36).substring(2, 15);
             const { data, status } = await useApiFetch(buildApiPath(`/${id}`), {
-                key: `${tenant}-${crudPath}-item-${id}`,
+                key: `${tenant}-${crudPath}-item-${id}-${timestamp}-${random}`,
             });
 
             if (status.value === 'success' && data.value) {
@@ -155,7 +156,8 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
 
             if (status.value === 'success') {
                 toast.success(defaultTranslations.add_success);
-                await refresh();
+                // Don't auto-refresh - let caller handle refresh with correct params
+                // await refresh();
                 return { data: data.value, status: status.value };
             }
             else if (fetchError.value) {
@@ -201,7 +203,8 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
 
             if (status.value === 'success') {
                 toast.success(defaultTranslations.edit_success);
-                await refresh();
+                // Don't auto-refresh - let caller handle refresh with correct params
+                // await refresh();
                 return { data: data.value, status: status.value };
             }
             else if (fetchError.value) {
