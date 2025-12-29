@@ -1,6 +1,6 @@
 /**
  * Composable to convert setting keys to human-readable labels
- * 
+ *
  * Examples:
  * - "shared.company.address" → "Company Address"
  * - "academy.course.title" → "Course Title"
@@ -22,11 +22,11 @@ export function useKeyToLabel() {
         const remainingKey = firstDotIndex > -1 ? key.substring(firstDotIndex + 1) : key;
 
         // Replace dots and underscores with spaces
-        let text = remainingKey.replace(/[._]/g, ' ');
+        const text = remainingKey.replace(/[._]/g, ' ');
 
         // Split by spaces and capitalize first letter of each word
         const words = text.split(/\s+/).filter(word => word.length > 0);
-        const capitalizedWords = words.map(word => {
+        const capitalizedWords = words.map((word) => {
             // Capitalize first letter, lowercase the rest
             return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
         });
@@ -38,4 +38,3 @@ export function useKeyToLabel() {
         keyToLabel,
     };
 }
-

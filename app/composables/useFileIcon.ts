@@ -93,7 +93,7 @@ export const useFileIcon = () => {
                     const response = await fetch(proxyUrl, {
                         method: 'GET',
                         headers: {
-                            Accept: '*/*',
+                            'Accept': '*/*',
                             'Cache-Control': 'no-cache, no-store, must-revalidate',
                             'Pragma': 'no-cache',
                             'Expires': '0',

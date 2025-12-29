@@ -227,23 +227,23 @@
                         :id="`setting-${setting.id}-alt`"
                         v-model="uploaderFields[index].alt"
                         :title="$t('setting.alt') || 'Alt Text'"
-                    :placeholder="$t('setting.alt_placeholder') || 'Enter alt text'"
-                    :disabled="disabled || readonly"
-                    :readonly="readonly"
-                    :errors="[]"
-                    @update:model-value="() => handleUploaderChange(index)"
-                />
+                        :placeholder="$t('setting.alt_placeholder') || 'Enter alt text'"
+                        :disabled="disabled || readonly"
+                        :readonly="readonly"
+                        :errors="[]"
+                        @update:model-value="() => handleUploaderChange(index)"
+                    />
 
-                <FormItemInput
-                    :id="`setting-${setting.id}-title`"
-                    v-model="uploaderFields[index].title"
-                    :title="$t('setting.title') || 'Title'"
-                    :placeholder="$t('setting.title_placeholder') || 'Enter title'"
-                    :disabled="disabled || readonly"
-                    :readonly="readonly"
-                    :errors="[]"
-                    @update:model-value="() => handleUploaderChange(index)"
-                />
+                    <FormItemInput
+                        :id="`setting-${setting.id}-title`"
+                        v-model="uploaderFields[index].title"
+                        :title="$t('setting.title') || 'Title'"
+                        :placeholder="$t('setting.title_placeholder') || 'Enter title'"
+                        :disabled="disabled || readonly"
+                        :readonly="readonly"
+                        :errors="[]"
+                        @update:model-value="() => handleUploaderChange(index)"
+                    />
 
                     <FormItemMedia
                         :id="`setting-${setting.id}-media`"
@@ -721,4 +721,3 @@ onMounted(() => {
     }
 });
 </script>
-

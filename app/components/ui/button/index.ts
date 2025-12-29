@@ -11,9 +11,11 @@ export const buttonVariants = cva(
                 'default':
           'bg-primary text-primary-foreground hover:bg-primary',
                 'destructive':
-          'bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
+          'bg-red-100 text-red-800 dark:bg-red-300/90 dark:text-red-800 hover:bg-red-300/90 dark:hover:bg-red-300/90 border border-red-400/25 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 font-medium',
                 'destructive-outline':
           'border border-destructive text-destructive bg-transparent hover:bg-destructive/10 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40',
+                'success':
+          'bg-green-100 text-green-800 border border-green-200 dark:bg-green-300/90 dark:text-green-800 hover:bg-green-300/50 dark:hover:bg-green-300/50 focus-visible:ring-success/20 dark:focus-visible:ring-success/40 font-medium',
                 'outline':
           'border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
                 'secondary':
@@ -24,7 +26,7 @@ export const buttonVariants = cva(
             },
             size: {
                 'default': 'h-9 px-4 py-2 has-[>svg]:px-4',
-                'sm': 'h-8 rounded-full gap-2 px-4 has-[>svg]:px-2.5',
+                'sm': 'h-8 rounded-full gap-2 px-2 has-[>svg]:px-2.5',
                 'lg': 'h-10 rounded-full px-6 has-[>svg]:px-4',
                 'icon': 'size-8 !rounded-lg',
                 'icon-sm': 'size-6 !rounded-md',

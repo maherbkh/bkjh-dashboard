@@ -108,11 +108,10 @@ const getStatusLabel = (status: string) => {
             </Badge>
         </template>
 
-        <template #cell-actions="{ row }">
+        <template #cell-actions>
             <div class="flex justify-end gap-2">
                 <!-- Actions column left empty for now -->
             </div>
         </template>
     </PageTable>
 </template>
-

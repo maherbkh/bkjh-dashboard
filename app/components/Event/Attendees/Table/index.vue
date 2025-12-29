@@ -2,6 +2,7 @@
 import { useInitials } from '@/composables/useInitials';
 import { toast } from 'vue-sonner';
 import { useDebounceFn } from '@vueuse/core';
+import { z } from 'zod';
 
 const { t } = useI18n();
 const { formatDateParts } = useGermanDateFormat();
@@ -9,6 +10,7 @@ interface EventRegistrationLite {
     id?: string | number;
     status?: string;
     registrationDate?: string;
+    hasAttended?: boolean;
     attendee?: {
         id?: string;
         firstName?: string;
@@ -22,6 +24,7 @@ interface EventRegistrationLite {
 }
 const props = defineProps<{
     data: EventRegistrationLite[];
+    eventId?: string;
 }>();
 
 const emit = defineEmits<{
@@ -54,8 +57,46 @@ const filteredData = computed(() => {
         }
     });
 });
+
+// Status counts for display in tabs
+const statusCounts = computed(() => {
+    return {
+        all: props.data.length,
+        pending: props.data.filter((item: EventRegistrationLite) => item.status === 'PENDING').length,
+        approved: props.data.filter((item: EventRegistrationLite) => item.status === 'APPROVED').length,
+        rejected: props.data.filter((item: EventRegistrationLite) => item.status === 'REJECTED').length,
+    };
+});
+
+// Computed property for rows with selection state to avoid recalculating on every render
+const tableRows = computed(() => {
+    return filteredData.value.map((item: EventRegistrationLite) => ({
+        ...item,
+        selected: item.id !== undefined && selectedRows.value.includes(String(item.id)),
+    }));
+});
 const statuses = ref<string[]>(['PENDING', 'APPROVED', 'REJECTED']);
 const loadingStates = ref<Record<string, boolean>>({});
+
+// Attendance update loading state
+const isUpdatingAttendance = ref(false);
+
+// Selection state
+const selectedRows = ref<string[]>([]);
+
+// Reset selected rows when status tab changes
+watch(selectedStatusTab, () => {
+    selectedRows.value = [];
+});
+
+// Computed property to check if all filtered rows are selected
+const isAllSelected = computed(() => {
+    if (!filteredData.value.length) return false;
+    return filteredData.value.every((item: EventRegistrationLite) => {
+        if (!item.id) return false;
+        return selectedRows.value.includes(String(item.id));
+    });
+});
 
 // Debounced status change function
 const changeStatus = useDebounceFn(async (id: string, status: 'PENDING' | 'APPROVED' | 'REJECTED') => {
@@ -124,6 +165,136 @@ const getStatusClass = (status: string, rowStatus: string) => {
 
     return [baseClasses, ...conditionalClasses];
 };
+
+// Selection handlers
+const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+        // Select all filtered attendees
+        const allIds = filteredData.value
+            .filter((item: EventRegistrationLite) => item.id !== undefined)
+            .map((item: EventRegistrationLite) => String(item.id));
+        // Use Set for O(1) lookup when merging
+        const existingSet = new Set(selectedRows.value);
+        allIds.forEach(id => existingSet.add(id));
+        selectedRows.value = Array.from(existingSet);
+    }
+    else {
+        // Deselect all filtered attendees - use Set for O(1) lookup
+        const filteredIdsSet = new Set(
+            filteredData.value
+                .filter((item: EventRegistrationLite) => item.id !== undefined)
+                .map((item: EventRegistrationLite) => String(item.id)),
+        );
+        selectedRows.value = selectedRows.value.filter(id => !filteredIdsSet.has(id));
+    }
+};
+
+const handleRowSelected = (id: string, checked: boolean) => {
+    const idString = String(id);
+    if (checked) {
+        if (!selectedRows.value.includes(idString)) {
+            selectedRows.value.push(idString);
+        }
+    }
+    else {
+        const index = selectedRows.value.indexOf(idString);
+        if (index > -1) {
+            selectedRows.value.splice(index, 1);
+        }
+    }
+};
+
+// Zod schema for attendance validation
+const attendanceValidationSchema = z.object({
+    attendeeId: z.string(),
+    hasAttended: z.boolean(),
+    registrationStatus: z.literal('APPROVED'),
+    attendeeName: z.string().optional(),
+});
+
+// Update attendance for selected attendees
+const updateAttendance = async (hasAttended: boolean) => {
+    if (!props.eventId || selectedRows.value.length === 0) return;
+
+    // Validate all selected attendees have APPROVED status
+    const invalidAttendees: Array<{ name: string; status: string }> = [];
+    const validAttendees: Array<{ attendeeId: string; hasAttended: boolean }> = [];
+
+    selectedRows.value.forEach((registrationId) => {
+        const registration = props.data.find(item => String(item.id) === registrationId);
+        if (!registration || !registration.attendee?.id) {
+            return;
+        }
+
+        const attendeeData = {
+            attendeeId: registration.attendee.id,
+            hasAttended,
+            registrationStatus: registration.status || '',
+            attendeeName: registration.attendee.fullName,
+        };
+
+        const validationResult = attendanceValidationSchema.safeParse(attendeeData);
+
+        if (!validationResult.success) {
+            // Status is not APPROVED
+            invalidAttendees.push({
+                name: registration.attendee.fullName || registration.attendee.email || 'Unknown',
+                status: registration.status || 'UNKNOWN',
+            });
+        }
+        else {
+            validAttendees.push({
+                attendeeId: registration.attendee.id,
+                hasAttended,
+            });
+        }
+    });
+
+    // Show toast errors for each invalid attendee
+    if (invalidAttendees.length > 0) {
+        invalidAttendees.forEach((attendee) => {
+            const statusLabel = getStatusLabel(attendee.status);
+            toast.error(
+                `${attendee.name}: ${t('attendee.attendance_update_validation_error', { status: statusLabel })}`,
+            );
+        });
+        return;
+    }
+
+    if (validAttendees.length === 0) {
+        toast.error(t('global.messages.error'));
+        return;
+    }
+
+    isUpdatingAttendance.value = true;
+
+    try {
+        const { data, error } = await useApiFetch(`/academy/events/${props.eventId}/attendees/attendance`, {
+            method: 'PATCH',
+            body: {
+                attendees: validAttendees,
+            },
+        });
+
+        if (error.value) {
+            toast.error(error.value.message || t('global.messages.error'));
+        }
+        else if (data.value) {
+            toast.success(data.value.message as string || t('global.messages.success'));
+            // Clear selection after successful update
+            selectedRows.value = [];
+            // Emit reload to refresh the data
+            emit('reload');
+        }
+    }
+    catch (err) {
+        console.error('Error updating attendance:', err);
+        toast.error(t('global.messages.error'));
+    }
+    finally {
+        isUpdatingAttendance.value = false;
+    }
+};
 </script>
 
 <template>
@@ -140,7 +311,7 @@ const getStatusClass = (status: string, rowStatus: string) => {
                         size="sm"
                         @click="selectStatusTab('ALL')"
                     >
-                        {{ $t('academy.all') }}
+                        {{ $t('academy.all') }} ({{ statusCounts.all }})
                     </Button>
                 </li>
                 <li>
@@ -150,7 +321,7 @@ const getStatusClass = (status: string, rowStatus: string) => {
                         size="sm"
                         @click="selectStatusTab('PENDING')"
                     >
-                        {{ $t('academy.pending') }}
+                        {{ $t('academy.pending') }} ({{ statusCounts.pending }})
                     </Button>
                 </li>
                 <li>
@@ -160,7 +331,7 @@ const getStatusClass = (status: string, rowStatus: string) => {
                         size="sm"
                         @click="selectStatusTab('APPROVED')"
                     >
-                        {{ $t('event.approved') }}
+                        {{ $t('event.approved') }} ({{ statusCounts.approved }})
                     </Button>
                 </li>
                 <li>
@@ -170,168 +341,216 @@ const getStatusClass = (status: string, rowStatus: string) => {
                         size="sm"
                         @click="selectStatusTab('REJECTED')"
                     >
-                        {{ $t('event.rejected') }}
+                        {{ $t('event.rejected') }} ({{ statusCounts.rejected }})
                     </Button>
                 </li>
             </ul>
         </div>
-        <PageEmptyState
-            v-if="filteredData.length === 0"
-            :search-query="''"
-            :add-new-text="$t('attendee.plural')"
-            :no-add-new-text="false"
-        />
-        <PageTable
-            v-else
-            :header-items="headerItems"
-            :rows="filteredData"
-            :selected-rows="[]"
-            :loading="false"
-            :skeleton-rows="3"
-            :selectable="false"
-            :sortable="false"
+        <Transition
+            enter-active-class="transition-all duration-300 ease-out"
+            enter-from-class="opacity-0 -translate-y-2"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition-all duration-200 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 -translate-y-2"
         >
-            <template #cell-person="{ row }">
-                <div class="flex flex-col">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <div>
-                                <Avatar
-                                    class="size-9 rounded-full border
-                                   group-active:bg-sidebar-primary group-active:text-sidebar-primary-foreground
-                                   group-data-[state=open]:bg-sidebar-accent group-data-[state=open]:text-sidebar-accent-foreground"
-                                >
-                                    <AvatarImage
-                                        class="bg-background"
-                                        :src="row.attendee?.avatar"
-                                        :alt="row.attendee?.fullName"
-                                    />
-                                    <AvatarFallback class="rounded-full bg-background">
-                                        {{ useInitials(row.attendee?.fullName) }}
-                                    </AvatarFallback>
-                                </Avatar>
-                            </div>
-                            <div>
-                                <div class="font-medium">
-                                    {{ row.attendee?.fullName }}
-                                </div>
-                                <div class="text-muted-foreground text-xs">
-                                    {{ row.attendee?.email }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div
+                v-if="selectedRows.length > 0"
+                class="flex items-center justify-between gap-5 px-2.5 py-2 rounded-full border"
+            >
+                <div class="flex items-center justify-start gap-5">
+                    <Button
+                        variant="success"
+                        size="sm"
+                        :disabled="isUpdatingAttendance"
+                        @click="updateAttendance(true)"
+                    >
+                        <Icon
+                            name="solar:check-circle-line-duotone"
+                            class="!size-5 shrink-0"
+                        />
+                        {{ $t('attendee.has_attended') }}
+                    </Button>
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        :disabled="isUpdatingAttendance"
+                        @click="updateAttendance(false)"
+                    >
+                        <Icon
+                            name="solar:close-circle-line-duotone"
+                            class="!size-5 shrink-0"
+                        />
+                        {{ $t('attendee.has_not_attended') }}
+                    </Button>
                 </div>
-            </template>
-
-            <template #cell-actions="{ row }">
-                <div class="flex justify-end gap-2">
-                    <NuxtLink :to="`/events/attendees/${row.attendee?.id}`">
-                        <LazyButton
-                            :title="$t('action.view')"
-                            variant="ghost"
-                            size="icon"
-                            hydrate-on-interaction="mouseover"
-                        >
-                            <Icon
-                                name="solar:eye-outline"
-                                class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
-                            />
-                        </LazyButton>
-                    </NuxtLink>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger as-child>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                            >
-                                <Icon
-                                    name="solar:menu-dots-bold"
-                                    class="size-5 shrink-0"
-                                />
-                                <span class="sr-only">{{ $t('common.actions') }}</span>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent class="min-w-40">
-                            <DropdownMenuRadioGroup v-model="row.status">
-                                <DropdownMenuRadioItem
-                                    v-for="status in statuses"
-                                    :key="status"
-                                    :value="status"
-                                    :class="getStatusClass(status, row.status)"
-                                    :disabled="loadingStates[row.id as string]"
-                                    @click="changeStatus(row.id as string, status as 'PENDING' | 'APPROVED' | 'REJECTED')"
-                                >
-                                    <div class="flex items-center gap-2">
-                                        <span>{{ getStatusLabel(status) }}</span>
-                                        <Icon
-                                            v-if="loadingStates[row.id as string]"
-                                            name="solar:loading-bold"
-                                            class="size-3 animate-spin"
-                                        />
-                                    </div>
-                                </DropdownMenuRadioItem>
-                            </DropdownMenuRadioGroup>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                <div class="text-muted-foreground text-sm font-medium mr-2">
+                    {{ $t('attendee.total_selected') }}: {{ selectedRows.length }}
                 </div>
-            </template>
-
-            <template #cell-employment="{ row }">
-                <template v-if="row.attendee?.isEmployee">
+            </div>
+        </Transition>
+        <div
+            class="transition-all duration-300 ease-out"
+            :class="selectedRows.length > 0 ? 'mt-4' : 'mt-0'"
+        >
+            <PageEmptyState
+                v-if="filteredData.length === 0"
+                :search-query="''"
+                :add-new-text="$t('attendee.plural')"
+                :no-add-new-text="false"
+            />
+            <PageTable
+                v-else
+                :header-items="headerItems"
+                :rows="tableRows"
+                :selected-rows="selectedRows"
+                :loading="false"
+                :skeleton-rows="3"
+                :selectable="true"
+                :sortable="false"
+                :model-value="isAllSelected"
+                @row-selected="(id: number | string, checked: boolean) => handleRowSelected(String(id), checked)"
+                @update:selected-rows="(rows: (string | number)[]) => {
+                    selectedRows = rows.map(String);
+                }"
+                @update:model-value="handleSelectAll"
+            >
+                <template #cell-person="{ row }">
                     <div class="flex flex-col">
-                        <div
-                            v-if="row.attendee?.occupation?.name"
-                            class="font-medium truncate"
-                        >
-                            {{ row.attendee.occupation.name }}
-                        </div>
-                        <div
-                            v-if="row.attendee?.group?.name"
-                            class="text-muted-foreground truncate text-sm"
-                        >
-                            {{ row.attendee.group.name }}
+                        <div>
+                            <div class="flex items-start gap-2">
+                                <div>
+                                    <Icon
+                                        :name="row.hasAttended ? 'solar:check-circle-line-duotone' : 'solar:close-circle-line-duotone'"
+                                        :class="[
+                                            '!size-9 shrink-0',
+                                            row.hasAttended ? 'text-success' : 'text-muted-foreground',
+                                        ]"
+                                        :title="row.hasAttended ? $t('attendee.has_attended') : $t('attendee.has_not_attended')"
+                                    />
+                                </div>
+                                <div>
+                                    <div class="font-medium">
+                                        {{ row.attendee?.fullName }}
+                                    </div>
+                                    <div class="text-muted-foreground text-xs">
+                                        {{ row.attendee?.email }}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </template>
-                <span
-                    v-else
-                    class="text-muted-foreground"
-                >—</span>
-            </template>
 
-            <template #cell-registration="{ row }">
-                <div class="flex flex-col">
-                    <div class="text-sm font-medium flex items-start gap-1.5">
-                        <div class="flex items-start gap-1.5">
-                            <Icon
-                                name="solar:calendar-mark-line-duotone"
-                                class="opacity-50 !size-4"
-                            />
-                            {{ formatDateParts(row.registrationDate).date }}
+                <template #cell-actions="{ row }">
+                    <div class="flex justify-end gap-2">
+                        <NuxtLink :to="`/events/attendees/${row.attendee?.id}`">
+                            <LazyButton
+                                :title="$t('action.view')"
+                                variant="ghost"
+                                size="icon"
+                                hydrate-on-interaction="mouseover"
+                            >
+                                <Icon
+                                    name="solar:eye-outline"
+                                    class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                />
+                            </LazyButton>
+                        </NuxtLink>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger as-child>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                >
+                                    <Icon
+                                        name="solar:menu-dots-bold"
+                                        class="size-5 shrink-0"
+                                    />
+                                    <span class="sr-only">{{ $t('common.actions') }}</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent class="min-w-40">
+                                <DropdownMenuRadioGroup v-model="row.status">
+                                    <DropdownMenuRadioItem
+                                        v-for="status in statuses"
+                                        :key="status"
+                                        :value="status"
+                                        :class="getStatusClass(status, row.status)"
+                                        :disabled="loadingStates[row.id as string]"
+                                        @click="changeStatus(row.id as string, status as 'PENDING' | 'APPROVED' | 'REJECTED')"
+                                    >
+                                        <div class="flex items-center gap-2">
+                                            <span>{{ getStatusLabel(status) }}</span>
+                                            <Icon
+                                                v-if="loadingStates[row.id as string]"
+                                                name="solar:loading-bold"
+                                                class="size-3 animate-spin"
+                                            />
+                                        </div>
+                                    </DropdownMenuRadioItem>
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </template>
+
+                <template #cell-employment="{ row }">
+                    <template v-if="row.attendee?.isEmployee">
+                        <div class="flex flex-col">
+                            <div
+                                v-if="row.attendee?.occupation?.name"
+                                class="font-medium truncate"
+                            >
+                                {{ row.attendee.occupation.name }}
+                            </div>
+                            <div
+                                v-if="row.attendee?.group?.name"
+                                class="text-muted-foreground truncate text-sm"
+                            >
+                                {{ row.attendee.group.name }}
+                            </div>
                         </div>
-                        <Icon
-                            name="solar:arrow-right-bold-duotone"
-                            class="size-5 mt-0.5 shrink-0 opacity-50"
-                        />
-                        <div class="flex items-start gap-1.5">
+                    </template>
+                    <span
+                        v-else
+                        class="text-muted-foreground"
+                    >—</span>
+                </template>
+
+                <template #cell-registration="{ row }">
+                    <div class="flex flex-col">
+                        <div class="text-sm font-medium flex items-start gap-1.5">
+                            <div class="flex items-start gap-1.5">
+                                <Icon
+                                    name="solar:calendar-mark-line-duotone"
+                                    class="opacity-50 !size-4"
+                                />
+                                {{ formatDateParts(row.registrationDate).date }}
+                            </div>
                             <Icon
-                                name="solar:watch-square-line-duotone"
-                                class="opacity-50 !size-4"
+                                name="solar:arrow-right-bold-duotone"
+                                class="size-5 mt-0.5 shrink-0 opacity-50"
                             />
-                            {{ formatDateParts(row.registrationDate).time }}
+                            <div class="flex items-start gap-1.5">
+                                <Icon
+                                    name="solar:watch-square-line-duotone"
+                                    class="opacity-50 !size-4"
+                                />
+                                {{ formatDateParts(row.registrationDate).time }}
+                            </div>
+                        </div>
+                        <div class="mt-1">
+                            <Badge
+                                :variant="row.status === 'APPROVED' ? 'success' : row.status === 'PENDING' ? 'pending' : 'destructive'"
+                                class="w-fit"
+                            >
+                                {{ getStatusLabel(row.status || '') }}
+                            </Badge>
                         </div>
                     </div>
-                    <div class="mt-1">
-                        <Badge
-                            :variant="row.status === 'APPROVED' ? 'success' : row.status === 'PENDING' ? 'pending' : 'destructive'"
-                            class="w-fit"
-                        >
-                            {{ getStatusLabel(row.status || '') }}
-                        </Badge>
-                    </div>
-                </div>
-            </template>
-        </PageTable>
+                </template>
+            </PageTable>
+        </div>
     </div>
 </template>

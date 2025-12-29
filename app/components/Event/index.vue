@@ -207,6 +207,7 @@ const getSpeakerAvatarSrc = (speaker: any) => {
                             <div>
                                 <EventAttendeesTable
                                     :data="event.registrations as any[]"
+                                    :event-id="event.id"
                                     @reload="emit('reload')"
                                 />
                             </div>

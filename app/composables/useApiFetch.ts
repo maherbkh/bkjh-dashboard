@@ -102,7 +102,7 @@ export function useApiFetch<T = any>(
         // Always include timestamp to ensure uniqueness and prevent caching
         const timestamp = Date.now();
         const random = Math.random().toString(36).substring(2, 15);
-        
+
         if (opts.key) {
             // Even if key is provided, append timestamp to make it unique
             const baseKey = typeof opts.key === 'function' ? opts.key() : opts.key;
@@ -113,7 +113,7 @@ export function useApiFetch<T = any>(
         // Include query params in the key so it changes when query changes
         const query = opts.query;
         let queryString = '';
-        
+
         // Handle reactive query objects - get current value
         if (query) {
             try {
