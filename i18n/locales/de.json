@@ -230,6 +230,7 @@
     "registration_date": "Anmeldedatum",
     "registration_info": "Anmeldeinformationen",
     "registration_status": "Anmeldestatus",
+    "registrations": "Anmeldungen",
     "resend_verification_email": "Verifizierungs-E-Mail erneut senden",
     "send_password_reset": "Passwort-Reset-E-Mail senden",
     "singular": "Teilnehmer",

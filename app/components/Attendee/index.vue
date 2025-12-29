@@ -24,6 +24,11 @@ const pendingRegistrations = computed(() =>
 );
 
 const router = useRouter();
+
+// Debug: Log registrations data
+watch(() => props.attendee.registrations, (registrations) => {
+    console.log('Attendee registrations:', registrations);
+}, { immediate: true });
 </script>
 
 <template>
@@ -159,6 +164,23 @@ const router = useRouter();
                                     :data="props.attendee.events || []"
                                 />
                             </div>
+                        </CardContent>
+                    </Card>
+                    <!-- Registrations Table -->
+                    <Card>
+                        <CardHeader>
+                            <CardTitle class="flex items-center gap-2">
+                                <Icon
+                                    name="solar:clipboard-list-line-duotone"
+                                    class="!size-5 opacity-75 shrink-0"
+                                />
+                                {{ $t("attendee.registrations") }}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <AttendeeRegistrationsTable
+                                :data="props.attendee.registrations || []"
+                            />
                         </CardContent>
                     </Card>
                 </div>

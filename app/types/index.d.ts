@@ -815,7 +815,11 @@ export interface AttendeeRegistration {
     id: string;
     attendeeId: string;
     eventId: string;
-    registrationStatus: 'CONFIRMED' | 'PENDING' | 'ATTENDED' | 'REJECTED';
+    registrationStatus: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CONFIRMED' | 'ATTENDED';
+    registeredAt: string;
+    approvedAt: string | null;
+    notes: string | null;
+    hasAttended: boolean;
     createdAt: string;
     updatedAt: string;
     event: {

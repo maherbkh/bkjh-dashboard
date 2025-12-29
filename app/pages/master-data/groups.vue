@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import type { Group, GroupForm, TableHeaderItem } from '~/types';
+
 const { t } = useI18n();
 const { confirmDelete, confirmBulkDelete } = useConfirmDialog();
+const { formatDate } = useGermanDateFormat();
 
 // Page configuration
 const pageTitle = computed(() => t('group.plural'));
@@ -47,7 +50,7 @@ const sortDir = ref<'asc' | 'desc'>('asc');
 // Computed properties
 const status = computed(() => isLoading.value ? 'pending' : 'success');
 
-const headerItems = computed(() => [
+const headerItems = computed((): TableHeaderItem[] => [
     {
         as: 'th',
         name: t('global.name'),
@@ -60,13 +63,8 @@ const headerItems = computed(() => [
     },
     {
         as: 'th',
-        name: t('company.singular'),
+        name: t('company.plural'),
         id: 'companies',
-    },
-    {
-        as: 'th',
-        name: t('common.created_at'),
-        id: 'created_at',
     },
 ]);
 
@@ -263,7 +261,7 @@ const isAllSelected = computed(() => {
 
 const handleSelectAll = (checked: boolean) => {
     if (checked) {
-        selectedRows.value = groups.value.map(group => group.id);
+        selectedRows.value = groups.value.map(group => String(group.id));
     }
     else {
         selectedRows.value = [];
@@ -321,7 +319,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         :header-items="headerItems"
                         :rows="groups.map((group: Group) => ({
                             ...group,
-                            selected: selectedRows.includes(group.id),
+                            selected: selectedRows.includes(String(group.id)),
                         }))"
                         :selected-rows="selectedRows"
                         :loading="isLoading"
@@ -372,10 +370,10 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                 class="text-sm"
                             >
                                 <div
-                                    v-for="company in row.companies.slice(0, 2)"
-                                    :key="company.id"
+                                    v-for="groupCompany in row.companies.slice(0, 2)"
+                                    :key="groupCompany.id"
                                 >
-                                    {{ company.name }}
+                                    {{ groupCompany.company?.name }}
                                 </div>
                                 <span
                                     v-if="row.companies.length > 2"
@@ -391,7 +389,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         </template>
 
                         <template #cell-created_at="{ row }">
-                            {{ useGermanDateFormat().formatDate(row.createdAt) }}
+                            {{ formatDate(row.createdAt) }}
                         </template>
 
                         <template #cell-actions="{ row }">

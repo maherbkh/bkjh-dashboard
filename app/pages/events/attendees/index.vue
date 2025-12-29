@@ -413,6 +413,20 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                         class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
                                     />
                                 </LazyButton>
+                                <!-- View Button - Keep visible -->
+                                <NuxtLink :to="`/events/attendees/${row.id}`">
+                                    <LazyButton
+                                        :title="$t('action.view')"
+                                        variant="ghost"
+                                        size="icon"
+                                        hydrate-on-interaction="mouseover"
+                                    >
+                                        <Icon
+                                            name="solar:eye-outline"
+                                            class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                        />
+                                    </LazyButton>
+                                </NuxtLink>
                                 <LazyButton
                                     :title="$t('action.edit')"
                                     variant="ghost"
