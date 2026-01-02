@@ -132,26 +132,68 @@ const getSpeakerAvatarSrc = (speaker: any) => {
     return null;
 };
 
-// Generate certificates
-const { execute: generateCertificates, status: certificateStatus }
-    = await useApiFetch(`/academy/certificates/events/${props.event.id}/generate`, {
-        method: 'POST',
-        immediate: false,
-        watch: false,
-    });
+// Generate certificates modal state
+const isGenerateCertificateDialogOpen = ref(false);
+const expireAt = ref<string | Date | undefined>(undefined);
+const certificateStatus = ref<'idle' | 'pending' | 'success' | 'error'>('idle');
 
-const handleGenerateCertificates = async () => {
+// Open the dialog when button is clicked
+const handleGenerateCertificates = () => {
+    isGenerateCertificateDialogOpen.value = true;
+};
+
+// Submit certificate generation with expiration date
+const handleSubmitCertificateGeneration = async () => {
+    if (!props.event.id) return;
+
+    certificateStatus.value = 'pending';
     try {
-        const response = await generateCertificates();
-        if (response?.data?.message) {
-            toast.success(response.data.message);
+        // Format expireAt: convert to ISO string if has value, otherwise null
+        const expireAtValue = expireAt.value
+            ? new Date(expireAt.value).toISOString()
+            : null;
+
+        const { data, error } = await useApiFetch(
+            `/academy/certificates/events/${props.event.id}/generate`,
+            {
+                method: 'POST',
+                body: {
+                    expireAt: expireAtValue,
+                },
+            },
+        );
+
+        if (error.value) {
+            throw new Error(
+                (error.value as any)?.message || t('global.messages.error'),
+            );
+        }
+
+        const responseData = data.value as any;
+        if (responseData?.message) {
+            toast.success(responseData.message);
         }
         else {
             toast.success(t('event.certificate_generation_queued'));
         }
+
+        certificateStatus.value = 'success';
+        // Close dialog and reset form
+        isGenerateCertificateDialogOpen.value = false;
+        expireAt.value = undefined;
     }
     catch (error) {
         console.error('Error generating certificates:', error);
+        certificateStatus.value = 'error';
+        toast.error(
+            error instanceof Error ? error.message : t('global.messages.error'),
+        );
+    }
+    finally {
+        // Reset status after a delay
+        setTimeout(() => {
+            certificateStatus.value = 'idle';
+        }, 1000);
     }
 };
 </script>
@@ -596,5 +638,59 @@ const handleGenerateCertificates = async () => {
                 </div>
             </div>
         </div>
+
+        <!-- Generate Certificates Dialog -->
+        <Dialog v-model:open="isGenerateCertificateDialogOpen">
+            <DialogContent class="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>
+                        {{ $t('event.generate_certificates_dialog_title') }}
+                    </DialogTitle>
+                    <DialogDescription>
+                        {{ $t('event.generate_certificates_dialog_description') }}
+                    </DialogDescription>
+                </DialogHeader>
+                <div class="grid gap-4 py-4">
+                    <FormItemDatePicker
+                        :model-value="expireAt"
+                        :label="$t('event.certificate_expiration_date')"
+                        :placeholder="$t('event.certificate_expiration_date_placeholder')"
+                        :time-picker="false"
+                        :required="false"
+                        format="yyyy-MM-dd"
+                        name="expireAt"
+                        @update:model-value="(val: string | Date | undefined) => expireAt = val || undefined"
+                    />
+                </div>
+                <DialogFooter>
+                    <Button
+                        variant="outline"
+                        @click="
+                            isGenerateCertificateDialogOpen = false;
+                            expireAt = undefined;
+                        "
+                    >
+                        {{ $t('action.cancel') }}
+                    </Button>
+                    <Button
+                        :disabled="certificateStatus === 'pending'"
+                        @click="handleSubmitCertificateGeneration"
+                    >
+                        <Icon
+                            :name="
+                                certificateStatus === 'pending'
+                                    ? 'solar:refresh-linear'
+                                    : 'solar:diploma-outline'
+                            "
+                            :class="[
+                                '!size-4 mr-2',
+                                certificateStatus === 'pending' ? 'animate-spin' : '',
+                            ]"
+                        />
+                        {{ $t('event.generate_certificates') }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>
