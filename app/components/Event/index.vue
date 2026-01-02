@@ -384,6 +384,7 @@ const handleGenerateCertificates = async () => {
                                 <EventAttendeesTable
                                     :data="event.registrations as any[]"
                                     :event-id="event.id"
+                                    :event-title="event.title"
                                     @reload="emit('reload')"
                                 />
                             </div>

@@ -473,7 +473,13 @@
     "old_events": "Include Old Events",
     "current_events": "Ongoing & Future Events",
     "generate_certificates": "Generate Certificates",
-    "certificate_generation_queued": "Certificate generation queued"
+    "certificate_generation_queued": "Certificate generation queued",
+    "download_certificate": "Download Certificate",
+    "certificate_not_available": "Certificate not available",
+    "certificate_download_success": "Certificate downloaded successfully for {name}",
+    "certificate_download_success_generic": "Certificate downloaded successfully",
+    "certificate_download_error": "Failed to download certificate for {name}",
+    "certificate_download_error_generic": "Failed to download certificate"
   },
   "event_category": {
     "description": "Manage event categories for organizing academy events",

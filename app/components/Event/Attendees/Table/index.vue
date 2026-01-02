@@ -3,14 +3,18 @@ import { useInitials } from '@/composables/useInitials';
 import { toast } from 'vue-sonner';
 import { useDebounceFn } from '@vueuse/core';
 import { z } from 'zod';
+import type { Certificate } from '~/composables/useCertificateDownload';
 
 const { t } = useI18n();
 const { formatDateParts } = useGermanDateFormat();
+const { downloadCertificate } = useCertificateDownload();
+
 interface EventRegistrationLite {
     id?: string | number;
     status?: string;
     registrationDate?: string;
     hasAttended?: boolean;
+    certificate?: Certificate | null;
     attendee?: {
         id?: string;
         firstName?: string;
@@ -25,6 +29,7 @@ interface EventRegistrationLite {
 const props = defineProps<{
     data: EventRegistrationLite[];
     eventId?: string;
+    eventTitle?: string;
 }>();
 
 const emit = defineEmits<{
@@ -457,6 +462,34 @@ const updateAttendance = async (hasAttended: boolean) => {
                                 />
                             </LazyButton>
                         </NuxtLink>
+                        <LazyButton
+                            :title="
+                                row.hasAttended && row.certificate
+                                    ? $t('event.download_certificate')
+                                    : $t('event.certificate_not_available')
+                            "
+                            variant="ghost"
+                            size="icon"
+                            :disabled="!row.hasAttended || !row.certificate"
+                            hydrate-on-interaction="mouseover"
+                            @click="
+                                row.certificate &&
+                                    downloadCertificate(row.certificate, {
+                                        attendeeName: row.attendee?.fullName,
+                                        eventTitle: props.eventTitle,
+                                    })
+                            "
+                        >
+                            <Icon
+                                name="solar:diploma-outline"
+                                :class="[
+                                    'group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 shrink-0',
+                                    row.hasAttended && row.certificate
+                                        ? 'opacity-80 group-hover:text-primary'
+                                        : 'opacity-40 cursor-not-allowed',
+                                ]"
+                            />
+                        </LazyButton>
                         <DropdownMenu>
                             <DropdownMenuTrigger as-child>
                                 <Button

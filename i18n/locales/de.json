@@ -473,7 +473,13 @@
     "old_events": "Alte Veranstaltungen einschließen",
     "current_events": "Laufende & Zukünftige Veranstaltungen",
     "generate_certificates": "Zertifikate generieren",
-    "certificate_generation_queued": "Zertifikatgenerierung in der Warteschlange"
+    "certificate_generation_queued": "Zertifikatgenerierung in der Warteschlange",
+    "download_certificate": "Zertifikat herunterladen",
+    "certificate_not_available": "Zertifikat nicht verfügbar",
+    "certificate_download_success": "Zertifikat für {name} erfolgreich heruntergeladen",
+    "certificate_download_success_generic": "Zertifikat erfolgreich heruntergeladen",
+    "certificate_download_error": "Fehler beim Herunterladen des Zertifikats für {name}",
+    "certificate_download_error_generic": "Fehler beim Herunterladen des Zertifikats"
   },
   "event_category": {
     "description": "Veranstaltungskategorien für die Organisation von Akademieveranstaltungen verwalten",
