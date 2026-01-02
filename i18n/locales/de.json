@@ -471,7 +471,9 @@
     "rejected": "Abgelehnt",
     "manually_set_full": "Diese Veranstaltung wurde manuell als voll gesetzt",
     "old_events": "Alte Veranstaltungen einschließen",
-    "current_events": "Laufende & Zukünftige Veranstaltungen"
+    "current_events": "Laufende & Zukünftige Veranstaltungen",
+    "generate_certificates": "Zertifikate generieren",
+    "certificate_generation_queued": "Zertifikatgenerierung in der Warteschlange"
   },
   "event_category": {
     "description": "Veranstaltungskategorien für die Organisation von Akademieveranstaltungen verwalten",

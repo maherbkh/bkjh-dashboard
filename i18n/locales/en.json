@@ -471,7 +471,9 @@
     "rejected": "Rejected",
     "manually_set_full": "This event was manually set to be full",
     "old_events": "Include Old Events",
-    "current_events": "Ongoing & Future Events"
+    "current_events": "Ongoing & Future Events",
+    "generate_certificates": "Generate Certificates",
+    "certificate_generation_queued": "Certificate generation queued"
   },
   "event_category": {
     "description": "Manage event categories for organizing academy events",
