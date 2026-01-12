@@ -933,6 +933,95 @@ export type SettingSection = {
     type: SettingValueType;
 };
 
+// Queue Job types
+// Queue job status values from backend
+export type QueueJobStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'RETRYING';
+
+// Queue names from backend
+export type QueueName = 'email' | 'certificate-generation' | 'certificate-email' | 'sla-deadlines';
+
+// Job payload - flexible object for different queue types
+export type QueueJobPayload = {
+    // Email queue payload
+    to?: string;
+    subject?: string;
+    text?: string;
+    html?: string;
+    replyTo?: string;
+    smtpConfig?: string;
+    attachments?: Array<{ filename: string; path: string }>;
+    hasAttachments?: boolean;
+    
+    // Certificate generation payload
+    attendeeId?: string;
+    eventId?: string;
+    attendeeData?: any;
+    eventData?: any;
+    expireAt?: string;
+    
+    // Certificate email payload
+    certificateId?: string;
+    attendeeEmail?: string;
+    attendeeName?: string;
+    eventName?: string;
+    generationDate?: string;
+    certificatePath?: string;
+    
+    // Allow any additional fields
+    [key: string]: any;
+};
+
+export type QueueJob = {
+    id: string; // UUID
+    jobId: string; // BullMQ/Bull job ID from Redis
+    queueName: QueueName;
+    jobType: string; // e.g., 'send', 'generate', 'sla-deadline'
+    status: QueueJobStatus;
+    payload: QueueJobPayload;
+    recipient: string | null; // Email recipient (if applicable)
+    subject: string | null; // Email subject (if applicable)
+    errorMessage: string | null;
+    errorStack: string | null;
+    attempts: number;
+    maxAttempts: number;
+    queuedAt: string | null; // ISO 8601
+    startedAt: string | null;
+    completedAt: string | null;
+    failedAt: string | null;
+    processingTime: number | null; // milliseconds
+    createdAt: string; // ISO 8601
+    updatedAt: string; // ISO 8601
+};
+
+// API response for single job
+export type QueueJobResponse = {
+    success: boolean;
+    message: string;
+    data: QueueJob;
+};
+
+// Statistics response
+export type QueueJobStatistics = {
+    total: number;
+    queued: number;
+    processing: number;
+    completed: number;
+    failed: number;
+    retrying: number;
+};
+
+export type QueueJobStatisticsResponse = {
+    success: boolean;
+    message: string;
+    data: QueueJobStatistics;
+};
+
+// Retry response
+export type QueueJobRetryResponse = {
+    success: boolean;
+    message: string;
+};
+
 // This ensures the file is treated as a module
 export {};
 

@@ -177,7 +177,14 @@ export const useNavigationData = (): ComputedRef<{
                             requireSuperAdmin: true,
                         },
                         {
-                            title: 'Update Settings',
+                            title: t('queue_job.plural'),
+                            url: '/settings/queue-jobs',
+                            icon: 'solar:list-check-outline',
+                            apps: [],
+                            requireSuperAdmin: true,
+                        },
+                        {
+                            title: t('setting.update'),
                             url: '/settings/update-settings',
                             icon: 'solar:refresh-outline',
                             apps: [],
@@ -200,7 +207,7 @@ export const useNavigationData = (): ComputedRef<{
                 return true;
             }
             // Check if item is for current app
-            return item.apps.includes(appStore.appSlug as 'support' | 'academy');
+            return item.apps && item.apps.includes(appStore.appSlug as 'support' | 'academy');
         }).map((item: any) => ({
             ...item,
             items: item.items.filter((subItem: any) => {
@@ -213,7 +220,7 @@ export const useNavigationData = (): ComputedRef<{
                     return true;
                 }
                 // Check if sub-item is for current app
-                return subItem.apps.includes(appStore.appSlug as 'support' | 'academy');
+                return subItem.apps && subItem.apps.includes(appStore.appSlug as 'support' | 'academy');
             }),
         }));
 
