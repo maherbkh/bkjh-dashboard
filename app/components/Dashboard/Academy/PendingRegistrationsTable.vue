@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner';
 import { useDebounceFn } from '@vueuse/core';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 
 const { t } = useI18n();
 const { formatDateParts, formatDateShort } = useGermanDateFormat();
@@ -59,10 +68,28 @@ const headerItems = computed(() => [
 const statuses = ref<string[]>(['PENDING', 'APPROVED', 'REJECTED']);
 const loadingStates = ref<Record<string, boolean>>({});
 
+// Rejection modal state
+const showRejectionModal = ref(false);
+const rejectionNote = ref('');
+const pendingRejectionId = ref<string | null>(null);
+
 // Debounced status change function
 const changeStatus = useDebounceFn(async (id: string, status: 'PENDING' | 'APPROVED' | 'REJECTED') => {
     if (loadingStates.value[id]) return; // Prevent multiple calls for same item
 
+    // Find the current registration to check its status
+    const registration = registrations.value.find(item => item.id === id);
+    const currentStatus = registration?.registrationStatus;
+
+    // If changing from PENDING to REJECTED, show modal instead of immediate API call
+    if (currentStatus === 'PENDING' && status === 'REJECTED') {
+        pendingRejectionId.value = id;
+        rejectionNote.value = '';
+        showRejectionModal.value = true;
+        return;
+    }
+
+    // For all other status changes, proceed with API call
     loadingStates.value[id] = true;
 
     try {
@@ -70,7 +97,7 @@ const changeStatus = useDebounceFn(async (id: string, status: 'PENDING' | 'APPRO
             method: 'PATCH',
             body: {
                 status: status,
-                note: '',
+                note: null,
             },
         });
 
@@ -90,6 +117,50 @@ const changeStatus = useDebounceFn(async (id: string, status: 'PENDING' | 'APPRO
         loadingStates.value[id] = false;
     }
 }, 300);
+
+// Confirm rejection with note
+const confirmRejection = async () => {
+    if (!pendingRejectionId.value) return;
+
+    const id = pendingRejectionId.value;
+    loadingStates.value[id] = true;
+
+    try {
+        const { data: responseData, error: responseError } = await useApiFetch(`/academy/events/registrations/${id}/status`, {
+            method: 'PATCH',
+            body: {
+                status: 'REJECTED',
+                note: rejectionNote.value.trim() || null,
+            },
+        });
+
+        if (responseError.value) {
+            toast.error(responseError.value.message);
+        }
+        else if (responseData.value) {
+            toast.success(responseData.value.message as string);
+            // Refresh the data
+            await refresh();
+            // Close modal and reset state
+            showRejectionModal.value = false;
+            rejectionNote.value = '';
+            pendingRejectionId.value = null;
+        }
+    }
+    catch (err) {
+        toast.error('Failed to update status');
+    }
+    finally {
+        loadingStates.value[id] = false;
+    }
+};
+
+// Cancel rejection modal
+const cancelRejection = () => {
+    showRejectionModal.value = false;
+    rejectionNote.value = '';
+    pendingRejectionId.value = null;
+};
 
 // Computed class function for better performance
 const getStatusClass = (status: string, rowStatus: string) => {
@@ -376,5 +447,37 @@ const getStatusLabel = (status: string): string => {
                 </div>
             </template>
         </PageTable>
+        <Dialog v-model:open="showRejectionModal">
+            <DialogContent class="max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>{{ $t('event.rejected') }}</DialogTitle>
+                    <DialogDescription>
+                        {{ $t('event.status_note_placeholder') }}
+                    </DialogDescription>
+                </DialogHeader>
+                <div class="py-4">
+                    <Textarea
+                        v-model="rejectionNote"
+                        :placeholder="$t('event.status_note_placeholder')"
+                        :rows="4"
+                    />
+                </div>
+                <DialogFooter>
+                    <Button
+                        variant="outline"
+                        @click="cancelRejection"
+                    >
+                        {{ $t('common.cancel') }}
+                    </Button>
+                    <Button
+                        variant="destructive"
+                        :disabled="loadingStates[pendingRejectionId || '']"
+                        @click="confirmRejection"
+                    >
+                        {{ $t('common.confirm') }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>

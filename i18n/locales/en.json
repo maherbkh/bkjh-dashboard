@@ -483,7 +483,9 @@
     "certificate_download_success": "Certificate downloaded successfully for {name}",
     "certificate_download_success_generic": "Certificate downloaded successfully",
     "certificate_download_error": "Failed to download certificate for {name}",
-    "certificate_download_error_generic": "Failed to download certificate"
+    "certificate_download_error_generic": "Failed to download certificate",
+    "status_note": "Status Note",
+    "status_note_placeholder": "Add an optional note about this status change..."
   },
   "event_category": {
     "description": "Manage event categories for organizing academy events",

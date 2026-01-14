@@ -483,7 +483,9 @@
     "certificate_download_success": "Zertifikat für {name} erfolgreich heruntergeladen",
     "certificate_download_success_generic": "Zertifikat erfolgreich heruntergeladen",
     "certificate_download_error": "Fehler beim Herunterladen des Zertifikats für {name}",
-    "certificate_download_error_generic": "Fehler beim Herunterladen des Zertifikats"
+    "certificate_download_error_generic": "Fehler beim Herunterladen des Zertifikats",
+    "status_note": "Status-Notiz",
+    "status_note_placeholder": "Fügen Sie eine optionale Notiz zu dieser Statusänderung hinzu..."
   },
   "event_category": {
     "description": "Veranstaltungskategorien für die Organisation von Akademieveranstaltungen verwalten",
