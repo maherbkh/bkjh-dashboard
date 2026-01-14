@@ -10,6 +10,11 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const { t } = useI18n();
 const { formatDateParts, formatDateShort } = useGermanDateFormat();
@@ -72,6 +77,10 @@ const loadingStates = ref<Record<string, boolean>>({});
 const showRejectionModal = ref(false);
 const rejectionNote = ref('');
 const pendingRejectionId = ref<string | null>(null);
+
+// Note view modal state
+const showNoteModal = ref(false);
+const selectedNote = ref<string | null>(null);
 
 // Debounced status change function
 const changeStatus = useDebounceFn(async (id: string, status: 'PENDING' | 'APPROVED' | 'REJECTED') => {
@@ -160,6 +169,18 @@ const cancelRejection = () => {
     showRejectionModal.value = false;
     rejectionNote.value = '';
     pendingRejectionId.value = null;
+};
+
+// View note modal
+const openNoteModal = (note: string | null | undefined) => {
+    if (!note) return;
+    selectedNote.value = note;
+    showNoteModal.value = true;
+};
+
+const closeNoteModal = () => {
+    showNoteModal.value = false;
+    selectedNote.value = null;
 };
 
 // Computed class function for better performance
@@ -314,9 +335,29 @@ const getStatusLabel = (status: string): string => {
                                     </AvatarFallback>
                                 </Avatar>
                             </div>
-                            <div>
-                                <div class="font-medium">
-                                    {{ getFullName(row.attendee) }}
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <div class="font-medium">
+                                        {{ getFullName(row.attendee) }}
+                                    </div>
+                                    <Tooltip
+                                        v-if="row.notes && row.notes.trim()"
+                                    >
+                                        <TooltipTrigger as-child>
+                                            <Icon
+                                                name="solar:chat-line-linear"
+                                                class="!size-4 shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                                                @click="openNoteModal(row.notes)"
+                                            />
+                                        </TooltipTrigger>
+                                        <TooltipContent
+                                            class="max-w-xs"
+                                        >
+                                            <p class="whitespace-pre-wrap">
+                                                {{ row.notes }}
+                                            </p>
+                                        </TooltipContent>
+                                    </Tooltip>
                                 </div>
                                 <div class="text-muted-foreground text-xs">
                                     {{ row.attendee.email }}
@@ -329,7 +370,7 @@ const getStatusLabel = (status: string): string => {
 
             <template #cell-employment="{ row }">
                 <template v-if="row.attendee?.isEmployee">
-                    <div class="flex flex-col">
+                    <div class="flex flex-col max-w-[200px]">
                         <div
                             v-if="row.attendee?.occupation?.name"
                             class="font-medium truncate"
@@ -475,6 +516,24 @@ const getStatusLabel = (status: string): string => {
                         @click="confirmRejection"
                     >
                         {{ $t('common.confirm') }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+        <Dialog v-model:open="showNoteModal">
+            <DialogContent class="max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>{{ $t('event.status_note') }}</DialogTitle>
+                </DialogHeader>
+                <div class="py-4">
+                    <p class="text-sm whitespace-pre-wrap">{{ selectedNote }}</p>
+                </div>
+                <DialogFooter>
+                    <Button
+                        variant="outline"
+                        @click="closeNoteModal"
+                    >
+                        {{ $t('global.close') }}
                     </Button>
                 </DialogFooter>
             </DialogContent>

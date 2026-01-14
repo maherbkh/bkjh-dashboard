@@ -13,6 +13,11 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const { t } = useI18n();
 const { formatDateParts } = useGermanDateFormat();
@@ -24,6 +29,7 @@ interface EventRegistrationLite {
     registrationDate?: string;
     hasAttended?: boolean;
     certificate?: Certificate | null;
+    notes?: string | null;
     attendee?: {
         id?: string;
         firstName?: string;
@@ -102,6 +108,10 @@ const selectedRows = ref<string[]>([]);
 const showRejectionModal = ref(false);
 const rejectionNote = ref('');
 const pendingRejectionId = ref<string | null>(null);
+
+// Note view modal state
+const showNoteModal = ref(false);
+const selectedNote = ref<string | null>(null);
 
 // Reset selected rows when status tab changes
 watch(selectedStatusTab, () => {
@@ -214,6 +224,18 @@ const cancelRejection = () => {
     showRejectionModal.value = false;
     rejectionNote.value = '';
     pendingRejectionId.value = null;
+};
+
+// View note modal
+const openNoteModal = (note: string | null | undefined) => {
+    if (!note) return;
+    selectedNote.value = note;
+    showNoteModal.value = true;
+};
+
+const closeNoteModal = () => {
+    showNoteModal.value = false;
+    selectedNote.value = null;
 };
 
 // Helper function to translate status values
@@ -510,9 +532,29 @@ const updateAttendance = async (hasAttended: boolean) => {
                                         :title="row.hasAttended ? $t('attendee.has_attended') : $t('attendee.has_not_attended')"
                                     />
                                 </div>
-                                <div>
-                                    <div class="font-medium">
-                                        {{ row.attendee?.fullName }}
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <div class="font-medium">
+                                            {{ row.attendee?.fullName }}
+                                        </div>
+                                        <Tooltip
+                                            v-if="row.notes && row.notes.trim()"
+                                        >
+                                            <TooltipTrigger as-child>
+                                                <Icon
+                                                    name="solar:chat-line-linear"
+                                                    class="!size-4 shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                                                    @click="openNoteModal(row.notes)"
+                                                />
+                                            </TooltipTrigger>
+                                            <TooltipContent
+                                                class="max-w-xs"
+                                            >
+                                                <p class="whitespace-pre-wrap">
+                                                    {{ row.notes }}
+                                                </p>
+                                            </TooltipContent>
+                                        </Tooltip>
                                     </div>
                                     <div class="text-muted-foreground text-xs">
                                         {{ row.attendee?.email }}
@@ -606,7 +648,7 @@ const updateAttendance = async (hasAttended: boolean) => {
 
                 <template #cell-employment="{ row }">
                     <template v-if="row.attendee?.isEmployee">
-                        <div class="flex flex-col">
+                        <div class="flex flex-col max-w-[200px]">
                             <div
                                 v-if="row.attendee?.occupation?.name"
                                 class="font-medium truncate"
@@ -689,6 +731,26 @@ const updateAttendance = async (hasAttended: boolean) => {
                         @click="confirmRejection"
                     >
                         {{ $t('common.confirm') }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+        <Dialog v-model:open="showNoteModal">
+            <DialogContent class="max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>{{ $t('event.status_note') }}</DialogTitle>
+                </DialogHeader>
+                <div class="py-4">
+                    <p class="text-sm whitespace-pre-wrap">
+                        {{ selectedNote }}
+                    </p>
+                </div>
+                <DialogFooter>
+                    <Button
+                        variant="outline"
+                        @click="closeNoteModal"
+                    >
+                        {{ $t('global.close') }}
                     </Button>
                 </DialogFooter>
             </DialogContent>
