@@ -1251,6 +1251,7 @@
     "status_change_dialog_title": "Ticket-Status ändern",
     "status_note": "Status-Notiz",
     "status_note_placeholder": "Fügen Sie eine optionale Notiz zu dieser Statusänderung hinzu...",
+    "note_required": "Notiz ist erforderlich, wenn E-Mail-Benachrichtigung gesendet wird",
     "status_update_failed": "Status konnte nicht aktualisiert werden",
     "status_updated_successfully": "Status erfolgreich aktualisiert",
     "send_email": "E-Mail senden",
@@ -1259,6 +1260,9 @@
     "send_to_requester": "Benachrichtigung an den Ticket-Antragsteller senden",
     "send_to_custom_email": "An benutzerdefinierte E-Mail-Adresse(n) senden",
     "custom_email_addresses": "E-Mail-Adressen",
+    "custom_email_addresses_placeholder": "E-Mail-Adresse(n) durch Komma \",\" getrennt",
+    "email_required": "E-Mail-Adresse ist erforderlich",
+    "email_invalid": "Bitte geben Sie eine gültige E-Mail-Adresse(n) ein",
     "subject": "Betreff",
     "title": "Titel",
     "type": {

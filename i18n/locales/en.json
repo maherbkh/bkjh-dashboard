@@ -1249,6 +1249,7 @@
     "status_change_dialog_title": "Change Ticket Status",
     "status_note": "Status Note",
     "status_note_placeholder": "Add an optional note about this status change...",
+    "note_required": "Note is required when sending email notification",
     "status_update_failed": "Failed to update status",
     "status_updated_successfully": "Status updated successfully",
     "send_email": "Send an Email",
@@ -1257,6 +1258,9 @@
     "send_to_requester": "Send notification to the ticket requester",
     "send_to_custom_email": "Send to custom email address(es)",
     "custom_email_addresses": "Email Addresses",
+    "custom_email_addresses_placeholder": "email address(es) seperated by comma \",\"",
+    "email_required": "Email address is required",
+    "email_invalid": "Please enter valid email address(es)",
     "subject": "Subject",
     "title": "Title",
     "type": {

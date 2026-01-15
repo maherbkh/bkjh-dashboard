@@ -59,7 +59,7 @@
         <!-- Status Change Dialog -->
         <Dialog
             :open="isDialogOpen"
-            @update:open="(value) => { isDialogOpen = value; if (!value) { statusNote = ''; sendEmail = true; emailOption = 'requester'; customEmails = ''; emailError = ''; } }"
+            @update:open="(value) => { isDialogOpen = value; if (!value) { statusNote = ''; sendEmail = false; emailOption = 'requester'; customEmails = ''; emailError = ''; noteError = ''; } }"
         >
             <DialogContent class="sm:max-w-md">
                 <DialogHeader>
@@ -76,7 +76,15 @@
                             v-model="statusNote"
                             :placeholder="$t('ticket.status_note_placeholder')"
                             rows="3"
+                            :class="{ 'border-red-500': noteError }"
+                            @input="noteError = ''"
                         />
+                        <p
+                            v-if="noteError"
+                            class="text-sm text-red-500"
+                        >
+                            {{ noteError }}
+                        </p>
                     </div>
 
                     <!-- Email Notification Section (only for CLOSED, SOLVED, PENDING_ACTION) -->
@@ -117,7 +125,7 @@
                                                 id="custom-emails"
                                                 v-model="customEmails"
                                                 type="text"
-                                                placeholder="email1@example.com, email2@example.com"
+                                                :placeholder="$t('ticket.custom_email_addresses_placeholder')"
                                                 :class="{ 'border-red-500': emailError }"
                                                 @input="emailError = ''"
                                             />
@@ -138,7 +146,7 @@
                     <Button
                         variant="outline"
                         :disabled="isInternalLoading"
-                        @click="() => { isDialogOpen = false; statusNote = ''; sendEmail = true; emailOption = 'requester'; customEmails = ''; emailError = ''; }"
+                        @click="() => { isDialogOpen = false; statusNote = ''; sendEmail = false; emailOption = 'requester'; customEmails = ''; emailError = ''; noteError = ''; }"
                     >
                         {{ $t('action.cancel') }}
                     </Button>
@@ -199,20 +207,21 @@ const statusNote = ref('');
 const isInternalLoading = ref(false);
 
 // Email notification state
-const sendEmail = ref(true);
+const sendEmail = ref(false);
 const emailOption = ref<'requester' | 'other'>('requester');
 const customEmails = ref('');
 const emailError = ref('');
+const noteError = ref('');
 
 // Check if email options should be shown for the selected status
 const shouldShowEmailOptions = computed(() => {
     return ['CLOSED', 'SOLVED', 'PENDING_ACTION'].includes(selectedStatus.value);
 });
 
-// Watch for email options visibility and ensure sendEmail is true when shown
+// Watch for email options visibility and reset sendEmail when shown
 watch(shouldShowEmailOptions, (newValue) => {
     if (newValue) {
-        sendEmail.value = true;
+        sendEmail.value = false;
     }
 });
 
@@ -220,10 +229,11 @@ watch(shouldShowEmailOptions, (newValue) => {
 const handleStatusSelect = (status: string) => {
     selectedStatus.value = status;
     statusNote.value = '';
-    sendEmail.value = true;
+    sendEmail.value = false;
     emailOption.value = 'requester';
     customEmails.value = '';
     emailError.value = '';
+    noteError.value = '';
     isDialogOpen.value = true;
 };
 
@@ -277,14 +287,22 @@ const getStatusIcon = (status: string) => {
 const submitStatusChange = async () => {
     if (!selectedStatus.value) return;
 
+    // Validate note if sendEmail is true (for applicable statuses)
+    if (shouldShowEmailOptions.value && sendEmail.value) {
+        if (!statusNote.value.trim()) {
+            noteError.value = t('ticket.note_required');
+            return;
+        }
+    }
+
     // Validate email if "other" is selected and email options should be shown
     if (shouldShowEmailOptions.value && sendEmail.value && emailOption.value === 'other') {
         if (!customEmails.value.trim()) {
-            emailError.value = 'Email address is required';
+            emailError.value = t('ticket.email_required');
             return;
         }
         if (!validateEmails(customEmails.value)) {
-            emailError.value = 'Please enter valid email address(es)';
+            emailError.value = t('ticket.email_invalid');
             return;
         }
     }
@@ -328,10 +346,11 @@ const submitStatusChange = async () => {
         isDialogOpen.value = false;
         statusNote.value = '';
         selectedStatus.value = '';
-        sendEmail.value = true;
+        sendEmail.value = false;
         emailOption.value = 'requester';
         customEmails.value = '';
         emailError.value = '';
+        noteError.value = '';
 
         // Emit event for parent to refresh data
         emit('status-changed');
