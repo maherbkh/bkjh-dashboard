@@ -248,6 +248,8 @@ export type TicketStatus = {
 export type TicketStatusChangePayload = {
     status: 'PENDING' | 'IN_PROGRESS' | 'PENDING_ACTION' | 'TRANSFERRED' | 'SOLVED' | 'CLOSED';
     note?: string;
+    sendEmail?: boolean;
+    email?: string;
 };
 
 export type TicketActionType

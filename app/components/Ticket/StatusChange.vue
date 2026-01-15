@@ -1,12 +1,13 @@
 <!--
   TicketStatusChange Component
 
-  Standalone component for changing ticket status with optional note.
+  Standalone component for changing ticket status with optional note and email notification.
 
   Props:
   - ticketId: string - The ticket UUID
   - currentStatus: string - The current/last status of the ticket (to disable in dropdown)
   - isLoading?: boolean - Optional external loading state
+  - requesterEmail?: string - The ticket requester's email address
 
   Emits:
   - status-changed: Triggered after successful status change (parent can refresh data)
@@ -58,7 +59,7 @@
         <!-- Status Change Dialog -->
         <Dialog
             :open="isDialogOpen"
-            @update:open="isDialogOpen = $event"
+            @update:open="(value) => { isDialogOpen = value; if (!value) { statusNote = ''; sendEmail = true; emailOption = 'requester'; customEmails = ''; emailError = ''; } }"
         >
             <DialogContent class="sm:max-w-md">
                 <DialogHeader>
@@ -77,12 +78,67 @@
                             rows="3"
                         />
                     </div>
+
+                    <!-- Email Notification Section (only for CLOSED, SOLVED, PENDING_ACTION) -->
+                    <TransitionExpand>
+                        <div
+                            v-if="shouldShowEmailOptions"
+                            class="space-y-3"
+                        >
+                            <FormItemSwitch
+                                id="send-email"
+                                v-model="sendEmail"
+                                flex-row
+                                :show-side-label="false"
+                                :title="$t('ticket.send_email')"
+                            />
+
+                            <!-- Email Options (shown when sendEmail is true) -->
+                            <TransitionExpand>
+                                <div
+                                    v-if="sendEmail"
+                                    class="space-y-3"
+                                >
+                                    <FormItemRadioGroup
+                                        id="email-recipient"
+                                        v-model="emailOption"
+                                        :options="emailOptions"
+                                        variant="box"
+                                    />
+
+                                    <!-- Custom Email Input (shown when "other" is selected) -->
+                                    <TransitionSlide>
+                                        <div
+                                            v-if="emailOption === 'other'"
+                                            class="space-y-2"
+                                        >
+                                            <Label for="custom-emails">{{ $t('ticket.custom_email_addresses') }}</Label>
+                                            <Input
+                                                id="custom-emails"
+                                                v-model="customEmails"
+                                                type="text"
+                                                placeholder="email1@example.com, email2@example.com"
+                                                :class="{ 'border-red-500': emailError }"
+                                                @input="emailError = ''"
+                                            />
+                                            <p
+                                                v-if="emailError"
+                                                class="text-sm text-red-500"
+                                            >
+                                                {{ emailError }}
+                                            </p>
+                                        </div>
+                                    </TransitionSlide>
+                                </div>
+                            </TransitionExpand>
+                        </div>
+                    </TransitionExpand>
                 </div>
                 <DialogFooter>
                     <Button
                         variant="outline"
                         :disabled="isInternalLoading"
-                        @click="isDialogOpen = false"
+                        @click="() => { isDialogOpen = false; statusNote = ''; sendEmail = true; emailOption = 'requester'; customEmails = ''; emailError = ''; }"
                     >
                         {{ $t('action.cancel') }}
                     </Button>
@@ -105,12 +161,14 @@
 
 <script lang="ts" setup>
 import { toast } from 'vue-sonner';
+import { TransitionExpand, TransitionSlide } from '@morev/vue-transitions';
 import type { TicketStatusChangePayload } from '~/types';
 
 interface Props {
     ticketId: string;
     currentStatus: string;
     isLoading?: boolean;
+    requesterEmail?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -140,12 +198,60 @@ const selectedStatus = ref<string>('');
 const statusNote = ref('');
 const isInternalLoading = ref(false);
 
+// Email notification state
+const sendEmail = ref(true);
+const emailOption = ref<'requester' | 'other'>('requester');
+const customEmails = ref('');
+const emailError = ref('');
+
+// Check if email options should be shown for the selected status
+const shouldShowEmailOptions = computed(() => {
+    return ['CLOSED', 'SOLVED', 'PENDING_ACTION'].includes(selectedStatus.value);
+});
+
+// Watch for email options visibility and ensure sendEmail is true when shown
+watch(shouldShowEmailOptions, (newValue) => {
+    if (newValue) {
+        sendEmail.value = true;
+    }
+});
+
 // Handle status selection from dropdown
 const handleStatusSelect = (status: string) => {
     selectedStatus.value = status;
     statusNote.value = '';
+    sendEmail.value = true;
+    emailOption.value = 'requester';
+    customEmails.value = '';
+    emailError.value = '';
     isDialogOpen.value = true;
 };
+
+// Email validation function
+const validateEmails = (emailString: string): boolean => {
+    if (!emailString.trim()) return false;
+
+    const emails = emailString.split(',').map(e => e.trim().toLowerCase());
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    return emails.every(email => emailRegex.test(email));
+};
+
+// Email options for RadioGroup
+const emailOptions = computed(() => [
+    {
+        value: 'requester' as const,
+        label: props.requesterEmail || t('ticket.requester_email'),
+        description: t('ticket.send_to_requester'),
+        icon: 'solar:user-circle-line-duotone',
+    },
+    {
+        value: 'other' as const,
+        label: t('ticket.other_email'),
+        description: t('ticket.send_to_custom_email'),
+        icon: 'solar:letter-unread-line-duotone',
+    },
+]);
 
 // Get status icon
 const getStatusIcon = (status: string) => {
@@ -171,6 +277,18 @@ const getStatusIcon = (status: string) => {
 const submitStatusChange = async () => {
     if (!selectedStatus.value) return;
 
+    // Validate email if "other" is selected and email options should be shown
+    if (shouldShowEmailOptions.value && sendEmail.value && emailOption.value === 'other') {
+        if (!customEmails.value.trim()) {
+            emailError.value = 'Email address is required';
+            return;
+        }
+        if (!validateEmails(customEmails.value)) {
+            emailError.value = 'Please enter valid email address(es)';
+            return;
+        }
+    }
+
     isInternalLoading.value = true;
     try {
         const payload: TicketStatusChangePayload = {
@@ -182,6 +300,25 @@ const submitStatusChange = async () => {
             payload.note = statusNote.value.trim();
         }
 
+        // Add email fields only for specific statuses (CLOSED, SOLVED, PENDING_ACTION)
+        if (shouldShowEmailOptions.value) {
+            payload.sendEmail = sendEmail.value;
+
+            // Add email based on selection
+            if (sendEmail.value) {
+                if (emailOption.value === 'requester') {
+                    payload.email = props.requesterEmail;
+                }
+                else {
+                    // Process custom emails: trim, lowercase, and join
+                    payload.email = customEmails.value
+                        .split(',')
+                        .map(e => e.trim().toLowerCase())
+                        .join(',');
+                }
+            }
+        }
+
         await useApiFetch(`/support/tickets/${props.ticketId}/status`, {
             method: 'POST',
             body: payload,
@@ -191,6 +328,10 @@ const submitStatusChange = async () => {
         isDialogOpen.value = false;
         statusNote.value = '';
         selectedStatus.value = '';
+        sendEmail.value = true;
+        emailOption.value = 'requester';
+        customEmails.value = '';
+        emailError.value = '';
 
         // Emit event for parent to refresh data
         emit('status-changed');

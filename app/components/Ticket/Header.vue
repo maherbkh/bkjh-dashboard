@@ -67,6 +67,7 @@
             <TicketStatusChange
                 :ticket-id="ticket.id"
                 :current-status="currentStatus"
+                :requester-email="ticket.requester.email"
                 :is-loading="isActionLoading"
                 @status-changed="$emit('statusChanged')"
             />

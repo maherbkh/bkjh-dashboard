@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { cn } from '@/lib/utils';
+
+const { t } = useI18n();
+
 const props = withDefaults(defineProps<{
     id?: string;
     title?: string;
@@ -9,12 +13,15 @@ const props = withDefaults(defineProps<{
     errors?: string[];
     trueLabel?: string;
     falseLabel?: string;
+    flexRow?: boolean;
+    showSideLabel?: boolean;
 }>(), {
+    modelValue: false,
     disabled: false,
     required: false,
     errors: () => [],
-    trueLabel: 'On',
-    falseLabel: 'Off',
+    flexRow: false,
+    showSideLabel: true,
 });
 
 const emit = defineEmits<{
@@ -25,10 +32,19 @@ const switchValue = computed<boolean>({
     get: () => props.modelValue ?? false,
     set: val => emit('update:modelValue', val),
 });
+
+// Use translations for labels if not provided
+const displayTrueLabel = computed(() => props.trueLabel || t('common.on'));
+const displayFalseLabel = computed(() => props.falseLabel || t('common.off'));
+
+// Computed wrapper classes
+const wrapperClasses = computed(() =>
+    cn('grid w-full items-center gap-1.5', props.flexRow && 'flex items-center justify-between space-x-2'),
+);
 </script>
 
 <template>
-    <div class="grid w-full items-center gap-1.5">
+    <div :class="wrapperClasses">
         <Label
             v-if="title"
             :for="id"
@@ -48,11 +64,11 @@ const switchValue = computed<boolean>({
                 :aria-invalid="errors.length > 0"
             />
             <Label
-                v-if="trueLabel || falseLabel"
+                v-if="showSideLabel && (displayTrueLabel || displayFalseLabel)"
                 :for="id"
                 class="text-sm text-muted-foreground"
             >
-                {{ switchValue ? trueLabel : falseLabel }}
+                {{ switchValue ? displayTrueLabel : displayFalseLabel }}
             </Label>
         </div>
         <p
