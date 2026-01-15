@@ -1261,6 +1261,8 @@
     "send_to_custom_email": "An benutzerdefinierte E-Mail-Adresse(n) senden",
     "custom_email_addresses": "E-Mail-Adressen",
     "custom_email_addresses_placeholder": "E-Mail-Adresse(n) durch Komma \",\" getrennt",
+    "internal_email": "Interne E-Mail",
+    "external_email": "Externe E-Mail",
     "email_required": "E-Mail-Adresse ist erforderlich",
     "email_invalid": "Bitte geben Sie eine gültige E-Mail-Adresse(n) ein",
     "subject": "Betreff",

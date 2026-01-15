@@ -107,6 +107,29 @@
                                     v-if="sendEmail"
                                     class="space-y-3"
                                 >
+                                    <!-- Email Status Notice (only for requester email) -->
+                                    <TransitionSlide>
+                                        <div
+                                            v-if="props.requesterEmail"
+                                            :class="cn(
+                                                'rounded-md px-3 py-2 text-sm font-normal',
+                                                isInternalEmail(props.requesterEmail)
+                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border border-green-400/25'
+                                                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border border-red-400/25',
+                                            )"
+                                        >
+                                            <div class="flex items-center gap-2">
+                                                <Icon
+                                                    :name="isInternalEmail(props.requesterEmail) ? 'solar:shield-check-outline' : 'solar:shield-cross-outline'"
+                                                    class="size-5! shrink-0"
+                                                />
+                                                <span>
+                                                    {{ isInternalEmail(props.requesterEmail) ? t('ticket.internal_email') : t('ticket.external_email') }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </TransitionSlide>
+
                                     <FormItemRadioGroup
                                         id="email-recipient"
                                         v-model="emailOption"
@@ -168,6 +191,7 @@
 </template>
 
 <script lang="ts" setup>
+import { cn } from '@/lib/utils';
 import { toast } from 'vue-sonner';
 import { TransitionExpand, TransitionSlide } from '@morev/vue-transitions';
 import type { TicketStatusChangePayload } from '~/types';
@@ -235,6 +259,51 @@ const handleStatusSelect = (status: string) => {
     emailError.value = '';
     noteError.value = '';
     isDialogOpen.value = true;
+};
+
+// Allowed internal email domains
+const internalEmailDomains = [
+    'backhaus-blog.de',
+    'backhaus.de',
+    'backhaus.firma.cc',
+    'backhaus-informiert.de',
+    'backhaus-jugendhilfe.com',
+    'backhaus-jugendhilfe.de',
+    'backhaus-kinderhilfe.com',
+    'backhaus-kinderhilfe.de',
+    'backhaus-profifamilie.de',
+    'bkjh.de',
+    'bkjh-news.de',
+    'gerhardbackhaus.com',
+    'gerhard-backhaus.com',
+    'gerhardbackhaus.de',
+    'gerhard-backhaus.de',
+    'kind-im-mittelpunkt.com',
+    'kind-im-mittelpunkt.de',
+    'kind-im-mittelpunkt.info',
+    'mariannebackhaus.com',
+    'marianne-backhaus.com',
+    'mariannebackhaus.de',
+    'marianne-backhaus.de',
+    'marianne-backhaus.eu',
+    'pflegefamilie.de',
+    'profifamilie.com',
+    'profifamilie.de',
+    'profifamilie.eu',
+    'profifamilie.info',
+    'profifamilie.net',
+    'profifamilie.org',
+    'sebastianbackhaus.com',
+    'sebastian-backhaus.com',
+    'sebastian-backhaus.de',
+    'backhaus-akademie.de',
+];
+
+// Check if email is internal
+const isInternalEmail = (email: string | undefined): boolean => {
+    if (!email) return false;
+    const domain = email.split('@')[1]?.toLowerCase();
+    return domain ? internalEmailDomains.includes(domain) : false;
 };
 
 // Email validation function

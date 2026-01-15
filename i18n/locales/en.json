@@ -1259,6 +1259,8 @@
     "send_to_custom_email": "Send to custom email address(es)",
     "custom_email_addresses": "Email Addresses",
     "custom_email_addresses_placeholder": "email address(es) seperated by comma \",\"",
+    "internal_email": "Internal Email",
+    "external_email": "External Email",
     "email_required": "Email address is required",
     "email_invalid": "Please enter valid email address(es)",
     "subject": "Subject",
