@@ -485,7 +485,7 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                     </CommandEmpty>
 
                     <ScrollArea
-                        class="max-h-60 overflow-auto no-scrollbar-arrows scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-900"
+                        class="max-h-60"
                         @scroll="handleScroll"
                     >
                         <CommandList>
