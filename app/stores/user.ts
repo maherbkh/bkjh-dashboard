@@ -8,7 +8,7 @@ export const useUserStore = defineStore('user', () => {
     const { t } = useNuxtApp().$i18n;
     const user = ref<User | undefined>();
     const accessToken = useCookie('BKJH_ACCESS_TOKEN', {
-        maxAge: 60 * 15, // 15 minutes to match backend
+        maxAge: 60 * 60 * 24, // 24 hours - backend controls actual validity via 401
         httpOnly: false,
         secure: false,
         sameSite: 'lax',
