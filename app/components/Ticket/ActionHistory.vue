@@ -57,10 +57,16 @@
                         <HoverCardTrigger
                             class="line-clamp-2 max-w-64 cursor-pointer hover:text-primary ease-in-out duration-300"
                         >
-                            {{ formatActionNote(row.note, row.actionType) }}
+                            <div v-html="formatActionNote(row.note, row.actionType)" />
                         </HoverCardTrigger>
-                        <HoverCardContent side="right">
-                            {{ formatActionNote(row.note, row.actionType) }}
+                        <HoverCardContent
+                            side="right"
+                            class="max-w-4xl"
+                        >
+                            <div
+                                v-html="formatActionNote(row.note, row.actionType)"
+                                class="prose prose-sm dark:prose-invert max-w-none [&_h1]:text-lg [&_h1]:font-bold [&_h2]:text-base [&_h2]:font-semibold [&_h3]:text-sm [&_h3]:font-medium [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:list-inside [&_ol]:list-decimal [&_ol]:list-inside [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono [&_code]:bg-muted [&_pre]:p-2 [&_pre]:rounded-md [&_pre]:overflow-x-auto [&_pre]:bg-muted [&_pre_code]:bg-transparent [&_pre_code]:p-0"
+                            />
                         </HoverCardContent>
                     </HoverCard>
                 </div>

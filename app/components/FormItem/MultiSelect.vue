@@ -16,6 +16,8 @@ const props = withDefaults(
 
         id?: string;
         label?: string;
+        title?: string;
+        description?: string;
         placeholder?: string;
         searchPlaceholder?: string;
         emptyText?: string;
@@ -375,25 +377,29 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
 </script>
 
 <template>
-    <div
-        class="w-full"
-        :class="singleLine ? 'space-y-1' : ''"
-    >
-        <label
-            v-if="label"
+    <div class="grid w-full items-center gap-2">
+        <Label
+            v-if="label || title"
             :for="id"
-            class="mb-2 block text-sm font-medium"
         >
-            {{ label }}<span
+            {{ label || title }}
+            <span
                 v-if="required"
-                class="text-destructive"
-            > *</span>
-        </label>
+                class="text-destructive font-semibold"
+            >*</span>
+        </Label>
+
+        <p
+            v-if="description"
+            class="text-sm text-muted-foreground"
+        >
+            {{ description }}
+        </p>
 
         <!-- Selected badges - Only render when there are selections -->
         <div
             v-if="selectedOptions.length > 0"
-            class="mb-2 flex gap-2"
+            class="flex gap-2"
             :class="singleLine ? 'overflow-x-auto whitespace-nowrap no-scrollbar' : 'flex-wrap'"
         >
             <template
@@ -435,13 +441,16 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                     type="button"
                     variant="outline"
                     :disabled="disabled"
-                    class="justify-between"
+                    class="justify-between h-8 text-base md:text-sm font-normal"
                     :class="autoSize ? 'w-auto' : 'w-full'"
                     aria-haspopup="listbox"
                     :aria-expanded="open"
                 >
                     <span class="truncate">{{ buttonText }}</span>
-                    <span aria-hidden>▼</span>
+                    <Icon
+                        name="solar:double-alt-arrow-down-line-duotone"
+                        class="ml-2 h-4 w-4 shrink-0 opacity-50"
+                    />
                 </Button>
             </PopoverTrigger>
             <PopoverContent

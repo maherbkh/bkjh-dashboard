@@ -235,53 +235,54 @@ const handleView = (job: QueueJob) => {
         <PageHeaderActions
             :page-title="pageTitle"
             :page-icon="pageIcon || 'solar:list-check-outline'"
+            :has-add-new="false"
+            :has-deleted-items="false"
         />
         
         <!-- Filters and Search -->
         <div class="border-b p-4 space-y-4">
             <form
-                class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end"
+                class="grid grid-cols-1 lg:grid-cols-6 gap-4 items-end"
                 @submit.prevent="handleSearchSubmit"
                 @reset.prevent="handleReset"
             >
+                <!-- First Row -->
                 <!-- Search -->
                 <FormItemInput
                     v-model="searchQuery"
                     :placeholder="$t('action.search_placeholder')"
                     icon="solar:rounded-magnifer-linear"
-                    class="col-span-12 lg:col-span-3"
+                    class="col-span-1 lg:col-span-2"
                 />
                 
                 <!-- Queue Name Filter -->
                 <FormItemSelect
                     v-model="selectedQueueName"
-                    :title="$t('queue_job.filter_by_queue')"
                     :placeholder="$t('queue_job.filter_by_queue')"
                     :data="queueNameOptions"
                     key-value="value"
                     name-value="label"
-                    class="col-span-12 lg:col-span-2"
+                    class="col-span-1 lg:col-span-2"
                 />
                 
                 <!-- Status Filter -->
                 <FormItemSelect
                     v-model="selectedStatus"
-                    :title="$t('queue_job.filter_by_status')"
                     :placeholder="$t('queue_job.filter_by_status')"
                     :data="statusOptions"
                     key-value="value"
                     name-value="label"
-                    class="col-span-12 lg:col-span-2"
+                    class="col-span-1 lg:col-span-2"
                 />
                 
+                <!-- Second Row -->
                 <!-- Start Date -->
                 <FormItemDatePicker
                     v-model="startDate"
-                    :title="$t('queue_job.date_range')"
                     :placeholder="$t('queue_job.date_range')"
                     format="yyyy-MM-dd"
                     :time-picker="false"
-                    class="col-span-12 lg:col-span-2"
+                    class="col-span-1 lg:col-span-2"
                 />
                 
                 <!-- End Date -->
@@ -290,34 +291,39 @@ const handleView = (job: QueueJob) => {
                     :placeholder="$t('queue_job.date_range')"
                     format="yyyy-MM-dd"
                     :time-picker="false"
-                    class="col-span-12 lg:col-span-2"
+                    class="col-span-1 lg:col-span-2"
                 />
                 
-                <!-- Search Button -->
-                <Button
-                    type="submit"
-                    class="cursor-pointer col-span-6 lg:col-span-1"
-                    size="sm"
-                    variant="secondary"
-                >
-                    <Icon
-                        class="shrink-0 w-full"
-                        name="solar:rounded-magnifer-linear"
-                    />
-                </Button>
-                
-                <!-- Reset Button -->
-                <Button
-                    type="reset"
-                    class="cursor-pointer col-span-6 lg:col-span-1"
-                    variant="outline"
-                    size="sm"
-                >
-                    <Icon
-                        class="shrink-0 w-full"
-                        name="solar:restart-line-duotone"
-                    />
-                </Button>
+                <!-- Action Buttons -->
+                <div class="col-span-1 lg:col-span-2 flex gap-2">
+                    <!-- Search Button -->
+                    <Button
+                        type="submit"
+                        class="cursor-pointer flex-1"
+                        size="sm"
+                        variant="secondary"
+                    >
+                        <Icon
+                            class="shrink-0"
+                            name="solar:rounded-magnifer-linear"
+                        />
+                        <span class="hidden sm:inline ml-2">{{ $t('action.search') }}</span>
+                    </Button>
+                    
+                    <!-- Reset Button -->
+                    <Button
+                        type="reset"
+                        class="cursor-pointer flex-1"
+                        variant="outline"
+                        size="sm"
+                    >
+                        <Icon
+                            class="shrink-0"
+                            name="solar:restart-line-duotone"
+                        />
+                        <span class="hidden sm:inline ml-2">{{ $t('action.reset') }}</span>
+                    </Button>
+                </div>
             </form>
         </div>
         

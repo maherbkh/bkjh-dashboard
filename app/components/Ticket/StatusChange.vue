@@ -61,7 +61,7 @@
             :open="isDialogOpen"
             @update:open="(value) => { isDialogOpen = value; if (!value) { statusNote = ''; sendEmail = false; emailOption = 'requester'; customEmails = ''; emailError = ''; noteError = ''; } }"
         >
-            <DialogContent class="sm:max-w-md">
+            <DialogContent class="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>{{ $t('ticket.status_change_dialog_title') }}</DialogTitle>
                     <DialogDescription>
@@ -71,12 +71,14 @@
                 <div class="space-y-4">
                     <div class="space-y-2">
                         <Label for="status-note">{{ $t('ticket.status_note') }}</Label>
-                        <Textarea
+                        <RTEditor
                             id="status-note"
                             v-model="statusNote"
                             :placeholder="$t('ticket.status_note_placeholder')"
-                            rows="3"
-                            :class="{ 'border-red-500': noteError }"
+                            :show-character-count="false"
+                            min-height="150px"
+                            class="w-full"
+                            :errors="noteError ? [noteError] : []"
                             @input="noteError = ''"
                         />
                         <p
@@ -195,6 +197,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'vue-sonner';
 import { TransitionExpand, TransitionSlide } from '@morev/vue-transitions';
 import type { TicketStatusChangePayload } from '~/types';
+import RTEditor from '~/components/FormItem/RTEditor.vue';
 
 interface Props {
     ticketId: string;

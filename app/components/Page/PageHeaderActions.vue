@@ -12,6 +12,10 @@ defineProps({
         type: Boolean,
         default: true,
     },
+    hasDeletedItems: {
+        type: Boolean,
+        default: true,
+    },
 });
 
 const emit = defineEmits(['add-new']);
@@ -35,6 +39,7 @@ const emit = defineEmits(['add-new']);
             {{ $t("action.add") + " " + $t("common.new") }}
         </LazyButton>
         <LazyButton
+            v-if="hasDeletedItems"
             class="cursor-pointer"
             variant="secondary"
             size="sm"

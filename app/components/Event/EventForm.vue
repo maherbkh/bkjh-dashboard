@@ -619,7 +619,6 @@ const formTitle = computed(() => {
                             <LazyFormItemMultiSelect
                                 id="speakers"
                                 v-model="speakers"
-                                :title="$t('academy.speakers')"
                                 :placeholder="$t('action.select') + ' ' + $t('academy.speakers')"
                                 class="col-span-12"
                                 :errors="errors.speakers ? [errors.speakers] : []"
