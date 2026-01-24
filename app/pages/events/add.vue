@@ -63,9 +63,17 @@ watch(duplicateEventId, async (id) => {
 const onSubmit = async (values: EventForm) => {
     isSubmitting.value = true;
 
+    // Ensure topics is always an array, never null or undefined
+    const payload: any = {
+        ...values,
+        topics: Array.isArray(values.topics) ? values.topics : [],
+    };
+    
+    console.log('API Payload topics:', payload.topics); // Debug log
+
     const { data, error } = await useApiFetch('/academy/events', {
         method: 'POST',
-        body: values as any,
+        body: payload,
     });
 
     if (error.value) {

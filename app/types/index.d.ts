@@ -756,6 +756,8 @@ export type EventData = {
     type: 'ONLINE' | 'IN_PERSON' | 'HYBRID' | string;
     shortDescription?: string;
     description?: string;
+    certNote?: string | null;
+    topics?: string[];
     note?: string | null;
     maxCapacity: number;
     room?: string | null;

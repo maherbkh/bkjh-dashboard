@@ -2,6 +2,9 @@
 import { useResourcesStore } from '~/stores/resources';
 import type { EventData } from '~/types';
 import FormItemMultiSelect from '~/components/FormItem/MultiSelect.vue';
+import FormItemInput from '~/components/FormItem/Input.vue';
+import FormItemTextarea from '~/components/FormItem/Textarea.vue';
+import FormItemArrayInput from '~/components/FormItem/ArrayInput.vue';
 
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm, loading } = useCrud<
@@ -16,6 +19,8 @@ const { defineField, errors, setValues, handleSubmit, resetForm, loading } = use
 const [title, titleAttrs] = defineField('title');
 const [description, descriptionAttrs] = defineField('description');
 const [shortDescription, shortDescriptionAttrs] = defineField('shortDescription');
+const [certNote, certNoteAttrs] = defineField('certNote');
+const [topics, topicsAttrs] = defineField('topics');
 const [note, noteAttrs] = defineField('note');
 const [type, typeAttrs] = defineField('type');
 const [eventCategoryIds, eventCategoryIdsAttrs] = defineField('eventCategoryIds');
@@ -87,6 +92,8 @@ watch(
                 title: ev.title,
                 description: ev.description,
                 shortDescription: ev.shortDescription,
+                certNote: (ev as any).certNote || undefined,
+                topics: Array.isArray((ev as any).topics) ? (ev as any).topics : [],
                 note: ev.note || undefined,
                 type: (ev.type?.toUpperCase?.() || ev.type) as any,
                 eventCategoryIds: categoryIds.length > 0 ? categoryIds : [],
@@ -97,6 +104,13 @@ watch(
                 location: ev.location || undefined,
                 isActive: ev.isActive,
             });
+
+            // Ensure topics is always an array after setValues
+            nextTick(() => {
+                if (!Array.isArray(topics.value)) {
+                    topics.value = [];
+                }
+            });
         }
     },
     { immediate: true },
@@ -104,14 +118,64 @@ watch(
 
 watch(
     () => props.isDialogOpen,
-    (open) => { if (!open) resetForm(); },
+    (open) => {
+        if (!open) {
+            resetForm();
+        }
+    },
 );
 
+// Ensure topics is always an array and defaults to empty array
+watch(() => topics.value, (newVal) => {
+    if (!Array.isArray(newVal)) {
+        topics.value = [];
+    }
+}, { immediate: true });
+
+// Initialize topics as empty array on mount
+onMounted(() => {
+    if (!Array.isArray(topics.value)) {
+        topics.value = [];
+    }
+});
+
 const onSubmitAndClose = handleSubmit((values) => {
-    emit('submit-and-close', values);
+    // Get topics directly from the reactive field, not from validated values
+    // Filter out empty strings and ensure it's always an array
+    let topicsArray: string[] = [];
+    if (Array.isArray(topics.value)) {
+        topicsArray = topics.value
+            .map(t => String(t || '').trim())
+            .filter(t => t.length > 0);
+    }
+
+    const submitValues: any = {
+        ...values,
+        topics: topicsArray, // Always include as array, even if empty
+    };
+
+    console.log('Submitting topics:', topicsArray); // Debug log
+
+    emit('submit-and-close', submitValues);
 });
 const onSubmitAndAddNew = handleSubmit((values) => {
-    emit('submit-and-add-new', values);
+    // Get topics directly from the reactive field, not from validated values
+    // Filter out empty strings and ensure it's always an array
+    let topicsArray: string[] = [];
+    if (Array.isArray(topics.value)) {
+        topicsArray = topics.value
+            .map(t => String(t || '').trim())
+            .filter(t => t.length > 0);
+    }
+
+    const submitValues: any = {
+        ...values,
+        topics: topicsArray, // Always include as array, even if empty
+    };
+
+    console.log('Submitting topics:', topicsArray); // Debug log
+
+    emit('submit-and-add-new', submitValues);
 });
 const handleClose = () => {
     emit('close-dialog');
@@ -146,6 +210,28 @@ const handleClose = () => {
                         class="col-span-12"
                         :errors="errors.shortDescription ? [errors.shortDescription] : []"
                         v-bind="shortDescriptionAttrs"
+                    />
+
+                    <FormItemTextarea
+                        id="certNote"
+                        v-model="certNote"
+                        :title="t('event.cert_note') || 'Certificate Note'"
+                        :placeholder="t('event.cert_note_description') || 'This content will be shown only in Certificate generation process'"
+                        class="col-span-12"
+                        :errors="errors.certNote ? [errors.certNote] : []"
+                        v-bind="certNoteAttrs"
+                        :rows="4"
+                    />
+
+                    <FormItemArrayInput
+                        id="topics"
+                        v-model="topics"
+                        :title="t('event.topics') || 'Topics'"
+                        :placeholder="t('event.topic_placeholder') || 'Enter topic'"
+                        class="col-span-12"
+                        :errors="errors.topics ? [errors.topics] : []"
+                        :add-button-text="t('action.add') + ' ' + (t('event.topic') || 'Topic')"
+                        item-id-prefix="topic"
                     />
 
                     <div class="col-span-12">

@@ -104,6 +104,12 @@ export function createEventSchema(
         shortDescription: z
             .string({ required_error: t('event.short_description') + ' ' + t('validation.required') })
             .max(500, t('event.short_description') + ' ' + t('validation.max_length', { max: 500 })),
+        certNote: z.string().max(5000, t('event.cert_note') + ' ' + t('validation.max_length', { max: 5000 })).optional(),
+        topics: z.array(z.string()).optional().default([]).transform((arr) => {
+            if (!Array.isArray(arr)) return [];
+            const filtered = arr.map(item => String(item || '').trim()).filter(item => item.length > 0);
+            return filtered;
+        }),
         note: z.string().max(1000, t('note.singular') + ' ' + t('validation.max_length', { max: 1000 })).optional(),
 
         type: EventType,
@@ -155,6 +161,12 @@ export function updateEventSchema(
         shortDescription: z
             .string({ required_error: t('event.short_description') + ' ' + t('validation.required') })
             .max(500, t('event.short_description') + ' ' + t('validation.max_length', { max: 500 })),
+        certNote: z.string().max(5000, t('event.cert_note') + ' ' + t('validation.max_length', { max: 5000 })).optional(),
+        topics: z.array(z.string()).optional().default([]).transform((arr) => {
+            if (!Array.isArray(arr)) return [];
+            const filtered = arr.map(item => String(item || '').trim()).filter(item => item.length > 0);
+            return filtered;
+        }),
         note: z.string().max(1000, t('note.singular') + ' ' + t('validation.max_length', { max: 1000 })).optional(),
         type: EventType,
         eventCategoryIds: z

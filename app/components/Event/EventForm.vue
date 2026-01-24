@@ -7,6 +7,9 @@ import { useResourcesStore } from '~/stores/resources';
 import RTEditor from '~/components/FormItem/RTEditor.vue';
 import FormItemMedia from '~/components/FormItem/Media.vue';
 import FormItemMultiSelect from '~/components/FormItem/MultiSelect.vue';
+import FormItemInput from '~/components/FormItem/Input.vue';
+import FormItemTextarea from '~/components/FormItem/Textarea.vue';
+import FormItemArrayInput from '~/components/FormItem/ArrayInput.vue';
 
 const { t } = useI18n();
 
@@ -43,6 +46,8 @@ const { defineField, errors, setValues, handleSubmit, resetForm } = useCrud<
 const [title, titleAttrs] = defineField('title');
 const [description, descriptionAttrs] = defineField('description');
 const [shortDescription, shortDescriptionAttrs] = defineField('shortDescription');
+const [certNote, certNoteAttrs] = defineField('certNote');
+const [topics, topicsAttrs] = defineField('topics');
 const [note, noteAttrs] = defineField('note');
 const [type, typeAttrs] = defineField('type');
 const [eventCategoryIds, eventCategoryIdsAttrs] = defineField('eventCategoryIds');
@@ -79,6 +84,10 @@ const typeOptions = computed(() => {
 
 // Initialize form data when props change
 watch(() => props.initialData, async (newData) => {
+    // Ensure topics is always initialized as empty array if not provided
+    if (!newData && props.mode === 'add') {
+        topics.value = [];
+    }
     if (newData && (props.mode === 'edit' || (props.mode === 'add' && newData))) {
         // Handle cover media - could be ID string or MediaEntity object
         let coverEntity: MediaEntity | null = null;
@@ -226,6 +235,8 @@ watch(() => props.initialData, async (newData) => {
             title: newData.title,
             description: newData.description,
             shortDescription: newData.shortDescription,
+            certNote: (newData as any).certNote || undefined,
+            topics: Array.isArray((newData as any).topics) ? (newData as any).topics : [],
             note: newData.note || undefined,
             type: (newData.type?.toUpperCase?.() || newData.type) as any,
             eventCategoryIds: categoryIds.length > 0 ? categoryIds : [],
@@ -248,6 +259,12 @@ watch(() => props.initialData, async (newData) => {
                 note: schedule.note || '',
             })),
         });
+
+        // Ensure topics is always an array after setValues
+        await nextTick();
+        if (!Array.isArray(topics.value)) {
+            topics.value = [];
+        }
     }
     else if (props.mode === 'add' && !newData) {
         resetForm();
@@ -257,11 +274,24 @@ watch(() => props.initialData, async (newData) => {
 
 // Form submission
 const onSubmit = handleSubmit((values) => {
+    // Get topics directly from the reactive field, not from validated values
+    // Filter out empty strings and ensure it's always an array
+    let topicsArray: string[] = [];
+    if (Array.isArray(topics.value)) {
+        topicsArray = topics.value
+            .map(t => String(t || '').trim())
+            .filter(t => t.length > 0);
+    }
+
     // Transform cover MediaEntity to ID for submission
-    const submitValues = {
+    const submitValues: any = {
         ...values,
         cover: coverId.value,
+        topics: topicsArray, // Always include as array, even if empty
     };
+
+    console.log('Submitting topics:', topicsArray); // Debug log
+
     emit('submit', submitValues as EventForm);
 });
 
@@ -282,6 +312,7 @@ const removeSchedule = (index: number) => {
         ...schedules.value.slice(index + 1),
     ];
 };
+
 
 // Computed properties
 const submitButtonText = computed(() => {
@@ -368,6 +399,28 @@ const formTitle = computed(() => {
                                 class="col-span-12"
                                 :errors="errors.shortDescription ? [errors.shortDescription] : []"
                                 v-bind="shortDescriptionAttrs"
+                            />
+
+                            <FormItemTextarea
+                                id="certNote"
+                                v-model="certNote"
+                                :title="t('event.cert_note') || 'Certificate Note'"
+                                :placeholder="t('event.cert_note_description') || 'This content will be shown only in Certificate generation process'"
+                                class="col-span-12"
+                                :errors="errors.certNote ? [errors.certNote] : []"
+                                v-bind="certNoteAttrs"
+                                :rows="4"
+                            />
+
+                            <FormItemArrayInput
+                                id="topics"
+                                v-model="topics"
+                                :title="t('event.topics') || 'Topics'"
+                                :placeholder="t('event.topic_placeholder') || 'Enter topic'"
+                                class="col-span-12"
+                                :errors="errors.topics ? [errors.topics] : []"
+                                :add-button-text="t('action.add') + ' ' + (t('event.topic') || 'Topic')"
+                                item-id-prefix="topic"
                             />
 
                             <FormItemTextarea
