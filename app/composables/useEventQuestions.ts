@@ -7,24 +7,29 @@
 import type { EventQuestion, EventQuestionType, EventQuestionOption, EventQuestionRatingConfig } from '~/types/event-question';
 import { isChoiceQuestionType, requiresOptions, requiresRatingConfig, EventQuestionType as QuestionType } from '~/types/event-question';
 
+/** Allowed for option labels: letters, numbers, spaces (no special chars) */
+const OPTION_LABEL_ALLOWED = /^[a-zA-Z0-9\s]+$/;
+
+/** Allowed for option values: lowercase letters, numbers, underscore (snake_case) */
+const OPTION_VALUE_ALLOWED = /^[a-z0-9_]+$/;
+
 /**
- * Generates a UUID v4 for new questions
+ * Derives option value from label: lowercase, spaces → underscore, strip other non-alphanumeric
+ * @param label - Raw label string
+ * @returns Snake-case value (no special chars)
  */
-/**
- * Generates a UUID v4 for new questions
- * @returns A valid UUID v4 string
- */
-export function generateQuestionId(): string {
-    // Simple UUID v4 generator
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c: string): string => {
-        const r = (Math.random() * 16) | 0;
-        const v = c === 'x' ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-    });
+export function labelToOptionValue(label: string): string {
+    if (!label || typeof label !== 'string') return '';
+    return label
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '_')
+        .replace(/[^a-z0-9_]/g, '');
 }
 
 /**
  * Validates options for choice-based questions
+ * Label and value must not include special characters (label: letters, numbers, spaces; value: snake_case)
  * @param question - The question to validate options for
  * @returns Array of error messages (empty if valid)
  */
@@ -49,19 +54,27 @@ export function validateOptions(question: EventQuestion): string[] {
         if (!option.label || option.label.trim().length === 0) {
             errors.push(`Option ${index + 1}: Label is required`);
         }
-        else if (option.label.length > 200) {
-            errors.push(`Option ${index + 1}: Label must be 200 characters or less`);
+        else {
+            if (option.label.length > 200) {
+                errors.push(`Option ${index + 1}: Label must be 200 characters or less`);
+            }
+            if (!OPTION_LABEL_ALLOWED.test(option.label)) {
+                errors.push(`Option ${index + 1}: Label must only contain letters, numbers, and spaces (no special characters)`);
+            }
         }
 
-        const value = option.value || option.label;
+        const value = option.value ?? labelToOptionValue(option.label);
         if (value.length > 100) {
             errors.push(`Option ${index + 1}: Value must be 100 characters or less`);
+        }
+        if (value && !OPTION_VALUE_ALLOWED.test(value)) {
+            errors.push(`Option ${index + 1}: Value must only contain lowercase letters, numbers, and underscores (no special characters)`);
         }
 
         if (valueSet.has(value)) {
             errors.push(`Option ${index + 1}: Duplicate value "${value}"`);
         }
-        else {
+        else if (value) {
             valueSet.add(value);
         }
     });
@@ -202,13 +215,13 @@ export function checkTypeChangeCompatibility(
 }
 
 /**
- * Normalizes question data and generates ID if missing
+ * Normalizes question data. ID is only set when present (backend-assigned); new questions have no id.
  * @param question - Partial question data to normalize
- * @returns Fully normalized EventQuestion with all required fields
+ * @returns Fully normalized EventQuestion
  */
 export function normalizeQuestion(question: Partial<EventQuestion>): EventQuestion {
     const normalized: EventQuestion = {
-        id: question.id || generateQuestionId(),
+        ...(question.id && { id: question.id }),
         label: question.label || '',
         type: question.type || QuestionType.SHORT_TEXT,
         isRequired: question.isRequired ?? false,
@@ -217,11 +230,11 @@ export function normalizeQuestion(question: Partial<EventQuestion>): EventQuesti
         helpText: question.helpText,
     };
 
-    // Normalize options for choice types
+    // Normalize options for choice types (value derived from label as snake_case when missing)
     if (isChoiceQuestionType(normalized.type) && question.options) {
         normalized.options = question.options.map(opt => ({
             label: opt.label || '',
-            value: opt.value || opt.label || '',
+            value: opt.value || labelToOptionValue(opt.label || ''),
         }));
     }
     else if (isChoiceQuestionType(normalized.type) && !question.options) {
@@ -242,14 +255,13 @@ export function normalizeQuestion(question: Partial<EventQuestion>): EventQuesti
 }
 
 /**
- * Gets default question structure for a given type
+ * Gets default question structure for a given type. No id (backend assigns on save).
  * @param type - The question type to create defaults for
  * @param defaultPosition - Optional position (defaults to questions index + 1 when adding)
- * @returns Default EventQuestion with generated UUID
+ * @returns Default EventQuestion
  */
 export function getDefaultQuestion(type: EventQuestionType, defaultPosition?: number): EventQuestion {
     const question: EventQuestion = {
-        id: generateQuestionId(),
         label: '',
         type,
         isRequired: false,
@@ -310,11 +322,11 @@ export function prepareQuestionsForSubmit(questions: EventQuestion[]): EventQues
             prepared.position = index;
         }
 
-        // Ensure options have values
+        // Ensure options have values (derived from label as snake_case when missing)
         if (prepared.options) {
             prepared.options = prepared.options.map(opt => ({
                 label: opt.label,
-                value: opt.value || opt.label,
+                value: opt.value || labelToOptionValue(opt.label),
             }));
         }
 

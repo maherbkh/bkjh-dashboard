@@ -58,9 +58,7 @@ const removeQuestion = async (index: number) => {
 
     if (confirmed) {
         questions.value = questions.value.filter((_, i) => i !== index);
-        if (question.id) {
-            emit('remove:question', question.id);
-        }
+        emit('remove:question', question.id ?? `index-${index}`);
     }
 };
 
@@ -86,7 +84,7 @@ const duplicateQuestion = (index: number): void => {
     }
 
     const duplicated: EventQuestion = {
-        ...getDefaultQuestion(question.type),
+        ...getDefaultQuestion(question.type, questions.value.length + 1),
         label: `${question.label} (Copy)`,
         type: question.type,
         isRequired: question.isRequired,
@@ -94,7 +92,6 @@ const duplicateQuestion = (index: number): void => {
         helpText: question.helpText,
         options: question.options ? [...question.options] : undefined,
         config: question.config ? { ...question.config } : undefined,
-        // Position is not set - admin must set it manually
     };
 
     questions.value = [...questions.value, duplicated];
@@ -178,7 +175,7 @@ const suggestedPosition = computed(() => getNextAvailablePosition(questions.valu
             <div class="space-y-2">
                 <QuestionEditor
                     v-for="(question, index) in questions"
-                    :key="question.id || index"
+                    :key="index"
                     :question="question"
                     :index="index"
                     :errors="questionErrors[index] || []"

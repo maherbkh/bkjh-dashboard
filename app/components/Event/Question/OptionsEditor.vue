@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { EventQuestionOption } from '~/types/event-question';
+import { labelToOptionValue } from '~/composables/useEventQuestions';
 
 type Props = {
     modelValue: EventQuestionOption[];
@@ -54,9 +55,9 @@ const updateOption = (index: number, field: 'label' | 'value', value: string): v
         [field]: value,
     };
 
-    // Auto-fill value from label if value is empty
-    if (field === 'label' && !updated[index]!.value) {
-        updated[index]!.value = value;
+    // Value is derived from label: lowercase, spaces → underscore (snake_case), no special chars
+    if (field === 'label') {
+        updated[index]!.value = labelToOptionValue(value);
     }
 
     options.value = updated;
@@ -96,12 +97,11 @@ const maxOptions = 50;
                     />
                     <FormItemInput
                         :id="`option-${index}-value`"
-                        v-model="options[index].value"
+                        :model-value="options[index].value"
                         :title="`Option ${index + 1} Value`"
-                        placeholder="Enter option value (optional)"
-                        :disabled="disabled"
+                        placeholder="Derived from label (snake_case)"
+                        :disabled="true"
                         class="col-span-1"
-                        @update:model-value="(val) => updateOption(index, 'value', String(val || ''))"
                     />
                 </div>
                 <Button

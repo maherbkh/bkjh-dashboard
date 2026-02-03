@@ -38,7 +38,7 @@ const props = withDefaults(
         </div>
         <div
             v-if="$slots.default"
-            :class="cn('mt-2 border border-border/50 pt-2 bg-muted/25 rounded-lg px-4 py-4 mx-4 mb-4', props.contentClass)"
+            :class="cn('mt-2 border border-border pt-2 bg-muted/50 rounded-lg px-4 py-4 mx-4 mb-4 *:ease-in-out duration-200', props.contentClass)"
         >
             <slot />
         </div>

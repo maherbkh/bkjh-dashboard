@@ -94,7 +94,7 @@ function getQuestionSchema(t: (key: string, params?: Record<string, string | num
             .string({ required_error: 'Option label is required' })
             .min(1, 'Option label is required')
             .max(200, 'Option label must be 200 characters or less'),
-        value: z.string().max(100, 'Option value must be 100 characters or less').optional(),
+        value: z.union([z.string().max(100, 'Option value must be 100 characters or less'), z.null()]).optional().transform(v => v ?? undefined),
     });
 
     const RatingConfigSchema = z.object({
@@ -102,9 +102,9 @@ function getQuestionSchema(t: (key: string, params?: Record<string, string | num
         max: z.number().max(100, 'Maximum must be 100 or less').optional(),
         step: z.number().positive('Step must be greater than 0').optional(),
         labels: z.object({
-            min: z.string().optional(),
-            max: z.string().optional(),
-        }).optional(),
+            min: z.union([z.string(), z.null()]).optional().transform(v => v ?? undefined),
+            max: z.union([z.string(), z.null()]).optional().transform(v => v ?? undefined),
+        }).optional().nullable().transform(v => v ?? undefined),
     }).refine((val) => {
         const min = val.min ?? 0;
         const max = val.max ?? 5;
@@ -123,10 +123,10 @@ function getQuestionSchema(t: (key: string, params?: Record<string, string | num
         type: QuestionType,
         isRequired: z.boolean().optional().default(false),
         position: z.number().int('Position must be an integer').min(0, 'Position must be 0 or greater').optional(),
-        placeholder: z.string().max(255, 'Placeholder must be 255 characters or less').optional(),
-        helpText: z.string().max(1000, 'Help text must be 1000 characters or less').optional(),
-        options: z.array(OptionSchema).optional(),
-        config: RatingConfigSchema.optional(),
+        placeholder: z.union([z.string().max(255, 'Placeholder must be 255 characters or less'), z.null()]).optional().transform(v => v ?? undefined),
+        helpText: z.union([z.string().max(1000, 'Help text must be 1000 characters or less'), z.null()]).optional().transform(v => v ?? undefined),
+        options: z.union([z.array(OptionSchema), z.null()]).optional().transform(v => v ?? undefined),
+        config: z.union([RatingConfigSchema, z.null()]).optional().transform(v => v ?? undefined),
     }).superRefine((question, ctx) => {
         // Type-specific validations
         if (question.type === 'SINGLE_CHOICE' || question.type === 'MULTI_CHOICE' || question.type === 'DROPDOWN') {
