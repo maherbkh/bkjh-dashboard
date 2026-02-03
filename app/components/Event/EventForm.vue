@@ -36,7 +36,7 @@ const emit = defineEmits<{
 }>();
 
 // CRUD
-const { defineField, errors, setValues, handleSubmit, resetForm } = useCrud<
+const { defineField, errors, setValues, handleSubmit, resetForm, validateField, setFieldValue } = useCrud<
     EventData,
     EventForm
 >({
@@ -337,6 +337,32 @@ const currentStep = ref(0);
 const TOTAL_STEPS = 7;
 const stepDirection = ref(1); // 1 = forward (next), -1 = backward (prev)
 
+// Fields validated per step (must pass before continuing to next)
+const STEP_FIELDS: (keyof EventForm)[][] = [
+    ['title', 'description', 'shortDescription', 'note', 'isActive', 'forKids', 'disableRegistration', 'isFull'],
+    ['cover'],
+    ['type', 'eventCategoryIds', 'eventTargetIds', 'maxCapacity', 'room', 'location'],
+    ['schedules'],
+    ['speakers'],
+    ['questions'],
+    ['topics', 'certNote'],
+];
+
+async function goToNextStep() {
+    if (currentStep.value >= TOTAL_STEPS - 1) return;
+    const fields = STEP_FIELDS[currentStep.value];
+    if (fields && fields.length > 0) {
+        if (currentStep.value === 1) {
+            setFieldValue('cover', coverId.value);
+        }
+        for (const name of fields) {
+            const result = await validateField(name as string);
+            if (!result.valid) return;
+        }
+    }
+    currentStep.value++;
+}
+
 watch(currentStep, (next, prev) => {
     stepDirection.value = next > (prev ?? 0) ? 1 : -1;
 });
@@ -358,6 +384,23 @@ const stepLabels = computed(() => [
     { id: 6, label: t('event.form.steps.certificate_content') },
 ]);
 
+// Step indices that have validation errors (for stepper error state)
+const stepsWithErrors = computed(() => {
+    const indices: number[] = [];
+    STEP_FIELDS.forEach((fields, index) => {
+        const hasError = fields.some(f => errors.value[f]);
+        if (hasError) indices.push(index);
+    });
+    return indices;
+});
+
+const isSaveDisabled = computed(
+    () =>
+        props.isSubmitting
+        || currentStep.value !== TOTAL_STEPS - 1
+        || stepsWithErrors.value.length > 0,
+);
+
 // Computed properties
 const submitButtonText = computed(() => {
     return props.mode === 'add' ? t('action.save') : t('action.update');
@@ -372,7 +415,7 @@ const formTitle = computed(() => {
 
 <template>
     <div class="overflow-x-hidden">
-        <div class="xl:col-span-8 space-y-6 min-w-0">
+        <div class="xl:col-span-8 space-y-4 min-w-0">
             <form
                 class="space-y-6 overflow-x-hidden min-w-0"
                 @submit.prevent="onSubmit"
@@ -380,7 +423,42 @@ const formTitle = computed(() => {
                 <EventFormStepper
                     v-model="currentStep"
                     :steps="stepLabels"
+                    :steps-with-errors="stepsWithErrors"
                 />
+
+                <div
+                    v-if="showActions"
+                    class="flex w-full items-center justify-between gap-2 py-3"
+                >
+                    <div class="min-w-0 flex-1 flex justify-start">
+                        <Button
+                            v-show="currentStep > 0"
+                            type="button"
+                            variant="outline"
+                            @click="currentStep--"
+                        >
+                            <Icon
+                                name="solar:arrow-left-outline"
+                                class="mr-2 size-5!"
+                            />
+                            {{ t('common.previous') }}
+                        </Button>
+                    </div>
+                    <div class="min-w-0 flex-1 flex justify-end">
+                        <Button
+                            v-show="currentStep < TOTAL_STEPS - 1"
+                            type="button"
+                            variant="outline"
+                            @click="goToNextStep"
+                        >
+                            {{ t('common.next') }}
+                            <Icon
+                                name="solar:arrow-right-outline"
+                                class="ml-2 size-5!"
+                            />
+                        </Button>
+                    </div>
+                </div>
 
                 <div class="relative overflow-x-hidden min-w-0">
                     <TransitionSlide
@@ -754,38 +832,12 @@ const formTitle = computed(() => {
 
                 <div
                     v-if="showActions"
-                    class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t lg:col-span-12 mb-8"
+                    class="flex flex-wrap items-center justify-end gap-2 pt-4 border-t lg:col-span-12 mb-8"
                 >
-                    <div class="flex gap-2">
-                        <Button
-                            v-show="currentStep > 0"
-                            type="button"
-                            variant="outline"
-                            @click="currentStep--"
-                        >
-                            <Icon
-                                name="solar:arrow-left-outline"
-                                class="mr-2 size-5!"
-                            />
-                            {{ t('common.previous') }}
-                        </Button>
-                        <Button
-                            v-show="currentStep < TOTAL_STEPS - 1"
-                            type="button"
-                            variant="outline"
-                            @click="currentStep++"
-                        >
-                            {{ t('common.next') }}
-                            <Icon
-                                name="solar:arrow-right-outline"
-                                class="ml-2 size-5!"
-                            />
-                        </Button>
-                    </div>
                     <Button
                         type="submit"
                         class="w-full sm:w-auto"
-                        :disabled="isSubmitting"
+                        :disabled="isSaveDisabled"
                     >
                         <Icon
                             v-if="isSubmitting"

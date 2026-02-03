@@ -26,7 +26,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
     };
 
     // VeeValidate form
-    const { handleSubmit, defineField, errors, resetForm, setValues } = useForm({
+    const { handleSubmit, defineField, errors, resetForm, setValues, validateField, setFieldValue } = useForm({
         validationSchema: formSchema ? toTypedSchema(formSchema) : undefined,
     });
 
@@ -366,6 +366,8 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
         errors,
         resetForm,
         setValues,
+        validateField,
+        setFieldValue,
     };
 };
 

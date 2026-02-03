@@ -7,9 +7,15 @@ interface Step {
 interface Props {
     steps: Step[];
     modelValue: number;
+    /** Step indices (0-based) that have validation errors; show X icon in destructive color */
+    stepsWithErrors?: number[];
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    stepsWithErrors: () => [],
+});
+
+const hasStepError = (index: number) => props.stepsWithErrors.includes(index);
 const emit = defineEmits<{
     'update:modelValue': [value: number];
 }>();
@@ -48,15 +54,22 @@ function goToStep(index: number) {
                     <span
                         class="flex size-9 shrink-0 items-center justify-center rounded-full border-2 transition-colors"
                         :class="[
-                            index === modelValue
-                                ? 'border-primary bg-primary text-primary-foreground'
-                                : index < modelValue
-                                    ? 'ring-2 ring-primary/25 ring-offset-2 border-transparent bg-primary/5 text-primary'
-                                    : 'border-muted-foreground/40 bg-muted/50 text-muted-foreground',
+                            hasStepError(index)
+                                ? 'border-destructive/25 bg-destructive/5 text-destructive/25'
+                                : index === modelValue
+                                    ? 'border-primary bg-primary text-primary-foreground'
+                                    : index < modelValue
+                                        ? 'ring-2 ring-primary/25 ring-offset-2 border-transparent bg-primary/5 text-primary'
+                                        : 'border-muted-foreground/40 bg-muted/50 text-muted-foreground',
                         ]"
                     >
                         <Icon
-                            v-if="index < modelValue"
+                            v-if="hasStepError(index)"
+                            name="solar:close-circle-outline"
+                            class="size-5!"
+                        />
+                        <Icon
+                            v-else-if="index < modelValue"
                             name="solar:check-circle-outline"
                             class="size-5!"
                         />
@@ -68,7 +81,7 @@ function goToStep(index: number) {
                     <span
                         class="flex min-h-9 items-center py-2 text-left text-sm font-medium"
                         :class="[
-                            index === modelValue ? 'text-primary' : 'text-muted-foreground',
+                            hasStepError(index) ? 'text-destructive/80' : index === modelValue ? 'text-primary' : 'text-muted-foreground',
                         ]"
                     >
                         {{ step.label }}
@@ -111,15 +124,22 @@ function goToStep(index: number) {
                     <span
                         class="flex size-9 shrink-0 items-center justify-center rounded-full border-2 text-sm font-medium transition-colors"
                         :class="[
-                            index === modelValue
-                                ? 'border-primary bg-primary text-primary-foreground'
-                                : index < modelValue
-                                    ? 'ring-2 ring-primary/25 ring-offset-2 border-transparent bg-primary/5 text-primary'
-                                    : 'border-muted-foreground/40 bg-muted/50',
+                            hasStepError(index)
+                                ? 'border-destructive/10 bg-destructive/5 text-destructive/50'
+                                : index === modelValue
+                                    ? 'border-primary bg-primary text-primary-foreground'
+                                    : index < modelValue
+                                        ? 'ring-2 ring-primary/25 ring-offset-2 border-transparent bg-primary/5 text-primary'
+                                        : 'border-muted-foreground/40 bg-muted/50',
                         ]"
                     >
                         <Icon
-                            v-if="index < modelValue"
+                            v-if="hasStepError(index)"
+                            name="solar:close-circle-outline"
+                            class="size-6!"
+                        />
+                        <Icon
+                            v-else-if="index < modelValue"
                             name="solar:check-circle-outline"
                             class="size-6!"
                         />
@@ -128,7 +148,7 @@ function goToStep(index: number) {
                     <span
                         class="line-clamp-2 min-h-[2.5rem] w-full px-0.5 text-center text-xs font-medium"
                         :class="[
-                            index === modelValue ? 'text-primary' : 'text-muted-foreground',
+                            hasStepError(index) ? 'text-destructive/80' : index === modelValue ? 'text-primary' : 'text-muted-foreground',
                         ]"
                     >
                         {{ step.label }}
