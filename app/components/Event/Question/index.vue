@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { EventQuestion, EventQuestionType } from '~/types/event-question';
+import type { QuestionValidationMessage } from '~/composables/useEventQuestions';
 import { EventQuestionType as QuestionType } from '~/types/event-question';
 import {
     getDefaultQuestion,
@@ -11,6 +12,12 @@ import {
 import { useAlertDialog } from '~/composables/useAlertDialog';
 import QuestionEditor from './QuestionEditor.vue';
 import QuestionTypeSelector from './QuestionTypeSelector.vue';
+
+const { t } = useI18n();
+
+function toMessage(msg: QuestionValidationMessage): string {
+    return typeof msg === 'string' ? t(msg) : t(msg.key, msg.params as Record<string, string>);
+}
 
 type Props = {
     modelValue?: EventQuestion[];
@@ -49,11 +56,15 @@ const removeQuestion = async (index: number) => {
     const question = questions.value[index];
     if (!question) return;
 
+    const description = question.label
+        ? t('event.questions.dialogs.delete_description', { label: question.label })
+        : t('event.questions.dialogs.delete_description_this');
+
     const confirmed = await show({
-        title: 'Delete Question?',
-        description: `Are you sure you want to delete "${question.label || 'this question'}"? This action cannot be undone.`,
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
+        title: t('event.questions.dialogs.delete_title'),
+        description,
+        confirmText: t('event.questions.dialogs.delete_confirm'),
+        cancelText: t('event.questions.dialogs.cancel'),
     });
 
     if (confirmed) {
@@ -85,7 +96,7 @@ const duplicateQuestion = (index: number): void => {
 
     const duplicated: EventQuestion = {
         ...getDefaultQuestion(question.type, questions.value.length + 1),
-        label: `${question.label} (Copy)`,
+        label: `${question.label} ${t('event.questions.form.copy_suffix')}`,
         type: question.type,
         isRequired: question.isRequired,
         placeholder: question.placeholder,
@@ -97,9 +108,9 @@ const duplicateQuestion = (index: number): void => {
     questions.value = [...questions.value, duplicated];
 };
 
-// Validate all questions
+// Validate all questions (errors are i18n keys/params for translation in template)
 const questionErrors = computed(() => {
-    const errors: Record<number, string[]> = {};
+    const errors: Record<number, QuestionValidationMessage[]> = {};
 
     questions.value.forEach((question, index) => {
         const validationErrors = validateQuestion(question);
@@ -108,7 +119,6 @@ const questionErrors = computed(() => {
         }
     });
 
-    // Check position uniqueness
     const positionErrors = validatePositionUniqueness(questions.value);
     if (positionErrors.length > 0) {
         questions.value.forEach((question, index) => {
@@ -116,9 +126,9 @@ const questionErrors = computed(() => {
                 if (!errors[index]) {
                     errors[index] = [];
                 }
-                // Add position errors to relevant questions
                 positionErrors.forEach((err) => {
-                    if (err.includes(`Position ${question.position}`) && errors[index]) {
+                    const pos = typeof err === 'string' ? null : err.params?.position;
+                    if (pos === question.position && errors[index]) {
                         errors[index]!.push(err);
                     }
                 });
@@ -147,10 +157,10 @@ const suggestedPosition = computed(() => getNextAvailablePosition(questions.valu
                 />
             </div>
             <h4 class="text-sm font-semibold text-foreground mb-1">
-                No questions yet
+                {{ t('event.questions.empty_title') }}
             </h4>
             <p class="text-xs text-muted-foreground text-center max-w-md mb-3">
-                Start building your event registration form by adding questions. Choose from various question types to collect the information you need.
+                {{ t('event.questions.empty_description') }}
             </p>
             <QuestionTypeSelector
                 :disabled="disabled"
@@ -165,10 +175,10 @@ const suggestedPosition = computed(() => getNextAvailablePosition(questions.valu
         >
             <div class="flex items-center justify-between text-xs text-muted-foreground mb-1">
                 <span>
-                    {{ questions.length }} {{ questions.length === 1 ? 'question' : 'questions' }}
+                    {{ questions.length }} {{ questions.length === 1 ? t('event.questions.question') : t('event.questions.questions') }}
                 </span>
                 <span v-if="questionErrors && Object.keys(questionErrors).length > 0">
-                    {{ Object.keys(questionErrors).length }} {{ Object.keys(questionErrors).length === 1 ? 'error' : 'errors' }} to fix
+                    {{ Object.keys(questionErrors).length }} {{ Object.keys(questionErrors).length === 1 ? t('event.questions.error') : t('event.questions.errors') }} {{ t('event.questions.errors_to_fix') }}
                 </span>
             </div>
 
@@ -205,7 +215,7 @@ const suggestedPosition = computed(() => getNextAvailablePosition(questions.valu
                 name="solar:danger-triangle-line-duotone"
                 class="size-4 shrink-0"
             />
-            <AlertTitle>Validation Errors</AlertTitle>
+            <AlertTitle>{{ t('event.questions.validation_errors_title') }}</AlertTitle>
             <AlertDescription>
                 <div class="space-y-1 mt-2">
                     <div

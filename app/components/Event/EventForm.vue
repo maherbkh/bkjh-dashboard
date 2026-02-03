@@ -487,8 +487,8 @@ const formTitle = computed(() => {
                                     <FormItemSwitch
                                         id="isActive"
                                         v-model="isActive"
-                                        true-label="Active"
-                                        false-label="Inactive"
+                                        :true-label="t('common.active')"
+                                        :false-label="t('common.inactive')"
                                         :title="t('common.active')"
                                         class="col-span-12 lg:col-span-3"
                                         v-bind="isActiveAttrs"
@@ -505,8 +505,8 @@ const formTitle = computed(() => {
                                     <FormItemSwitch
                                         id="disableRegistration"
                                         v-model="disableRegistration"
-                                        true-label="Ja"
-                                        false-label="Nein"
+                                        :true-label="t('common.yes')"
+                                        :false-label="t('common.no')"
                                         :title="t('event.disable_registration')"
                                         class="col-span-12 lg:col-span-3"
                                         v-bind="disableRegistrationAttrs"
@@ -514,8 +514,8 @@ const formTitle = computed(() => {
                                     <FormItemSwitch
                                         id="isFull"
                                         v-model="isFull"
-                                        true-label="Ja"
-                                        false-label="Nein"
+                                        :true-label="t('common.yes')"
+                                        :false-label="t('common.no')"
                                         :title="t('event.is_full')"
                                         class="col-span-12 lg:col-span-3"
                                         v-bind="isFullAttrs"
@@ -571,7 +571,7 @@ const formTitle = computed(() => {
                                     <FormItemMedia
                                         id="cover"
                                         v-model="coverMedia"
-                                        :label="t('event.cover') || 'Cover Image'"
+                                        :label="t('event.cover')"
                                         name="cover"
                                         :multiple="false"
                                         :max-files="1"

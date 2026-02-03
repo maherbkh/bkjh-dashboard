@@ -2,6 +2,8 @@
 import type { EventQuestionOption } from '~/types/event-question';
 import { labelToOptionValue } from '~/composables/useEventQuestions';
 
+const { t } = useI18n();
+
 type Props = {
     modelValue: EventQuestionOption[];
     errors?: string[];
@@ -71,7 +73,7 @@ const maxOptions = 50;
     <div class="space-y-2">
         <div class="flex items-center justify-between">
             <Label class="text-sm font-medium">
-                Options
+                {{ t('event.questions.form.options') }}
             </Label>
             <span class="text-xs text-muted-foreground">
                 {{ optionCount }} / {{ maxOptions }}
@@ -88,8 +90,8 @@ const maxOptions = 50;
                     <FormItemInput
                         :id="`option-${index}-label`"
                         v-model="options[index].label"
-                        :title="`Option ${index + 1} Label`"
-                        placeholder="Enter option label"
+                        :title="t('event.questions.form.option_n_label', { n: index + 1 })"
+                        :placeholder="t('event.questions.form.enter_option_label')"
                         :required="true"
                         :disabled="disabled"
                         class="col-span-1"
@@ -98,8 +100,8 @@ const maxOptions = 50;
                     <FormItemInput
                         :id="`option-${index}-value`"
                         :model-value="options[index].value"
-                        :title="`Option ${index + 1} Value`"
-                        placeholder="Derived from label (snake_case)"
+                        :title="t('event.questions.form.option_n_value', { n: index + 1 })"
+                        :placeholder="t('event.questions.form.derived_from_label')"
                         :disabled="true"
                         class="col-span-1"
                     />
@@ -151,7 +153,7 @@ const maxOptions = 50;
             v-if="optionCount === 0"
             class="text-xs text-muted-foreground"
         >
-            At least one option is required for this question type.
+            {{ t('event.questions.form.at_least_one_option') }}
         </p>
     </div>
 </template>

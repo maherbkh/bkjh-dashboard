@@ -44,9 +44,9 @@ const props = withDefaults(
         itemKey: 'id',
         itemLabel: 'name',
         itemDisabled: 'disabled',
-        placeholder: 'Select…',
-        searchPlaceholder: 'Search…',
-        emptyText: 'No results found',
+        placeholder: undefined,
+        searchPlaceholder: undefined,
+        emptyText: undefined,
         disabled: false,
         max: 0,
         clearable: true,
@@ -58,7 +58,7 @@ const props = withDefaults(
         contentClass: 'w-[320px] p-0',
         maxCount: 4,
         responsiveMaxCount: undefined,
-        buttonText: (count: number) => (count > 0 ? `${count} selected` : 'Select…'),
+        buttonText: undefined,
         searchDebounce: 120,
     },
 );
@@ -131,7 +131,7 @@ const model = computed<string[]>({
         // Handle both UUID arrays and object arrays
         return modelValue.map((v) => {
             if (typeof v === 'object' && v !== null && 'id' in v) {
-                return String(v.id);
+                return String((v as { id: unknown }).id);
             }
             return String(v);
         });
@@ -307,10 +307,21 @@ const effectiveMaxCount = computed(() => {
     return typeof byVp === 'number' ? byVp : props.maxCount;
 });
 
-// Memoized button text to prevent unnecessary recalculations
+const effectiveSearchPlaceholder = computed(() =>
+    props.searchPlaceholder ?? t('search.placeholder'),
+);
+const effectiveEmptyText = computed(() =>
+    props.emptyText ?? t('form.no_results'),
+);
+
+// Memoized button text to prevent unnecessary recalculations (i18n when no custom buttonText)
 const buttonText = computed(() => {
     const count = model.value.length;
-    return props.buttonText(count);
+    return props.buttonText
+        ? props.buttonText(count)
+        : count > 0
+            ? t('form.selected_count', { count })
+            : t('select.placeholder');
 });
 
 // Virtual scrolling optimization for large datasets
@@ -423,7 +434,7 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                         <div class="relative flex-1">
                             <CommandInput
                                 v-model="search"
-                                :placeholder="searchPlaceholder"
+                                :placeholder="effectiveSearchPlaceholder"
                                 class="pl-0 border-transparent!"
                             />
                         </div>
@@ -441,7 +452,7 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
 
                     <CommandEmpty class="p-3 text-sm text-muted-foreground">
                         {{
-                            emptyText
+                            effectiveEmptyText
                         }}
                     </CommandEmpty>
 
@@ -463,7 +474,7 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                                         class="mr-2"
                                         @update:checked="(nv:boolean) => toggleSelectAll(nv)"
                                     />
-                                    <span>{{ isAllSelected ? "Unselect all" : "Select all" }}</span>
+                                    <span>{{ isAllSelected ? t('form.unselect_all') : t('action.select_all') }}</span>
                                 </CommandItem>
 
                                 <!-- Virtual scrolling container -->

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { EventQuestion, EventQuestionType } from '~/types/event-question';
+import type { QuestionValidationMessage } from '~/composables/useEventQuestions';
 import { EventQuestionType as QuestionType, isChoiceQuestionType, requiresRatingConfig } from '~/types/event-question';
 import { checkTypeChangeCompatibility } from '~/composables/useEventQuestions';
 import { useAlertDialog } from '~/composables/useAlertDialog';
@@ -10,7 +11,7 @@ import RatingConfigEditor from './RatingConfigEditor.vue';
 type Props = {
     question: EventQuestion;
     index: number;
-    errors?: string[];
+    errors?: QuestionValidationMessage[];
     disabled?: boolean;
     suggestedPosition?: number;
 };
@@ -27,6 +28,24 @@ const emit = defineEmits<{
 
 const { show } = useAlertDialog();
 const { t } = useI18n();
+
+function toMessage(msg: QuestionValidationMessage): string {
+    return typeof msg === 'string' ? t(msg) : t(msg.key, msg.params as Record<string, string>);
+}
+
+function errorKey(msg: QuestionValidationMessage): string {
+    return typeof msg === 'string' ? msg : msg.key;
+}
+
+const generalErrors = computed(() => {
+    if (!props.errors?.length) return [];
+    return props.errors
+        .filter(e => {
+            const k = errorKey(e);
+            return !k.includes('label') && !k.includes('position') && !k.toLowerCase().includes('option') && !k.includes('rating') && !k.includes('config');
+        })
+        .map(toMessage);
+});
 
 const isExpanded = ref(false);
 const localQuestion = ref<EventQuestion>({ ...props.question });
@@ -54,11 +73,14 @@ const handleTypeChange = async (newType: EventQuestionType): Promise<void> => {
     const compatibility = checkTypeChangeCompatibility(localQuestion.value.type, newType);
 
     if (!compatibility.compatible) {
+        const description = compatibility.warningMessages?.length
+            ? compatibility.warningMessages.map(m => toMessage(m)).join('. ') + '.'
+            : t('event.questions.dialogs.change_type_description');
         const confirmed = await show({
-            title: 'Change Question Type?',
-            description: compatibility.warning || 'Changing the question type may result in data loss. Are you sure you want to continue?',
-            confirmText: 'Continue',
-            cancelText: 'Cancel',
+            title: t('event.questions.dialogs.change_type_title'),
+            description,
+            confirmText: t('event.questions.dialogs.continue_confirm'),
+            cancelText: t('event.questions.dialogs.cancel'),
         });
 
         if (!confirmed) {
@@ -91,10 +113,10 @@ const handleTypeChange = async (newType: EventQuestionType): Promise<void> => {
 
 const handleRemove = async (): Promise<void> => {
     const confirmed = await show({
-        title: 'Delete Question?',
-        description: 'Are you sure you want to delete this question? This action cannot be undone.',
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
+        title: t('event.questions.dialogs.delete_title'),
+        description: t('event.questions.dialogs.delete_description_this'),
+        confirmText: t('event.questions.dialogs.delete_confirm'),
+        cancelText: t('event.questions.dialogs.cancel'),
     });
 
     if (confirmed) {
@@ -102,15 +124,15 @@ const handleRemove = async (): Promise<void> => {
     }
 };
 
-const questionTypeOptions = [
-    { id: QuestionType.SHORT_TEXT, name: 'Short Text' },
-    { id: QuestionType.LONG_TEXT, name: 'Long Text' },
-    { id: QuestionType.SINGLE_CHOICE, name: 'Single Choice' },
-    { id: QuestionType.MULTI_CHOICE, name: 'Multiple Choice' },
-    { id: QuestionType.DROPDOWN, name: 'Dropdown' },
-    { id: QuestionType.RATING, name: 'Rating' },
-    { id: QuestionType.DATE, name: 'Date' },
-];
+const questionTypeOptions = computed(() => [
+    { id: QuestionType.SHORT_TEXT, name: t('event.questions.types.short_text') },
+    { id: QuestionType.LONG_TEXT, name: t('event.questions.types.long_text') },
+    { id: QuestionType.SINGLE_CHOICE, name: t('event.questions.types.single_choice') },
+    { id: QuestionType.MULTI_CHOICE, name: t('event.questions.types.multi_choice') },
+    { id: QuestionType.DROPDOWN, name: t('event.questions.types.dropdown') },
+    { id: QuestionType.RATING, name: t('event.questions.types.rating') },
+    { id: QuestionType.DATE, name: t('event.questions.types.date') },
+]);
 
 const getTypeIcon = (type: EventQuestionType) => {
     const icons: Record<EventQuestionType, string> = {
@@ -148,13 +170,13 @@ const getTypeIcon = (type: EventQuestionType) => {
                 />
                 <div class="flex-1 min-w-0">
                     <div class="text-sm font-medium text-foreground truncate">
-                        {{ localQuestion.label || `Question ${index + 1}` }}
+                        {{ localQuestion.label || t('event.questions.form.question_n', { n: index + 1 }) }}
                     </div>
                     <div
                         v-if="localQuestion.isRequired"
                         class="text-xs text-muted-foreground"
                     >
-                        Required
+                        {{ t('event.questions.form.required') }}
                     </div>
                 </div>
             </div>
@@ -257,11 +279,11 @@ const getTypeIcon = (type: EventQuestionType) => {
                     <FormItemInput
                         id="question-label"
                         v-model="localQuestion.label"
-                        :title="'Question Label'"
-                        :placeholder="'Enter question label'"
+                        :title="t('event.questions.form.question_label')"
+                        :placeholder="t('event.questions.form.question_label_placeholder')"
                         :required="true"
                         :disabled="disabled"
-                        :errors="errors?.filter(e => e.includes('Label')) || []"
+                        :errors="errors?.filter(e => errorKey(e).includes('label'))?.map(toMessage) || []"
                         @update:model-value="(val) => updateField('label', String(val || ''))"
                     />
 
@@ -269,7 +291,7 @@ const getTypeIcon = (type: EventQuestionType) => {
                     <FormItemSelect
                         id="question-type"
                         v-model="localQuestion.type"
-                        :title="'Question Type'"
+                        :title="t('event.questions.form.question_type')"
                         :data="questionTypeOptions"
                         key-value="id"
                         name-value="name"
@@ -282,9 +304,9 @@ const getTypeIcon = (type: EventQuestionType) => {
                     <FormItemSwitch
                         id="question-required"
                         v-model="localQuestion.isRequired"
-                        :title="'Required'"
-                        true-label="Yes"
-                        false-label="No"
+                        :title="t('event.questions.form.required')"
+                        :true-label="t('common.yes')"
+                        :false-label="t('common.no')"
                         :disabled="disabled"
                         @update:model-value="(val) => updateField('isRequired', Boolean(val))"
                     />
@@ -294,24 +316,24 @@ const getTypeIcon = (type: EventQuestionType) => {
                         id="question-position"
                         :model-value="localQuestion.position !== undefined ? String(localQuestion.position) : ''"
                         type="number"
-                        :title="'Position'"
-                        :placeholder="suggestedPosition !== undefined ? String(suggestedPosition) : 'Enter position'"
+                        :title="t('event.questions.form.position')"
+                        :placeholder="suggestedPosition !== undefined ? String(suggestedPosition) : t('event.questions.form.position_placeholder')"
                         :required="true"
                         :disabled="disabled"
                         :min="0"
-                        :errors="errors?.filter(e => e.includes('Position')) || []"
+                        :errors="errors?.filter(e => errorKey(e).includes('position'))?.map(toMessage) || []"
                         @update:model-value="(val) => updateField('position', val ? Number(val) : undefined)"
                     />
                     <p class="text-xs text-muted-foreground -mt-2">
-                        Set position for sorting (must be unique)
+                        {{ t('event.questions.form.position_hint') }}
                     </p>
 
                     <!-- Placeholder -->
                     <FormItemInput
                         id="question-placeholder"
                         v-model="localQuestion.placeholder"
-                        :title="'Placeholder'"
-                        :placeholder="'Enter placeholder text (optional)'"
+                        :title="t('event.questions.form.placeholder')"
+                        :placeholder="t('event.questions.form.placeholder_optional')"
                         :disabled="disabled"
                         @update:model-value="(val) => updateField('placeholder', val ? String(val) : undefined)"
                     />
@@ -320,8 +342,8 @@ const getTypeIcon = (type: EventQuestionType) => {
                     <FormItemTextarea
                         id="question-help-text"
                         v-model="localQuestion.helpText"
-                        :title="'Help Text'"
-                        :placeholder="'Enter help text (optional)'"
+                        :title="t('event.questions.form.help_text')"
+                        :placeholder="t('event.questions.form.help_text_optional')"
                         :disabled="disabled"
                         :rows="3"
                         @update:model-value="(val) => updateField('helpText', val ? String(val) : undefined)"
@@ -334,7 +356,7 @@ const getTypeIcon = (type: EventQuestionType) => {
                     >
                         <OptionsEditor
                             :model-value="localQuestion.options || []"
-                            :errors="errors?.filter(e => e.includes('option') || e.includes('Option')) || []"
+                            :errors="errors?.filter(e => errorKey(e).toLowerCase().includes('option'))?.map(toMessage) || []"
                             :disabled="disabled"
                             @update:model-value="(val) => updateField('options', val)"
                         />
@@ -347,7 +369,7 @@ const getTypeIcon = (type: EventQuestionType) => {
                     >
                         <RatingConfigEditor
                             v-model="localQuestion.config"
-                            :errors="errors?.filter(e => e.includes('rating') || e.includes('Rating') || e.includes('config')) || []"
+                            :errors="errors?.filter(e => { const k = errorKey(e); return k.includes('rating') || k.includes('config'); })?.map(toMessage) || []"
                             :disabled="disabled"
                             @update:model-value="(val) => updateField('config', val)"
                         />
@@ -355,14 +377,14 @@ const getTypeIcon = (type: EventQuestionType) => {
 
                     <!-- General Errors -->
                     <div
-                        v-if="errors && errors.length > 0"
+                        v-if="generalErrors.length > 0"
                         class="text-destructive text-xs space-y-0.5"
                     >
                         <div
-                            v-for="(err, i) in errors.filter(e => !e.includes('Label') && !e.includes('Position') && !e.includes('option') && !e.includes('Option') && !e.includes('rating') && !e.includes('Rating') && !e.includes('config'))"
+                            v-for="(msg, i) in generalErrors"
                             :key="i"
                         >
-                            • {{ err }}
+                            • {{ msg }}
                         </div>
                     </div>
                 </div>

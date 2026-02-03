@@ -29,50 +29,15 @@ watch(open, (val) => {
     emit('update:modelValue', val);
 });
 
-const questionTypes = [
-    {
-        type: QuestionType.SHORT_TEXT,
-        label: 'Short Text',
-        description: 'Single-line text input',
-        icon: 'solar:text-field-line-duotone',
-    },
-    {
-        type: QuestionType.LONG_TEXT,
-        label: 'Long Text',
-        description: 'Multi-line text input',
-        icon: 'solar:text-bold-line-duotone',
-    },
-    {
-        type: QuestionType.SINGLE_CHOICE,
-        label: 'Single Choice',
-        description: 'Radio button selection',
-        icon: 'solar:check-circle-line-duotone',
-    },
-    {
-        type: QuestionType.MULTI_CHOICE,
-        label: 'Multiple Choice',
-        description: 'Checkbox selection',
-        icon: 'solar:checklist-minimalistic-line-duotone',
-    },
-    {
-        type: QuestionType.DROPDOWN,
-        label: 'Dropdown',
-        description: 'Dropdown selection',
-        icon: 'solar:list-arrow-down-minimalistic-line-duotone',
-    },
-    {
-        type: QuestionType.RATING,
-        label: 'Rating',
-        description: 'Rating scale',
-        icon: 'solar:star-line-duotone',
-    },
-    {
-        type: QuestionType.DATE,
-        label: 'Date',
-        description: 'Date picker',
-        icon: 'solar:calendar-line-duotone',
-    },
-];
+const questionTypes = computed(() => [
+    { type: QuestionType.SHORT_TEXT, labelKey: 'event.questions.types.short_text', descKey: 'event.questions.types.short_text_desc', icon: 'solar:text-field-line-duotone' },
+    { type: QuestionType.LONG_TEXT, labelKey: 'event.questions.types.long_text', descKey: 'event.questions.types.long_text_desc', icon: 'solar:text-bold-line-duotone' },
+    { type: QuestionType.SINGLE_CHOICE, labelKey: 'event.questions.types.single_choice', descKey: 'event.questions.types.single_choice_desc', icon: 'solar:check-circle-line-duotone' },
+    { type: QuestionType.MULTI_CHOICE, labelKey: 'event.questions.types.multi_choice', descKey: 'event.questions.types.multi_choice_desc', icon: 'solar:checklist-minimalistic-line-duotone' },
+    { type: QuestionType.DROPDOWN, labelKey: 'event.questions.types.dropdown', descKey: 'event.questions.types.dropdown_desc', icon: 'solar:list-arrow-down-minimalistic-line-duotone' },
+    { type: QuestionType.RATING, labelKey: 'event.questions.types.rating', descKey: 'event.questions.types.rating_desc', icon: 'solar:star-line-duotone' },
+    { type: QuestionType.DATE, labelKey: 'event.questions.types.date', descKey: 'event.questions.types.date_desc', icon: 'solar:calendar-line-duotone' },
+]);
 
 const handleSelect = (type: EventQuestionType) => {
     emit('select', type);
@@ -92,7 +57,7 @@ const handleSelect = (type: EventQuestionType) => {
                     name="solar:add-circle-bold-duotone"
                     class="size-4 shrink-0"
                 />
-                Add Question
+                {{ t('event.questions.add_question') }}
             </Button>
         </PopoverTrigger>
         <PopoverContent
@@ -102,10 +67,10 @@ const handleSelect = (type: EventQuestionType) => {
             <div class="p-1.5">
                 <div class="px-2 py-1 mb-1">
                     <h4 class="text-sm font-semibold text-foreground">
-                        Select Question Type
+                        {{ t('event.questions.select_question_type') }}
                     </h4>
                     <p class="text-xs text-muted-foreground">
-                        Choose the type of question you want to add
+                        {{ t('event.questions.select_question_type_description') }}
                     </p>
                 </div>
                 <div class="grid grid-cols-1 gap-0.5">
@@ -122,10 +87,10 @@ const handleSelect = (type: EventQuestionType) => {
                         />
                         <div class="flex-1 min-w-0">
                             <div class="font-medium text-sm text-foreground group-hover:text-primary transition-colors">
-                                {{ item.label }}
+                                {{ t(item.labelKey) }}
                             </div>
                             <div class="text-xs text-muted-foreground">
-                                {{ item.description }}
+                                {{ t(item.descKey) }}
                             </div>
                         </div>
                     </button>

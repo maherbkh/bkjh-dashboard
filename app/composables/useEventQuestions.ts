@@ -1,11 +1,42 @@
 /**
  * Composable for Event Question Management
  *
- * Provides utilities for validating, normalizing, and managing event questions
+ * Provides utilities for validating, normalizing, and managing event questions.
+ * Validation functions return i18n keys (and optional params) for translation in components.
  */
 
 import type { EventQuestion, EventQuestionType, EventQuestionOption, EventQuestionRatingConfig } from '~/types/event-question';
 import { isChoiceQuestionType, requiresOptions, requiresRatingConfig, EventQuestionType as QuestionType } from '~/types/event-question';
+
+/** Message suitable for t(key) or t(key, params) in components */
+export type QuestionValidationMessage = string | { key: string; params?: Record<string, string | number> };
+
+const V = {
+    options_required: 'event.questions.validation.options_required',
+    options_max: 'event.questions.validation.options_max',
+    option_n_label_required: 'event.questions.validation.option_n_label_required',
+    option_n_label_max: 'event.questions.validation.option_n_label_max',
+    option_n_label_chars: 'event.questions.validation.option_n_label_chars',
+    option_n_value_max: 'event.questions.validation.option_n_value_max',
+    option_n_value_chars: 'event.questions.validation.option_n_value_chars',
+    option_n_duplicate_value: 'event.questions.validation.option_n_duplicate_value',
+    rating_min: 'event.questions.validation.rating_min',
+    rating_max: 'event.questions.validation.rating_max',
+    rating_max_gt_min: 'event.questions.validation.rating_max_gt_min',
+    rating_step: 'event.questions.validation.rating_step',
+    label_required: 'event.questions.validation.label_required',
+    label_max: 'event.questions.validation.label_max',
+    type_required: 'event.questions.validation.type_required',
+    position_min: 'event.questions.validation.position_min',
+    position_integer: 'event.questions.validation.position_integer',
+    placeholder_max: 'event.questions.validation.placeholder_max',
+    help_text_max: 'event.questions.validation.help_text_max',
+    type_change_options_removed: 'event.questions.validation.type_change_options_removed',
+    type_change_rating_removed: 'event.questions.validation.type_change_rating_removed',
+    type_change_add_option: 'event.questions.validation.type_change_add_option',
+    type_change_rating_settings: 'event.questions.validation.type_change_rating_settings',
+    position_duplicate: 'event.questions.validation.position_duplicate',
+} as const;
 
 /** Allowed for option labels: letters, numbers, spaces (no special chars) */
 const OPTION_LABEL_ALLOWED = /^[a-zA-Z0-9\s]+$/;
@@ -31,48 +62,49 @@ export function labelToOptionValue(label: string): string {
  * Validates options for choice-based questions
  * Label and value must not include special characters (label: letters, numbers, spaces; value: snake_case)
  * @param question - The question to validate options for
- * @returns Array of error messages (empty if valid)
+ * @returns Array of i18n keys/params for error messages (empty if valid)
  */
-export function validateOptions(question: EventQuestion): string[] {
-    const errors: string[] = [];
+export function validateOptions(question: EventQuestion): QuestionValidationMessage[] {
+    const errors: QuestionValidationMessage[] = [];
 
     if (!requiresOptions(question.type)) {
         return errors;
     }
 
     if (!question.options || question.options.length === 0) {
-        errors.push('At least one option is required for this question type');
+        errors.push(V.options_required);
         return errors;
     }
 
     if (question.options.length > 50) {
-        errors.push('Maximum 50 options allowed');
+        errors.push(V.options_max);
     }
 
     const valueSet = new Set<string>();
+    const n = (i: number) => i + 1;
     question.options.forEach((option, index) => {
         if (!option.label || option.label.trim().length === 0) {
-            errors.push(`Option ${index + 1}: Label is required`);
+            errors.push({ key: V.option_n_label_required, params: { n: n(index) } });
         }
         else {
             if (option.label.length > 200) {
-                errors.push(`Option ${index + 1}: Label must be 200 characters or less`);
+                errors.push({ key: V.option_n_label_max, params: { n: n(index) } });
             }
             if (!OPTION_LABEL_ALLOWED.test(option.label)) {
-                errors.push(`Option ${index + 1}: Label must only contain letters, numbers, and spaces (no special characters)`);
+                errors.push({ key: V.option_n_label_chars, params: { n: n(index) } });
             }
         }
 
         const value = option.value ?? labelToOptionValue(option.label);
         if (value.length > 100) {
-            errors.push(`Option ${index + 1}: Value must be 100 characters or less`);
+            errors.push({ key: V.option_n_value_max, params: { n: n(index) } });
         }
         if (value && !OPTION_VALUE_ALLOWED.test(value)) {
-            errors.push(`Option ${index + 1}: Value must only contain lowercase letters, numbers, and underscores (no special characters)`);
+            errors.push({ key: V.option_n_value_chars, params: { n: n(index) } });
         }
 
         if (valueSet.has(value)) {
-            errors.push(`Option ${index + 1}: Duplicate value "${value}"`);
+            errors.push({ key: V.option_n_duplicate_value, params: { n: n(index), value } });
         }
         else if (value) {
             valueSet.add(value);
@@ -85,10 +117,10 @@ export function validateOptions(question: EventQuestion): string[] {
 /**
  * Validates rating configuration
  * @param config - The rating config to validate
- * @returns Array of error messages (empty if valid)
+ * @returns Array of i18n keys for error messages (empty if valid)
  */
-export function validateRatingConfig(config: EventQuestionRatingConfig | undefined): string[] {
-    const errors: string[] = [];
+export function validateRatingConfig(config: EventQuestionRatingConfig | undefined): QuestionValidationMessage[] {
+    const errors: QuestionValidationMessage[] = [];
 
     if (!config) {
         return errors;
@@ -98,19 +130,19 @@ export function validateRatingConfig(config: EventQuestionRatingConfig | undefin
     const max = config.max ?? 5;
 
     if (min < 0) {
-        errors.push('Minimum value must be 0 or greater');
+        errors.push(V.rating_min);
     }
 
     if (max > 100) {
-        errors.push('Maximum value must be 100 or less');
+        errors.push(V.rating_max);
     }
 
     if (max <= min) {
-        errors.push('Maximum value must be greater than minimum value');
+        errors.push(V.rating_max_gt_min);
     }
 
     if (config.step !== undefined && config.step <= 0) {
-        errors.push('Step must be greater than 0');
+        errors.push(V.rating_step);
     }
 
     return errors;
@@ -119,42 +151,42 @@ export function validateRatingConfig(config: EventQuestionRatingConfig | undefin
 /**
  * Validates an individual question
  * @param question - The question to validate
- * @returns Array of error messages (empty if valid)
+ * @returns Array of i18n keys/params for error messages (empty if valid)
  */
-export function validateQuestion(question: EventQuestion): string[] {
-    const errors: string[] = [];
+export function validateQuestion(question: EventQuestion): QuestionValidationMessage[] {
+    const errors: QuestionValidationMessage[] = [];
 
     // Label validation
     if (!question.label || question.label.trim().length === 0) {
-        errors.push('Label is required');
+        errors.push(V.label_required);
     }
     else if (question.label.length > 500) {
-        errors.push('Label must be 500 characters or less');
+        errors.push(V.label_max);
     }
 
     // Type validation
     if (!question.type) {
-        errors.push('Type is required');
+        errors.push(V.type_required);
     }
 
     // Position validation
     if (question.position !== undefined) {
         if (question.position < 0) {
-            errors.push('Position must be 0 or greater');
+            errors.push(V.position_min);
         }
         if (!Number.isInteger(question.position)) {
-            errors.push('Position must be an integer');
+            errors.push(V.position_integer);
         }
     }
 
     // Placeholder validation
     if (question.placeholder && question.placeholder.length > 255) {
-        errors.push('Placeholder must be 255 characters or less');
+        errors.push(V.placeholder_max);
     }
 
     // Help text validation
     if (question.helpText && question.helpText.length > 1000) {
-        errors.push('Help text must be 1000 characters or less');
+        errors.push(V.help_text_max);
     }
 
     // Type-specific validations
@@ -170,44 +202,41 @@ export function validateQuestion(question: EventQuestion): string[] {
 }
 
 /**
- * Checks if changing question type is safe and returns warning message
+ * Checks if changing question type is safe and returns warning message keys
  * @param oldType - The current question type
  * @param newType - The new question type to change to
- * @returns Object with compatibility status and optional warning message
+ * @returns Object with compatibility status and optional warning message keys for t()
  */
 export function checkTypeChangeCompatibility(
     oldType: EventQuestionType,
     newType: EventQuestionType,
-): { compatible: boolean; warning?: string } {
+): { compatible: boolean; warningMessages?: QuestionValidationMessage[] } {
     if (oldType === newType) {
         return { compatible: true };
     }
 
-    const warnings: string[] = [];
+    const warnings: QuestionValidationMessage[] = [];
 
-    // Check if losing options
     if (isChoiceQuestionType(oldType) && !isChoiceQuestionType(newType)) {
-        warnings.push('Options will be removed');
+        warnings.push(V.type_change_options_removed);
     }
 
-    // Check if losing rating config
     if (oldType === QuestionType.RATING && newType !== QuestionType.RATING) {
-        warnings.push('Rating configuration will be removed');
+        warnings.push(V.type_change_rating_removed);
     }
 
-    // Check if gaining requirements
     if (!isChoiceQuestionType(oldType) && isChoiceQuestionType(newType)) {
-        warnings.push('You will need to add at least one option');
+        warnings.push(V.type_change_add_option);
     }
 
     if (oldType !== QuestionType.RATING && newType === QuestionType.RATING) {
-        warnings.push('You will need to configure rating settings');
+        warnings.push(V.type_change_rating_settings);
     }
 
     if (warnings.length > 0) {
         return {
             compatible: false,
-            warning: warnings.join('. ') + '.',
+            warningMessages: warnings,
         };
     }
 
@@ -337,11 +366,11 @@ export function prepareQuestionsForSubmit(questions: EventQuestion[]): EventQues
 /**
  * Validates position uniqueness within questions array
  * @param questions - Array of questions to validate
- * @returns Array of error messages for duplicate positions (empty if valid)
+ * @returns Array of i18n keys/params for duplicate position errors (empty if valid)
  */
-export function validatePositionUniqueness(questions: EventQuestion[]): string[] {
-    const errors: string[] = [];
-    const positionMap = new Map<number, number[]>(); // position -> array of question indices
+export function validatePositionUniqueness(questions: EventQuestion[]): QuestionValidationMessage[] {
+    const errors: QuestionValidationMessage[] = [];
+    const positionMap = new Map<number, number[]>();
 
     questions.forEach((question, index) => {
         if (question.position !== undefined) {
@@ -354,7 +383,10 @@ export function validatePositionUniqueness(questions: EventQuestion[]): string[]
 
     positionMap.forEach((indices, position) => {
         if (indices.length > 1) {
-            errors.push(`Position ${position} is used by multiple questions (indices: ${indices.join(', ')})`);
+            errors.push({
+                key: V.position_duplicate,
+                params: { position, indices: indices.join(', ') },
+            });
         }
     });
 

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { EventQuestionRatingConfig } from '~/types/event-question';
 
+const { t } = useI18n();
+
 type Props = {
     modelValue?: EventQuestionRatingConfig;
     errors?: string[];
@@ -51,7 +53,7 @@ const updateLabel = (field: 'min' | 'max', value: string): void => {
 <template>
     <div class="space-y-3">
         <Label class="text-sm font-medium">
-            Rating Configuration
+            {{ t('event.questions.rating_config.title') }}
         </Label>
 
         <div class="grid grid-cols-3 gap-2">
@@ -59,8 +61,8 @@ const updateLabel = (field: 'min' | 'max', value: string): void => {
                 id="rating-min"
                 v-model.number="config.min"
                 type="number"
-                :title="'Minimum'"
-                :placeholder="'0'"
+                :title="t('event.questions.rating_config.minimum')"
+                placeholder="0"
                 :required="true"
                 :disabled="disabled"
                 :min="0"
@@ -70,8 +72,8 @@ const updateLabel = (field: 'min' | 'max', value: string): void => {
                 id="rating-max"
                 v-model.number="config.max"
                 type="number"
-                :title="'Maximum'"
-                :placeholder="'5'"
+                :title="t('event.questions.rating_config.maximum')"
+                placeholder="5"
                 :required="true"
                 :disabled="disabled"
                 :min="1"
@@ -82,8 +84,8 @@ const updateLabel = (field: 'min' | 'max', value: string): void => {
                 id="rating-step"
                 v-model.number="config.step"
                 type="number"
-                :title="'Step'"
-                :placeholder="'1'"
+                :title="t('event.questions.rating_config.step')"
+                placeholder="1"
                 :disabled="disabled"
                 :min="0.1"
                 @update:model-value="(val) => updateField('step', val ? Number(val) : undefined)"
@@ -94,16 +96,16 @@ const updateLabel = (field: 'min' | 'max', value: string): void => {
             <FormItemInput
                 id="rating-min-label"
                 :model-value="config.labels?.min || ''"
-                :title="'Minimum Label'"
-                :placeholder="'e.g., Poor'"
+                :title="t('event.questions.rating_config.minimum_label')"
+                :placeholder="t('event.questions.rating_config.min_label_placeholder')"
                 :disabled="disabled"
                 @update:model-value="(val) => updateLabel('min', String(val || ''))"
             />
             <FormItemInput
                 id="rating-max-label"
                 :model-value="config.labels?.max || ''"
-                :title="'Maximum Label'"
-                :placeholder="'e.g., Excellent'"
+                :title="t('event.questions.rating_config.maximum_label')"
+                :placeholder="t('event.questions.rating_config.max_label_placeholder')"
                 :disabled="disabled"
                 @update:model-value="(val) => updateLabel('max', String(val || ''))"
             />
@@ -122,7 +124,7 @@ const updateLabel = (field: 'min' | 'max', value: string): void => {
         </div>
 
         <p class="text-xs text-muted-foreground">
-            Minimum must be &gt;= 0, Maximum must be &lt;= 100, and Maximum must be greater than Minimum.
+            {{ t('event.questions.rating_config.hint') }}
         </p>
     </div>
 </template>
