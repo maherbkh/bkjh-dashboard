@@ -10,6 +10,8 @@ import FormItemMultiSelect from '~/components/FormItem/MultiSelect.vue';
 import FormItemInput from '~/components/FormItem/Input.vue';
 import FormItemTextarea from '~/components/FormItem/Textarea.vue';
 import FormItemArrayInput from '~/components/FormItem/ArrayInput.vue';
+import EventQuestions from '~/components/Event/Question/index.vue';
+import { prepareQuestionsForSubmit } from '~/composables/useEventQuestions';
 
 const { t } = useI18n();
 
@@ -61,6 +63,7 @@ const [disableRegistration, disableRegistrationAttrs] = defineField('disableRegi
 const [isFull, isFullAttrs] = defineField('isFull');
 const [speakers, speakersAttrs] = defineField('speakers');
 const [schedules] = defineField('schedules');
+const [questions] = defineField('questions');
 
 // Cover media field - stored as MediaEntity in component, but form schema expects ID
 const coverMedia = ref<MediaEntity | null>(null);
@@ -258,6 +261,7 @@ watch(() => props.initialData, async (newData) => {
                 endTime: schedule.endTime || '',
                 note: schedule.note || '',
             })),
+            questions: (newData as any).questions || [],
         });
 
         // Ensure topics is always an array after setValues
@@ -269,6 +273,7 @@ watch(() => props.initialData, async (newData) => {
     else if (props.mode === 'add' && !newData) {
         resetForm();
         coverMedia.value = null;
+        questions.value = []; // Start with empty questions array
     }
 }, { immediate: true });
 
@@ -283,14 +288,19 @@ const onSubmit = handleSubmit((values) => {
             .filter(t => t.length > 0);
     }
 
+    // Prepare questions for submission (ensure IDs, validate positions)
+    const preparedQuestions = prepareQuestionsForSubmit(questions.value || []);
+
     // Transform cover MediaEntity to ID for submission
     const submitValues: any = {
         ...values,
         cover: coverId.value,
         topics: topicsArray, // Always include as array, even if empty
+        questions: preparedQuestions, // Include prepared questions
     };
 
     console.log('Submitting topics:', topicsArray); // Debug log
+    console.log('Submitting questions:', preparedQuestions); // Debug log
 
     emit('submit', submitValues as EventForm);
 });
@@ -312,7 +322,6 @@ const removeSchedule = (index: number) => {
         ...schedules.value.slice(index + 1),
     ];
 };
-
 
 // Computed properties
 const submitButtonText = computed(() => {
@@ -681,6 +690,23 @@ const formTitle = computed(() => {
                                 item-label="name"
                             />
                         </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle class="flex items-start gap-2">
+                            <Icon
+                                name="solar:question-circle-line-duotone"
+                                class="!size-5 opacity-75 shrink-0"
+                            />
+                            Event Questions
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <EventQuestions
+                            v-model="questions"
+                            :errors="errors.questions ? { questions: Array.isArray(errors.questions) ? errors.questions : [errors.questions] } : {}"
+                        />
                     </CardContent>
                 </Card>
                 <div

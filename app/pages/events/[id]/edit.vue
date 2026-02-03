@@ -41,15 +41,15 @@ onMounted(async () => {
 const onSubmit = async (values: EventForm) => {
     if (!editingEvent.value) return;
     isSubmitting.value = true;
-    
+
     // Ensure topics is always an array, never null or undefined
     const payload: any = {
         ...values,
         topics: Array.isArray(values.topics) ? values.topics : [],
     };
-    
+
     console.log('API Payload topics:', payload.topics); // Debug log
-    
+
     const { data, error } = await useApiFetch(`/academy/events/${editingEvent.value.id}`, {
         method: 'PATCH',
         body: payload,

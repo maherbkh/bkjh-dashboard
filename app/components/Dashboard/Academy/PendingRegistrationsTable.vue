@@ -526,7 +526,9 @@ const getStatusLabel = (status: string): string => {
                     <DialogTitle>{{ $t('event.status_note') }}</DialogTitle>
                 </DialogHeader>
                 <div class="py-4">
-                    <p class="text-sm whitespace-pre-wrap">{{ selectedNote }}</p>
+                    <p class="text-sm whitespace-pre-wrap">
+                        {{ selectedNote }}
+                    </p>
                 </div>
                 <DialogFooter>
                     <Button

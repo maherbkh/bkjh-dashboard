@@ -591,8 +591,8 @@ const updateAttendance = async (hasAttended: boolean) => {
                             :disabled="!row.hasAttended || !row.certificate"
                             hydrate-on-interaction="mouseover"
                             @click="
-                                row.certificate &&
-                                    downloadCertificate(row.certificate, {
+                                row.certificate
+                                    && downloadCertificate(row.certificate, {
                                         attendeeName: row.attendee?.fullName,
                                         eventTitle: props.eventTitle,
                                     })

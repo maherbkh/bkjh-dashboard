@@ -68,7 +68,7 @@ const onSubmit = async (values: EventForm) => {
         ...values,
         topics: Array.isArray(values.topics) ? values.topics : [],
     };
-    
+
     console.log('API Payload topics:', payload.topics); // Debug log
 
     const { data, error } = await useApiFetch('/academy/events', {

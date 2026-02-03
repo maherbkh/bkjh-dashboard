@@ -66,7 +66,7 @@ const { show: showAlertDialog } = useAlertDialog();
 const isRetryable = computed(() => {
     if (!job.value) return false;
     if (job.value.status !== 'FAILED') return false;
-    
+
     // Check if queue is retryable
     const retryableQueues: QueueName[] = ['email', 'certificate-generation', 'certificate-email'];
     return retryableQueues.includes(job.value.queueName);
@@ -103,13 +103,16 @@ const handleRetry = async () => {
             toast.success(t('queue_job.retry_success'));
             // Refresh job data
             await refresh();
-        } else {
+        }
+        else {
             toast.error(t('queue_job.retry_failed'));
         }
-    } catch (err) {
+    }
+    catch (err) {
         console.error('Error retrying job:', err);
         toast.error(t('queue_job.retry_failed'));
-    } finally {
+    }
+    finally {
         isRetrying.value = false;
     }
 };

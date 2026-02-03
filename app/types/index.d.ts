@@ -798,6 +798,7 @@ export type EventData = {
     admin?: EventAdminLite | null;
     speakers?: EventSpeakerLite[];
     schedules?: EventSchedule[];
+    questions?: import('~/types/event-question').EventQuestion[];
     registrations?: EventRegistration[];
     registrationsCount?: number;
     schedulesCount?: number;
@@ -955,14 +956,14 @@ export type QueueJobPayload = {
     smtpConfig?: string;
     attachments?: Array<{ filename: string; path: string }>;
     hasAttachments?: boolean;
-    
+
     // Certificate generation payload
     attendeeId?: string;
     eventId?: string;
     attendeeData?: any;
     eventData?: any;
     expireAt?: string;
-    
+
     // Certificate email payload
     certificateId?: string;
     attendeeEmail?: string;
@@ -970,7 +971,7 @@ export type QueueJobPayload = {
     eventName?: string;
     generationDate?: string;
     certificatePath?: string;
-    
+
     // Allow any additional fields
     [key: string]: any;
 };

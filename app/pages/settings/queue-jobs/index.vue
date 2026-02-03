@@ -238,7 +238,7 @@ const handleView = (job: QueueJob) => {
             :has-add-new="false"
             :has-deleted-items="false"
         />
-        
+
         <!-- Filters and Search -->
         <div class="border-b p-4 space-y-4">
             <form
@@ -254,7 +254,7 @@ const handleView = (job: QueueJob) => {
                     icon="solar:rounded-magnifer-linear"
                     class="col-span-1 lg:col-span-2"
                 />
-                
+
                 <!-- Queue Name Filter -->
                 <FormItemSelect
                     v-model="selectedQueueName"
@@ -264,7 +264,7 @@ const handleView = (job: QueueJob) => {
                     name-value="label"
                     class="col-span-1 lg:col-span-2"
                 />
-                
+
                 <!-- Status Filter -->
                 <FormItemSelect
                     v-model="selectedStatus"
@@ -274,7 +274,7 @@ const handleView = (job: QueueJob) => {
                     name-value="label"
                     class="col-span-1 lg:col-span-2"
                 />
-                
+
                 <!-- Second Row -->
                 <!-- Start Date -->
                 <FormItemDatePicker
@@ -284,7 +284,7 @@ const handleView = (job: QueueJob) => {
                     :time-picker="false"
                     class="col-span-1 lg:col-span-2"
                 />
-                
+
                 <!-- End Date -->
                 <FormItemDatePicker
                     v-model="endDate"
@@ -293,7 +293,7 @@ const handleView = (job: QueueJob) => {
                     :time-picker="false"
                     class="col-span-1 lg:col-span-2"
                 />
-                
+
                 <!-- Action Buttons -->
                 <div class="col-span-1 lg:col-span-2 flex gap-2">
                     <!-- Search Button -->
@@ -309,7 +309,7 @@ const handleView = (job: QueueJob) => {
                         />
                         <span class="hidden sm:inline ml-2">{{ $t('action.search') }}</span>
                     </Button>
-                    
+
                     <!-- Reset Button -->
                     <Button
                         type="reset"
@@ -326,7 +326,7 @@ const handleView = (job: QueueJob) => {
                 </div>
             </form>
         </div>
-        
+
         <!-- Table -->
         <div>
             <PageEmptyState
@@ -362,7 +362,7 @@ const handleView = (job: QueueJob) => {
                             </span>
                         </div>
                     </template>
-                    
+
                     <template #cell-queueName="{ row }">
                         <Badge
                             :variant="getQueueVariant(row.queueName)"
@@ -371,13 +371,13 @@ const handleView = (job: QueueJob) => {
                             {{ $t(`queue_job.queues.${row.queueName}`) }}
                         </Badge>
                     </template>
-                    
+
                     <template #cell-jobType="{ row }">
                         <div class="text-sm">
                             {{ row.jobType }}
                         </div>
                     </template>
-                    
+
                     <template #cell-status="{ row }">
                         <Badge
                             :variant="getStatusVariant(row.status)"
@@ -386,25 +386,25 @@ const handleView = (job: QueueJob) => {
                             {{ $t(`queue_job.status.${row.status.toLowerCase()}`) || row.status }}
                         </Badge>
                     </template>
-                    
+
                     <template #cell-recipient="{ row }">
                         <div class="text-sm">
                             {{ row.recipient || $t('queue_job.not_available') }}
                         </div>
                     </template>
-                    
+
                     <template #cell-attempts="{ row }">
                         <div class="text-sm">
                             {{ row.attempts }}/{{ row.maxAttempts }}
                         </div>
                     </template>
-                    
+
                     <template #cell-queuedAt="{ row }">
                         <div class="text-sm">
                             {{ row.queuedAt ? formatDateShort(row.queuedAt) : $t('queue_job.not_available') }}
                         </div>
                     </template>
-                    
+
                     <template #cell-actions="{ row }">
                         <div class="flex justify-end gap-2">
                             <LazyButton
@@ -422,7 +422,7 @@ const handleView = (job: QueueJob) => {
                         </div>
                     </template>
                 </PageTable>
-                
+
                 <PageTablePaginator
                     class="mt-5"
                     :meta="{

@@ -53,16 +53,16 @@ const initializeArray = () => {
 watch(() => props.modelValue, (newValue) => {
     const normalized = normalizeArray(newValue);
     const current = internalArray.value;
-    
+
     // Quick reference check first
     if (current === normalized) return;
-    
+
     // Length check for early exit
     if (current.length !== normalized.length) {
         internalArray.value = normalized;
         return;
     }
-    
+
     // Deep comparison only if lengths match
     let hasChanged = false;
     for (let i = 0; i < current.length; i++) {
@@ -71,7 +71,7 @@ watch(() => props.modelValue, (newValue) => {
             break;
         }
     }
-    
+
     if (hasChanged) {
         internalArray.value = normalized;
     }
@@ -110,21 +110,21 @@ const hasErrors = computed(() => props.errors && props.errors.length > 0);
 const getItemError = (index: number): string[] => {
     // Check for per-item errors (e.g., errors['topics.0'])
     const itemErrorKey = `${props.id || 'array'}.${index}`;
-    const itemError = props.errors.find(err => 
-        typeof err === 'string' && err.includes(itemErrorKey)
+    const itemError = props.errors.find(err =>
+        typeof err === 'string' && err.includes(itemErrorKey),
     );
     if (itemError) return [itemError];
-    
+
     // Check for errors[index] pattern
     if (props.errors[index]) return [String(props.errors[index])];
-    
+
     return [];
 };
 
 // Add new item to array
 const addItem = (): void => {
     if (!canAdd.value) return;
-    
+
     // Create new array with added empty string
     const newArray = [...normalizedArray.value, ''];
     internalArray.value = newArray;
@@ -134,7 +134,7 @@ const addItem = (): void => {
 // Remove item from array by index
 const removeItem = (index: number): void => {
     if (!canRemoveItem(index)) return;
-    
+
     // Use splice for efficient in-place modification, then create new array for reactivity
     const newArray = [...normalizedArray.value];
     newArray.splice(index, 1);
@@ -145,7 +145,7 @@ const removeItem = (index: number): void => {
 // Update item at specific index
 const updateItem = (index: number, value: string | null): void => {
     if (index < 0 || index >= normalizedArray.value.length) return;
-    
+
     // Direct index assignment with new array reference for reactivity
     const newArray = [...normalizedArray.value];
     newArray[index] = value || '';

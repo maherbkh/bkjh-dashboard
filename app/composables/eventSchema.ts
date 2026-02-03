@@ -86,6 +86,107 @@ function scheduleArrayWithGlobalRules(t: (key: string, params?: Record<string, s
     });
 }
 
+function getQuestionSchema(t: (key: string, params?: Record<string, string | number>) => string) {
+    const QuestionType = z.enum(['SHORT_TEXT', 'LONG_TEXT', 'SINGLE_CHOICE', 'MULTI_CHOICE', 'DROPDOWN', 'RATING', 'DATE']);
+
+    const OptionSchema = z.object({
+        label: z
+            .string({ required_error: 'Option label is required' })
+            .min(1, 'Option label is required')
+            .max(200, 'Option label must be 200 characters or less'),
+        value: z.string().max(100, 'Option value must be 100 characters or less').optional(),
+    });
+
+    const RatingConfigSchema = z.object({
+        min: z.number().min(0, 'Minimum must be 0 or greater').optional(),
+        max: z.number().max(100, 'Maximum must be 100 or less').optional(),
+        step: z.number().positive('Step must be greater than 0').optional(),
+        labels: z.object({
+            min: z.string().optional(),
+            max: z.string().optional(),
+        }).optional(),
+    }).refine((val) => {
+        const min = val.min ?? 0;
+        const max = val.max ?? 5;
+        return max > min;
+    }, {
+        message: 'Maximum must be greater than minimum',
+        path: ['max'],
+    });
+
+    return z.object({
+        id: z.string().uuid().optional(),
+        label: z
+            .string({ required_error: 'Question label is required' })
+            .min(1, 'Question label is required')
+            .max(500, 'Question label must be 500 characters or less'),
+        type: QuestionType,
+        isRequired: z.boolean().optional().default(false),
+        position: z.number().int('Position must be an integer').min(0, 'Position must be 0 or greater').optional(),
+        placeholder: z.string().max(255, 'Placeholder must be 255 characters or less').optional(),
+        helpText: z.string().max(1000, 'Help text must be 1000 characters or less').optional(),
+        options: z.array(OptionSchema).optional(),
+        config: RatingConfigSchema.optional(),
+    }).superRefine((question, ctx) => {
+        // Type-specific validations
+        if (question.type === 'SINGLE_CHOICE' || question.type === 'MULTI_CHOICE' || question.type === 'DROPDOWN') {
+            if (!question.options || question.options.length === 0) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: 'At least one option is required for this question type',
+                    path: ['options'],
+                });
+            }
+            else if (question.options.length > 50) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: 'Maximum 50 options allowed',
+                    path: ['options'],
+                });
+            }
+
+            // Check for duplicate values
+            if (question.options) {
+                const values = question.options.map(opt => opt.value || opt.label);
+                const duplicates = values.filter((val, idx) => values.indexOf(val) !== idx);
+                if (duplicates.length > 0) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: `Duplicate option values: ${[...new Set(duplicates)].join(', ')}`,
+                        path: ['options'],
+                    });
+                }
+            }
+        }
+    });
+}
+
+function questionsArrayWithGlobalRules(t: (key: string, params?: Record<string, string | number>) => string) {
+    const Item = getQuestionSchema(t);
+    return z.array(Item).max(100, 'Maximum 100 questions allowed').superRefine((items, ctx) => {
+        // Check position uniqueness
+        const positionMap = new Map<number, number[]>();
+        items.forEach((item, idx) => {
+            if (item.position !== undefined) {
+                if (!positionMap.has(item.position)) {
+                    positionMap.set(item.position, []);
+                }
+                positionMap.get(item.position)!.push(idx);
+            }
+        });
+
+        positionMap.forEach((indices, position) => {
+            if (indices.length > 1) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: `Position ${position} is used by multiple questions`,
+                    path: [],
+                });
+            }
+        });
+    }).optional().default([]);
+}
+
 export function createEventSchema(
     t: (key: string, params?: Record<string, string | number>) => string,
 ) {
@@ -141,6 +242,7 @@ export function createEventSchema(
 
         speakers: z.array(z.string().uuid(t('speaker.singular') + ' ' + t('validation.uuid'))).optional().default([]),
         schedules: scheduleArrayWithGlobalRules(t).default([]),
+        questions: questionsArrayWithGlobalRules(t),
     });
 }
 
@@ -192,6 +294,7 @@ export function updateEventSchema(
         cover: z.string().uuid().optional().nullable(),
         speakers: z.array(z.string().uuid(t('speaker.singular') + ' ' + t('validation.uuid'))).optional().default([]),
         schedules: scheduleArrayWithGlobalRules(t).default([]),
+        questions: questionsArrayWithGlobalRules(t),
     });
 }
 
