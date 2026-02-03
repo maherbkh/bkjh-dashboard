@@ -8,12 +8,31 @@ type Props = {
     modelValue: EventQuestionOption[];
     errors?: string[];
     disabled?: boolean;
+    /** When true (e.g. question has answers), existing option rows are read-only but Add Option stays enabled. */
+    readonlyExistingOptions?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
     errors: () => [],
     disabled: false,
+    readonlyExistingOptions: false,
 });
+
+/** When readonlyExistingOptions became true, we lock options at index < this count. */
+const initialLockedCount = ref<number | null>(null);
+
+watch(
+    () => props.readonlyExistingOptions,
+    (readonly) => {
+        if (readonly && initialLockedCount.value === null) {
+            initialLockedCount.value = props.modelValue?.length ?? 0;
+        }
+        if (!readonly) {
+            initialLockedCount.value = null;
+        }
+    },
+    { immediate: true },
+);
 
 const emit = defineEmits<{
     'update:modelValue': [options: EventQuestionOption[]];
@@ -24,15 +43,25 @@ const options = computed({
     set: val => emit('update:modelValue', val),
 });
 
+function isRowLocked(index: number): boolean {
+    if (!props.readonlyExistingOptions || initialLockedCount.value === null) {
+        return false;
+    }
+    return index < initialLockedCount.value;
+}
+
 const addOption = (): void => {
-    if (options.value.length >= maxOptions) {
+    if (props.disabled || options.value.length >= maxOptions) {
         return;
     }
     options.value = [...options.value, { label: '', value: '' }];
 };
 
 const removeOption = (index: number): void => {
-    if (index < 0 || index >= options.value.length) {
+    if (props.disabled || index < 0 || index >= options.value.length) {
+        return;
+    }
+    if (props.readonlyExistingOptions && isRowLocked(index)) {
         return;
     }
     if (options.value.length > 1) {
@@ -41,7 +70,10 @@ const removeOption = (index: number): void => {
 };
 
 const updateOption = (index: number, field: 'label' | 'value', value: string): void => {
-    if (index < 0 || index >= options.value.length) {
+    if (props.disabled || index < 0 || index >= options.value.length) {
+        return;
+    }
+    if (props.readonlyExistingOptions && isRowLocked(index)) {
         return;
     }
 
@@ -94,6 +126,7 @@ const maxOptions = 50;
                         :placeholder="t('event.questions.form.enter_option_label')"
                         :required="true"
                         :disabled="disabled"
+                        :readonly="isRowLocked(index)"
                         class="col-span-1"
                         @update:model-value="(val) => updateOption(index, 'label', String(val || ''))"
                     />
@@ -110,7 +143,7 @@ const maxOptions = 50;
                     type="button"
                     variant="ghost"
                     size="sm"
-                    :disabled="disabled || options.length <= 1"
+                    :disabled="disabled || (readonlyExistingOptions && isRowLocked(index)) || options.length <= 1"
                     class="shrink-0 h-7 w-7 mt-6"
                     @click="removeOption(index)"
                 >
@@ -134,7 +167,7 @@ const maxOptions = 50;
                 name="solar:add-circle-outline"
                 class="mr-2 size-4 shrink-0"
             />
-            Add Option
+            {{ t('event.questions.form.add_option') }}
         </Button>
 
         <div

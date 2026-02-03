@@ -47,6 +47,9 @@ const generalErrors = computed(() => {
         .map(toMessage);
 });
 
+/** When true, only isRequired, position, and helpText are editable (question has answers). */
+const lockedByAnswers = computed(() => props.question?.hasAnswers === true);
+
 const isExpanded = ref(false);
 const localQuestion = ref<EventQuestion>({ ...props.question });
 
@@ -172,11 +175,8 @@ const getTypeIcon = (type: EventQuestionType) => {
                     <div class="text-sm font-medium text-foreground truncate">
                         {{ localQuestion.label || t('event.questions.form.question_n', { n: index + 1 }) }}
                     </div>
-                    <div
-                        v-if="localQuestion.isRequired"
-                        class="text-xs text-muted-foreground"
-                    >
-                        {{ t('event.questions.form.required') }}
+                    <div class="text-xs text-muted-foreground">
+                        {{ localQuestion.isRequired ? t('event.questions.form.required') : t('event.questions.form.optional') }}
                     </div>
                 </div>
             </div>
@@ -247,7 +247,7 @@ const getTypeIcon = (type: EventQuestionType) => {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    :disabled="disabled"
+                    :disabled="disabled || lockedByAnswers"
                     class="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
                     @click.stop="handleRemove"
                 >
@@ -275,19 +275,19 @@ const getTypeIcon = (type: EventQuestionType) => {
                         <span class="font-mono">ID: {{ localQuestion.id }}</span>
                     </div>
 
-                    <!-- Label -->
+                    <!-- Label (readonly when question has answers) -->
                     <FormItemInput
                         id="question-label"
                         v-model="localQuestion.label"
                         :title="t('event.questions.form.question_label')"
                         :placeholder="t('event.questions.form.question_label_placeholder')"
                         :required="true"
-                        :disabled="disabled"
+                        :disabled="disabled || lockedByAnswers"
                         :errors="errors?.filter(e => errorKey(e).includes('label'))?.map(toMessage) || []"
                         @update:model-value="(val) => updateField('label', String(val || ''))"
                     />
 
-                    <!-- Type Selector -->
+                    <!-- Type Selector (readonly when question has answers) -->
                     <FormItemSelect
                         id="question-type"
                         v-model="localQuestion.type"
@@ -296,11 +296,11 @@ const getTypeIcon = (type: EventQuestionType) => {
                         key-value="id"
                         name-value="name"
                         :required="true"
-                        :disabled="disabled"
+                        :disabled="disabled || lockedByAnswers"
                         @update:model-value="(val) => handleTypeChange(val as EventQuestionType)"
                     />
 
-                    <!-- Is Required -->
+                    <!-- Is Required (always editable when not disabled) -->
                     <FormItemSwitch
                         id="question-required"
                         v-model="localQuestion.isRequired"
@@ -311,7 +311,7 @@ const getTypeIcon = (type: EventQuestionType) => {
                         @update:model-value="(val) => updateField('isRequired', Boolean(val))"
                     />
 
-                    <!-- Position -->
+                    <!-- Position (always editable when not disabled) -->
                     <FormItemInput
                         id="question-position"
                         :model-value="localQuestion.position !== undefined ? String(localQuestion.position) : ''"
@@ -328,17 +328,17 @@ const getTypeIcon = (type: EventQuestionType) => {
                         {{ t('event.questions.form.position_hint') }}
                     </p>
 
-                    <!-- Placeholder -->
+                    <!-- Placeholder (readonly when question has answers) -->
                     <FormItemInput
                         id="question-placeholder"
                         v-model="localQuestion.placeholder"
                         :title="t('event.questions.form.placeholder')"
                         :placeholder="t('event.questions.form.placeholder_optional')"
-                        :disabled="disabled"
+                        :disabled="disabled || lockedByAnswers"
                         @update:model-value="(val) => updateField('placeholder', val ? String(val) : undefined)"
                     />
 
-                    <!-- Help Text -->
+                    <!-- Help Text (always editable when not disabled) -->
                     <FormItemTextarea
                         id="question-help-text"
                         v-model="localQuestion.helpText"
@@ -349,7 +349,7 @@ const getTypeIcon = (type: EventQuestionType) => {
                         @update:model-value="(val) => updateField('helpText', val ? String(val) : undefined)"
                     />
 
-                    <!-- Options Editor (for choice types) -->
+                    <!-- Options Editor (readonly when question has answers) -->
                     <div
                         v-if="isChoiceQuestionType(localQuestion.type)"
                         class="pt-2 border-t"
@@ -358,11 +358,12 @@ const getTypeIcon = (type: EventQuestionType) => {
                             :model-value="localQuestion.options || []"
                             :errors="errors?.filter(e => errorKey(e).toLowerCase().includes('option'))?.map(toMessage) || []"
                             :disabled="disabled"
+                            :readonly-existing-options="lockedByAnswers"
                             @update:model-value="(val) => updateField('options', val)"
                         />
                     </div>
 
-                    <!-- Rating Config Editor (for rating type) -->
+                    <!-- Rating Config Editor (readonly when question has answers) -->
                     <div
                         v-if="requiresRatingConfig(localQuestion.type)"
                         class="pt-2 border-t"
@@ -370,7 +371,7 @@ const getTypeIcon = (type: EventQuestionType) => {
                         <RatingConfigEditor
                             v-model="localQuestion.config"
                             :errors="errors?.filter(e => { const k = errorKey(e); return k.includes('rating') || k.includes('config'); })?.map(toMessage) || []"
-                            :disabled="disabled"
+                            :disabled="disabled || lockedByAnswers"
                             @update:model-value="(val) => updateField('config', val)"
                         />
                     </div>

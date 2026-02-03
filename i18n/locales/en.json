@@ -548,6 +548,7 @@
         "question_label_placeholder": "Enter question label",
         "question_type": "Question Type",
         "required": "Required",
+        "optional": "Optional",
         "position": "Position",
         "position_placeholder": "Enter position",
         "position_hint": "Set position for sorting (must be unique)",

@@ -127,6 +127,7 @@ function getQuestionSchema(t: (key: string, params?: Record<string, string | num
         helpText: z.union([z.string().max(1000, 'Help text must be 1000 characters or less'), z.null()]).optional().transform(v => v ?? undefined),
         options: z.union([z.array(OptionSchema), z.null()]).optional().transform(v => v ?? undefined),
         config: z.union([RatingConfigSchema, z.null()]).optional().transform(v => v ?? undefined),
+        hasAnswers: z.boolean().optional(),
     }).superRefine((question, ctx) => {
         // Type-specific validations
         if (question.type === 'SINGLE_CHOICE' || question.type === 'MULTI_CHOICE' || question.type === 'DROPDOWN') {

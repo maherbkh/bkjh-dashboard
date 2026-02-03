@@ -54,6 +54,8 @@ export interface EventQuestion {
     helpText?: string; // Help text (max 1000 characters)
     options?: EventQuestionOption[]; // Options for choice types (required for SINGLE_CHOICE, MULTI_CHOICE, DROPDOWN)
     config?: EventQuestionRatingConfig; // Config for RATING type
+    /** When true (e.g. from API on update), only isRequired, position, and helpText are editable */
+    hasAnswers?: boolean;
 }
 
 /**

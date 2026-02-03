@@ -548,6 +548,7 @@
         "question_label_placeholder": "Fragenbezeichnung eingeben",
         "question_type": "Fragetyp",
         "required": "Pflichtfeld",
+        "optional": "Optional",
         "position": "Position",
         "position_placeholder": "Position eingeben",
         "position_hint": "Position für die Sortierung setzen (muss eindeutig sein)",

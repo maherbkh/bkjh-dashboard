@@ -257,6 +257,7 @@ export function normalizeQuestion(question: Partial<EventQuestion>): EventQuesti
         position: question.position,
         placeholder: question.placeholder,
         helpText: question.helpText,
+        ...(question.hasAnswers !== undefined && { hasAnswers: question.hasAnswers }),
     };
 
     // Normalize options for choice types (value derived from label as snake_case when missing)
@@ -333,7 +334,8 @@ export function getNextAvailablePosition(questions: EventQuestion[]): number {
         return 0;
     }
 
-    return positions[0] + 1;
+    const maxPosition = positions[0];
+    return (maxPosition ?? 0) + 1;
 }
 
 /**

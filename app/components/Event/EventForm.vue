@@ -270,7 +270,10 @@ watch(() => props.initialData, async (newData) => {
                 endTime: schedule.endTime || '',
                 note: schedule.note || '',
             })),
-            questions: (newData as any).questions || [],
+            questions: ((newData as any).questions || []).map((q: any) => ({
+                ...q,
+                hasAnswers: q.hasAnswers ?? q.has_answers ?? false,
+            })),
         });
 
         // Ensure topics is always an array after setValues

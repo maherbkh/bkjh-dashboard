@@ -146,7 +146,7 @@ function goToStep(index: number) {
                         <span v-else>{{ index + 1 }}</span>
                     </span>
                     <span
-                        class="line-clamp-2 min-h-[2.5rem] w-full px-0.5 text-center text-xs font-medium"
+                        class="line-clamp-2 min-h-10 w-full px-0.5 text-center text-xs font-medium"
                         :class="[
                             hasStepError(index) ? 'text-destructive/80' : index === modelValue ? 'text-primary' : 'text-muted-foreground',
                         ]"
@@ -156,7 +156,7 @@ function goToStep(index: number) {
                 </button>
                 <span
                     v-if="index < steps.length - 1"
-                    class="mt-[1.3125rem] h-0.5 w-12 shrink-0 rounded transition-colors"
+                    class="mt-5.25 h-0.5 w-12 shrink-0 rounded transition-colors"
                     :class="
                         index < modelValue ? 'bg-primary' : 'bg-muted'
                     "
