@@ -39,7 +39,7 @@ const questions = computed({
 });
 
 const addQuestion = (type: EventQuestionType): void => {
-    const newQuestion = getDefaultQuestion(type);
+    const newQuestion = getDefaultQuestion(type, questions.value.length + 1);
 
     questions.value = [...questions.value, newQuestion];
     emit('add:question', newQuestion);

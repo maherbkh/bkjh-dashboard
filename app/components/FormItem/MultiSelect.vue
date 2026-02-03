@@ -402,7 +402,7 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                     type="button"
                     variant="outline"
                     :disabled="disabled"
-                    class="justify-between h-8 text-base md:text-sm font-normal"
+                    class="justify-between h-8 text-base md:text-sm font-normal bg-background!"
                     :class="autoSize ? 'w-auto' : 'w-full'"
                     aria-haspopup="listbox"
                     :aria-expanded="open"
@@ -424,7 +424,7 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                             <CommandInput
                                 v-model="search"
                                 :placeholder="searchPlaceholder"
-                                class="pl-0 !border-transparent"
+                                class="pl-0 border-transparent!"
                             />
                         </div>
                         <Button
@@ -543,17 +543,24 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
             >
                 <div
                     v-if="opt && idx < effectiveMaxCount"
-                    class="flex justify-between items-center gap-1 text-xs font-normal bg-primary/5 text-primary rounded-full border border-primary/25 pl-2 pr-1 py-0.5"
+                    class="group flex justify-between items-center gap-1 text-xs font-normal bg-muted text-muted-foreground rounded-full border border-background-foreground/25 pl-2 pr-1 py-0.5"
                 >
                     <span class="truncate max-w-48">{{ opt?.label }}</span>
                     <button
                         type="button"
                         :title="t('form.remove_item', { label: opt?.label ?? '' })"
-                        class="size-4! bg-background text- hover:text-destructive hover:scale-105 cursor-pointer ease-in-out duration-200  hover:bg-destructive/10 hover:border-destructive/10 rounded-full shrink-0"
+                        class="relative inline-flex size-4! shrink-0 items-center justify-center rounded-full bg-background text-muted-foreground transition-all duration-200 hover:scale-105 hover:bg-destructive/10 hover:text-destructive cursor-pointer"
                         @click="opt && toggleValue(opt.value, false)"
                     >
-                        ×
-                    </Button>
+                        <Icon
+                            name="solar:check-circle-outline"
+                            class="size-4! transition-opacity group-hover:opacity-0 text-success"
+                        />
+                        <Icon
+                            name="solar:close-circle-outline"
+                            class="size-4! absolute inset-0 m-auto opacity-0 text-destructive transition-opacity group-hover:opacity-100"
+                        />
+                    </button>
                 </div>
             </template>
             <Badge

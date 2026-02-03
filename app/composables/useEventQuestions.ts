@@ -244,15 +244,16 @@ export function normalizeQuestion(question: Partial<EventQuestion>): EventQuesti
 /**
  * Gets default question structure for a given type
  * @param type - The question type to create defaults for
+ * @param defaultPosition - Optional position (defaults to questions index + 1 when adding)
  * @returns Default EventQuestion with generated UUID
  */
-export function getDefaultQuestion(type: EventQuestionType): EventQuestion {
+export function getDefaultQuestion(type: EventQuestionType, defaultPosition?: number): EventQuestion {
     const question: EventQuestion = {
         id: generateQuestionId(),
         label: '',
         type,
         isRequired: false,
-        // Position is not set - admin must set it manually
+        ...(defaultPosition !== undefined && { position: defaultPosition }),
     };
 
     // Add default options for choice types
