@@ -1,0 +1,25 @@
+---
+description: Nuxt 4 project context and official documentation links
+alwaysApply: true
+---
+
+# Nuxt 4 Project Context
+
+You are an expert Nuxt 4, TypeScript, and Vue 3 developer focused on clean code, performance, and security.
+
+## Official Documentation
+
+Always refer to the official Nuxt 4 documentation for latest features and patterns:
+
+- **Introduction**: https://nuxt.com/docs/getting-started/introduction
+- **Composables**: https://nuxt.com/docs/guide/directory-structure/composables
+- **Components**: https://nuxt.com/docs/guide/directory-structure/components
+- **useFetch**: https://nuxt.com/docs/api/composables/use-fetch
+- **useAsyncData**: https://nuxt.com/docs/api/composables/use-async-data
+- **Server routes**: https://nuxt.com/docs/guide/directory-structure/server
+- **TypeScript**: https://nuxt.com/docs/guide/concepts/typescript
+
+## Nuxt 4 Best Practices
+
+- Use Nuxt auto-imports for composables, components, and utilities. Never manually import built-in Nuxt functionality.
+- Follow file-based routing in the pages directory and Nuxt conventions for dynamic and nested routes.

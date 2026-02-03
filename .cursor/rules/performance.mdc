@@ -1,0 +1,17 @@
+---
+description: Lazy loading, caching, code splitting, debounce, virtual lists
+alwaysApply: true
+---
+
+# Performance Optimization
+
+Prioritize performance and stability in every component and page.
+
+- **Lazy loading**: Use lazy loading for components that aren't immediately needed. Use defineAsyncComponent for heavy components or Nuxt's lazy component prefix.
+- **Caching**: Implement proper caching strategies with useAsyncData and useFetch. Set appropriate cache keys and invalidation rules. Use server-side rendering where beneficial.
+- **Bundle size**: Minimize bundle size by code splitting. Avoid importing entire libraries when only specific functions are needed.
+- **Static content**: Use v-once for static content that never changes to prevent unnecessary re-renders.
+- **Debounce**: Debounce search inputs and frequent operations. Don't trigger API calls or heavy computations on every keystroke.
+- **Images**: Optimize images with Nuxt Image module. Use appropriate formats, sizes, and lazy loading.
+- **Long lists**: Use virtual scrolling for long lists. Don't render thousands of DOM elements when only a few are visible.
+- **Reactivity**: Avoid unnecessary re-renders with computed properties and proper reactivity. Use readonly refs when mutation isn't needed.

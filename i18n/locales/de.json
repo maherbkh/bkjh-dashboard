@@ -492,7 +492,18 @@
     "certificate_download_error": "Fehler beim Herunterladen des Zertifikats für {name}",
     "certificate_download_error_generic": "Fehler beim Herunterladen des Zertifikats",
     "status_note": "Status-Notiz",
-    "status_note_placeholder": "Fügen Sie eine optionale Notiz zu dieser Statusänderung hinzu..."
+    "status_note_placeholder": "Fügen Sie eine optionale Notiz zu dieser Statusänderung hinzu...",
+    "form": {
+      "steps": {
+        "details": "Veranstaltungsdetails",
+        "cover_image": "Titelbild",
+        "participant_info": "Teilnehmerinformationen",
+        "date_time_management": "Datum und Zeit",
+        "speakers": "Referenten",
+        "questions": "Fragen",
+        "certificate_content": "Zertifikatsinhalt"
+      }
+    }
   },
   "event_category": {
     "description": "Veranstaltungskategorien für die Organisation von Akademieveranstaltungen verwalten",

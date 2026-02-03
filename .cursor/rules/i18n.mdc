@@ -1,0 +1,13 @@
+---
+description: i18n translation keys for all user-facing text; en and de
+alwaysApply: true
+---
+
+# Internationalization (i18n)
+
+- Always use i18n translation keys for all user-facing text. Never hardcode text strings in components or pages.
+- Support both **en** and **de** languages. Use **Du form** (informal) for German translations.
+- Before adding new translation keys, check if appropriate keys already exist in the translation files (`i18n/`).
+- Structure keys with proper parent and child hierarchy for better organization.
+- Use semantic key naming that reflects the content context, not the UI location. Group related translations under common parent keys.
+- For forms: use consistent key patterns. For buttons, group under `common.buttons`. For validation messages, group under `validation` or `form.errors`.

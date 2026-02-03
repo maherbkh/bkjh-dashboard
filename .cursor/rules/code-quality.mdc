@@ -1,0 +1,25 @@
+---
+description: SOLID principles, strict TypeScript, no duplication
+alwaysApply: true
+---
+
+# Code Quality Standards
+
+Write clean, maintainable code following SOLID principles.
+
+- **Single responsibility**: Each component and composable should serve one purpose.
+- **Open/closed**: Extend functionality without modifying existing code.
+- **Liskov substitution**: Derived classes substitutable for base classes.
+- **Interface segregation**: Keep interfaces focused and specific.
+- **Dependency inversion**: Depend on abstractions, not concretions.
+
+## TypeScript
+
+- Ensure strong TypeScript safety with zero warnings or errors.
+- Never use `any`. Use proper type inference and explicit typing where needed.
+- The only exception is v-html usage where necessary for typed content.
+
+## No Duplication
+
+- Avoid code duplication. Extract reusable logic into composables and utilities before creating new implementations.
+- Always check existing composables in the composables directory for reusable global helpers and functions before making new ones.

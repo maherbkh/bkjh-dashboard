@@ -1,0 +1,17 @@
+---
+description: Tailwind CSS 4+ styling; check theme variables first
+alwaysApply: true
+---
+
+# Styling with Tailwind CSS 4+
+
+- Use Tailwind CSS 4+ for all styling. Leverage utility classes for rapid development and consistent design.
+- Always check the project's CSS file (`app/assets/css/main.css`) for existing theme variables before adding new ones.
+- Use CSS custom properties from the theme when available for colors, spacing, and other design tokens.
+
+## Documentation
+
+- **Installation**: https://tailwindcss.com/docs/installation
+- **Utility-first**: https://tailwindcss.com/docs/utility-first
+- **Configuration**: https://tailwindcss.com/docs/configuration
+- **Dark mode**: https://tailwindcss.com/docs/dark-mode

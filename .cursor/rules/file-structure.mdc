@@ -1,0 +1,17 @@
+---
+description: Nuxt file layout; components, composables, layouts, pages, server
+alwaysApply: true
+---
+
+# File Structure and Organization
+
+Organize code following Nuxt conventions and best practices.
+
+- **Components**: Place Vue components in the components directory for auto-import. Use **PascalCase** naming for components.
+- **Composables**: Place reusable composition functions in the composables directory. Use **camelCase** with **use** prefix for composables (e.g. useApiFetch).
+- **Layouts**: Create application layouts in the layouts directory. Support multiple layouts for different sections.
+- **Pages**: Use file-based routing in the pages directory. Follow Nuxt's routing conventions for dynamic routes and nested routes.
+- **Server**: Place API routes and server middleware in the server directory. Use proper HTTP methods and response codes.
+- **Assets**: Store compiled assets like CSS and images in the assets directory. These will be processed by build tools.
+- **Public**: Store static files that should be served as-is in the public directory. These files are served at the root URL.
+- **Types**: Create TypeScript types and interfaces in a types directory. Export and reuse types across the application.

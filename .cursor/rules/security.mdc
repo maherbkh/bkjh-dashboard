@@ -1,0 +1,18 @@
+---
+description: Sanitize v-html, validate inputs, env vars, CSRF, cookies, CSP
+alwaysApply: true
+---
+
+# Security Best Practices
+
+Follow security guidelines rigorously to protect user data and application integrity.
+
+- **v-html**: Sanitize user inputs before displaying with v-html. Always validate and escape user-generated content.
+- **Validation**: Validate all API inputs on both client and server. Never trust client-side validation alone.
+- **Secrets**: Use environment variables for sensitive data. Never commit secrets, API keys, or credentials to version control. Never expose API keys or secrets in client code. All sensitive operations should happen server-side.
+- **CSRF**: Implement proper CSRF protection for state-changing operations. Use Nuxt's built-in CSRF middleware.
+- **Cookies**: Use HTTP-only cookies for authentication tokens. Don't store sensitive tokens in localStorage or sessionStorage.
+- **Escaping**: Escape user-generated content appropriately based on context (HTML, JavaScript, URLs, CSS).
+- **Rate limiting**: Implement rate limiting for API endpoints to prevent abuse. Use Nuxt server middleware for rate limiting.
+- **Dependencies**: Keep dependencies up to date. Regularly check for security vulnerabilities in npm packages.
+- **CSP**: Use Content Security Policy headers to prevent XSS attacks. Configure CSP in nuxt.config.ts.

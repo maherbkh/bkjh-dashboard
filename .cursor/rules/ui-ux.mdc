@@ -1,0 +1,19 @@
+---
+description: Loading states, errors, accessibility, responsive, design system
+alwaysApply: true
+---
+
+# UI/UX Excellence
+
+Implement strong UI/UX patterns with accessibility and user experience as top priorities.
+
+- **Loading**: Provide clear loading states with skeleton loaders or spinners. Never leave users wondering if something is happening.
+- **Errors**: Show meaningful error messages with recovery actions. Explain what went wrong and how to fix it.
+- **Keyboard**: Use proper focus management and keyboard navigation. All interactive elements must be accessible via keyboard. Implement proper tab order and focus indicators.
+- **Responsive**: Ensure responsive design across all breakpoints. Test on mobile, tablet, and desktop. Use Tailwind responsive prefixes consistently.
+- **Accessibility**: Implement proper ARIA labels. Use semantic HTML. Provide screen reader support for dynamic content.
+- **Motion**: Use transitions and animations purposefully. Respect user preferences for reduced motion.
+- **Design system**: Maintain consistent spacing, typography, and color usage. Follow the design system strictly.
+- **Validation**: Validate forms with real-time feedback. Show validation errors when users blur from invalid fields.
+- **Async actions**: Disable buttons during async operations to prevent double submissions. Show loading indicators on buttons during processing.
+- **Success**: Show success confirmations for user actions (toasts, notifications, or inline messages).

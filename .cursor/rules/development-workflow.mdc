@@ -1,0 +1,17 @@
+---
+description: Test in isolation, strict TS, conventional commits, formatting
+alwaysApply: true
+---
+
+# Development Workflow
+
+- **Testing**: Always test components in isolation before integration. Verify functionality, accessibility, and responsive behavior.
+- **TypeScript**: Use TypeScript strict mode. Enable all strict type checking options in tsconfig.json.
+- **Commits**: Write descriptive commit messages. Follow conventional commit format for better changelog generation.
+- **Review**: Review code for potential improvements before committing. Check for duplicated logic, missing types, and security issues.
+- **Naming**: Use meaningful variable and function names. Names should clearly indicate purpose and usage.
+- **Functions**: Keep functions small and focused. If a function does multiple things, break it into smaller functions.
+- **Comments**: Document complex logic with comments. Explain why something is done, not what is done.
+- **Edge cases**: Handle edge cases and error scenarios. Don't just code the happy path.
+- **Error states**: Test error states and loading states. Verify that error handling works correctly.
+- **Formatting**: Use consistent code formatting. Follow the project's ESLint and Prettier configuration.

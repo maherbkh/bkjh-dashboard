@@ -1,0 +1,11 @@
+---
+description: Use useApiFetch for all API calls; typed responses; loading/error handling
+alwaysApply: true
+---
+
+# API Integration
+
+- Use the **useApiFetch** composable for all API calls. It lives in `app/composables/useApiFetch.ts`.
+- Never use raw fetch or axios directly.
+- Always type your API responses properly.
+- Handle loading states, errors, and success cases consistently across the application.

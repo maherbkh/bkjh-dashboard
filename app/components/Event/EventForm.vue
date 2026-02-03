@@ -14,6 +14,7 @@ import EventQuestions from '~/components/Event/Question/index.vue';
 import { prepareQuestionsForSubmit } from '~/composables/useEventQuestions';
 
 const { t } = useI18n();
+const runtimeConfig = useRuntimeConfig();
 
 // Props
 interface Props {
@@ -75,8 +76,13 @@ const eventCategories = computed(() => resourcesStore.eventCategories || []);
 const eventTargets = computed(() => resourcesStore.eventTargets || []);
 
 // Fetch speakers for multi-select
-const { data: speakersListData, status: isLoadingSpeakers } = await useApiFetch<{ data: Speaker[] }>('/academy/speakers/active', {
+const { data: speakersListData, status: isLoadingSpeakers } = await useApiFetch<Speaker[]>('/academy/speakers/active', {
     server: false,
+});
+
+const speakersList = computed<Speaker[]>(() => {
+    const raw = speakersListData.value as { data?: Speaker[] } | null;
+    return raw?.data ?? [];
 });
 
 // Event type options with translated names
@@ -101,9 +107,11 @@ watch(() => props.initialData, async (newData) => {
             if (typeof coverData === 'string') {
                 // If it's an ID, fetch the media entity
                 try {
-                    const { data, error } = await useApiFetch<{ success: boolean; message: string; data: MediaEntity }>(`/shared/media/${coverData}`, {
+                    const { data, error } = await useApiFetch<MediaEntity>(`/shared/media/${coverData}`, {
                         server: false,
                     });
+
+                    const fetchedData = (data.value as { data?: MediaEntity } | null)?.data;
 
                     if (error.value) {
                         console.error('Error fetching cover media:', error.value);
@@ -124,8 +132,8 @@ watch(() => props.initialData, async (newData) => {
                             } as MediaEntity;
                         }
                     }
-                    else if (data.value?.data) {
-                        coverEntity = data.value.data;
+                    else if (fetchedData) {
+                        coverEntity = fetchedData;
                         // Ensure url field is set from coverUrl if available
                         if (coverUrl && !coverEntity.url) {
                             coverEntity = {
@@ -180,16 +188,17 @@ watch(() => props.initialData, async (newData) => {
         else if (coverUrl && typeof coverUrl === 'string') {
             // Extract ID from URL or use a placeholder
             const urlParts = coverUrl.split('/');
-            const filename = urlParts[urlParts.length - 1];
+            const filename = urlParts[urlParts.length - 1] ?? '';
             const uuidMatch = filename.match(/^([a-f0-9-]+)/);
             const uuid = uuidMatch ? uuidMatch[1] : '';
+            const apiOrigin = `${new URL(runtimeConfig.public.apiBaseUrl as string).origin}/`;
 
             coverEntity = {
                 id: uuid || '',
                 uuid: uuid || '',
                 filename: filename,
                 storedName: filename,
-                path: coverUrl.replace('http://api.backhaus.test:3055/', ''),
+                path: coverUrl.replace(apiOrigin, ''),
                 url: coverUrl,
                 mimeType: 'image/png',
                 extension: filename.split('.').pop() || '.png',
@@ -323,6 +332,20 @@ const removeSchedule = (index: number) => {
     ];
 };
 
+// Step navigation (0–6)
+const currentStep = ref(0);
+const TOTAL_STEPS = 7;
+
+const stepLabels = computed(() => [
+    { id: 0, label: t('event.form.steps.details') },
+    { id: 1, label: t('event.form.steps.cover_image') },
+    { id: 2, label: t('event.form.steps.participant_info') },
+    { id: 3, label: t('event.form.steps.date_time_management') },
+    { id: 4, label: t('event.form.steps.speakers') },
+    { id: 5, label: t('event.form.steps.questions') },
+    { id: 6, label: t('event.form.steps.certificate_content') },
+]);
+
 // Computed properties
 const submitButtonText = computed(() => {
     return props.mode === 'add' ? t('action.save') : t('action.update');
@@ -342,14 +365,20 @@ const formTitle = computed(() => {
                 class="space-y-6"
                 @submit.prevent="onSubmit"
             >
-                <Card>
+                <EventFormStepper
+                    v-model="currentStep"
+                    :steps="stepLabels"
+                />
+
+                <!-- Step 0: Event Details -->
+                <Card v-show="currentStep === 0">
                     <CardHeader>
                         <CardTitle class="flex items-start gap-2">
                             <Icon
-                                name="solar:clipboard-text-broken"
-                                class="!size-5 opacity-75 shrink-0"
+                                name="solar:clipboard-text-outline"
+                                class="size-5! opacity-75 shrink-0"
                             />
-                            Event Details
+                            {{ t('event.form.steps.details') }}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -359,7 +388,7 @@ const formTitle = computed(() => {
                                 v-model="title"
                                 :title="t('common.title')"
                                 :placeholder="t('common.title')"
-                                class="col-span-12 lg:col-span-6"
+                                class="col-span-12"
                                 :errors="errors.title ? [errors.title] : []"
                                 v-bind="titleAttrs"
                                 required
@@ -405,39 +434,16 @@ const formTitle = computed(() => {
                                 v-model="shortDescription"
                                 :title="t('common.short_description')"
                                 :placeholder="t('common.short_description')"
-                                class="col-span-12"
+                                class="col-span-12 lg:col-span-6"
                                 :errors="errors.shortDescription ? [errors.shortDescription] : []"
                                 v-bind="shortDescriptionAttrs"
                             />
-
-                            <FormItemTextarea
-                                id="certNote"
-                                v-model="certNote"
-                                :title="t('event.cert_note') || 'Certificate Note'"
-                                :placeholder="t('event.cert_note_description') || 'This content will be shown only in Certificate generation process'"
-                                class="col-span-12"
-                                :errors="errors.certNote ? [errors.certNote] : []"
-                                v-bind="certNoteAttrs"
-                                :rows="4"
-                            />
-
-                            <FormItemArrayInput
-                                id="topics"
-                                v-model="topics"
-                                :title="t('event.topics') || 'Topics'"
-                                :placeholder="t('event.topic_placeholder') || 'Enter topic'"
-                                class="col-span-12"
-                                :errors="errors.topics ? [errors.topics] : []"
-                                :add-button-text="t('action.add') + ' ' + (t('event.topic') || 'Topic')"
-                                item-id-prefix="topic"
-                            />
-
                             <FormItemTextarea
                                 id="eventNote"
                                 v-model="note"
                                 :title="t('note.singular')"
                                 :placeholder="t('note.singular')"
-                                class="col-span-12"
+                                class="col-span-12 lg:col-span-6"
                                 :errors="errors.note ? [errors.note] : []"
                                 v-bind="noteAttrs"
                             />
@@ -461,6 +467,23 @@ const formTitle = computed(() => {
                                     {{ errors.description }}
                                 </div>
                             </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <!-- Step 1: Cover Image Uploader -->
+                <Card v-show="currentStep === 1">
+                    <CardHeader>
+                        <CardTitle class="flex items-start gap-2">
+                            <Icon
+                                name="solar:gallery-outline"
+                                class="size-5! opacity-75 shrink-0"
+                            />
+                            {{ t('event.form.steps.cover_image') }}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div class="grid grid-cols-12 gap-5">
                             <FormItemMedia
                                 id="cover"
                                 v-model="coverMedia"
@@ -477,14 +500,16 @@ const formTitle = computed(() => {
                         </div>
                     </CardContent>
                 </Card>
-                <Card>
+
+                <!-- Step 2: Participant Information -->
+                <Card v-show="currentStep === 2">
                     <CardHeader>
                         <CardTitle class="flex items-start gap-2">
                             <Icon
-                                name="solar:users-group-two-rounded-line-duotone"
-                                class="!size-5 opacity-75 shrink-0"
+                                name="solar:users-group-two-rounded-outline"
+                                class="size-5! opacity-75 shrink-0"
                             />
-                            Teilnehmerinformationen
+                            {{ t('event.form.steps.participant_info') }}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -564,19 +589,20 @@ const formTitle = computed(() => {
                         </div>
                     </CardContent>
                 </Card>
-                <Card>
+
+                <!-- Step 3: Date and Time Management -->
+                <Card v-show="currentStep === 3">
                     <CardHeader>
                         <CardTitle class="flex items-start gap-2">
                             <Icon
-                                name="solar:calendar-line-duotone"
-                                class="!size-5 opacity-75 shrink-0"
+                                name="solar:calendar-outline"
+                                class="size-5! opacity-75 shrink-0"
                             />
-                            Date & Time Management
+                            {{ t('event.form.steps.date_time_management') }}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div class="grid grid-cols-12 gap-5">
-                            <!-- Schedules Section -->
                             <div class="col-span-12">
                                 <label class="block text-sm font-medium mb-2">
                                     {{ t('event.schedules') }}
@@ -634,11 +660,11 @@ const formTitle = computed(() => {
                                                 variant="destructive-outline"
                                                 class="w-full"
                                                 size="sm"
-                                                @click="removeSchedule(index)"
+                                                @click="removeSchedule(Number(index))"
                                             >
                                                 <Icon
                                                     name="solar:trash-bin-minimalistic-outline"
-                                                    class="!size-4.5 shrink-0"
+                                                    class="size-4.5! shrink-0"
                                                 />
                                                 {{ t('action.delete') }}
                                             </Button>
@@ -666,14 +692,19 @@ const formTitle = computed(() => {
                         </div>
                     </CardContent>
                 </Card>
-                <Card v-if="isLoadingSpeakers !== 'pending'">
+
+                <!-- Step 4: Speakers -->
+                <Card
+                    v-show="currentStep === 4"
+                    v-if="isLoadingSpeakers !== 'pending'"
+                >
                     <CardHeader>
                         <CardTitle class="flex items-start gap-2">
                             <Icon
-                                name="solar:user-speak-rounded-line-duotone"
-                                class="!size-5 opacity-75 shrink-0"
+                                name="solar:user-speak-rounded-outline"
+                                class="size-5! opacity-75 shrink-0"
                             />
-                            {{ $t('academy.speakers') }}
+                            {{ t('event.form.steps.speakers') }}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -681,25 +712,27 @@ const formTitle = computed(() => {
                             <LazyFormItemMultiSelect
                                 id="speakers"
                                 v-model="speakers"
-                                :placeholder="$t('action.select') + ' ' + $t('academy.speakers')"
+                                :placeholder="t('action.select') + ' ' + t('academy.speakers')"
                                 class="col-span-12"
                                 :errors="errors.speakers ? [errors.speakers] : []"
                                 v-bind="speakersAttrs"
-                                :data="speakersListData?.data || []"
+                                :data="speakersList"
                                 item-key="id"
                                 item-label="name"
                             />
                         </div>
                     </CardContent>
                 </Card>
-                <Card>
+
+                <!-- Step 5: Questions -->
+                <Card v-show="currentStep === 5">
                     <CardHeader>
                         <CardTitle class="flex items-start gap-2">
                             <Icon
-                                name="solar:question-circle-line-duotone"
-                                class="!size-5 opacity-75 shrink-0"
+                                name="solar:question-circle-outline"
+                                class="size-5! opacity-75 shrink-0"
                             />
-                            Event Questions
+                            {{ t('event.form.steps.questions') }}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -709,19 +742,83 @@ const formTitle = computed(() => {
                         />
                     </CardContent>
                 </Card>
+
+                <!-- Step 6: Certificate Generation content -->
+                <Card v-show="currentStep === 6">
+                    <CardHeader>
+                        <CardTitle class="flex items-start gap-2">
+                            <Icon
+                                name="solar:document-text-outline"
+                                class="size-5! opacity-75 shrink-0"
+                            />
+                            {{ t('event.form.steps.certificate_content') }}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div class="grid grid-cols-12 gap-5">
+                            <FormItemArrayInput
+                                id="topics-cert"
+                                v-model="topics"
+                                :title="t('event.topics') || 'Topics'"
+                                :placeholder="t('event.topic_placeholder') || 'Enter topic'"
+                                class="col-span-12"
+                                :errors="errors.topics ? [errors.topics] : []"
+                                :add-button-text="t('action.add') + ' ' + (t('event.topic') || 'Topic')"
+                                item-id-prefix="topic-cert"
+                            />
+                            <FormItemTextarea
+                                id="certNote"
+                                v-model="certNote"
+                                :title="t('event.cert_note') || 'Certificate Note'"
+                                :placeholder="t('event.cert_note_description') || 'This content will be shown only in Certificate generation process'"
+                                class="col-span-12"
+                                :errors="errors.certNote ? [errors.certNote] : []"
+                                v-bind="certNoteAttrs"
+                                :rows="4"
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+
                 <div
                     v-if="showActions"
-                    class="flex justify-end gap-2 pt-4 border-t lg:col-span-12 mb-8"
+                    class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t lg:col-span-12 mb-8"
                 >
+                    <div class="flex gap-2">
+                        <Button
+                            v-show="currentStep > 0"
+                            type="button"
+                            variant="outline"
+                            @click="currentStep--"
+                        >
+                            <Icon
+                                name="solar:arrow-left-outline"
+                                class="mr-2 size-5!"
+                            />
+                            {{ t('common.previous') }}
+                        </Button>
+                        <Button
+                            v-show="currentStep < TOTAL_STEPS - 1"
+                            type="button"
+                            variant="outline"
+                            @click="currentStep++"
+                        >
+                            {{ t('common.next') }}
+                            <Icon
+                                name="solar:arrow-right-outline"
+                                class="ml-2 size-5!"
+                            />
+                        </Button>
+                    </div>
                     <Button
                         type="submit"
-                        class="w-full"
+                        class="w-full sm:w-auto"
                         :disabled="isSubmitting"
                     >
                         <Icon
                             v-if="isSubmitting"
-                            name="solar:refresh-linear"
-                            class="mr-2 !size-5 animate-spin"
+                            name="solar:refresh-outline"
+                            class="mr-2 size-5! animate-spin"
                         />
                         {{ submitButtonText }}
                     </Button>

@@ -1,0 +1,14 @@
+---
+description: Composables first; shadcn-vue and FormItem for forms
+alwaysApply: true
+---
+
+# Component and Form Development
+
+- Check for existing composables in the **composables** directory (`app/composables`) before creating new helper functions or utilities. Reuse global helpers when possible.
+- For all forms, use **shadcn-vue** and **FormItem** components. These are pre-built reusable form components (see `components.json`: new-york style, UI in `~/components/ui`).
+- Use **FormField** for field-level validation and state management.
+- Use **FormItem** for consistent layout and spacing.
+- Use **FormLabel** for accessible labels.
+- Use **FormControl** for input wrapping.
+- Use **FormMessage** for error display.
