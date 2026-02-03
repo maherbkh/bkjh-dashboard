@@ -428,7 +428,7 @@ const formTitle = computed(() => {
 
                 <div
                     v-if="showActions"
-                    class="flex w-full items-center justify-between gap-2 py-3"
+                    class="flex w-full items-center justify-between gap-2 mx-auto max-w-lg"
                 >
                     <div class="min-w-0 flex-1 flex justify-start">
                         <Button
