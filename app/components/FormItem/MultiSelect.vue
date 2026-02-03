@@ -68,6 +68,8 @@ const emit = defineEmits<{
     (e: 'open-change', value: boolean): void;
 }>();
 
+const { t } = useI18n();
+
 const open = ref(false);
 const search = ref('');
 const debouncedSearch = ref('');
@@ -389,47 +391,6 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
             >*</span>
         </Label>
 
-        <p
-            v-if="description"
-            class="text-sm text-muted-foreground"
-        >
-            {{ description }}
-        </p>
-
-        <!-- Selected badges - Only render when there are selections -->
-        <div
-            v-if="selectedOptions.length > 0"
-            class="flex gap-2"
-            :class="singleLine ? 'overflow-x-auto whitespace-nowrap no-scrollbar' : 'flex-wrap'"
-        >
-            <template
-                v-for="(opt, idx) in selectedOptions"
-                :key="`selected-${opt?.value}-${idx}`"
-            >
-                <Badge
-                    v-if="opt && idx < effectiveMaxCount"
-                    class="gap-1 mr-1"
-                >
-                    <span class="truncate max-w-[12rem]">{{ opt?.label }}</span>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        class="h-4 w-4 p-0"
-                        @click="opt && toggleValue(opt.value, false)"
-                    >
-                        ×
-                    </Button>
-                </Badge>
-            </template>
-            <Badge
-                v-if="selectedOptions.length > effectiveMaxCount"
-                variant="secondary"
-            >
-                +{{ selectedOptions.length - effectiveMaxCount }}
-            </Badge>
-        </div>
-
         <Popover
             v-model:open="open"
             @update:open="(v:boolean) => emit('open-change', v)"
@@ -569,6 +530,46 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                 </Command>
             </PopoverContent>
         </Popover>
+
+        <!-- Selected badges - below input, before description -->
+        <div
+            v-if="selectedOptions.length > 0"
+            class="flex gap-2"
+            :class="singleLine ? 'overflow-x-auto whitespace-nowrap no-scrollbar' : 'flex-wrap'"
+        >
+            <template
+                v-for="(opt, idx) in selectedOptions"
+                :key="`selected-${opt?.value}-${idx}`"
+            >
+                <div
+                    v-if="opt && idx < effectiveMaxCount"
+                    class="flex justify-between items-center gap-1 text-xs font-normal bg-primary/5 text-primary rounded-full border border-primary/25 pl-2 pr-1 py-0.5"
+                >
+                    <span class="truncate max-w-48">{{ opt?.label }}</span>
+                    <button
+                        type="button"
+                        :title="t('form.remove_item', { label: opt?.label ?? '' })"
+                        class="size-4! bg-background text- hover:text-destructive hover:scale-105 cursor-pointer ease-in-out duration-200  hover:bg-destructive/10 hover:border-destructive/10 rounded-full shrink-0"
+                        @click="opt && toggleValue(opt.value, false)"
+                    >
+                        ×
+                    </Button>
+                </div>
+            </template>
+            <Badge
+                v-if="selectedOptions.length > effectiveMaxCount"
+                variant="secondary"
+            >
+                +{{ selectedOptions.length - effectiveMaxCount }}
+            </Badge>
+        </div>
+
+        <p
+            v-if="description"
+            class="text-sm text-muted-foreground"
+        >
+            {{ description }}
+        </p>
 
         <!-- Hint text - Only render when hint exists -->
         <p

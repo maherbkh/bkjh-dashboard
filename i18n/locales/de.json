@@ -570,6 +570,7 @@
     "phone": "Telefon",
     "phone_placeholder": "Telefonnummer eingeben",
     "preferences": "Einstellungen",
+    "remove_item": "{label} entfernen",
     "select_option": "Option auswählen"
   },
   "global": {

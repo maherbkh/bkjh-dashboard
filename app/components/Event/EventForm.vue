@@ -335,6 +335,18 @@ const removeSchedule = (index: number) => {
 // Step navigation (0–6)
 const currentStep = ref(0);
 const TOTAL_STEPS = 7;
+const stepDirection = ref(1); // 1 = forward (next), -1 = backward (prev)
+
+watch(currentStep, (next, prev) => {
+    stepDirection.value = next > (prev ?? 0) ? 1 : -1;
+});
+
+// Subtle slide: short distance (20%) so it feels in-place, not from far away
+const slideOffset = computed(() =>
+    stepDirection.value === 1
+        ? { enter: ['10%', 0] as [string | number, number], leave: ['-10%', 0] as [string | number, number] }
+        : { enter: ['-10%', 0] as [string | number, number], leave: ['10%', 0] as [string | number, number] },
+);
 
 const stepLabels = computed(() => [
     { id: 0, label: t('event.form.steps.details') },
@@ -359,10 +371,10 @@ const formTitle = computed(() => {
 </script>
 
 <template>
-    <div>
-        <div class="xl:col-span-8 space-y-6">
+    <div class="overflow-x-hidden">
+        <div class="xl:col-span-8 space-y-6 min-w-0">
             <form
-                class="space-y-6"
+                class="space-y-6 overflow-x-hidden min-w-0"
                 @submit.prevent="onSubmit"
             >
                 <EventFormStepper
@@ -370,415 +382,375 @@ const formTitle = computed(() => {
                     :steps="stepLabels"
                 />
 
-                <!-- Step 0: Event Details -->
-                <Card v-show="currentStep === 0">
-                    <CardHeader>
-                        <CardTitle class="flex items-start gap-2">
-                            <Icon
-                                name="solar:clipboard-text-outline"
-                                class="size-5! opacity-75 shrink-0"
-                            />
-                            {{ t('event.form.steps.details') }}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="grid grid-cols-12 gap-5">
-                            <FormItemInput
-                                id="title"
-                                v-model="title"
-                                :title="t('common.title')"
-                                :placeholder="t('common.title')"
-                                class="col-span-12"
-                                :errors="errors.title ? [errors.title] : []"
-                                v-bind="titleAttrs"
-                                required
-                            />
-                            <FormItemSwitch
-                                id="isActive"
-                                v-model="isActive"
-                                true-label="Active"
-                                false-label="Inactive"
-                                :title="t('common.active')"
-                                class="col-span-12 lg:col-span-3"
-                                v-bind="isActiveAttrs"
-                            />
-                            <FormItemSwitch
-                                id="forKids"
-                                v-model="forKids"
-                                true-label="Ja"
-                                false-label="Nein"
-                                :title="t('event.for_kids')"
-                                class="col-span-12 lg:col-span-3"
-                                v-bind="forKidsAttrs"
-                            />
-                            <FormItemSwitch
-                                id="disableRegistration"
-                                v-model="disableRegistration"
-                                true-label="Ja"
-                                false-label="Nein"
-                                :title="t('event.disable_registration')"
-                                class="col-span-12 lg:col-span-3"
-                                v-bind="disableRegistrationAttrs"
-                            />
-                            <FormItemSwitch
-                                id="isFull"
-                                v-model="isFull"
-                                true-label="Ja"
-                                false-label="Nein"
-                                :title="t('event.is_full')"
-                                class="col-span-12 lg:col-span-3"
-                                v-bind="isFullAttrs"
-                            />
-                            <FormItemTextarea
-                                id="shortDescription"
-                                v-model="shortDescription"
-                                :title="t('common.short_description')"
-                                :placeholder="t('common.short_description')"
-                                class="col-span-12 lg:col-span-6"
-                                :errors="errors.shortDescription ? [errors.shortDescription] : []"
-                                v-bind="shortDescriptionAttrs"
-                            />
-                            <FormItemTextarea
-                                id="eventNote"
-                                v-model="note"
-                                :title="t('note.singular')"
-                                :placeholder="t('note.singular')"
-                                class="col-span-12 lg:col-span-6"
-                                :errors="errors.note ? [errors.note] : []"
-                                v-bind="noteAttrs"
-                            />
-                            <div class="col-span-12">
-                                <label class="block text-sm font-medium mb-2">
-                                    {{ t('form.description') }}
-                                </label>
-                                <RTEditor
-                                    v-model="description"
-                                    :placeholder="t('form.description')"
-                                    :show-character-count="true"
-                                    :max-length="10000"
-                                    min-height="200px"
-                                    class="w-full"
-                                    :errors="errors.description ? [errors.description] : []"
-                                />
-                                <div
-                                    v-if="errors.description"
-                                    class="text-sm text-destructive mt-1"
-                                >
-                                    {{ errors.description }}
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <!-- Step 1: Cover Image Uploader -->
-                <Card v-show="currentStep === 1">
-                    <CardHeader>
-                        <CardTitle class="flex items-start gap-2">
-                            <Icon
-                                name="solar:gallery-outline"
-                                class="size-5! opacity-75 shrink-0"
-                            />
-                            {{ t('event.form.steps.cover_image') }}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="grid grid-cols-12 gap-5">
-                            <FormItemMedia
-                                id="cover"
-                                v-model="coverMedia"
-                                :label="t('event.cover') || 'Cover Image'"
-                                name="cover"
-                                :multiple="false"
-                                :max-files="1"
-                                :allowed-types="['image']"
-                                :access-level="AccessLevel.PUBLIC"
-                                :collection-name="CollectionType.COVER"
-                                :errors="errors.cover ? [errors.cover] : []"
-                                class="col-span-12"
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <!-- Step 2: Participant Information -->
-                <Card v-show="currentStep === 2">
-                    <CardHeader>
-                        <CardTitle class="flex items-start gap-2">
-                            <Icon
-                                name="solar:users-group-two-rounded-outline"
-                                class="size-5! opacity-75 shrink-0"
-                            />
-                            {{ t('event.form.steps.participant_info') }}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="grid grid-cols-12 items-start gap-5">
-                            <FormItemSelect
-                                id="type"
-                                v-model="type"
-                                :searchable="false"
-                                :title="t('event.type')"
-                                :placeholder="t('action.select') + ' ' + t('event.type')"
-                                class="col-span-12 lg:col-span-4"
-                                :errors="errors.type ? [errors.type] : []"
-                                v-bind="typeAttrs"
-                                :data="typeOptions as any"
-                                key-value="id"
-                                name-value="name"
-                                required
-                            />
-                            <FormItemMultiSelect
-                                id="eventCategoryIds"
-                                v-model="eventCategoryIds"
-                                :title="t('event_category.singular')"
-                                :placeholder="t('action.select') + ' ' + t('event_category.singular')"
-                                class="col-span-12 lg:col-span-4"
-                                :errors="errors.eventCategoryIds ? [errors.eventCategoryIds] : []"
-                                v-bind="eventCategoryIdsAttrs"
-                                :data="eventCategories as any"
-                                item-key="id"
-                                item-label="name"
-                                :max="10"
-                                required
-                            />
-                            <FormItemMultiSelect
-                                id="eventTargetIds"
-                                v-model="eventTargetIds"
-                                :title="t('event_target.singular')"
-                                :placeholder="t('action.select') + ' ' + t('event_target.singular')"
-                                class="col-span-12 lg:col-span-4"
-                                :errors="errors.eventTargetIds ? [errors.eventTargetIds] : []"
-                                v-bind="eventTargetIdsAttrs"
-                                :data="eventTargets as any"
-                                item-key="id"
-                                item-label="name"
-                                :max="10"
-                                required
-                            />
-                            <FormItemInput
-                                id="maxCapacity"
-                                v-model="maxCapacity"
-                                :title="t('event.max_capacity')"
-                                :placeholder="t('event.max_capacity')"
-                                class="col-span-12 lg:col-span-4"
-                                :errors="errors.maxCapacity ? [errors.maxCapacity] : []"
-                                v-bind="maxCapacityAttrs"
-                                type="number"
-                                min="1"
-                                required
-                            />
-                            <FormItemInput
-                                id="room"
-                                v-model="room"
-                                :title="t('event.room')"
-                                :placeholder="t('event.room')"
-                                class="col-span-12 lg:col-span-4"
-                                :errors="errors.room ? [errors.room] : []"
-                                v-bind="roomAttrs"
-                            />
-                            <FormItemInput
-                                id="location"
-                                v-model="location"
-                                :title="t('event.location')"
-                                :placeholder="t('event.location')"
-                                class="col-span-12 lg:col-span-4"
-                                :errors="errors.location ? [errors.location] : []"
-                                v-bind="locationAttrs"
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <!-- Step 3: Date and Time Management -->
-                <Card v-show="currentStep === 3">
-                    <CardHeader>
-                        <CardTitle class="flex items-start gap-2">
-                            <Icon
-                                name="solar:calendar-outline"
-                                class="size-5! opacity-75 shrink-0"
-                            />
-                            {{ t('event.form.steps.date_time_management') }}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="grid grid-cols-12 gap-5">
-                            <div class="col-span-12">
-                                <label class="block text-sm font-medium mb-2">
-                                    {{ t('event.schedules') }}
-                                </label>
-                                <div class="space-y-4">
-                                    <div
-                                        v-for="(schedule, index) in schedules"
-                                        :key="index"
-                                        class="grid grid-cols-12 gap-4 p-4 border rounded-lg bg-muted/50"
-                                    >
-                                        <FormItemDatePicker
-                                            :model-value="schedule.date"
-                                            :label="t('event.date')"
-                                            :placeholder="t('academy.events.filters.select_date')"
-                                            format="yyyy-MM-dd"
-                                            :time-picker="false"
-                                            :name="`schedule-${index}-date`"
-                                            class="col-span-12 lg:col-span-4"
-                                            :errors="errors[`schedules.${index}.date`] ? [errors[`schedules.${index}.date`]] : []"
-                                            @update:model-value="(value: string | number) => schedule.date = String(value)"
+                <div class="relative overflow-x-hidden min-w-0">
+                    <TransitionSlide
+                        mode="out-in"
+                        :offset="slideOffset"
+                        :duration="150"
+                    >
+                        <div :key="currentStep">
+                            <!-- Step 0: Event Details -->
+                            <CompactCard
+                                v-if="currentStep === 0"
+                                icon="solar:clipboard-text-outline"
+                                :title="t('event.form.steps.details')"
+                            >
+                                <div class="grid grid-cols-12 items-start gap-5">
+                                    <FormItemInput
+                                        id="title"
+                                        v-model="title"
+                                        :title="t('common.title')"
+                                        :placeholder="t('common.title')"
+                                        class="col-span-12"
+                                        :errors="errors.title ? [errors.title] : []"
+                                        v-bind="titleAttrs"
+                                        required
+                                    />
+                                    <FormItemSwitch
+                                        id="isActive"
+                                        v-model="isActive"
+                                        true-label="Active"
+                                        false-label="Inactive"
+                                        :title="t('common.active')"
+                                        class="col-span-12 lg:col-span-3"
+                                        v-bind="isActiveAttrs"
+                                    />
+                                    <FormItemSwitch
+                                        id="forKids"
+                                        v-model="forKids"
+                                        true-label="Ja"
+                                        false-label="Nein"
+                                        :title="t('event.for_kids')"
+                                        class="col-span-12 lg:col-span-3"
+                                        v-bind="forKidsAttrs"
+                                    />
+                                    <FormItemSwitch
+                                        id="disableRegistration"
+                                        v-model="disableRegistration"
+                                        true-label="Ja"
+                                        false-label="Nein"
+                                        :title="t('event.disable_registration')"
+                                        class="col-span-12 lg:col-span-3"
+                                        v-bind="disableRegistrationAttrs"
+                                    />
+                                    <FormItemSwitch
+                                        id="isFull"
+                                        v-model="isFull"
+                                        true-label="Ja"
+                                        false-label="Nein"
+                                        :title="t('event.is_full')"
+                                        class="col-span-12 lg:col-span-3"
+                                        v-bind="isFullAttrs"
+                                    />
+                                    <FormItemTextarea
+                                        id="shortDescription"
+                                        v-model="shortDescription"
+                                        :title="t('common.short_description')"
+                                        :placeholder="t('common.short_description')"
+                                        class="col-span-12 lg:col-span-6"
+                                        :errors="errors.shortDescription ? [errors.shortDescription] : []"
+                                        v-bind="shortDescriptionAttrs"
+                                    />
+                                    <FormItemTextarea
+                                        id="eventNote"
+                                        v-model="note"
+                                        :title="t('note.singular')"
+                                        :placeholder="t('note.singular')"
+                                        class="col-span-12 lg:col-span-6"
+                                        :errors="errors.note ? [errors.note] : []"
+                                        v-bind="noteAttrs"
+                                    />
+                                    <div class="col-span-12">
+                                        <label class="block text-sm font-medium mb-2">
+                                            {{ t('form.description') }}
+                                        </label>
+                                        <RTEditor
+                                            v-model="description"
+                                            :placeholder="t('form.description')"
+                                            :show-character-count="true"
+                                            :max-length="10000"
+                                            min-height="200px"
+                                            class="w-full"
+                                            :errors="errors.description ? [errors.description] : []"
                                         />
-                                        <FormItemDatePicker
-                                            :model-value="schedule.startTime"
-                                            :only-time="true"
-                                            :label="t('event.start_time')"
-                                            :placeholder="t('event.start_time')"
-                                            format="HH:mm"
-                                            :name="`schedule-${index}-startTime`"
-                                            class="col-span-12 lg:col-span-4"
-                                            :errors="errors[`schedules.${index}.startTime`] ? [errors[`schedules.${index}.startTime`]] : []"
-                                            @update:model-value="(value: string | number) => schedule.startTime = String(value)"
-                                        />
-                                        <FormItemDatePicker
-                                            :model-value="schedule.endTime"
-                                            :only-time="true"
-                                            :label="t('event.end_time')"
-                                            :placeholder="t('event.end_time')"
-                                            format="HH:mm"
-                                            :name="`schedule-${index}-endTime`"
-                                            class="col-span-12 lg:col-span-4"
-                                            :errors="errors[`schedules.${index}.endTime`] ? [errors[`schedules.${index}.endTime`]] : []"
-                                            @update:model-value="(value: string | number) => schedule.endTime = String(value)"
-                                        />
-                                        <FormItemInput
-                                            :id="`schedule-${index}-note`"
-                                            v-model="schedule.note"
-                                            :title="t('note.singular')"
-                                            :placeholder="t('note.singular')"
-                                            class="col-span-12"
-                                            :errors="errors[`schedules.${index}.note`] ? [String(errors[`schedules.${index}.note`] || '')] : []"
-                                        />
-                                        <div class="col-span-12">
-                                            <Button
-                                                type="button"
-                                                variant="destructive-outline"
-                                                class="w-full"
-                                                size="sm"
-                                                @click="removeSchedule(Number(index))"
-                                            >
-                                                <Icon
-                                                    name="solar:trash-bin-minimalistic-outline"
-                                                    class="size-4.5! shrink-0"
-                                                />
-                                                {{ t('action.delete') }}
-                                            </Button>
+                                        <div
+                                            v-if="errors.description"
+                                            class="text-sm text-destructive mt-1"
+                                        >
+                                            {{ errors.description }}
                                         </div>
                                     </div>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        @click="addSchedule"
-                                    >
-                                        <Icon
-                                            name="solar:add-circle-outline"
-                                            class="mr-2 h-4 w-4"
-                                        />
-                                        {{ t('action.add') }} {{ t('event.schedule') }}
-                                    </Button>
                                 </div>
-                                <div
-                                    v-if="errors.schedules"
-                                    class="text-sm text-destructive mt-1"
+                            </CompactCard>
+
+                            <!-- Step 1: Cover Image Uploader -->
+                            <CompactCard
+                                v-else-if="currentStep === 1"
+                                icon="solar:gallery-outline"
+                                :title="t('event.form.steps.cover_image')"
+                            >
+                                <div class="grid grid-cols-12 items-start gap-5">
+                                    <FormItemMedia
+                                        id="cover"
+                                        v-model="coverMedia"
+                                        :label="t('event.cover') || 'Cover Image'"
+                                        name="cover"
+                                        :multiple="false"
+                                        :max-files="1"
+                                        :allowed-types="['image']"
+                                        :access-level="AccessLevel.PUBLIC"
+                                        :collection-name="CollectionType.COVER"
+                                        :errors="errors.cover ? [errors.cover] : []"
+                                        class="col-span-12"
+                                    />
+                                </div>
+                            </CompactCard>
+
+                            <!-- Step 2: Participant Information -->
+                            <CompactCard
+                                v-else-if="currentStep === 2"
+                                icon="solar:users-group-two-rounded-outline"
+                                :title="t('event.form.steps.participant_info')"
+                            >
+                                <div class="grid grid-cols-12 items-start gap-5">
+                                    <FormItemSelect
+                                        id="type"
+                                        v-model="type"
+                                        :searchable="false"
+                                        :title="t('event.type')"
+                                        :placeholder="t('action.select') + ' ' + t('event.type')"
+                                        class="col-span-12 lg:col-span-4"
+                                        :errors="errors.type ? [errors.type] : []"
+                                        v-bind="typeAttrs"
+                                        :data="typeOptions as any"
+                                        key-value="id"
+                                        name-value="name"
+                                        required
+                                    />
+                                    <FormItemMultiSelect
+                                        id="eventCategoryIds"
+                                        v-model="eventCategoryIds"
+                                        :title="t('event_category.singular')"
+                                        :placeholder="t('action.select') + ' ' + t('event_category.singular')"
+                                        class="col-span-12 lg:col-span-4"
+                                        :errors="errors.eventCategoryIds ? [errors.eventCategoryIds] : []"
+                                        v-bind="eventCategoryIdsAttrs"
+                                        :data="eventCategories as any"
+                                        item-key="id"
+                                        item-label="name"
+                                        :max="10"
+                                        required
+                                    />
+                                    <FormItemMultiSelect
+                                        id="eventTargetIds"
+                                        v-model="eventTargetIds"
+                                        :title="t('event_target.singular')"
+                                        :placeholder="t('action.select') + ' ' + t('event_target.singular')"
+                                        class="col-span-12 lg:col-span-4"
+                                        :errors="errors.eventTargetIds ? [errors.eventTargetIds] : []"
+                                        v-bind="eventTargetIdsAttrs"
+                                        :data="eventTargets as any"
+                                        item-key="id"
+                                        item-label="name"
+                                        :max="10"
+                                        required
+                                    />
+                                    <FormItemInput
+                                        id="maxCapacity"
+                                        v-model="maxCapacity"
+                                        :title="t('event.max_capacity')"
+                                        :placeholder="t('event.max_capacity')"
+                                        class="col-span-12 lg:col-span-4"
+                                        :errors="errors.maxCapacity ? [errors.maxCapacity] : []"
+                                        v-bind="maxCapacityAttrs"
+                                        type="number"
+                                        min="1"
+                                        required
+                                    />
+                                    <FormItemInput
+                                        id="room"
+                                        v-model="room"
+                                        :title="t('event.room')"
+                                        :placeholder="t('event.room')"
+                                        class="col-span-12 lg:col-span-4"
+                                        :errors="errors.room ? [errors.room] : []"
+                                        v-bind="roomAttrs"
+                                    />
+                                    <FormItemInput
+                                        id="location"
+                                        v-model="location"
+                                        :title="t('event.location')"
+                                        :placeholder="t('event.location')"
+                                        class="col-span-12 lg:col-span-4"
+                                        :errors="errors.location ? [errors.location] : []"
+                                        v-bind="locationAttrs"
+                                    />
+                                </div>
+                            </CompactCard>
+
+                            <!-- Step 3: Date and Time Management -->
+                            <CompactCard
+                                v-else-if="currentStep === 3"
+                                icon="solar:calendar-outline"
+                                :title="t('event.form.steps.date_time_management')"
+                            >
+                                <div class="grid grid-cols-12 items-start gap-5">
+                                    <div class="col-span-12">
+                                        <label class="block text-sm font-medium mb-2">
+                                            {{ t('event.schedules') }}
+                                        </label>
+                                        <div class="space-y-4">
+                                            <div
+                                                v-for="(schedule, index) in schedules"
+                                                :key="index"
+                                                class="grid grid-cols-12 items-start gap-4 p-4 border rounded-lg bg-muted/50"
+                                            >
+                                                <FormItemDatePicker
+                                                    :model-value="schedule.date"
+                                                    :label="t('event.date')"
+                                                    :placeholder="t('academy.events.filters.select_date')"
+                                                    format="yyyy-MM-dd"
+                                                    :time-picker="false"
+                                                    :name="`schedule-${index}-date`"
+                                                    class="col-span-12 lg:col-span-4"
+                                                    :errors="errors[`schedules.${index}.date`] ? [errors[`schedules.${index}.date`]] : []"
+                                                    @update:model-value="(value: string | number) => schedule.date = String(value)"
+                                                />
+                                                <FormItemDatePicker
+                                                    :model-value="schedule.startTime"
+                                                    :only-time="true"
+                                                    :label="t('event.start_time')"
+                                                    :placeholder="t('event.start_time')"
+                                                    format="HH:mm"
+                                                    :name="`schedule-${index}-startTime`"
+                                                    class="col-span-12 lg:col-span-4"
+                                                    :errors="errors[`schedules.${index}.startTime`] ? [errors[`schedules.${index}.startTime`]] : []"
+                                                    @update:model-value="(value: string | number) => schedule.startTime = String(value)"
+                                                />
+                                                <FormItemDatePicker
+                                                    :model-value="schedule.endTime"
+                                                    :only-time="true"
+                                                    :label="t('event.end_time')"
+                                                    :placeholder="t('event.end_time')"
+                                                    format="HH:mm"
+                                                    :name="`schedule-${index}-endTime`"
+                                                    class="col-span-12 lg:col-span-4"
+                                                    :errors="errors[`schedules.${index}.endTime`] ? [errors[`schedules.${index}.endTime`]] : []"
+                                                    @update:model-value="(value: string | number) => schedule.endTime = String(value)"
+                                                />
+                                                <FormItemInput
+                                                    :id="`schedule-${index}-note`"
+                                                    v-model="schedule.note"
+                                                    :title="t('note.singular')"
+                                                    :placeholder="t('note.singular')"
+                                                    class="col-span-12"
+                                                    :errors="errors[`schedules.${index}.note`] ? [String(errors[`schedules.${index}.note`] || '')] : []"
+                                                />
+                                                <div class="col-span-12">
+                                                    <Button
+                                                        type="button"
+                                                        variant="destructive-outline"
+                                                        class="w-full"
+                                                        size="sm"
+                                                        @click="removeSchedule(Number(index))"
+                                                    >
+                                                        <Icon
+                                                            name="solar:trash-bin-minimalistic-outline"
+                                                            class="size-4.5! shrink-0"
+                                                        />
+                                                        {{ t('action.delete') }}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                @click="addSchedule"
+                                            >
+                                                <Icon
+                                                    name="solar:add-circle-outline"
+                                                    class="mr-2 h-4 w-4"
+                                                />
+                                                {{ t('action.add') }} {{ t('event.schedule') }}
+                                            </Button>
+                                        </div>
+                                        <div
+                                            v-if="errors.schedules"
+                                            class="text-sm text-destructive mt-1"
+                                        >
+                                            {{ errors.schedules }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </CompactCard>
+
+                            <!-- Step 4: Speakers -->
+                            <template v-else-if="currentStep === 4">
+                                <CompactCard
+                                    v-if="isLoadingSpeakers !== 'pending'"
+                                    icon="solar:user-speak-rounded-outline"
+                                    :title="t('event.form.steps.speakers')"
                                 >
-                                    {{ errors.schedules }}
+                                    <div class="grid grid-cols-12 items-start gap-5">
+                                        <LazyFormItemMultiSelect
+                                            id="speakers"
+                                            v-model="speakers"
+                                            :placeholder="t('action.select') + ' ' + t('academy.speakers')"
+                                            class="col-span-12"
+                                            :errors="errors.speakers ? [errors.speakers] : []"
+                                            v-bind="speakersAttrs"
+                                            :data="speakersList"
+                                            item-key="id"
+                                            item-label="name"
+                                        />
+                                    </div>
+                                </CompactCard>
+                            </template>
+
+                            <!-- Step 5: Questions -->
+                            <CompactCard
+                                v-else-if="currentStep === 5"
+                                icon="solar:question-circle-outline"
+                                :title="t('event.form.steps.questions')"
+                            >
+                                <EventQuestions
+                                    v-model="questions"
+                                    :errors="errors.questions ? { questions: Array.isArray(errors.questions) ? errors.questions : [errors.questions] } : {}"
+                                />
+                            </CompactCard>
+
+                            <!-- Step 6: Certificate Generation content -->
+                            <CompactCard
+                                v-else-if="currentStep === 6"
+                                icon="solar:document-text-outline"
+                                :title="t('event.form.steps.certificate_content')"
+                            >
+                                <div class="grid grid-cols-12 items-start gap-5">
+                                    <FormItemArrayInput
+                                        id="topics-cert"
+                                        v-model="topics"
+                                        :title="t('event.topics') || 'Topics'"
+                                        :placeholder="t('event.topic_placeholder') || 'Enter topic'"
+                                        class="col-span-12"
+                                        :errors="errors.topics ? [errors.topics] : []"
+                                        :add-button-text="t('action.add') + ' ' + (t('event.topic') || 'Topic')"
+                                        item-id-prefix="topic-cert"
+                                    />
+                                    <FormItemTextarea
+                                        id="certNote"
+                                        v-model="certNote"
+                                        :title="t('event.cert_note') || 'Certificate Note'"
+                                        :placeholder="t('event.cert_note_description') || 'This content will be shown only in Certificate generation process'"
+                                        class="col-span-12"
+                                        :errors="errors.certNote ? [errors.certNote] : []"
+                                        v-bind="certNoteAttrs"
+                                        :rows="4"
+                                    />
                                 </div>
-                            </div>
+                            </CompactCard>
                         </div>
-                    </CardContent>
-                </Card>
-
-                <!-- Step 4: Speakers -->
-                <Card
-                    v-show="currentStep === 4"
-                    v-if="isLoadingSpeakers !== 'pending'"
-                >
-                    <CardHeader>
-                        <CardTitle class="flex items-start gap-2">
-                            <Icon
-                                name="solar:user-speak-rounded-outline"
-                                class="size-5! opacity-75 shrink-0"
-                            />
-                            {{ t('event.form.steps.speakers') }}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="grid grid-cols-12 gap-5">
-                            <LazyFormItemMultiSelect
-                                id="speakers"
-                                v-model="speakers"
-                                :placeholder="t('action.select') + ' ' + t('academy.speakers')"
-                                class="col-span-12"
-                                :errors="errors.speakers ? [errors.speakers] : []"
-                                v-bind="speakersAttrs"
-                                :data="speakersList"
-                                item-key="id"
-                                item-label="name"
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <!-- Step 5: Questions -->
-                <Card v-show="currentStep === 5">
-                    <CardHeader>
-                        <CardTitle class="flex items-start gap-2">
-                            <Icon
-                                name="solar:question-circle-outline"
-                                class="size-5! opacity-75 shrink-0"
-                            />
-                            {{ t('event.form.steps.questions') }}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <EventQuestions
-                            v-model="questions"
-                            :errors="errors.questions ? { questions: Array.isArray(errors.questions) ? errors.questions : [errors.questions] } : {}"
-                        />
-                    </CardContent>
-                </Card>
-
-                <!-- Step 6: Certificate Generation content -->
-                <Card v-show="currentStep === 6">
-                    <CardHeader>
-                        <CardTitle class="flex items-start gap-2">
-                            <Icon
-                                name="solar:document-text-outline"
-                                class="size-5! opacity-75 shrink-0"
-                            />
-                            {{ t('event.form.steps.certificate_content') }}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="grid grid-cols-12 gap-5">
-                            <FormItemArrayInput
-                                id="topics-cert"
-                                v-model="topics"
-                                :title="t('event.topics') || 'Topics'"
-                                :placeholder="t('event.topic_placeholder') || 'Enter topic'"
-                                class="col-span-12"
-                                :errors="errors.topics ? [errors.topics] : []"
-                                :add-button-text="t('action.add') + ' ' + (t('event.topic') || 'Topic')"
-                                item-id-prefix="topic-cert"
-                            />
-                            <FormItemTextarea
-                                id="certNote"
-                                v-model="certNote"
-                                :title="t('event.cert_note') || 'Certificate Note'"
-                                :placeholder="t('event.cert_note_description') || 'This content will be shown only in Certificate generation process'"
-                                class="col-span-12"
-                                :errors="errors.certNote ? [errors.certNote] : []"
-                                v-bind="certNoteAttrs"
-                                :rows="4"
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
+                    </TransitionSlide>
+                </div>
 
                 <div
                     v-if="showActions"
