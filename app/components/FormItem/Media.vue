@@ -235,7 +235,7 @@ const getFileTypeIcon = (mimeType: string) => {
                 <div
                     v-for="(file, index) in props.modelValue"
                     :key="file.id"
-                    class="flex items-center justify-between p-4 bg-card/50 backdrop-blur-sm rounded-lg border border-border shadow-premium hover-lift"
+                    class="flex items-center justify-between p-4 bg-card/50 backdrop-blur-sm rounded-lg border border-border  hover-lift"
                 >
                     <div class="flex items-center gap-3">
                         <div class="relative">

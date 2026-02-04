@@ -323,10 +323,10 @@ const allowedTypesText = computed(() => {
         <div
             :class="[
                 'relative border-2 border-dashed rounded-xl p-6 transition-all duration-300 ease-in-out flex-1 flex flex-col min-h-0',
-                'bg-card/50 backdrop-blur-sm shadow-premium',
-                dragging ? 'border-solid border-primary bg-primary/10 shadow-premium-lg' : 'border-border hover:border-primary/50',
+                'bg-card/50',
+                dragging ? 'border-solid border-primary bg-primary/25' : 'border-border hover:border-primary/50',
                 errorHandler.isError.value ? 'border-destructive' : '',
-                disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover-lift',
+                disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
             ]"
             @drop.prevent="handleDrop"
             @dragover.prevent="handleDragOver"
@@ -387,7 +387,7 @@ const allowedTypesText = computed(() => {
                     <div
                         v-for="(file, index) in safeFiles"
                         :key="file.id"
-                        class="relative group hover-lift"
+                        class="relative group"
                     >
                         <div class="aspect-square overflow-hidden rounded-lg border border-border bg-card/50">
                             <NuxtImg
