@@ -22,7 +22,6 @@ export default defineNuxtConfig({
     },
     devtools: { enabled: true },
     app: {
-        buildAssetsDir: '/static/',
         rootAttrs: {
             id: '__bkjh_dashboard_app',
         },
