@@ -515,11 +515,14 @@ const STEP_FIELDS_COLLECTION: (keyof EventForm)[][] = [
     ],
     ['schedules'],
     [], // step 4 = workshops (edit only; validated by count 0 or ≥2)
+    ['questions'], // index 5
 ];
 
 // Collection + add: 4 steps (no Workshops until event is saved). Collection + edit: 5 steps.
-const STEP_FIELDS_COLLECTION_ADD: (keyof EventForm)[][]
-    = STEP_FIELDS_COLLECTION.slice(0, 4);
+const STEP_FIELDS_COLLECTION_ADD: (keyof EventForm)[][] = [
+    ...STEP_FIELDS_COLLECTION.slice(0, 4),
+    ['questions'], // index 4
+];
 
 const stepLabels = computed(() => {
     if (isEventCollection.value && props.mode === 'edit') {
@@ -529,6 +532,7 @@ const stepLabels = computed(() => {
             { id: 2, label: t('event.form.steps.participant_info') },
             { id: 3, label: t('event.form.steps.date_time_management') },
             { id: 4, label: t('event.form.steps.workshops') },
+            { id: 5, label: t('event.form.steps.questions') },
         ];
     }
     if (isEventCollection.value && props.mode === 'add') {
@@ -537,6 +541,7 @@ const stepLabels = computed(() => {
             { id: 1, label: t('event.form.steps.cover_image') },
             { id: 2, label: t('event.form.steps.participant_info') },
             { id: 3, label: t('event.form.steps.date_time_management') },
+            { id: 4, label: t('event.form.steps.questions') },
         ];
     }
     return [
@@ -563,10 +568,10 @@ const STEP_FIELDS = computed(() => {
 // Step slugs for URL sync (same order as stepLabels)
 const stepSlugs = computed(() => {
     if (isEventCollection.value && props.mode === 'edit') {
-        return ['details', 'cover', 'participant-info', 'date-time', 'workshops'];
+        return ['details', 'cover', 'participant-info', 'date-time', 'workshops', 'questions'];
     }
     if (isEventCollection.value && props.mode === 'add') {
-        return ['details', 'cover', 'participant-info', 'date-time'];
+        return ['details', 'cover', 'participant-info', 'date-time', 'questions'];
     }
     return [
         'details',
@@ -1165,9 +1170,9 @@ const formTitle = computed(() => {
                                 </CompactCard>
                             </template>
 
-                            <!-- Step 5: Questions -->
+                            <!-- Step 5: Questions (or Step 4 for Add Collection) -->
                             <CompactCard
-                                v-else-if="currentStep === 5"
+                                v-else-if="currentStep === 5 || (isEventCollection && mode === 'add' && currentStep === 4)"
                                 icon="solar:question-circle-outline"
                                 :title="t('event.form.steps.questions')"
                             >
