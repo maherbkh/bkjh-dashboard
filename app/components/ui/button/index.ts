@@ -8,12 +8,11 @@ export const buttonVariants = cva(
     {
         variants: {
             variant: {
-                'default':
-          'bg-primary text-primary-foreground hover:bg-primary',
+                'default': 'bg-primary text-primary-foreground hover:bg-primary',
                 'destructive':
           'bg-red-100 text-red-800 dark:bg-red-300/90 dark:text-red-800 hover:bg-red-300/90 dark:hover:bg-red-300/90 border border-red-400/25 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 font-medium',
                 'destructive-outline':
-          'border border-destructive text-destructive bg-transparent hover:bg-destructive/10 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40',
+          'text-button border border-destructive text-destructive bg-transparent hover:bg-destructive/10 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40',
                 'success':
           'bg-green-100 text-green-800 border border-green-200 dark:bg-green-300/90 dark:text-green-800 hover:bg-green-300/50 dark:hover:bg-green-300/50 focus-visible:ring-success/20 dark:focus-visible:ring-success/40 font-medium',
                 'outline':

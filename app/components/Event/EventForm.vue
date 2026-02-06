@@ -39,7 +39,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 // Emits
 const emit = defineEmits<{
-    submit: [values: EventForm, options?: { isEventCollection: boolean }];
+    submit: [values: EventForm, options?: { isEventCollection: boolean; workshopCount: number }];
     stepChange: [index: number, slug: string];
 }>();
 
@@ -1081,6 +1081,7 @@ const formTitle = computed(() => {
                                                         type="button"
                                                         variant="destructive-outline"
                                                         size="sm"
+                                                        class="w-full whitespace-nowrap"
                                                         @click="removeSchedule(Number(index))"
                                                     >
                                                         <Icon
@@ -1128,7 +1129,7 @@ const formTitle = computed(() => {
                                     :event-id="initialData!.id"
                                     :event-is-active="isActive"
                                     :event-schedules-for-new-workshop="
-                                        (schedules || []).map((s) => ({
+                                        (schedules || []).map((s: any) => ({
                                             date: s.date || '',
                                             startTime: s.startTime || '',
                                             endTime: s.endTime || '',
