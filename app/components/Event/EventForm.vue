@@ -44,10 +44,15 @@ const emit = defineEmits<{
 }>();
 
 // CRUD
-const { defineField, errors, setValues, handleSubmit, resetForm, validateField, setFieldValue } = useCrud<
-    EventData,
-    EventForm
->({
+const {
+    defineField,
+    errors,
+    setValues,
+    handleSubmit,
+    resetForm,
+    validateField,
+    setFieldValue,
+} = useCrud<EventData, EventForm>({
     crudPath: 'events',
     tenant: 'academy',
     formSchema: createEventSchema(t),
@@ -56,19 +61,23 @@ const { defineField, errors, setValues, handleSubmit, resetForm, validateField, 
 // Form fields
 const [title, titleAttrs] = defineField('title');
 const [description, descriptionAttrs] = defineField('description');
-const [shortDescription, shortDescriptionAttrs] = defineField('shortDescription');
+const [shortDescription, shortDescriptionAttrs]
+    = defineField('shortDescription');
 const [certNote, certNoteAttrs] = defineField('certNote');
 const [topics, topicsAttrs] = defineField('topics');
 const [note, noteAttrs] = defineField('note');
 const [type, typeAttrs] = defineField('type');
-const [eventCategoryIds, eventCategoryIdsAttrs] = defineField('eventCategoryIds');
+const [eventCategoryIds, eventCategoryIdsAttrs]
+    = defineField('eventCategoryIds');
 const [eventTargetIds, eventTargetIdsAttrs] = defineField('eventTargetIds');
 const [maxCapacity, maxCapacityAttrs] = defineField('maxCapacity');
 const [room, roomAttrs] = defineField('room');
 const [location, locationAttrs] = defineField('location');
 const [isActive, isActiveAttrs] = defineField('isActive');
 const [forKids, forKidsAttrs] = defineField('forKids');
-const [disableRegistration, disableRegistrationAttrs] = defineField('disableRegistration');
+const [disableRegistration, disableRegistrationAttrs] = defineField(
+    'disableRegistration',
+);
 const [isFull, isFullAttrs] = defineField('isFull');
 const [speakers, speakersAttrs] = defineField('speakers');
 const [schedules] = defineField('schedules');
@@ -80,23 +89,27 @@ const isEventCollection = ref(false);
 const workshopCount = ref(0);
 
 // Init isEventCollection and workshopCount: add => false; edit => from backend isEventCollection or forceEventCollection or hasWorkshops
-watch([() => props.initialData, () => props.forceEventCollection], ([newData, forceCol]) => {
-    if (props.mode === 'edit' && newData) {
-        const workshops = (newData as any).workshops;
-        const hasWorkshops = Array.isArray(workshops) && workshops.length > 0;
-        const fromBackend = (newData as any).isEventCollection;
-        isEventCollection.value = fromBackend ?? (!!forceCol || hasWorkshops);
-        workshopCount.value = Array.isArray(workshops) ? workshops.length : 0;
-    }
-    else if (props.mode === 'edit' && forceCol) {
-        isEventCollection.value = true;
-        workshopCount.value = 0;
-    }
-    else if (props.mode === 'add' && !newData) {
-        isEventCollection.value = false;
-        workshopCount.value = 0;
-    }
-}, { immediate: true });
+watch(
+    [() => props.initialData, () => props.forceEventCollection],
+    ([newData, forceCol]) => {
+        if (props.mode === 'edit' && newData) {
+            const workshops = (newData as any).workshops;
+            const hasWorkshops = Array.isArray(workshops) && workshops.length > 0;
+            const fromBackend = (newData as any).isEventCollection;
+            isEventCollection.value = fromBackend ?? (!!forceCol || hasWorkshops);
+            workshopCount.value = Array.isArray(workshops) ? workshops.length : 0;
+        }
+        else if (props.mode === 'edit' && forceCol) {
+            isEventCollection.value = true;
+            workshopCount.value = 0;
+        }
+        else if (props.mode === 'add' && !newData) {
+            isEventCollection.value = false;
+            workshopCount.value = 0;
+        }
+    },
+    { immediate: true },
+);
 
 // When forKids or disableRegistration is true, force isEventCollection to false
 watch([forKids, disableRegistration], ([fk, dr]) => {
@@ -123,7 +136,9 @@ const eventCategories = computed(() => resourcesStore.eventCategories || []);
 const eventTargets = computed(() => resourcesStore.eventTargets || []);
 
 // Fetch speakers for multi-select
-const { data: speakersListData, status: isLoadingSpeakers } = await useApiFetch<Speaker[]>('/academy/speakers/active', {
+const { data: speakersListData, status: isLoadingSpeakers } = await useApiFetch<
+    Speaker[]
+>('/academy/speakers/active', {
     server: false,
 });
 
@@ -139,30 +154,85 @@ const typeOptions = computed(() => {
 });
 
 // Initialize form data when props change
-watch(() => props.initialData, async (newData) => {
+watch(
+    () => props.initialData,
+    async (newData) => {
     // Ensure topics is always initialized as empty array if not provided
-    if (!newData && props.mode === 'add') {
-        topics.value = [];
-    }
-    if (newData && (props.mode === 'edit' || (props.mode === 'add' && newData))) {
-        // Handle cover media - could be ID string or MediaEntity object
-        let coverEntity: MediaEntity | null = null;
-        const coverData = (newData as any).cover;
-        const coverUrl = (newData as any).coverUrl;
+        if (!newData && props.mode === 'add') {
+            topics.value = [];
+        }
+        if (
+            newData
+            && (props.mode === 'edit' || (props.mode === 'add' && newData))
+        ) {
+            // Handle cover media - could be ID string or MediaEntity object
+            let coverEntity: MediaEntity | null = null;
+            const coverData = (newData as any).cover;
+            const coverUrl = (newData as any).coverUrl;
 
-        if (coverData) {
-            if (typeof coverData === 'string') {
-                // If it's an ID, fetch the media entity
-                try {
-                    const { data, error } = await useApiFetch<MediaEntity>(`/shared/media/${coverData}`, {
-                        server: false,
-                    });
+            if (coverData) {
+                if (typeof coverData === 'string') {
+                    // If it's an ID, fetch the media entity
+                    try {
+                        const { data, error } = await useApiFetch<MediaEntity>(
+                            `/shared/media/${coverData}`,
+                            {
+                                server: false,
+                            },
+                        );
 
-                    const fetchedData = (data.value as { data?: MediaEntity } | null)?.data;
+                        const fetchedData = (data.value as { data?: MediaEntity } | null)
+                            ?.data;
 
-                    if (error.value) {
-                        console.error('Error fetching cover media:', error.value);
-                        // If fetch fails but we have coverUrl, create a minimal entity
+                        if (error.value) {
+                            console.error('Error fetching cover media:', error.value);
+                            // If fetch fails but we have coverUrl, create a minimal entity
+                            if (coverUrl) {
+                                coverEntity = {
+                                    id: coverData,
+                                    uuid: coverData,
+                                    filename: '',
+                                    storedName: '',
+                                    path: '',
+                                    url: coverUrl,
+                                    mimeType: 'image/png',
+                                    extension: '.png',
+                                    size: 0,
+                                    metadata: {},
+                                    accessLevel: AccessLevel.PUBLIC,
+                                } as MediaEntity;
+                            }
+                        }
+                        else if (fetchedData) {
+                            coverEntity = fetchedData;
+                            // Ensure url field is set from coverUrl if available
+                            if (coverUrl && !coverEntity.url) {
+                                coverEntity = {
+                                    ...coverEntity,
+                                    url: coverUrl,
+                                } as MediaEntity;
+                            }
+                        }
+                        // Fallback: if fetch didn't return data but we have coverUrl, create minimal entity
+                        else if (coverUrl) {
+                            coverEntity = {
+                                id: coverData,
+                                uuid: coverData,
+                                filename: '',
+                                storedName: '',
+                                path: '',
+                                url: coverUrl,
+                                mimeType: 'image/png',
+                                extension: '.png',
+                                size: 0,
+                                metadata: {},
+                                accessLevel: AccessLevel.PUBLIC,
+                            } as MediaEntity;
+                        }
+                    }
+                    catch (error) {
+                        console.error('Error fetching cover media:', error);
+                        // Fallback: create minimal entity from coverUrl if available
                         if (coverUrl) {
                             coverEntity = {
                                 id: coverData,
@@ -179,162 +249,144 @@ watch(() => props.initialData, async (newData) => {
                             } as MediaEntity;
                         }
                     }
-                    else if (fetchedData) {
-                        coverEntity = fetchedData;
-                        // Ensure url field is set from coverUrl if available
-                        if (coverUrl && !coverEntity.url) {
-                            coverEntity = {
-                                ...coverEntity,
-                                url: coverUrl,
-                            } as MediaEntity;
-                        }
-                    }
-                    // Fallback: if fetch didn't return data but we have coverUrl, create minimal entity
-                    else if (coverUrl) {
-                        coverEntity = {
-                            id: coverData,
-                            uuid: coverData,
-                            filename: '',
-                            storedName: '',
-                            path: '',
-                            url: coverUrl,
-                            mimeType: 'image/png',
-                            extension: '.png',
-                            size: 0,
-                            metadata: {},
-                            accessLevel: AccessLevel.PUBLIC,
-                        } as MediaEntity;
-                    }
                 }
-                catch (error) {
-                    console.error('Error fetching cover media:', error);
-                    // Fallback: create minimal entity from coverUrl if available
-                    if (coverUrl) {
-                        coverEntity = {
-                            id: coverData,
-                            uuid: coverData,
-                            filename: '',
-                            storedName: '',
-                            path: '',
-                            url: coverUrl,
-                            mimeType: 'image/png',
-                            extension: '.png',
-                            size: 0,
-                            metadata: {},
-                            accessLevel: AccessLevel.PUBLIC,
-                        } as MediaEntity;
-                    }
+                else if (coverData.id) {
+                    // If it's already a MediaEntity object
+                    coverEntity = coverData as MediaEntity;
                 }
             }
-            else if (coverData.id) {
-                // If it's already a MediaEntity object
-                coverEntity = coverData as MediaEntity;
+            // If no cover data but we have coverUrl, try to construct from URL
+            else if (coverUrl && typeof coverUrl === 'string') {
+                // Extract ID from URL or use a placeholder
+                const urlParts = coverUrl.split('/');
+                const filename = urlParts[urlParts.length - 1] ?? '';
+                const uuidMatch = filename.match(/^([a-f0-9-]+)/);
+                const uuid = uuidMatch ? uuidMatch[1] : '';
+                const apiOrigin = `${new URL(runtimeConfig.public.apiBaseUrl as string).origin}/`;
+
+                coverEntity = {
+                    id: uuid || '',
+                    uuid: uuid || '',
+                    filename: filename,
+                    storedName: filename,
+                    path: coverUrl.replace(apiOrigin, ''),
+                    url: coverUrl,
+                    mimeType: 'image/png',
+                    extension: filename.split('.').pop() || '.png',
+                    size: 0,
+                    metadata: {},
+                    accessLevel: AccessLevel.PUBLIC,
+                } as MediaEntity;
+            }
+
+            // Set coverMedia after ensuring we have a valid entity
+            // Use nextTick to ensure reactivity
+            await nextTick();
+            if (coverEntity) {
+                // Ensure all required fields are present for preview
+                const validEntity: MediaEntity = {
+                    id: coverEntity.id || '',
+                    uuid: coverEntity.uuid || coverEntity.id || '',
+                    filename: coverEntity.filename || '',
+                    storedName: coverEntity.storedName || coverEntity.filename || '',
+                    path: coverEntity.path || '',
+                    url: coverEntity.url || coverUrl || '',
+                    mimeType: coverEntity.mimeType || 'image/png',
+                    extension: coverEntity.extension || '.png',
+                    size:
+            typeof coverEntity.size === 'string'
+                ? parseInt(coverEntity.size)
+                : coverEntity.size || 0,
+                    metadata: coverEntity.metadata || {},
+                    accessLevel: coverEntity.accessLevel || AccessLevel.PUBLIC,
+                } as MediaEntity;
+
+                // Force reactivity by creating a new object reference
+                coverMedia.value = { ...validEntity };
+            }
+            else {
+                coverMedia.value = null;
+            }
+
+            // Extract category and target IDs from new response structure
+            const categoryIds = (newData as any).categories
+                ? (newData as any).categories
+                        .map(
+                            (cat: any) =>
+                                cat.eventCategory?.id || cat.eventCategoryId || cat.id,
+                        )
+                        .filter(Boolean)
+                : (newData as any).eventCategoryIds
+                    || ((newData as any).eventCategoryId
+                        ? [(newData as any).eventCategoryId]
+                        : []);
+
+            const targetIds = (newData as any).targets
+                ? (newData as any).targets
+                        .map(
+                            (target: any) =>
+                                target.eventTarget?.id || target.eventTargetId || target.id,
+                        )
+                        .filter(Boolean)
+                : (newData as any).eventTargetIds
+                    || ((newData as any).eventTargetId
+                        ? [(newData as any).eventTargetId]
+                        : []);
+
+            setValues({
+                title: newData.title,
+                description: newData.description,
+                shortDescription: newData.shortDescription,
+                certNote: (newData as any).certNote || undefined,
+                topics: Array.isArray((newData as any).topics)
+                    ? (newData as any).topics
+                    : [],
+                note: newData.note || undefined,
+                type: (newData.type?.toUpperCase?.() || newData.type) as any,
+                eventCategoryIds: categoryIds.length > 0 ? categoryIds : [],
+                eventTargetIds: targetIds.length > 0 ? targetIds : [],
+                adminId: (newData as any).adminId,
+                maxCapacity:
+          (newData as any).maxCapacity ?? (newData as any).maxTrainee ?? 1,
+                room: (newData as any).conferenceRoom || newData.room || undefined,
+                location: newData.location || undefined,
+                isActive: newData.isActive,
+                forKids: (newData as any).forKids ?? false,
+                disableRegistration: (newData as any).disableRegistration ?? false,
+                isFull: (newData as any).isFull ?? false,
+                cover: coverEntity?.id || null,
+                speakers: (newData.speakers || []).map(
+                    (speaker: any) => speaker.speakerId || speaker.id,
+                ),
+                schedules: (newData.schedules || []).map(schedule => ({
+                    ...schedule,
+                    date: schedule.date
+                        ? new Date(schedule.date).toISOString().split('T')[0]
+                        : '',
+                    startTime: schedule.startTime || '',
+                    endTime: schedule.endTime || '',
+                    note: schedule.note || '',
+                })),
+                questions: ((newData as any).questions || []).map((q: any) => ({
+                    ...q,
+                    hasAnswers: q.hasAnswers ?? q.has_answers ?? false,
+                })),
+            });
+
+            // Ensure topics is always an array after setValues
+            await nextTick();
+            if (!Array.isArray(topics.value)) {
+                topics.value = [];
             }
         }
-        // If no cover data but we have coverUrl, try to construct from URL
-        else if (coverUrl && typeof coverUrl === 'string') {
-            // Extract ID from URL or use a placeholder
-            const urlParts = coverUrl.split('/');
-            const filename = urlParts[urlParts.length - 1] ?? '';
-            const uuidMatch = filename.match(/^([a-f0-9-]+)/);
-            const uuid = uuidMatch ? uuidMatch[1] : '';
-            const apiOrigin = `${new URL(runtimeConfig.public.apiBaseUrl as string).origin}/`;
-
-            coverEntity = {
-                id: uuid || '',
-                uuid: uuid || '',
-                filename: filename,
-                storedName: filename,
-                path: coverUrl.replace(apiOrigin, ''),
-                url: coverUrl,
-                mimeType: 'image/png',
-                extension: filename.split('.').pop() || '.png',
-                size: 0,
-                metadata: {},
-                accessLevel: AccessLevel.PUBLIC,
-            } as MediaEntity;
-        }
-
-        // Set coverMedia after ensuring we have a valid entity
-        // Use nextTick to ensure reactivity
-        await nextTick();
-        if (coverEntity) {
-            // Ensure all required fields are present for preview
-            const validEntity: MediaEntity = {
-                id: coverEntity.id || '',
-                uuid: coverEntity.uuid || coverEntity.id || '',
-                filename: coverEntity.filename || '',
-                storedName: coverEntity.storedName || coverEntity.filename || '',
-                path: coverEntity.path || '',
-                url: coverEntity.url || coverUrl || '',
-                mimeType: coverEntity.mimeType || 'image/png',
-                extension: coverEntity.extension || '.png',
-                size: typeof coverEntity.size === 'string' ? parseInt(coverEntity.size) : (coverEntity.size || 0),
-                metadata: coverEntity.metadata || {},
-                accessLevel: coverEntity.accessLevel || AccessLevel.PUBLIC,
-            } as MediaEntity;
-
-            // Force reactivity by creating a new object reference
-            coverMedia.value = { ...validEntity };
-        }
-        else {
+        else if (props.mode === 'add' && !newData) {
+            resetForm();
             coverMedia.value = null;
+            questions.value = []; // Start with empty questions array
         }
-
-        // Extract category and target IDs from new response structure
-        const categoryIds = (newData as any).categories
-            ? (newData as any).categories.map((cat: any) => cat.eventCategory?.id || cat.eventCategoryId || cat.id).filter(Boolean)
-            : (newData as any).eventCategoryIds || ((newData as any).eventCategoryId ? [(newData as any).eventCategoryId] : []);
-
-        const targetIds = (newData as any).targets
-            ? (newData as any).targets.map((target: any) => target.eventTarget?.id || target.eventTargetId || target.id).filter(Boolean)
-            : (newData as any).eventTargetIds || ((newData as any).eventTargetId ? [(newData as any).eventTargetId] : []);
-
-        setValues({
-            title: newData.title,
-            description: newData.description,
-            shortDescription: newData.shortDescription,
-            certNote: (newData as any).certNote || undefined,
-            topics: Array.isArray((newData as any).topics) ? (newData as any).topics : [],
-            note: newData.note || undefined,
-            type: (newData.type?.toUpperCase?.() || newData.type) as any,
-            eventCategoryIds: categoryIds.length > 0 ? categoryIds : [],
-            eventTargetIds: targetIds.length > 0 ? targetIds : [],
-            adminId: (newData as any).adminId,
-            maxCapacity: (newData as any).maxCapacity ?? (newData as any).maxTrainee ?? 1,
-            room: (newData as any).conferenceRoom || newData.room || undefined,
-            location: newData.location || undefined,
-            isActive: newData.isActive,
-            forKids: (newData as any).forKids ?? false,
-            disableRegistration: (newData as any).disableRegistration ?? false,
-            isFull: (newData as any).isFull ?? false,
-            cover: coverEntity?.id || null,
-            speakers: (newData.speakers || []).map((speaker: any) => speaker.speakerId || speaker.id),
-            schedules: (newData.schedules || []).map(schedule => ({
-                ...schedule,
-                date: schedule.date ? new Date(schedule.date).toISOString().split('T')[0] : '',
-                startTime: schedule.startTime || '',
-                endTime: schedule.endTime || '',
-                note: schedule.note || '',
-            })),
-            questions: ((newData as any).questions || []).map((q: any) => ({
-                ...q,
-                hasAnswers: q.hasAnswers ?? q.has_answers ?? false,
-            })),
-        });
-
-        // Ensure topics is always an array after setValues
-        await nextTick();
-        if (!Array.isArray(topics.value)) {
-            topics.value = [];
-        }
-    }
-    else if (props.mode === 'add' && !newData) {
-        resetForm();
-        coverMedia.value = null;
-        questions.value = []; // Start with empty questions array
-    }
-}, { immediate: true });
+    },
+    { immediate: true },
+);
 
 // Form submission
 const onSubmit = handleSubmit((values) => {
@@ -370,17 +422,23 @@ const onSubmit = handleSubmit((values) => {
 
     submitValues.isEventCollection = isEventCollection.value;
 
-    emit('submit', submitValues as EventForm, { isEventCollection: isEventCollection.value, workshopCount: workshopCount.value });
+    emit('submit', submitValues as EventForm, {
+        isEventCollection: isEventCollection.value,
+        workshopCount: workshopCount.value,
+    });
 });
 
 // Schedule management
 const addSchedule = () => {
-    schedules.value = [...(schedules.value || []), {
-        date: '',
-        startTime: '',
-        endTime: '',
-        note: '',
-    }];
+    schedules.value = [
+        ...(schedules.value || []),
+        {
+            date: '',
+            startTime: '',
+            endTime: '',
+            note: '',
+        },
+    ];
 };
 
 const removeSchedule = (index: number) => {
@@ -393,22 +451,42 @@ const removeSchedule = (index: number) => {
 
 // Re-validate schedules when any date/time/note changes so errors clear live
 let schedulesValidateTimeout: ReturnType<typeof setTimeout> | null = null;
-watch(schedules, () => {
-    if (schedulesValidateTimeout) clearTimeout(schedulesValidateTimeout);
-    schedulesValidateTimeout = setTimeout(() => {
-        validateField('schedules');
-        schedulesValidateTimeout = null;
-    }, 150);
-}, { deep: true });
+watch(
+    schedules,
+    () => {
+        if (schedulesValidateTimeout) clearTimeout(schedulesValidateTimeout);
+        schedulesValidateTimeout = setTimeout(() => {
+            validateField('schedules');
+            schedulesValidateTimeout = null;
+        }, 150);
+    },
+    { deep: true },
+);
 
 // Step navigation – dynamic based on isEventCollection
 const currentStep = ref(0);
 const stepDirection = ref(1); // 1 = forward (next), -1 = backward (prev)
 
 const STEP_FIELDS_NORMAL: (keyof EventForm)[][] = [
-    ['title', 'description', 'shortDescription', 'note', 'isActive', 'forKids', 'disableRegistration', 'isFull'],
+    [
+        'title',
+        'description',
+        'shortDescription',
+        'note',
+        'isActive',
+        'forKids',
+        'disableRegistration',
+        'isFull',
+    ],
     ['cover'],
-    ['type', 'eventCategoryIds', 'eventTargetIds', 'maxCapacity', 'room', 'location'],
+    [
+        'type',
+        'eventCategoryIds',
+        'eventTargetIds',
+        'maxCapacity',
+        'room',
+        'location',
+    ],
     ['schedules'],
     ['speakers'],
     ['questions'],
@@ -416,15 +494,32 @@ const STEP_FIELDS_NORMAL: (keyof EventForm)[][] = [
 ];
 
 const STEP_FIELDS_COLLECTION: (keyof EventForm)[][] = [
-    ['title', 'description', 'shortDescription', 'note', 'isActive', 'forKids', 'disableRegistration', 'isFull'],
+    [
+        'title',
+        'description',
+        'shortDescription',
+        'note',
+        'isActive',
+        'forKids',
+        'disableRegistration',
+        'isFull',
+    ],
     ['cover'],
-    ['type', 'eventCategoryIds', 'eventTargetIds', 'maxCapacity', 'room', 'location'],
+    [
+        'type',
+        'eventCategoryIds',
+        'eventTargetIds',
+        'maxCapacity',
+        'room',
+        'location',
+    ],
     ['schedules'],
     [], // step 4 = workshops (edit only; validated by count 0 or ≥2)
 ];
 
 // Collection + add: 4 steps (no Workshops until event is saved). Collection + edit: 5 steps.
-const STEP_FIELDS_COLLECTION_ADD: (keyof EventForm)[][] = STEP_FIELDS_COLLECTION.slice(0, 4);
+const STEP_FIELDS_COLLECTION_ADD: (keyof EventForm)[][]
+    = STEP_FIELDS_COLLECTION.slice(0, 4);
 
 const stepLabels = computed(() => {
     if (isEventCollection.value && props.mode === 'edit') {
@@ -458,8 +553,10 @@ const stepLabels = computed(() => {
 const TOTAL_STEPS = computed(() => stepLabels.value.length);
 
 const STEP_FIELDS = computed(() => {
-    if (isEventCollection.value && props.mode === 'edit') return STEP_FIELDS_COLLECTION;
-    if (isEventCollection.value && props.mode === 'add') return STEP_FIELDS_COLLECTION_ADD;
+    if (isEventCollection.value && props.mode === 'edit')
+        return STEP_FIELDS_COLLECTION;
+    if (isEventCollection.value && props.mode === 'add')
+        return STEP_FIELDS_COLLECTION_ADD;
     return STEP_FIELDS_NORMAL;
 });
 
@@ -471,26 +568,42 @@ const stepSlugs = computed(() => {
     if (isEventCollection.value && props.mode === 'add') {
         return ['details', 'cover', 'participant-info', 'date-time'];
     }
-    return ['details', 'cover', 'participant-info', 'date-time', 'speakers', 'questions', 'certificate'];
+    return [
+        'details',
+        'cover',
+        'participant-info',
+        'date-time',
+        'speakers',
+        'questions',
+        'certificate',
+    ];
 });
 
 // Sync initialStep from parent (URL) and clamp when TOTAL_STEPS changes
-watch(() => props.initialStep, (v) => {
-    if (v !== undefined && v >= 0) {
-        const max = TOTAL_STEPS.value - 1;
-        currentStep.value = Math.min(Math.max(0, v), max);
-    }
-}, { immediate: true });
+watch(
+    () => props.initialStep,
+    (v) => {
+        if (v !== undefined && v >= 0) {
+            const max = TOTAL_STEPS.value - 1;
+            currentStep.value = Math.min(Math.max(0, v), max);
+        }
+    },
+    { immediate: true },
+);
 
 watch(TOTAL_STEPS, (total) => {
     if (currentStep.value >= total) currentStep.value = Math.max(0, total - 1);
 });
 
 // Emit stepChange when currentStep changes so parent can sync URL
-watch(currentStep, (index) => {
-    const slug = stepSlugs.value[index];
-    if (slug) emit('stepChange', index, slug);
-}, { immediate: true });
+watch(
+    currentStep,
+    (index) => {
+        const slug = stepSlugs.value[index];
+        if (slug) emit('stepChange', index, slug);
+    },
+    { immediate: true },
+);
 
 /** Validate a single step's fields. Returns true if valid. */
 async function validateStep(stepIndex: number): Promise<boolean> {
@@ -534,15 +647,23 @@ watch(currentStep, (next, prev) => {
 // Subtle slide: short distance (20%) so it feels in-place, not from far away
 const slideOffset = computed(() =>
     stepDirection.value === 1
-        ? { enter: ['10%', 0] as [string | number, number], leave: ['-10%', 0] as [string | number, number] }
-        : { enter: ['-10%', 0] as [string | number, number], leave: ['10%', 0] as [string | number, number] },
+        ? {
+                enter: ['10%', 0] as [string | number, number],
+                leave: ['-10%', 0] as [string | number, number],
+            }
+        : {
+                enter: ['-10%', 0] as [string | number, number],
+                leave: ['10%', 0] as [string | number, number],
+            },
 );
 
 function onWorkshopCountChange(n: number) {
     workshopCount.value = n;
 }
 
-const workshopCountValid = computed(() => workshopCount.value === 0 || workshopCount.value >= 2);
+const workshopCountValid = computed(
+    () => workshopCount.value === 0 || workshopCount.value >= 2,
+);
 
 // Step indices that have validation errors (for stepper error state)
 const stepsWithErrors = computed(() => {
@@ -564,7 +685,13 @@ const isSaveDisabled = computed(() => {
     if (currentStep.value !== TOTAL_STEPS.value - 1) return true;
     if (stepsWithErrors.value.length > 0) return true;
     // When event is active and collection, require at least 2 workshops to allow update
-    if (isEventCollection.value && currentStep.value === 4 && isActive.value && workshopCount.value < 2) return true;
+    if (
+        isEventCollection.value
+        && currentStep.value === 4
+        && isActive.value
+        && workshopCount.value < 2
+    )
+        return true;
     return false;
 });
 
@@ -609,7 +736,7 @@ const formTitle = computed(() => {
                                 name="solar:arrow-left-outline"
                                 class="mr-2 size-5!"
                             />
-                            {{ t('common.previous') }}
+                            {{ t("common.previous") }}
                         </Button>
                     </div>
                     <div class="min-w-0 flex-1 flex justify-end">
@@ -619,7 +746,7 @@ const formTitle = computed(() => {
                             variant="outline"
                             @click="goToNextStep"
                         >
-                            {{ t('common.next') }}
+                            {{ t("common.next") }}
                             <Icon
                                 name="solar:arrow-right-outline"
                                 class="ml-2 size-5!"
@@ -674,8 +801,8 @@ const formTitle = computed(() => {
                                     <FormItemSwitch
                                         id="forKids"
                                         v-model="forKids"
-                                        true-label="Ja"
-                                        false-label="Nein"
+                                        :true-label="t('common.yes')"
+                                        :false-label="t('common.no')"
                                         :title="t('event.for_kids')"
                                         class="col-span-12 lg:col-span-3"
                                         v-bind="forKidsAttrs"
@@ -704,7 +831,9 @@ const formTitle = computed(() => {
                                         :title="t('common.short_description')"
                                         :placeholder="t('common.short_description')"
                                         class="col-span-12 lg:col-span-6"
-                                        :errors="errors.shortDescription ? [errors.shortDescription] : []"
+                                        :errors="
+                                            errors.shortDescription ? [errors.shortDescription] : []
+                                        "
                                         v-bind="shortDescriptionAttrs"
                                     />
                                     <FormItemTextarea
@@ -718,7 +847,7 @@ const formTitle = computed(() => {
                                     />
                                     <div class="col-span-12">
                                         <label class="block text-sm font-medium mb-2">
-                                            {{ t('form.description') }}
+                                            {{ t("form.description") }}
                                         </label>
                                         <RTEditor
                                             v-model="description"
@@ -787,9 +916,13 @@ const formTitle = computed(() => {
                                         id="eventCategoryIds"
                                         v-model="eventCategoryIds"
                                         :title="t('event_category.singular')"
-                                        :placeholder="t('action.select') + ' ' + t('event_category.singular')"
+                                        :placeholder="
+                                            t('action.select') + ' ' + t('event_category.singular')
+                                        "
                                         class="col-span-12 lg:col-span-4"
-                                        :errors="errors.eventCategoryIds ? [errors.eventCategoryIds] : []"
+                                        :errors="
+                                            errors.eventCategoryIds ? [errors.eventCategoryIds] : []
+                                        "
                                         v-bind="eventCategoryIdsAttrs"
                                         :data="eventCategories as any"
                                         item-key="id"
@@ -801,9 +934,13 @@ const formTitle = computed(() => {
                                         id="eventTargetIds"
                                         v-model="eventTargetIds"
                                         :title="t('event_target.singular')"
-                                        :placeholder="t('action.select') + ' ' + t('event_target.singular')"
+                                        :placeholder="
+                                            t('action.select') + ' ' + t('event_target.singular')
+                                        "
                                         class="col-span-12 lg:col-span-4"
-                                        :errors="errors.eventTargetIds ? [errors.eventTargetIds] : []"
+                                        :errors="
+                                            errors.eventTargetIds ? [errors.eventTargetIds] : []
+                                        "
                                         v-bind="eventTargetIdsAttrs"
                                         :data="eventTargets as any"
                                         item-key="id"
@@ -829,7 +966,7 @@ const formTitle = computed(() => {
                                         v-if="isEventCollection"
                                         class="col-span-12 text-sm text-muted-foreground"
                                     >
-                                        {{ t('event.workshops.max_capacity_from_workshops') }}
+                                        {{ t("event.workshops.max_capacity_from_workshops") }}
                                     </p>
                                     <FormItemInput
                                         id="room"
@@ -861,7 +998,7 @@ const formTitle = computed(() => {
                                 <div class="grid grid-cols-12 items-start gap-5">
                                     <div class="col-span-12">
                                         <label class="block text-sm font-medium mb-2">
-                                            {{ t('event.schedules') }}
+                                            {{ t("event.schedules") }}
                                         </label>
                                         <div class="space-y-4">
                                             <div
@@ -877,8 +1014,15 @@ const formTitle = computed(() => {
                                                     :time-picker="false"
                                                     :name="`schedule-${index}-date`"
                                                     class="col-span-12 lg:col-span-4"
-                                                    :errors="errors[`schedules.${index}.date`] ? [errors[`schedules.${index}.date`]] : []"
-                                                    @update:model-value="(value: string | number) => schedule.date = String(value)"
+                                                    :errors="
+                                                        errors[`schedules.${index}.date`]
+                                                            ? [errors[`schedules.${index}.date`]]
+                                                            : []
+                                                    "
+                                                    @update:model-value="
+                                                        (value: string | number) =>
+                                                            (schedule.date = String(value))
+                                                    "
                                                 />
                                                 <FormItemDatePicker
                                                     :model-value="schedule.startTime"
@@ -888,8 +1032,15 @@ const formTitle = computed(() => {
                                                     format="HH:mm"
                                                     :name="`schedule-${index}-startTime`"
                                                     class="col-span-12 lg:col-span-4"
-                                                    :errors="errors[`schedules.${index}.startTime`] ? [errors[`schedules.${index}.startTime`]] : []"
-                                                    @update:model-value="(value: string | number) => schedule.startTime = String(value)"
+                                                    :errors="
+                                                        errors[`schedules.${index}.startTime`]
+                                                            ? [errors[`schedules.${index}.startTime`]]
+                                                            : []
+                                                    "
+                                                    @update:model-value="
+                                                        (value: string | number) =>
+                                                            (schedule.startTime = String(value))
+                                                    "
                                                 />
                                                 <FormItemDatePicker
                                                     :model-value="schedule.endTime"
@@ -899,8 +1050,15 @@ const formTitle = computed(() => {
                                                     format="HH:mm"
                                                     :name="`schedule-${index}-endTime`"
                                                     class="col-span-12 lg:col-span-4"
-                                                    :errors="errors[`schedules.${index}.endTime`] ? [errors[`schedules.${index}.endTime`]] : []"
-                                                    @update:model-value="(value: string | number) => schedule.endTime = String(value)"
+                                                    :errors="
+                                                        errors[`schedules.${index}.endTime`]
+                                                            ? [errors[`schedules.${index}.endTime`]]
+                                                            : []
+                                                    "
+                                                    @update:model-value="
+                                                        (value: string | number) =>
+                                                            (schedule.endTime = String(value))
+                                                    "
                                                 />
                                                 <FormItemInput
                                                     :id="`schedule-${index}-note`"
@@ -908,13 +1066,20 @@ const formTitle = computed(() => {
                                                     :title="t('note.singular')"
                                                     :placeholder="t('note.singular')"
                                                     class="col-span-12"
-                                                    :errors="errors[`schedules.${index}.note`] ? [String(errors[`schedules.${index}.note`] || '')] : []"
+                                                    :errors="
+                                                        errors[`schedules.${index}.note`]
+                                                            ? [
+                                                                String(
+                                                                    errors[`schedules.${index}.note`] || '',
+                                                                ),
+                                                            ]
+                                                            : []
+                                                    "
                                                 />
                                                 <div class="col-span-12">
                                                     <Button
                                                         type="button"
                                                         variant="destructive-outline"
-                                                        class="w-full"
                                                         size="sm"
                                                         @click="removeSchedule(Number(index))"
                                                     >
@@ -922,7 +1087,7 @@ const formTitle = computed(() => {
                                                             name="solar:trash-bin-minimalistic-outline"
                                                             class="size-4.5! shrink-0"
                                                         />
-                                                        {{ t('action.delete') }}
+                                                        {{ t("action.delete") }}
                                                     </Button>
                                                 </div>
                                             </div>
@@ -935,7 +1100,7 @@ const formTitle = computed(() => {
                                                     name="solar:add-circle-outline"
                                                     class="mr-2 h-4 w-4"
                                                 />
-                                                {{ t('action.add') }} {{ t('event.schedule') }}
+                                                {{ t("action.add") }} {{ t("event.schedule") }}
                                             </Button>
                                         </div>
                                         <div
@@ -950,14 +1115,26 @@ const formTitle = computed(() => {
 
                             <!-- Step 4: Workshops (edit only, when isEventCollection) -->
                             <CompactCard
-                                v-else-if="currentStep === 4 && isEventCollection && mode === 'edit' && initialData?.id"
+                                v-else-if="
+                                    currentStep === 4
+                                        && isEventCollection
+                                        && mode === 'edit'
+                                        && initialData?.id
+                                "
                                 icon="solar:widget-5-outline"
                                 :title="t('event.form.steps.workshops')"
                             >
                                 <EventWorkshopList
                                     :event-id="initialData!.id"
                                     :event-is-active="isActive"
-                                    :event-schedules-for-new-workshop="(schedules || []).map(s => ({ date: s.date || '', startTime: s.startTime || '', endTime: s.endTime || '', note: s.note }))"
+                                    :event-schedules-for-new-workshop="
+                                        (schedules || []).map((s) => ({
+                                            date: s.date || '',
+                                            startTime: s.startTime || '',
+                                            endTime: s.endTime || '',
+                                            note: s.note,
+                                        }))
+                                    "
                                     @count-change="onWorkshopCountChange"
                                 />
                             </CompactCard>
@@ -973,7 +1150,9 @@ const formTitle = computed(() => {
                                         <LazyFormItemMultiSelect
                                             id="speakers"
                                             v-model="speakers"
-                                            :placeholder="t('action.select') + ' ' + t('academy.speakers')"
+                                            :placeholder="
+                                                t('action.select') + ' ' + t('academy.speakers')
+                                            "
                                             class="col-span-12"
                                             :errors="errors.speakers ? [errors.speakers] : []"
                                             v-bind="speakersAttrs"
@@ -993,7 +1172,15 @@ const formTitle = computed(() => {
                             >
                                 <EventQuestions
                                     v-model="questions"
-                                    :errors="errors.questions ? { questions: Array.isArray(errors.questions) ? errors.questions : [errors.questions] } : {}"
+                                    :errors="
+                                        errors.questions
+                                            ? {
+                                                questions: Array.isArray(errors.questions)
+                                                    ? errors.questions
+                                                    : [errors.questions],
+                                            }
+                                            : {}
+                                    "
                                 />
                             </CompactCard>
 
@@ -1011,14 +1198,19 @@ const formTitle = computed(() => {
                                         :placeholder="t('event.topic_placeholder') || 'Enter topic'"
                                         class="col-span-12"
                                         :errors="errors.topics ? [errors.topics] : []"
-                                        :add-button-text="t('action.add') + ' ' + (t('event.topic') || 'Topic')"
+                                        :add-button-text="
+                                            t('action.add') + ' ' + (t('event.topic') || 'Topic')
+                                        "
                                         item-id-prefix="topic-cert"
                                     />
                                     <FormItemTextarea
                                         id="certNote"
                                         v-model="certNote"
                                         :title="t('event.cert_note') || 'Certificate Note'"
-                                        :placeholder="t('event.cert_note_description') || 'This content will be shown only in Certificate generation process'"
+                                        :placeholder="
+                                            t('event.cert_note_description')
+                                                || 'This content will be shown only in Certificate generation process'
+                                        "
                                         class="col-span-12"
                                         :errors="errors.certNote ? [errors.certNote] : []"
                                         v-bind="certNoteAttrs"

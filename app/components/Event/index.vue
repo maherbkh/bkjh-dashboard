@@ -161,7 +161,7 @@ const handleSubmitCertificateGeneration = async () => {
 
     certificateStatus.value = 'pending';
     try {
-        // Format expireAt: convert to ISO string if has value, otherwise null
+    // Format expireAt: convert to ISO string if has value, otherwise null
         const expireAtValue = expireAt.value
             ? new Date(expireAt.value).toISOString()
             : null;
@@ -203,7 +203,7 @@ const handleSubmitCertificateGeneration = async () => {
         );
     }
     finally {
-        // Reset status after a delay
+    // Reset status after a delay
         setTimeout(() => {
             certificateStatus.value = 'idle';
         }, 1000);
@@ -393,7 +393,12 @@ const handleSubmitCertificateGeneration = async () => {
                         <EventBox
                             :title="$t('event.pending_attendees')"
                             icon="solar:users-group-two-rounded-linear"
-                            :value="Number((event.registrationsCount as number) - (event.approvedRegistrationsCount as number))"
+                            :value="
+                                Number(
+                                    (event.registrationsCount as number)
+                                        - (event.approvedRegistrationsCount as number),
+                                )
+                            "
                         />
                         <EventBox
                             :title="$t('event.event_days')"
@@ -469,20 +474,35 @@ const handleSubmitCertificateGeneration = async () => {
                         </CardHeader>
                         <CardContent class="flex flex-col divide-y divide-dashed">
                             <AppListItem
-                                :title="$t('academy.type')"
-                                :value="event.type"
+                                :title="$t('event.type')"
+                                :value="
+                                    event.type
+                                        ? $t('academy.type.' + event.type.toLowerCase())
+                                        : ''
+                                "
                             />
                             <AppListItem
                                 :title="$t('category.singular')"
-                                :value="event.categories && event.categories.length > 0
-                                    ? event.categories.map((cat: any) => cat.eventCategory?.name || cat.name).join(', ')
-                                    : (event.eventCategory?.name || $t('common.not_assigned'))"
+                                :value="
+                                    event.categories && event.categories.length > 0
+                                        ? event.categories
+                                            .map((cat: any) => cat.eventCategory?.name || cat.name)
+                                            .join(', ')
+                                        : event.eventCategory?.name || $t('common.not_assigned')
+                                "
                             />
                             <AppListItem
                                 :title="$t('target.singular')"
-                                :value="event.targets && event.targets.length > 0
-                                    ? event.targets.map((target: any) => target.eventTarget?.name || target.name).join(', ')
-                                    : (event.eventTarget?.name || $t('common.not_assigned'))"
+                                :value="
+                                    event.targets && event.targets.length > 0
+                                        ? event.targets
+                                            .map(
+                                                (target: any) =>
+                                                    target.eventTarget?.name || target.name,
+                                            )
+                                            .join(', ')
+                                        : event.eventTarget?.name || $t('common.not_assigned')
+                                "
                             />
 
                             <AppListItem
@@ -498,7 +518,14 @@ const handleSubmitCertificateGeneration = async () => {
 
                             <AppListItem
                                 :title="$t('academy.capacity')"
-                                :value="event.isEventCollection ? event.workshops?.reduce((acc, workshop) => acc + workshop.maxCapacity, 0) : event.maxCapacity"
+                                :value="
+                                    event.isEventCollection
+                                        ? event.workshops?.reduce(
+                                            (acc, workshop) => acc + workshop.maxCapacity,
+                                            0,
+                                        )
+                                        : event.maxCapacity
+                                "
                             />
 
                             <div
@@ -667,10 +694,10 @@ const handleSubmitCertificateGeneration = async () => {
             <DialogContent class="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>
-                        {{ $t('event.generate_certificates_dialog_title') }}
+                        {{ $t("event.generate_certificates_dialog_title") }}
                     </DialogTitle>
                     <DialogDescription>
-                        {{ $t('event.generate_certificates_dialog_description') }}
+                        {{ $t("event.generate_certificates_dialog_description") }}
                     </DialogDescription>
                 </DialogHeader>
                 <div class="grid gap-4 py-4">
@@ -682,7 +709,9 @@ const handleSubmitCertificateGeneration = async () => {
                         :required="false"
                         format="yyyy-MM-dd"
                         name="expireAt"
-                        @update:model-value="(val: string | Date | undefined) => expireAt = val || undefined"
+                        @update:model-value="
+                            (val: string | Date | undefined) => (expireAt = val || undefined)
+                        "
                     />
                 </div>
                 <DialogFooter>
@@ -693,7 +722,7 @@ const handleSubmitCertificateGeneration = async () => {
                             expireAt = undefined;
                         "
                     >
-                        {{ $t('action.cancel') }}
+                        {{ $t("action.cancel") }}
                     </Button>
                     <Button
                         :disabled="certificateStatus === 'pending'"
@@ -710,7 +739,7 @@ const handleSubmitCertificateGeneration = async () => {
                                 certificateStatus === 'pending' ? 'animate-spin' : '',
                             ]"
                         />
-                        {{ $t('event.generate_certificates') }}
+                        {{ $t("event.generate_certificates") }}
                     </Button>
                 </DialogFooter>
             </DialogContent>

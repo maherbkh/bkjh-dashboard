@@ -11,7 +11,12 @@ const props = withDefaults(
     defineProps<{
         eventId: string;
         /** When adding a new workshop, pre-fill schedules with this (from event step 3). Ignored when editing. */
-        eventSchedulesForNewWorkshop?: Array<{ date: string; startTime: string; endTime: string; note?: string }>;
+        eventSchedulesForNewWorkshop?: Array<{
+            date: string;
+            startTime: string;
+            endTime: string;
+            note?: string;
+        }>;
         /** When false, single-workshop state is shown as a warning (not blocking); when true, as error. */
         eventIsActive?: boolean;
     }>(),
@@ -37,7 +42,8 @@ async function fetchWorkshops() {
             { server: false },
         );
         if (error.value) {
-            listError.value = (error.value as any)?.message || t('global.messages.error');
+            listError.value
+                = (error.value as any)?.message || t('global.messages.error');
             workshops.value = [];
         }
         else {
@@ -52,7 +58,10 @@ async function fetchWorkshops() {
 }
 
 onMounted(() => fetchWorkshops());
-watch(() => props.eventId, () => fetchWorkshops());
+watch(
+    () => props.eventId,
+    () => fetchWorkshops(),
+);
 
 // Form state: null = closed, 'add' = adding new, string = editing workshop id
 const formMode = ref<null | 'add' | string>(null);
@@ -68,7 +77,9 @@ const defaultForm = (): CreateWorkshopForm => ({
     position: workshops.value.length,
     room: undefined,
     location: undefined,
-    schedules: (props.eventSchedulesForNewWorkshop && props.eventSchedulesForNewWorkshop.length > 0)
+    schedules:
+    props.eventSchedulesForNewWorkshop
+    && props.eventSchedulesForNewWorkshop.length > 0
         ? props.eventSchedulesForNewWorkshop.map(s => ({
                 date: s.date || '',
                 startTime: s.startTime || '',
@@ -83,7 +94,10 @@ const form = ref<CreateWorkshopForm>(defaultForm());
 const formValidationErrors = ref<Record<string, string>>({});
 
 // Speakers for multi-select
-const { data: speakersListData } = await useApiFetch<Speaker[]>('/academy/speakers/active', { server: false });
+const { data: speakersListData } = await useApiFetch<Speaker[]>(
+    '/academy/speakers/active',
+    { server: false },
+);
 const speakersList = computed<Speaker[]>(() => {
     const raw = speakersListData.value as { data?: Speaker[] } | null;
     return raw?.data ?? [];
@@ -107,7 +121,8 @@ function openEdit(workshop: Workshop) {
         room: workshop.room ?? undefined,
         location: workshop.location ?? undefined,
         schedules: (workshop.schedules || []).map((s) => {
-            const dateStr = typeof s.date === 'string' ? (s.date.split('T')[0] ?? '') : '';
+            const dateStr
+                = typeof s.date === 'string' ? (s.date.split('T')[0] ?? '') : '';
             return {
                 id: s.id,
                 date: dateStr,
@@ -116,7 +131,9 @@ function openEdit(workshop: Workshop) {
                 note: s.note ?? undefined,
             };
         }),
-        speakerIds: (workshop.speakers || []).map(sp => sp.speaker?.id).filter(Boolean) as string[],
+        speakerIds: (workshop.speakers || [])
+            .map(sp => sp.speaker?.id)
+            .filter(Boolean) as string[],
     };
     formMode.value = workshop.id;
     formError.value = null;
@@ -131,7 +148,10 @@ function closeForm() {
 
 // Workshop schedule form helpers
 function addSchedule() {
-    form.value.schedules = [...(form.value.schedules || []), { date: '', startTime: '', endTime: '', note: undefined }];
+    form.value.schedules = [
+        ...(form.value.schedules || []),
+        { date: '', startTime: '', endTime: '', note: undefined },
+    ];
 }
 
 function removeSchedule(index: number) {
@@ -153,39 +173,51 @@ async function submitForm() {
     if (!parsed.success) {
         const issues: Record<string, string> = {};
         parsed.error.issues.forEach((issue) => {
-            const path = (issue.path && issue.path[0] !== undefined) ? String(issue.path[0]) : '_';
+            const path
+                = issue.path && issue.path[0] !== undefined ? String(issue.path[0]) : '_';
             if (!issues[path]) issues[path] = issue.message;
         });
         formValidationErrors.value = issues;
-        const firstMessage = Object.values(issues)[0] || t('global.messages.validation_error');
+        const firstMessage
+            = Object.values(issues)[0] || t('global.messages.validation_error');
         toast.error(firstMessage);
         return;
     }
     const payload = parsed.data;
-    const validSchedules = (payload.schedules || []).filter(
-        s => s.date && s.startTime && s.endTime,
-    ).map(({ id: _id, ...s }) => s);
+    const validSchedules = (payload.schedules || [])
+        .filter(s => s.date && s.startTime && s.endTime)
+        .map(({ id: _id, ...s }) => s);
     const body = {
         title: payload.title,
         maxCapacity: payload.maxCapacity,
-        ...(payload.shortDescription != null && { shortDescription: payload.shortDescription }),
+        ...(payload.shortDescription != null && {
+            shortDescription: payload.shortDescription,
+        }),
         ...(payload.certNote != null && { certNote: payload.certNote }),
-        ...(payload.topics != null && payload.topics.length > 0 && { topics: payload.topics }),
+        ...(payload.topics != null
+            && payload.topics.length > 0 && { topics: payload.topics }),
         position: payload.position ?? 0,
         ...(payload.room != null && { room: payload.room }),
         ...(payload.location != null && { location: payload.location }),
         ...(validSchedules.length > 0 && { schedules: validSchedules }),
-        ...(payload.speakerIds != null && payload.speakerIds.length > 0 && { speakerIds: payload.speakerIds }),
+        ...(payload.speakerIds != null
+            && payload.speakerIds.length > 0 && { speakerIds: payload.speakerIds }),
     };
     formSaving.value = true;
     try {
         if (formMode.value === 'add') {
-            const { error } = await useApiFetch(`/academy/events/${props.eventId}/workshops`, {
-                method: 'POST',
-                body,
-            });
+            const { error } = await useApiFetch(
+                `/academy/events/${props.eventId}/workshops`,
+                {
+                    method: 'POST',
+                    body,
+                },
+            );
             if (error.value) {
-                const errorMessage = (error.value as any)?.data?.message || (error.value as any)?.message || t('global.messages.error');
+                const errorMessage
+                    = (error.value as any)?.data?.message
+                        || (error.value as any)?.message
+                        || t('global.messages.error');
                 formError.value = errorMessage;
                 toast.error(errorMessage);
                 return;
@@ -198,7 +230,10 @@ async function submitForm() {
                 { method: 'PATCH', body },
             );
             if (error.value) {
-                const errorMessage = (error.value as any)?.data?.message || (error.value as any)?.message || t('global.messages.error');
+                const errorMessage
+                    = (error.value as any)?.data?.message
+                        || (error.value as any)?.message
+                        || t('global.messages.error');
                 formError.value = errorMessage;
                 toast.error(errorMessage);
                 return;
@@ -219,7 +254,10 @@ async function confirmDelete(workshop: Workshop) {
         description: workshop.title,
     });
     if (!confirmed || !props.eventId) return;
-    const { error } = await useApiFetch(`/academy/events/${props.eventId}/workshops/${workshop.id}`, { method: 'DELETE' });
+    const { error } = await useApiFetch(
+        `/academy/events/${props.eventId}/workshops/${workshop.id}`,
+        { method: 'DELETE' },
+    );
     if (error.value) return;
     await fetchWorkshops();
 }
@@ -246,12 +284,12 @@ const workshopCountValid = computed(() => {
                 name="solar:refresh-outline"
                 class="size-5 animate-spin"
             />
-            {{ t('common.loading') }}
+            {{ t("common.loading") }}
         </div>
         <template v-else>
             <div class="flex items-center justify-between gap-2">
                 <p class="text-sm text-muted-foreground">
-                    {{ workshops.length }} {{ t('event.workshops.title').toLowerCase() }}
+                    {{ workshops.length }} {{ t("event.workshops.title").toLowerCase() }}
                 </p>
                 <Button
                     type="button"
@@ -263,7 +301,7 @@ const workshopCountValid = computed(() => {
                         name="solar:add-circle-outline"
                         class="mr-2 size-4"
                     />
-                    {{ t('event.workshops.add_workshop') }}
+                    {{ t("event.workshops.add_workshop") }}
                 </Button>
             </div>
 
@@ -278,12 +316,13 @@ const workshopCountValid = computed(() => {
                 >
                     <div>
                         <span class="font-medium">{{ w.title }}</span>
-                        <span class="ml-2 text-sm text-muted-foreground">({{ w.maxCapacity }} {{ t('event.max_capacity') }})</span>
+                        <span class="ml-2 text-sm text-muted-foreground">({{ w.maxCapacity }} {{ t("event.max_capacity") }})</span>
                         <span
                             v-if="w.availableSpots != null"
                             class="ml-2 text-xs text-muted-foreground"
                         >
-                            {{ t('event.workshops.title') }}: {{ w.availableSpots }} free
+                            {{ t("event.workshops.title") }}: {{ w.availableSpots }}
+                            {{ t("event.workshops.free_spots") }}
                         </span>
                     </div>
                     <div class="flex gap-2">
@@ -293,7 +332,7 @@ const workshopCountValid = computed(() => {
                             size="sm"
                             @click="openEdit(w)"
                         >
-                            {{ t('action.edit') }}
+                            {{ t("action.edit") }}
                         </Button>
                         <Button
                             type="button"
@@ -301,7 +340,7 @@ const workshopCountValid = computed(() => {
                             size="sm"
                             @click="confirmDelete(w)"
                         >
-                            {{ t('action.delete') }}
+                            {{ t("action.delete") }}
                         </Button>
                     </div>
                 </li>
@@ -311,7 +350,8 @@ const workshopCountValid = computed(() => {
                 v-else
                 class="text-sm text-muted-foreground"
             >
-                {{ t('event.workshops.empty_title') }} {{ t('event.workshops.empty_description') }}
+                {{ t("event.workshops.empty_title") }}
+                {{ t("event.workshops.empty_description") }}
             </p>
 
             <!-- When event is active: require ≥2 workshops (block update). When inactive: show warning for 1 workshop but allow update. -->
@@ -319,13 +359,17 @@ const workshopCountValid = computed(() => {
                 v-if="eventIsActive && workshops.length < 2"
                 class="text-sm text-destructive"
             >
-                {{ workshops.length === 1 ? t('event.workshops.validation_one_workshop') : t('event.workshops.validation_active_need_two') }}
+                {{
+                    workshops.length === 1
+                        ? t("event.workshops.validation_one_workshop")
+                        : t("event.workshops.validation_active_need_two")
+                }}
             </p>
             <p
                 v-else-if="!eventIsActive && workshops.length === 1"
                 class="text-sm text-amber-600 dark:text-amber-500"
             >
-                {{ t('event.workshops.validation_one_workshop') }}
+                {{ t("event.workshops.validation_one_workshop") }}
             </p>
 
             <!-- Add / Edit form (inline) -->
@@ -334,7 +378,11 @@ const workshopCountValid = computed(() => {
                 class="rounded-lg border bg-muted/30 p-4 space-y-4"
             >
                 <h4 class="font-medium">
-                    {{ formMode === 'add' ? t('event.workshops.add_workshop') : t('event.workshops.edit_workshop') }}
+                    {{
+                        formMode === "add"
+                            ? t("event.workshops.add_workshop")
+                            : t("event.workshops.edit_workshop")
+                    }}
                 </h4>
                 <div
                     v-if="formError"
@@ -348,7 +396,9 @@ const workshopCountValid = computed(() => {
                         :title="t('common.title')"
                         :placeholder="t('common.title')"
                         class="lg:col-span-9 col-span-12"
-                        :errors="formValidationErrors.title ? [formValidationErrors.title] : []"
+                        :errors="
+                            formValidationErrors.title ? [formValidationErrors.title] : []
+                        "
                         required
                     />
                     <FormItemInput
@@ -358,7 +408,11 @@ const workshopCountValid = computed(() => {
                         min="1"
                         max="10000"
                         class="col-span-12 lg:col-span-3"
-                        :errors="formValidationErrors.maxCapacity ? [formValidationErrors.maxCapacity] : []"
+                        :errors="
+                            formValidationErrors.maxCapacity
+                                ? [formValidationErrors.maxCapacity]
+                                : []
+                        "
                         required
                         @update:model-value="(v) => (form.maxCapacity = Number(v) || 0)"
                     />
@@ -366,8 +420,14 @@ const workshopCountValid = computed(() => {
                         :model-value="form.shortDescription ?? ''"
                         :title="t('common.short_description')"
                         class="col-span-12"
-                        :errors="formValidationErrors.shortDescription ? [formValidationErrors.shortDescription] : []"
-                        @update:model-value="(v) => (form.shortDescription = v ?? undefined)"
+                        :errors="
+                            formValidationErrors.shortDescription
+                                ? [formValidationErrors.shortDescription]
+                                : []
+                        "
+                        @update:model-value="
+                            (v) => (form.shortDescription = v ?? undefined)
+                        "
                     />
                     <FormItemInput
                         :model-value="form.room ?? ''"
@@ -385,7 +445,11 @@ const workshopCountValid = computed(() => {
                         :model-value="form.certNote ?? ''"
                         :title="t('event.cert_note')"
                         class="col-span-12"
-                        :errors="formValidationErrors.certNote ? [formValidationErrors.certNote] : []"
+                        :errors="
+                            formValidationErrors.certNote
+                                ? [formValidationErrors.certNote]
+                                : []
+                        "
                         @update:model-value="(v) => (form.certNote = v ?? undefined)"
                     />
                     <FormItemArrayInput
@@ -393,14 +457,18 @@ const workshopCountValid = computed(() => {
                         :title="t('event.topics')"
                         :placeholder="t('event.topic_placeholder') || 'Topic'"
                         class="col-span-12"
-                        :add-button-text="t('action.add') + ' ' + (t('event.topic') || 'Topic')"
+                        :add-button-text="
+                            t('action.add') + ' ' + (t('event.topic') || 'Topic')
+                        "
                         item-id-prefix="workshop-topic"
                     />
                     <div class="col-span-12">
-                        <label class="block text-sm font-medium mb-2">{{ t('event.schedules') }}</label>
+                        <label class="block text-sm font-medium mb-2">{{
+                            t("event.schedules")
+                        }}</label>
                         <div class="space-y-3">
                             <div
-                                v-for="(schedule, idx) in (form.schedules || [])"
+                                v-for="(schedule, idx) in form.schedules || []"
                                 :key="idx"
                                 class="grid grid-cols-12 gap-2 items-start rounded border p-2 bg-background"
                             >
@@ -410,7 +478,9 @@ const workshopCountValid = computed(() => {
                                     format="yyyy-MM-dd"
                                     :time-picker="false"
                                     class="col-span-12 lg:col-span-3"
-                                    @update:model-value="(v: string | number) => (schedule.date = String(v))"
+                                    @update:model-value="
+                                        (v: string | number) => (schedule.date = String(v))
+                                    "
                                 />
                                 <FormItemDatePicker
                                     :model-value="schedule.startTime"
@@ -418,7 +488,9 @@ const workshopCountValid = computed(() => {
                                     :label="t('event.start_time')"
                                     format="HH:mm"
                                     class="col-span-12 lg:col-span-3"
-                                    @update:model-value="(v: string | number) => (schedule.startTime = String(v))"
+                                    @update:model-value="
+                                        (v: string | number) => (schedule.startTime = String(v))
+                                    "
                                 />
                                 <FormItemDatePicker
                                     :model-value="schedule.endTime"
@@ -426,7 +498,9 @@ const workshopCountValid = computed(() => {
                                     :label="t('event.end_time')"
                                     format="HH:mm"
                                     class="col-span-12 lg:col-span-3"
-                                    @update:model-value="(v: string | number) => (schedule.endTime = String(v))"
+                                    @update:model-value="
+                                        (v: string | number) => (schedule.endTime = String(v))
+                                    "
                                 />
                                 <FormItemInput
                                     :model-value="schedule.note ?? ''"
@@ -458,7 +532,7 @@ const workshopCountValid = computed(() => {
                                     name="solar:add-circle-outline"
                                     class="mr-2 size-4"
                                 />
-                                {{ t('action.add') }} {{ t('event.schedule') }}
+                                {{ t("action.add") }} {{ t("event.schedule") }}
                             </Button>
                         </div>
                     </div>
@@ -484,14 +558,14 @@ const workshopCountValid = computed(() => {
                             name="solar:refresh-outline"
                             class="mr-2 size-4 animate-spin"
                         />
-                        {{ formMode === 'add' ? t('action.save') : t('action.update') }}
+                        {{ formMode === "add" ? t("action.save") : t("action.update") }}
                     </Button>
                     <Button
                         type="button"
                         variant="outline"
                         @click="closeForm"
                     >
-                        {{ t('action.cancel') }}
+                        {{ t("action.cancel") }}
                     </Button>
                 </div>
             </div>

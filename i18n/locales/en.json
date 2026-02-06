@@ -517,7 +517,8 @@
       "validation_active_need_two": "Active events must have at least two workshops. Add workshops or set the event to inactive.",
       "max_capacity_from_workshops": "Total capacity is calculated from workshops.",
       "show_warning_no_workshops": "This event is set up to include several workshops (sessions), but no workshops have been added yet. To complete the setup, open Edit and add at least two workshops.",
-      "show_warning_few_workshops": "This event is set up to include several workshops (sessions), but only one is added so far. Please add at least one more workshop in Edit so that participants can see and book the full programme."
+      "show_warning_few_workshops": "This event is set up to include several workshops (sessions), but only one is added so far. Please add at least one more workshop in Edit so that participants can see and book the full programme.",
+      "free_spots": "free"
     },
     "questions": {
       "empty_title": "No questions yet",
