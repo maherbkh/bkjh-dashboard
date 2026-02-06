@@ -210,7 +210,7 @@ const handleSubmitCertificateGeneration = async () => {
             >
                 <Icon
                     name="solar:ticket-cross-outline"
-                    class="!size-10 text-muted-foreground"
+                    class="size-10! text-muted-foreground"
                 />
             </div>
             <h2 class="text-2xl font-semibold text-foreground mb-2">
@@ -257,7 +257,7 @@ const handleSubmitCertificateGeneration = async () => {
                 <div class="flex items-start gap-4">
                     <Icon
                         name="solar:calendar-line-duotone"
-                        class="!size-5 shrink-0 opacity-75 mt-1"
+                        class="size-5! shrink-0 opacity-75 mt-1"
                     />
                     <div>
                         <div class="text-lg font-bold flex items-center gap-4">
@@ -326,7 +326,7 @@ const handleSubmitCertificateGeneration = async () => {
                                     : 'solar:diploma-outline'
                             "
                             :class="[
-                                '!size-4.5',
+                                'size-4.5!',
                                 certificateStatus === 'pending' ? 'animate-spin' : '',
                             ]"
                         />
@@ -344,7 +344,7 @@ const handleSubmitCertificateGeneration = async () => {
                                     ? 'solar:loading-bold'
                                     : 'solar:round-arrow-down-line-duotone'
                             "
-                            :class="['!size-4.5', isExporting ? 'animate-spin' : '']"
+                            :class="['size-4.5!', isExporting ? 'animate-spin' : '']"
                         />
                         {{ $t("event.download_attendees_list") }}
                     </Button>
@@ -383,7 +383,7 @@ const handleSubmitCertificateGeneration = async () => {
                             <CardTitle class="flex items-center gap-2">
                                 <Icon
                                     name="solar:clipboard-text-broken"
-                                    class="!size-5 opacity-75 shrink-0"
+                                    class="size-5! opacity-75 shrink-0"
                                 />
                                 {{ $t("global.short_description") }}
                             </CardTitle>
@@ -399,7 +399,7 @@ const handleSubmitCertificateGeneration = async () => {
                             <CardTitle class="flex items-center gap-2">
                                 <Icon
                                     name="solar:document-text-linear"
-                                    class="!size-5 opacity-75 shrink-0"
+                                    class="size-5! opacity-75 shrink-0"
                                 />
                                 {{ $t("global.description") }}
                             </CardTitle>
@@ -416,7 +416,7 @@ const handleSubmitCertificateGeneration = async () => {
                             <CardTitle class="flex items-center gap-2">
                                 <Icon
                                     name="solar:users-group-two-rounded-line-duotone"
-                                    class="!size-5 opacity-75 shrink-0"
+                                    class="size-5! opacity-75 shrink-0"
                                 />
                                 {{ $t("attendee.plural") }}
                             </CardTitle>
@@ -439,7 +439,7 @@ const handleSubmitCertificateGeneration = async () => {
                             <CardTitle>
                                 <Icon
                                     name="solar:documents-minimalistic-outline"
-                                    class="!size-5 opacity-75 shrink-0"
+                                    class="size-5! opacity-75 shrink-0"
                                 />
                                 {{ $t("global.information") }}
                             </CardTitle>
@@ -546,7 +546,7 @@ const handleSubmitCertificateGeneration = async () => {
                             <CardTitle>
                                 <Icon
                                     name="solar:user-speak-rounded-line-duotone"
-                                    class="!size-5 opacity-75 shrink-0"
+                                    class="size-5! opacity-75 shrink-0"
                                 />
                                 {{ $t("academy.speakers") }}
                             </CardTitle>
@@ -586,7 +586,7 @@ const handleSubmitCertificateGeneration = async () => {
                             <CardTitle>
                                 <Icon
                                     name="solar:calendar-line-duotone"
-                                    class="!size-5 opacity-75 shrink-0"
+                                    class="size-5! opacity-75 shrink-0"
                                 />
                                 {{ $t("academy.schedules") }}
                             </CardTitle>
@@ -606,7 +606,7 @@ const handleSubmitCertificateGeneration = async () => {
                                             <div class="truncate opacity-75 flex items-center">
                                                 <Icon
                                                     name="solar:watch-square-line-duotone"
-                                                    class="!size-4 shrink-0 mr-1.5"
+                                                    class="size-4! shrink-0 mr-1.5"
                                                 />
                                                 {{ day.startTime }}
                                             </div>
@@ -617,7 +617,7 @@ const handleSubmitCertificateGeneration = async () => {
                                             <div class="truncate opacity-75 flex items-center">
                                                 <Icon
                                                     name="solar:watch-square-line-duotone"
-                                                    class="!size-4 shrink-0 mr-1.5"
+                                                    class="size-4! shrink-0 mr-1.5"
                                                 />
                                                 {{ day.endTime }}
                                             </div>
@@ -683,7 +683,7 @@ const handleSubmitCertificateGeneration = async () => {
                                     : 'solar:diploma-outline'
                             "
                             :class="[
-                                '!size-4 mr-2',
+                                'size-4! mr-2',
                                 certificateStatus === 'pending' ? 'animate-spin' : '',
                             ]"
                         />
