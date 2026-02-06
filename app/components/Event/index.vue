@@ -132,6 +132,19 @@ const getSpeakerAvatarSrc = (speaker: any) => {
     return null;
 };
 
+// Warning bar: inactive + event collection with < 2 workshops
+const showCollectionWorkshopWarning = computed(() => {
+    if (props.event.isActive) return false;
+    if (!props.event.isEventCollection) return false;
+    const count = props.event.workshops?.length ?? 0;
+    return count < 2;
+});
+const collectionWorkshopWarningMessage = computed(() => {
+    const count = props.event.workshops?.length ?? 0;
+    if (count === 0) return t('event.workshops.show_warning_no_workshops');
+    return t('event.workshops.show_warning_few_workshops', { count });
+});
+
 // Generate certificates modal state
 const isGenerateCertificateDialogOpen = ref(false);
 const expireAt = ref<string | Date | undefined>(undefined);
@@ -350,7 +363,17 @@ const handleSubmitCertificateGeneration = async () => {
                     </Button>
                 </div>
             </div>
-            <!-- Ticket Details Grid -->
+            <div
+                v-if="showCollectionWorkshopWarning"
+                class="bg-warning/10 px-4 py-2 rounded-md border border-warning/50 text-warning text-sm flex items-start gap-2"
+            >
+                <Icon
+                    name="solar:shield-warning-line-duotone"
+                    class="size-5! shrink-0"
+                />
+                <p>{{ collectionWorkshopWarningMessage }}</p>
+            </div>
+            <!-- Event Details Grid -->
             <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
                 <!-- Main Content -->
                 <div class="xl:col-span-8 space-y-6">
@@ -475,7 +498,7 @@ const handleSubmitCertificateGeneration = async () => {
 
                             <AppListItem
                                 :title="$t('academy.capacity')"
-                                :value="event.maxCapacity"
+                                :value="event.isEventCollection ? event.workshops?.reduce((acc, workshop) => acc + workshop.maxCapacity, 0) : event.maxCapacity"
                             />
 
                             <div

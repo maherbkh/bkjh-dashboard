@@ -515,6 +515,8 @@
       "empty_description": "Fügen Sie mindestens zwei Workshops hinzu oder entfernen Sie alle.",
       "validation_one_workshop": "Fügen Sie mindestens einen weiteren Workshop hinzu oder entfernen Sie diesen. Veranstaltungen müssen entweder keine oder mindestens zwei Workshops haben.",
       "validation_active_need_two": "Aktive Veranstaltungen müssen mindestens zwei Workshops haben. Fügen Sie Workshops hinzu oder setzen Sie die Veranstaltung auf inaktiv.",
+      "show_warning_no_workshops": "Diese Veranstaltung ist für mehrere Workshops (Sessions) angelegt, es wurden aber noch keine hinzugefügt. Öffnen Sie Bearbeiten und fügen Sie mindestens zwei Workshops hinzu, um die Einrichtung abzuschließen.",
+      "show_warning_few_workshops": "Diese Veranstaltung ist für mehrere Workshops angelegt, bisher ist aber nur einer eingetragen. Bitte fügen Sie unter Bearbeiten mindestens einen weiteren Workshop hinzu, damit Teilnehmende das vollständige Programm sehen und buchen können.",
       "max_capacity_from_workshops": "Die Gesamtkapazität wird aus den Workshops berechnet."
     },
     "questions": {
