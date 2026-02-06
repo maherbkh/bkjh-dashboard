@@ -5,7 +5,38 @@ import { toast } from 'vue-sonner';
 import type { EventForm } from '~/composables/eventSchema';
 
 const { t } = useI18n();
-const route = useRoute();// Page configuration
+const route = useRoute();
+const router = useRouter();
+
+// Step slug <-> index for URL sync
+const STEP_SLUG_TO_INDEX: Record<string, number> = {
+    'details': 0,
+    'cover': 1,
+    'participant-info': 2,
+    'date-time': 3,
+    'speakers': 4,
+    'questions': 5,
+    'certificate': 6,
+    'workshops': 4,
+};
+const initialStep = computed(() => {
+    const slug = route.query.step as string | undefined;
+    if (!slug) return 0;
+    const idx = STEP_SLUG_TO_INDEX[slug];
+    return idx !== undefined ? idx : 0;
+});
+
+// When redirected from add (collection event), treat as collection so workshops step and slug work
+const forceEventCollection = computed(() =>
+    route.query.collection === '1' || route.query.collection === 'true',
+);
+
+function syncStepToUrl(stepIndex: number, slug: string) {
+    const next = { path: route.path, query: { ...route.query, step: slug } };
+    router.replace(next);
+}
+
+// Page configuration
 const pageTitle = computed(() => t('action.edit') + ' ' + t('academy.singular'));
 const pageIcon = usePageIcon();
 const pageDescription = computed(() => t('action.edit') + ' ' + t('academy.singular'));
@@ -34,11 +65,18 @@ onMounted(async () => {
     }
     if (data.value) {
         editingEvent.value = (data.value as any).data as EventData;
+        const event = editingEvent.value;
+        if (event?.isEventCollection === true && (!event.workshops || event.workshops.length === 0)) {
+            router.replace({ path: route.path, query: { ...route.query, step: 'workshops', collection: '1' } });
+        }
     }
 });
 
 // Form submission
-const onSubmit = async (values: EventForm) => {
+const onSubmit = async (
+    values: EventForm,
+    options?: { isEventCollection?: boolean; workshopCount?: number },
+) => {
     if (!editingEvent.value) return;
     isSubmitting.value = true;
 
@@ -64,7 +102,14 @@ const onSubmit = async (values: EventForm) => {
 
     if (data.value) {
         toast.success(t('global.messages.success'));
-        await navigateTo(`/events/${route.params.id as string}/show`, { replace: true });
+        const isCol = options?.isEventCollection === true;
+        const count = options?.workshopCount ?? 0;
+        if (isCol && count < 2) {
+            await navigateTo(`/events/${route.params.id as string}/edit?step=workshops&collection=1`, { replace: true });
+        }
+        else {
+            await navigateTo(`/events/${route.params.id as string}/show`, { replace: true });
+        }
     }
 
     isSubmitting.value = false;
@@ -96,8 +141,11 @@ const handleCancel = () => {
         <EventForm
             mode="edit"
             :initial-data="editingEvent"
+            :initial-step="initialStep"
+            :force-event-collection="forceEventCollection"
             :is-submitting="isSubmitting"
             @submit="onSubmit"
+            @step-change="syncStepToUrl"
         />
     </div>
 </template>

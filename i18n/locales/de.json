@@ -502,8 +502,20 @@
         "date_time_management": "Datum und Zeit",
         "speakers": "Referenten",
         "questions": "Fragen",
-        "certificate_content": "Zertifikatsinhalt"
+        "certificate_content": "Zertifikatsinhalt",
+        "workshops": "Workshops"
       }
+    },
+    "is_event_collection": "Veranstaltung ist eine Sammlung (mit Workshops)",
+    "workshops": {
+      "title": "Workshops",
+      "add_workshop": "Workshop hinzufügen",
+      "edit_workshop": "Workshop bearbeiten",
+      "empty_title": "Noch keine Workshops",
+      "empty_description": "Fügen Sie mindestens zwei Workshops hinzu oder entfernen Sie alle.",
+      "validation_one_workshop": "Fügen Sie mindestens einen weiteren Workshop hinzu oder entfernen Sie diesen. Veranstaltungen müssen entweder keine oder mindestens zwei Workshops haben.",
+      "validation_active_need_two": "Aktive Veranstaltungen müssen mindestens zwei Workshops haben. Fügen Sie Workshops hinzu oder setzen Sie die Veranstaltung auf inaktiv.",
+      "max_capacity_from_workshops": "Die Gesamtkapazität wird aus den Workshops berechnet."
     },
     "questions": {
       "empty_title": "Noch keine Fragen",

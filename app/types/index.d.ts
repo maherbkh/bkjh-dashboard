@@ -726,6 +726,40 @@ export interface EventSchedule {
     updatedAt: string;
 }
 
+/** Workshop schedule item (API shape: date, startTime, endTime, note) */
+export interface WorkshopScheduleItem {
+    id?: string;
+    date: string; // YYYY-MM-DD
+    startTime: string; // HH:mm
+    endTime: string; // HH:mm
+    note?: string | null;
+}
+
+export interface WorkshopSpeakerLite {
+    speaker: {
+        id: string;
+        name: string;
+        qualification?: string;
+    };
+}
+
+export interface Workshop {
+    id: string;
+    eventId: string;
+    title: string;
+    shortDescription?: string | null;
+    certNote?: string | null;
+    topics?: string[] | null;
+    maxCapacity: number;
+    position: number;
+    room?: string | null;
+    location?: string | null;
+    schedules?: WorkshopScheduleItem[];
+    speakers?: WorkshopSpeakerLite[];
+    approvedRegistrationsCount?: number;
+    availableSpots?: number;
+}
+
 export interface EventAdminLite {
     id: string;
     firstName: string;
@@ -763,6 +797,7 @@ export type EventData = {
     room?: string | null;
     location?: string | null;
     isActive: boolean;
+    isEventCollection?: boolean;
     forKids?: boolean;
     disableRegistration?: boolean;
     isFull?: boolean;
@@ -798,6 +833,7 @@ export type EventData = {
     admin?: EventAdminLite | null;
     speakers?: EventSpeakerLite[];
     schedules?: EventSchedule[];
+    workshops?: Workshop[];
     questions?: import('~/types/event-question').EventQuestion[];
     registrations?: EventRegistration[];
     registrationsCount?: number;

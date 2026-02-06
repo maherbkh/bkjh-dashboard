@@ -12,6 +12,7 @@ import FormItemTextarea from '~/components/FormItem/Textarea.vue';
 import FormItemArrayInput from '~/components/FormItem/ArrayInput.vue';
 import EventQuestions from '~/components/Event/Question/index.vue';
 import { prepareQuestionsForSubmit } from '~/composables/useEventQuestions';
+import EventWorkshopList from '~/components/Event/WorkshopList.vue';
 
 const { t } = useI18n();
 const runtimeConfig = useRuntimeConfig();
@@ -22,17 +23,24 @@ interface Props {
     initialData?: EventData | null;
     isSubmitting?: boolean;
     showActions?: boolean;
+    /** Initial step index from URL (e.g. from ?step=cover). Clamped to valid range. */
+    initialStep?: number;
+    /** When true (e.g. from ?collection=1 after add), treat as collection so workshops step/slug work even if event has 0 workshops yet. */
+    forceEventCollection?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     initialData: null,
     isSubmitting: false,
     showActions: true,
+    initialStep: undefined,
+    forceEventCollection: false,
 });
 
 // Emits
 const emit = defineEmits<{
-    submit: [values: EventForm];
+    submit: [values: EventForm, options?: { isEventCollection: boolean }];
+    stepChange: [index: number, slug: string];
 }>();
 
 // CRUD
@@ -65,6 +73,45 @@ const [isFull, isFullAttrs] = defineField('isFull');
 const [speakers, speakersAttrs] = defineField('speakers');
 const [schedules] = defineField('schedules');
 const [questions] = defineField('questions');
+
+// Frontend-only: event is a collection (with workshops). Not sent to backend.
+const isEventCollection = ref(false);
+// Workshop count from WorkshopList (for step validation: 0 or ≥2)
+const workshopCount = ref(0);
+
+// Init isEventCollection and workshopCount: add => false; edit => from backend isEventCollection or forceEventCollection or hasWorkshops
+watch([() => props.initialData, () => props.forceEventCollection], ([newData, forceCol]) => {
+    if (props.mode === 'edit' && newData) {
+        const workshops = (newData as any).workshops;
+        const hasWorkshops = Array.isArray(workshops) && workshops.length > 0;
+        const fromBackend = (newData as any).isEventCollection;
+        isEventCollection.value = fromBackend ?? (!!forceCol || hasWorkshops);
+        workshopCount.value = Array.isArray(workshops) ? workshops.length : 0;
+    }
+    else if (props.mode === 'edit' && forceCol) {
+        isEventCollection.value = true;
+        workshopCount.value = 0;
+    }
+    else if (props.mode === 'add' && !newData) {
+        isEventCollection.value = false;
+        workshopCount.value = 0;
+    }
+}, { immediate: true });
+
+// When forKids or disableRegistration is true, force isEventCollection to false
+watch([forKids, disableRegistration], ([fk, dr]) => {
+    if (fk || dr) isEventCollection.value = false;
+});
+
+// When isEventCollection is true, lock maxCapacity to 999 (readonly, sent to backend)
+watch(isEventCollection, (v) => {
+    if (v) maxCapacity.value = 999;
+});
+
+// Add mode + isEventCollection: force isActive to false until user saves and edits (then they can set it true in edit mode)
+watch([() => props.mode, isEventCollection], ([mode, isCol]) => {
+    if (mode === 'add' && isCol) isActive.value = false;
+});
 
 // Cover media field - stored as MediaEntity in component, but form schema expects ID
 const coverMedia = ref<MediaEntity | null>(null);
@@ -311,10 +358,19 @@ const onSubmit = handleSubmit((values) => {
         questions: preparedQuestions, // Include prepared questions
     };
 
-    console.log('Submitting topics:', topicsArray); // Debug log
-    console.log('Submitting questions:', preparedQuestions); // Debug log
+    // When adding a collection event, default isActive to false (inactive until workshops added)
+    if (props.mode === 'add' && isEventCollection.value) {
+        submitValues.isActive = false;
+        submitValues.maxCapacity = 999;
+    }
+    // When isEventCollection (add or edit), always send maxCapacity 999 (backend may replace with sum of workshops)
+    if (isEventCollection.value) {
+        submitValues.maxCapacity = 999;
+    }
 
-    emit('submit', submitValues as EventForm);
+    submitValues.isEventCollection = isEventCollection.value;
+
+    emit('submit', submitValues as EventForm, { isEventCollection: isEventCollection.value, workshopCount: workshopCount.value });
 });
 
 // Schedule management
@@ -335,13 +391,21 @@ const removeSchedule = (index: number) => {
     ];
 };
 
-// Step navigation (0–6)
+// Re-validate schedules when any date/time/note changes so errors clear live
+let schedulesValidateTimeout: ReturnType<typeof setTimeout> | null = null;
+watch(schedules, () => {
+    if (schedulesValidateTimeout) clearTimeout(schedulesValidateTimeout);
+    schedulesValidateTimeout = setTimeout(() => {
+        validateField('schedules');
+        schedulesValidateTimeout = null;
+    }, 150);
+}, { deep: true });
+
+// Step navigation – dynamic based on isEventCollection
 const currentStep = ref(0);
-const TOTAL_STEPS = 7;
 const stepDirection = ref(1); // 1 = forward (next), -1 = backward (prev)
 
-// Fields validated per step (must pass before continuing to next)
-const STEP_FIELDS: (keyof EventForm)[][] = [
+const STEP_FIELDS_NORMAL: (keyof EventForm)[][] = [
     ['title', 'description', 'shortDescription', 'note', 'isActive', 'forKids', 'disableRegistration', 'isFull'],
     ['cover'],
     ['type', 'eventCategoryIds', 'eventTargetIds', 'maxCapacity', 'room', 'location'],
@@ -351,19 +415,116 @@ const STEP_FIELDS: (keyof EventForm)[][] = [
     ['topics', 'certNote'],
 ];
 
-async function goToNextStep() {
-    if (currentStep.value >= TOTAL_STEPS - 1) return;
-    const fields = STEP_FIELDS[currentStep.value];
-    if (fields && fields.length > 0) {
-        if (currentStep.value === 1) {
-            setFieldValue('cover', coverId.value);
-        }
-        for (const name of fields) {
-            const result = await validateField(name as string);
-            if (!result.valid) return;
-        }
+const STEP_FIELDS_COLLECTION: (keyof EventForm)[][] = [
+    ['title', 'description', 'shortDescription', 'note', 'isActive', 'forKids', 'disableRegistration', 'isFull'],
+    ['cover'],
+    ['type', 'eventCategoryIds', 'eventTargetIds', 'maxCapacity', 'room', 'location'],
+    ['schedules'],
+    [], // step 4 = workshops (edit only; validated by count 0 or ≥2)
+];
+
+// Collection + add: 4 steps (no Workshops until event is saved). Collection + edit: 5 steps.
+const STEP_FIELDS_COLLECTION_ADD: (keyof EventForm)[][] = STEP_FIELDS_COLLECTION.slice(0, 4);
+
+const stepLabels = computed(() => {
+    if (isEventCollection.value && props.mode === 'edit') {
+        return [
+            { id: 0, label: t('event.form.steps.details') },
+            { id: 1, label: t('event.form.steps.cover_image') },
+            { id: 2, label: t('event.form.steps.participant_info') },
+            { id: 3, label: t('event.form.steps.date_time_management') },
+            { id: 4, label: t('event.form.steps.workshops') },
+        ];
     }
+    if (isEventCollection.value && props.mode === 'add') {
+        return [
+            { id: 0, label: t('event.form.steps.details') },
+            { id: 1, label: t('event.form.steps.cover_image') },
+            { id: 2, label: t('event.form.steps.participant_info') },
+            { id: 3, label: t('event.form.steps.date_time_management') },
+        ];
+    }
+    return [
+        { id: 0, label: t('event.form.steps.details') },
+        { id: 1, label: t('event.form.steps.cover_image') },
+        { id: 2, label: t('event.form.steps.participant_info') },
+        { id: 3, label: t('event.form.steps.date_time_management') },
+        { id: 4, label: t('event.form.steps.speakers') },
+        { id: 5, label: t('event.form.steps.questions') },
+        { id: 6, label: t('event.form.steps.certificate_content') },
+    ];
+});
+
+const TOTAL_STEPS = computed(() => stepLabels.value.length);
+
+const STEP_FIELDS = computed(() => {
+    if (isEventCollection.value && props.mode === 'edit') return STEP_FIELDS_COLLECTION;
+    if (isEventCollection.value && props.mode === 'add') return STEP_FIELDS_COLLECTION_ADD;
+    return STEP_FIELDS_NORMAL;
+});
+
+// Step slugs for URL sync (same order as stepLabels)
+const stepSlugs = computed(() => {
+    if (isEventCollection.value && props.mode === 'edit') {
+        return ['details', 'cover', 'participant-info', 'date-time', 'workshops'];
+    }
+    if (isEventCollection.value && props.mode === 'add') {
+        return ['details', 'cover', 'participant-info', 'date-time'];
+    }
+    return ['details', 'cover', 'participant-info', 'date-time', 'speakers', 'questions', 'certificate'];
+});
+
+// Sync initialStep from parent (URL) and clamp when TOTAL_STEPS changes
+watch(() => props.initialStep, (v) => {
+    if (v !== undefined && v >= 0) {
+        const max = TOTAL_STEPS.value - 1;
+        currentStep.value = Math.min(Math.max(0, v), max);
+    }
+}, { immediate: true });
+
+watch(TOTAL_STEPS, (total) => {
+    if (currentStep.value >= total) currentStep.value = Math.max(0, total - 1);
+});
+
+// Emit stepChange when currentStep changes so parent can sync URL
+watch(currentStep, (index) => {
+    const slug = stepSlugs.value[index];
+    if (slug) emit('stepChange', index, slug);
+}, { immediate: true });
+
+/** Validate a single step's fields. Returns true if valid. */
+async function validateStep(stepIndex: number): Promise<boolean> {
+    const fields = STEP_FIELDS.value[stepIndex];
+    if (!fields || fields.length === 0) return true;
+    if (stepIndex === 1) {
+        setFieldValue('cover', coverId.value);
+    }
+    for (const name of fields) {
+        const result = await validateField(name as string);
+        if (!result.valid) return false;
+    }
+    return true;
+}
+
+async function goToNextStep() {
+    if (currentStep.value >= TOTAL_STEPS.value - 1) return;
+    const ok = await validateStep(currentStep.value);
+    if (!ok) return;
     currentStep.value++;
+}
+
+/** Called when user clicks a stepper circle. Validate steps when moving forward; allow going back without validation. */
+async function onStepperStepClick(requestedIndex: number) {
+    if (requestedIndex <= currentStep.value) {
+        currentStep.value = requestedIndex;
+        return;
+    }
+    // Moving forward: validate every step from current up to (but not including) requested
+    for (let i = currentStep.value; i < requestedIndex; i++) {
+        const ok = await validateStep(i);
+        if (!ok) return; // stay on current step; errors are already set
+    }
+    currentStep.value = requestedIndex;
 }
 
 watch(currentStep, (next, prev) => {
@@ -377,32 +538,35 @@ const slideOffset = computed(() =>
         : { enter: ['-10%', 0] as [string | number, number], leave: ['10%', 0] as [string | number, number] },
 );
 
-const stepLabels = computed(() => [
-    { id: 0, label: t('event.form.steps.details') },
-    { id: 1, label: t('event.form.steps.cover_image') },
-    { id: 2, label: t('event.form.steps.participant_info') },
-    { id: 3, label: t('event.form.steps.date_time_management') },
-    { id: 4, label: t('event.form.steps.speakers') },
-    { id: 5, label: t('event.form.steps.questions') },
-    { id: 6, label: t('event.form.steps.certificate_content') },
-]);
+function onWorkshopCountChange(n: number) {
+    workshopCount.value = n;
+}
+
+const workshopCountValid = computed(() => workshopCount.value === 0 || workshopCount.value >= 2);
 
 // Step indices that have validation errors (for stepper error state)
 const stepsWithErrors = computed(() => {
     const indices: number[] = [];
-    STEP_FIELDS.forEach((fields, index) => {
+    const stepFields = STEP_FIELDS.value;
+    stepFields.forEach((fields, index) => {
         const hasError = fields.some(f => errors.value[f]);
         if (hasError) indices.push(index);
     });
+    // When collection and event is active, step 4 is invalid if fewer than 2 workshops (no update allowed)
+    if (isEventCollection.value && isActive.value && workshopCount.value < 2) {
+        if (!indices.includes(4)) indices.push(4);
+    }
     return indices;
 });
 
-const isSaveDisabled = computed(
-    () =>
-        props.isSubmitting
-        || currentStep.value !== TOTAL_STEPS - 1
-        || stepsWithErrors.value.length > 0,
-);
+const isSaveDisabled = computed(() => {
+    if (props.isSubmitting) return true;
+    if (currentStep.value !== TOTAL_STEPS.value - 1) return true;
+    if (stepsWithErrors.value.length > 0) return true;
+    // When event is active and collection, require at least 2 workshops to allow update
+    if (isEventCollection.value && currentStep.value === 4 && isActive.value && workshopCount.value < 2) return true;
+    return false;
+});
 
 // Computed properties
 const submitButtonText = computed(() => {
@@ -417,16 +581,17 @@ const formTitle = computed(() => {
 </script>
 
 <template>
-    <div class="overflow-x-hidden">
-        <div class="xl:col-span-8 space-y-4 min-w-0">
+    <div class="overflow-x-hidden overflow-y-visible">
+        <div class="xl:col-span-8 space-y-4 min-w-0 overflow-y-visible">
             <form
-                class="space-y-6 overflow-x-hidden min-w-0"
+                class="space-y-6 overflow-x-hidden overflow-y-visible min-w-0"
                 @submit.prevent="onSubmit"
             >
                 <EventFormStepper
-                    v-model="currentStep"
+                    :model-value="currentStep"
                     :steps="stepLabels"
                     :steps-with-errors="stepsWithErrors"
+                    @update:model-value="onStepperStepClick"
                 />
 
                 <div
@@ -463,7 +628,7 @@ const formTitle = computed(() => {
                     </div>
                 </div>
 
-                <div class="relative overflow-x-hidden min-w-0">
+                <div class="relative overflow-x-hidden overflow-y-visible min-w-0">
                     <TransitionSlide
                         mode="out-in"
                         :offset="slideOffset"
@@ -482,10 +647,19 @@ const formTitle = computed(() => {
                                         v-model="title"
                                         :title="t('common.title')"
                                         :placeholder="t('common.title')"
-                                        class="col-span-12"
+                                        class="col-span-12 lg:col-span-9"
                                         :errors="errors.title ? [errors.title] : []"
                                         v-bind="titleAttrs"
                                         required
+                                    />
+                                    <FormItemSwitch
+                                        id="isEventCollection"
+                                        v-model="isEventCollection"
+                                        :true-label="t('common.yes')"
+                                        :false-label="t('common.no')"
+                                        :title="t('event.is_event_collection')"
+                                        class="col-span-12 lg:col-span-3"
+                                        :disabled="forKids || disableRegistration"
                                     />
                                     <FormItemSwitch
                                         id="isActive"
@@ -494,6 +668,7 @@ const formTitle = computed(() => {
                                         :false-label="t('common.inactive')"
                                         :title="t('common.active')"
                                         class="col-span-12 lg:col-span-3"
+                                        :disabled="mode === 'add' && isEventCollection"
                                         v-bind="isActiveAttrs"
                                     />
                                     <FormItemSwitch
@@ -647,7 +822,15 @@ const formTitle = computed(() => {
                                         type="number"
                                         min="1"
                                         required
+                                        :readonly="isEventCollection"
+                                        :disabled="isEventCollection"
                                     />
+                                    <p
+                                        v-if="isEventCollection"
+                                        class="col-span-12 text-sm text-muted-foreground"
+                                    >
+                                        {{ t('event.workshops.max_capacity_from_workshops') }}
+                                    </p>
                                     <FormItemInput
                                         id="room"
                                         v-model="room"
@@ -765,8 +948,22 @@ const formTitle = computed(() => {
                                 </div>
                             </CompactCard>
 
-                            <!-- Step 4: Speakers -->
-                            <template v-else-if="currentStep === 4">
+                            <!-- Step 4: Workshops (edit only, when isEventCollection) -->
+                            <CompactCard
+                                v-else-if="currentStep === 4 && isEventCollection && mode === 'edit' && initialData?.id"
+                                icon="solar:widget-5-outline"
+                                :title="t('event.form.steps.workshops')"
+                            >
+                                <EventWorkshopList
+                                    :event-id="initialData!.id"
+                                    :event-is-active="isActive"
+                                    :event-schedules-for-new-workshop="(schedules || []).map(s => ({ date: s.date || '', startTime: s.startTime || '', endTime: s.endTime || '', note: s.note }))"
+                                    @count-change="onWorkshopCountChange"
+                                />
+                            </CompactCard>
+
+                            <!-- Step 4: Speakers (when not collection) -->
+                            <template v-else-if="currentStep === 4 && !isEventCollection">
                                 <CompactCard
                                     v-if="isLoadingSpeakers !== 'pending'"
                                     icon="solar:user-speak-rounded-outline"

@@ -40,7 +40,7 @@ function errorKey(msg: QuestionValidationMessage): string {
 const generalErrors = computed(() => {
     if (!props.errors?.length) return [];
     return props.errors
-        .filter(e => {
+        .filter((e) => {
             const k = errorKey(e);
             return !k.includes('label') && !k.includes('position') && !k.toLowerCase().includes('option') && !k.includes('rating') && !k.includes('config');
         })

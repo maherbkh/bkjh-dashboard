@@ -12,7 +12,7 @@
             <!-- Toolbar -->
             <div
                 v-if="showToolbar && editor"
-                class="border-b border-border bg-muted/30 p-2 flex items-center gap-1.5 flex-wrap"
+                class="border-b border-border bg-muted p-2 flex items-center gap-1.5 flex-wrap"
             >
                 <!-- Text Formatting -->
                 <Button
@@ -384,7 +384,7 @@
             <div class="relative">
                 <editor-content
                     :editor="editor"
-                    class="contentmax-w-none focus:outline-none p-4 min-h-[200px] text-foreground [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-foreground [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-foreground [&_h3]:text-lg [&_h3]:font-medium [&_h3]:text-foreground [&_p]:leading-relaxed [&_p]:text-foreground [&_ul]:list-disc [&_ul]:list-outside [&_ul]:pl-6 [&_ul_li]:pl-2 [&_ol]:list-decimal [&_ol]:list-outside [&_ol]:pl-6 [&_ol_li]:pl-2 [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono [&_code]:bg-muted [&_code]:text-foreground [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:overflow-x-auto [&_pre]:bg-muted [&_pre_code]:bg-transparent [&_pre_code]:p-0"
+                    class="bg-background/90 contentmax-w-none focus:outline-none p-4 min-h-[200px] text-foreground [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-foreground [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-foreground [&_h3]:text-lg [&_h3]:font-medium [&_h3]:text-foreground [&_p]:leading-relaxed [&_p]:text-foreground [&_ul]:list-disc [&_ul]:list-outside [&_ul]:pl-6 [&_ul_li]:pl-2 [&_ol]:list-decimal [&_ol]:list-outside [&_ol]:pl-6 [&_ol_li]:pl-2 [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono [&_code]:bg-muted [&_code]:text-foreground [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:overflow-x-auto [&_pre]:bg-muted [&_pre_code]:bg-transparent [&_pre_code]:p-0"
                     :class="{
                         'border rounded-md': !showToolbar,
                         'border-destructive aria-invalid:border-destructive': !showToolbar && (errors?.length || 0) > 0,

@@ -6,6 +6,30 @@ import type { EventData } from '~/types';
 
 const { t } = useI18n();
 const route = useRoute();
+const router = useRouter();
+
+// Step slug <-> index for URL sync
+const STEP_SLUG_TO_INDEX: Record<string, number> = {
+    'details': 0,
+    'cover': 1,
+    'participant-info': 2,
+    'date-time': 3,
+    'speakers': 4,
+    'questions': 5,
+    'certificate': 6,
+    'workshops': 4,
+};
+const initialStep = computed(() => {
+    const slug = route.query.step as string | undefined;
+    if (!slug) return 0;
+    const idx = STEP_SLUG_TO_INDEX[slug];
+    return idx !== undefined ? idx : 0;
+});
+
+function syncStepToUrl(stepIndex: number, slug: string) {
+    const next = { path: route.path, query: { ...route.query, step: slug } };
+    router.replace(next);
+}
 
 // Page configuration
 const pageTitle = computed(() => t('action.add') + ' ' + t('academy.singular'));
@@ -26,7 +50,6 @@ useSeoMeta({
 
 // State
 const isSubmitting = ref(false);
-const router = useRouter();
 
 // Duplication logic
 const duplicateEventId = computed(() => route.query.duplicate as string);
@@ -60,7 +83,7 @@ watch(duplicateEventId, async (id) => {
 }, { immediate: true });
 
 // Form submission
-const onSubmit = async (values: EventForm) => {
+const onSubmit = async (values: EventForm, options?: { isEventCollection?: boolean }) => {
     isSubmitting.value = true;
 
     // Ensure topics is always an array, never null or undefined
@@ -69,9 +92,7 @@ const onSubmit = async (values: EventForm) => {
         topics: Array.isArray(values.topics) ? values.topics : [],
     };
 
-    console.log('API Payload topics:', payload.topics); // Debug log
-
-    const { data, error } = await useApiFetch('/academy/events', {
+    const { data, error } = await useApiFetch<{ data?: { id: string } }>('/academy/events', {
         method: 'POST',
         body: payload,
     });
@@ -85,7 +106,13 @@ const onSubmit = async (values: EventForm) => {
 
     if (data.value) {
         toast.success(t('global.messages.success'));
-        await navigateTo('/events');
+        const eventId = (data.value as any)?.data?.id;
+        if (options?.isEventCollection && eventId) {
+            await navigateTo(`/events/${eventId}/edit?step=workshops&collection=1`, { replace: true });
+        }
+        else {
+            await navigateTo('/events', { replace: true });
+        }
     }
 
     isSubmitting.value = false;
@@ -116,8 +143,10 @@ const handleCancel = () => {
         <EventForm
             mode="add"
             :initial-data="duplicateEventData"
+            :initial-step="initialStep"
             :is-submitting="isSubmitting"
             @submit="onSubmit"
+            @step-change="syncStepToUrl"
             @cancel="handleCancel"
         />
     </div>

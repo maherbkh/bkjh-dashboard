@@ -502,8 +502,20 @@
         "date_time_management": "Date and Time Management",
         "speakers": "Speakers",
         "questions": "Questions",
-        "certificate_content": "Certificate Content"
+        "certificate_content": "Certificate Content",
+        "workshops": "Workshops"
       }
+    },
+    "is_event_collection": "Event is a collection (with workshops)",
+    "workshops": {
+      "title": "Workshops",
+      "add_workshop": "Add workshop",
+      "edit_workshop": "Edit workshop",
+      "empty_title": "No workshops yet",
+      "empty_description": "Add at least two workshops for this event, or remove all to have none.",
+      "validation_one_workshop": "Add at least one more workshop or remove this one. Events must have either no workshops or at least two.",
+      "validation_active_need_two": "Active events must have at least two workshops. Add workshops or set the event to inactive.",
+      "max_capacity_from_workshops": "Total capacity is calculated from workshops."
     },
     "questions": {
       "empty_title": "No questions yet",

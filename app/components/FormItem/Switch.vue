@@ -44,7 +44,7 @@ const wrapperClasses = computed(() =>
 </script>
 
 <template>
-    <div :class="wrapperClasses">
+    <div :class="cn(wrapperClasses)">
         <Label
             v-if="title"
             :for="id"
@@ -55,7 +55,7 @@ const wrapperClasses = computed(() =>
                 class="text-destructive font-semibold"
             >*</span>
         </Label>
-        <div class="flex items-center space-x-2">
+        <div :class="[(title && 'mt-2'), 'flex items-center space-x-2']">
             <Switch
                 :id="id"
                 v-model="switchValue"
