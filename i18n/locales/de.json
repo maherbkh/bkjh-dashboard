@@ -548,14 +548,12 @@
         "single_choice": "Einzelauswahl",
         "multi_choice": "Mehrfachauswahl",
         "dropdown": "Dropdown",
-        "rating": "Bewertung",
         "date": "Datum",
         "short_text_desc": "Einzeilige Texteingabe",
         "long_text_desc": "Mehrzeilige Texteingabe",
         "single_choice_desc": "Radio-Button-Auswahl",
         "multi_choice_desc": "Checkbox-Auswahl",
         "dropdown_desc": "Dropdown-Auswahl",
-        "rating_desc": "Bewertungsskala",
         "date_desc": "Datumsauswahl"
       },
       "form": {
@@ -581,17 +579,6 @@
         "question_n": "Frage {n}",
         "copy_suffix": "(Kopie)"
       },
-      "rating_config": {
-        "title": "Bewertungskonfiguration",
-        "minimum": "Minimum",
-        "maximum": "Maximum",
-        "step": "Schritt",
-        "minimum_label": "Minimum-Bezeichnung",
-        "maximum_label": "Maximum-Bezeichnung",
-        "min_label_placeholder": "z. B. Schlecht",
-        "max_label_placeholder": "z. B. Ausgezeichnet",
-        "hint": "Minimum muss >= 0 sein, Maximum <= 100, und Maximum muss größer als Minimum sein."
-      },
       "validation": {
         "label_required": "Bezeichnung ist erforderlich",
         "label_max": "Bezeichnung darf maximal 500 Zeichen haben",
@@ -608,14 +595,8 @@
         "option_n_value_max": "Option {n}: Wert darf maximal 100 Zeichen haben",
         "option_n_value_chars": "Option {n}: Wert darf nur Kleinbuchstaben, Zahlen und Unterstriche enthalten (keine Sonderzeichen)",
         "option_n_duplicate_value": "Option {n}: Doppelter Wert \"{value}\"",
-        "rating_min": "Minimum muss 0 oder größer sein",
-        "rating_max": "Maximum muss 100 oder kleiner sein",
-        "rating_max_gt_min": "Maximum muss größer als Minimum sein",
-        "rating_step": "Schritt muss größer als 0 sein",
         "type_change_options_removed": "Optionen werden entfernt",
-        "type_change_rating_removed": "Bewertungskonfiguration wird entfernt",
         "type_change_add_option": "Du musst mindestens eine Option hinzufügen",
-        "type_change_rating_settings": "Du musst die Bewertungseinstellungen konfigurieren",
         "position_duplicate": "Position {position} wird von mehreren Fragen verwendet (Indizes: {indices})"
       }
     }

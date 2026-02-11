@@ -256,16 +256,14 @@ const getStatusLabel = (status: string) => {
 
 // Computed class function for better performance
 const getStatusClass = (status: string, rowStatus: string) => {
+    if (status === rowStatus) {
+        return ['opacity-50 cursor-not-allowed'];
+    }
     const baseClasses = 'cursor-pointer hover:bg-accent';
     const conditionalClasses = [];
-
     if (status === 'PENDING') conditionalClasses.push('text-muted-foreground');
     if (status === 'APPROVED') conditionalClasses.push('hover:!bg-success/10 hover:!text-success');
     if (status === 'REJECTED') conditionalClasses.push('hover:!bg-destructive/10 hover:!text-destructive');
-    if (status === rowStatus) conditionalClasses.push('font-medium');
-    if (rowStatus === status && status === 'APPROVED') conditionalClasses.push('text-success');
-    if (rowStatus === status && status === 'REJECTED') conditionalClasses.push('text-destructive');
-
     return [baseClasses, ...conditionalClasses];
 };
 
@@ -628,7 +626,7 @@ const updateAttendance = async (hasAttended: boolean) => {
                                         :key="status"
                                         :value="status"
                                         :class="getStatusClass(status, row.status)"
-                                        :disabled="loadingStates[row.id as string]"
+                                        :disabled="loadingStates[row.id as string] || status === row.status"
                                         @click="changeStatus(row.id as string, status as 'PENDING' | 'APPROVED' | 'REJECTED')"
                                     >
                                         <div class="flex items-center gap-2">

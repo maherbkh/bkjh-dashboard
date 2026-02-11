@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import type { EventQuestion, EventQuestionType } from '~/types/event-question';
 import type { QuestionValidationMessage } from '~/composables/useEventQuestions';
-import { EventQuestionType as QuestionType, isChoiceQuestionType, requiresRatingConfig } from '~/types/event-question';
+import { EventQuestionType as QuestionType, isChoiceQuestionType } from '~/types/event-question';
 import { checkTypeChangeCompatibility } from '~/composables/useEventQuestions';
 import { useAlertDialog } from '~/composables/useAlertDialog';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import OptionsEditor from './OptionsEditor.vue';
-import RatingConfigEditor from './RatingConfigEditor.vue';
 
 type Props = {
     question: EventQuestion;
@@ -42,7 +41,7 @@ const generalErrors = computed(() => {
     return props.errors
         .filter((e) => {
             const k = errorKey(e);
-            return !k.includes('label') && !k.includes('position') && !k.toLowerCase().includes('option') && !k.includes('rating') && !k.includes('config');
+            return !k.includes('label') && !k.includes('position') && !k.toLowerCase().includes('option');
         })
         .map(toMessage);
 });
@@ -96,18 +95,8 @@ const handleTypeChange = async (newType: EventQuestionType): Promise<void> => {
         if (isChoiceQuestionType(localQuestion.value.type) && !isChoiceQuestionType(newType)) {
             localQuestion.value.options = undefined;
         }
-        if (localQuestion.value.type === QuestionType.RATING && newType !== QuestionType.RATING) {
-            localQuestion.value.config = undefined;
-        }
         if (!isChoiceQuestionType(localQuestion.value.type) && isChoiceQuestionType(newType)) {
             localQuestion.value.options = [];
-        }
-        if (localQuestion.value.type !== QuestionType.RATING && newType === QuestionType.RATING) {
-            localQuestion.value.config = {
-                min: 0,
-                max: 5,
-                step: 1,
-            };
         }
     }
 
@@ -133,7 +122,6 @@ const questionTypeOptions = computed(() => [
     { id: QuestionType.SINGLE_CHOICE, name: t('event.questions.types.single_choice') },
     { id: QuestionType.MULTI_CHOICE, name: t('event.questions.types.multi_choice') },
     { id: QuestionType.DROPDOWN, name: t('event.questions.types.dropdown') },
-    { id: QuestionType.RATING, name: t('event.questions.types.rating') },
     { id: QuestionType.DATE, name: t('event.questions.types.date') },
 ]);
 
@@ -144,7 +132,6 @@ const getTypeIcon = (type: EventQuestionType) => {
         [QuestionType.SINGLE_CHOICE]: 'solar:check-circle-line-duotone',
         [QuestionType.MULTI_CHOICE]: 'solar:checklist-minimalistic-line-duotone',
         [QuestionType.DROPDOWN]: 'solar:list-arrow-down-minimalistic-line-duotone',
-        [QuestionType.RATING]: 'solar:star-line-duotone',
         [QuestionType.DATE]: 'solar:calendar-line-duotone',
     };
     return icons[type] || 'solar:question-circle-line-duotone';
@@ -360,19 +347,6 @@ const getTypeIcon = (type: EventQuestionType) => {
                             :disabled="disabled"
                             :readonly-existing-options="lockedByAnswers"
                             @update:model-value="(val) => updateField('options', val)"
-                        />
-                    </div>
-
-                    <!-- Rating Config Editor (readonly when question has answers) -->
-                    <div
-                        v-if="requiresRatingConfig(localQuestion.type)"
-                        class="pt-2 border-t"
-                    >
-                        <RatingConfigEditor
-                            v-model="localQuestion.config"
-                            :errors="errors?.filter(e => { const k = errorKey(e); return k.includes('rating') || k.includes('config'); })?.map(toMessage) || []"
-                            :disabled="disabled || lockedByAnswers"
-                            @update:model-value="(val) => updateField('config', val)"
                         />
                     </div>
 

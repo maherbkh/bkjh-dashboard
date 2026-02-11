@@ -35,7 +35,6 @@ const questionTypes = computed(() => [
     { type: QuestionType.SINGLE_CHOICE, labelKey: 'event.questions.types.single_choice', descKey: 'event.questions.types.single_choice_desc', icon: 'solar:check-circle-line-duotone' },
     { type: QuestionType.MULTI_CHOICE, labelKey: 'event.questions.types.multi_choice', descKey: 'event.questions.types.multi_choice_desc', icon: 'solar:checklist-minimalistic-line-duotone' },
     { type: QuestionType.DROPDOWN, labelKey: 'event.questions.types.dropdown', descKey: 'event.questions.types.dropdown_desc', icon: 'solar:list-arrow-down-minimalistic-line-duotone' },
-    { type: QuestionType.RATING, labelKey: 'event.questions.types.rating', descKey: 'event.questions.types.rating_desc', icon: 'solar:star-line-duotone' },
     { type: QuestionType.DATE, labelKey: 'event.questions.types.date', descKey: 'event.questions.types.date_desc', icon: 'solar:calendar-line-duotone' },
 ]);
 

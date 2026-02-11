@@ -548,14 +548,12 @@
         "single_choice": "Single Choice",
         "multi_choice": "Multiple Choice",
         "dropdown": "Dropdown",
-        "rating": "Rating",
         "date": "Date",
         "short_text_desc": "Single-line text input",
         "long_text_desc": "Multi-line text input",
         "single_choice_desc": "Radio button selection",
         "multi_choice_desc": "Checkbox selection",
         "dropdown_desc": "Dropdown selection",
-        "rating_desc": "Rating scale",
         "date_desc": "Date picker"
       },
       "form": {
@@ -581,17 +579,6 @@
         "question_n": "Question {n}",
         "copy_suffix": "(Copy)"
       },
-      "rating_config": {
-        "title": "Rating Configuration",
-        "minimum": "Minimum",
-        "maximum": "Maximum",
-        "step": "Step",
-        "minimum_label": "Minimum Label",
-        "maximum_label": "Maximum Label",
-        "min_label_placeholder": "e.g., Poor",
-        "max_label_placeholder": "e.g., Excellent",
-        "hint": "Minimum must be >= 0, Maximum must be <= 100, and Maximum must be greater than Minimum."
-      },
       "validation": {
         "label_required": "Label is required",
         "label_max": "Label must be 500 characters or less",
@@ -608,14 +595,8 @@
         "option_n_value_max": "Option {n}: Value must be 100 characters or less",
         "option_n_value_chars": "Option {n}: Value must only contain lowercase letters, numbers, and underscores (no special characters)",
         "option_n_duplicate_value": "Option {n}: Duplicate value \"{value}\"",
-        "rating_min": "Minimum value must be 0 or greater",
-        "rating_max": "Maximum value must be 100 or less",
-        "rating_max_gt_min": "Maximum value must be greater than minimum value",
-        "rating_step": "Step must be greater than 0",
         "type_change_options_removed": "Options will be removed",
-        "type_change_rating_removed": "Rating configuration will be removed",
         "type_change_add_option": "You will need to add at least one option",
-        "type_change_rating_settings": "You will need to configure rating settings",
         "position_duplicate": "Position {position} is used by multiple questions (indices: {indices})"
       }
     }

@@ -10,7 +10,6 @@ The following question types are supported:
 - `SINGLE_CHOICE` - Radio button selection (requires options)
 - `MULTI_CHOICE` - Checkbox selection (requires options)
 - `DROPDOWN` - Dropdown selection (requires options)
-- `RATING` - Rating scale (supports config)
 - `DATE` - Date picker
 
 ## Field Constraints
@@ -22,23 +21,12 @@ The following question types are supported:
 - `placeholder`: Optional, string, max 255 characters
 - `helpText`: Optional, string, max 1000 characters
 - `options`: Optional, array, max 50 items (required for SINGLE_CHOICE, MULTI_CHOICE, DROPDOWN)
-- `config`: Optional, object (used for RATING type)
 
 ## Option Structure
 
 Each option in the `options` array has:
 - `label`: Required, string, max 200 characters
 - `value`: Optional, string, max 100 characters (defaults to label if not provided)
-
-## Rating Config Structure
-
-For `RATING` type questions, the `config` object supports:
-- `min`: Optional, number, >= 0
-- `max`: Optional, number, <= 100, must be > min
-- `step`: Optional, number
-- `labels`: Optional, object with:
-  - `min`: Optional, string
-  - `max`: Optional, string
 
 ---
 
@@ -243,73 +231,7 @@ For `RATING` type questions, the `config` object supports:
 }
 ```
 
-### 11. RATING - Minimal
-
-```json
-{
-  "label": "Rate your satisfaction",
-  "type": "RATING"
-}
-```
-
-### 12. RATING - With Basic Config
-
-```json
-{
-  "label": "How would you rate this event?",
-  "type": "RATING",
-  "isRequired": true,
-  "position": 5,
-  "helpText": "Rate from 1 to 5",
-  "config": {
-    "min": 1,
-    "max": 5
-  }
-}
-```
-
-### 13. RATING - Full Config with Labels
-
-```json
-{
-  "label": "Rate the overall experience",
-  "type": "RATING",
-  "isRequired": true,
-  "position": 6,
-  "helpText": "Select a rating from the scale below",
-  "config": {
-    "min": 0,
-    "max": 10,
-    "step": 1,
-    "labels": {
-      "min": "Poor",
-      "max": "Excellent"
-    }
-  }
-}
-```
-
-### 14. RATING - Custom Range
-
-```json
-{
-  "label": "Rate the content quality (0-100)",
-  "type": "RATING",
-  "isRequired": false,
-  "position": 7,
-  "config": {
-    "min": 0,
-    "max": 100,
-    "step": 5,
-    "labels": {
-      "min": "Very Poor",
-      "max": "Outstanding"
-    }
-  }
-}
-```
-
-### 15. DATE - Minimal
+### 11. DATE - Minimal
 
 ```json
 {
@@ -433,21 +355,6 @@ Example payload for creating/updating an event with all question types:
       ]
     },
     {
-      "label": "Rate your interest in this event",
-      "type": "RATING",
-      "isRequired": true,
-      "position": 5,
-      "config": {
-        "min": 1,
-        "max": 5,
-        "step": 1,
-        "labels": {
-          "min": "Not Interested",
-          "max": "Very Interested"
-        }
-      }
-    },
-    {
       "label": "What is your preferred date?",
       "type": "DATE",
       "isRequired": false,
@@ -509,34 +416,6 @@ Example payload for creating/updating an event with all question types:
 }
 ```
 
-### Rating with Maximum Range
-
-```json
-{
-  "label": "Rate from 0 to 100",
-  "type": "RATING",
-  "config": {
-    "min": 0,
-    "max": 100,
-    "step": 10
-  }
-}
-```
-
-### Rating with Minimum Range
-
-```json
-{
-  "label": "Rate from 1 to 3",
-  "type": "RATING",
-  "config": {
-    "min": 1,
-    "max": 3,
-    "step": 1
-  }
-}
-```
-
 ### Question with Maximum Length Fields
 
 ```json
@@ -594,38 +473,6 @@ Example payload for creating/updating an event with all question types:
 }
 ```
 
-### Rating with Only Min Label
-
-```json
-{
-  "label": "Rate the service",
-  "type": "RATING",
-  "config": {
-    "min": 1,
-    "max": 5,
-    "labels": {
-      "min": "Poor"
-    }
-  }
-}
-```
-
-### Rating with Only Max Label
-
-```json
-{
-  "label": "Rate the service",
-  "type": "RATING",
-  "config": {
-    "min": 1,
-    "max": 5,
-    "labels": {
-      "max": "Excellent"
-    }
-  }
-}
-```
-
 ---
 
 ## Validation Rules Summary
@@ -637,11 +484,6 @@ Example payload for creating/updating an event with all question types:
 ### Type-Specific Requirements
 - `SINGLE_CHOICE`, `MULTI_CHOICE`, `DROPDOWN` - Must have at least one option in the `options` array
 - Options must have unique values (value defaults to label if not provided)
-
-### Rating Config Validation
-- `min` must be >= 0
-- `max` must be <= 100
-- `max` must be > `min` (if both are provided)
 
 ### Position Validation
 - Must be unique within the same event
@@ -660,7 +502,6 @@ Example payload for creating/updating an event with all question types:
 2. **Options Requirement**: For `SINGLE_CHOICE`, `MULTI_CHOICE`, and `DROPDOWN` types, ensure at least one option is provided
 3. **Position Management**: If positions are not provided, the backend will use array indices. For explicit ordering, provide position values
 4. **Option Values**: If `value` is not provided in an option, it defaults to the `label`. Ensure uniqueness if custom values are used
-5. **Rating Config**: When using `RATING` type, validate that `min < max` and both are within valid ranges (0-100)
-6. **Required Fields**: Only `label` and `type` are required. All other fields are optional
-7. **Boolean Fields**: Use actual boolean values (`true`/`false`) not strings for `isRequired`
-8. **Number Fields**: Use actual numbers not strings for `position`, `min`, `max`, `step` in config
+5. **Required Fields**: Only `label` and `type` are required. All other fields are optional
+6. **Boolean Fields**: Use actual boolean values (`true`/`false`) not strings for `isRequired`
+7. **Number Fields**: Use actual numbers not strings for `position`

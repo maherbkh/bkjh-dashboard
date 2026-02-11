@@ -14,7 +14,6 @@ export enum EventQuestionType {
     SINGLE_CHOICE = 'SINGLE_CHOICE',
     MULTI_CHOICE = 'MULTI_CHOICE',
     DROPDOWN = 'DROPDOWN',
-    RATING = 'RATING',
     DATE = 'DATE',
 }
 
@@ -24,19 +23,6 @@ export enum EventQuestionType {
 export interface EventQuestionOption {
     label: string; // Required, max 200 characters
     value?: string; // Optional, max 100 characters, defaults to label if not provided
-}
-
-/**
- * Rating configuration for RATING type questions
- */
-export interface EventQuestionRatingConfig {
-    min?: number; // Optional, >= 0, default: 0
-    max?: number; // Optional, <= 100, must be > min, default: 5
-    step?: number; // Optional, default: 1
-    labels?: {
-        min?: string; // Optional label for minimum value
-        max?: string; // Optional label for maximum value
-    };
 }
 
 /**
@@ -53,7 +39,6 @@ export interface EventQuestion {
     placeholder?: string; // Placeholder text (max 255 characters)
     helpText?: string; // Help text (max 1000 characters)
     options?: EventQuestionOption[]; // Options for choice types (required for SINGLE_CHOICE, MULTI_CHOICE, DROPDOWN)
-    config?: EventQuestionRatingConfig; // Config for RATING type
     /** When true (e.g. from API on update), only isRequired, position, and helpText are editable */
     hasAnswers?: boolean;
 }
@@ -79,11 +64,4 @@ export function isChoiceQuestionType(type: EventQuestionType): boolean {
  */
 export function requiresOptions(type: EventQuestionType): boolean {
     return isChoiceQuestionType(type);
-}
-
-/**
- * Type guard to check if question requires rating config
- */
-export function requiresRatingConfig(type: EventQuestionType): boolean {
-    return type === EventQuestionType.RATING;
 }

@@ -5,8 +5,8 @@
  * Validation functions return i18n keys (and optional params) for translation in components.
  */
 
-import type { EventQuestion, EventQuestionType, EventQuestionOption, EventQuestionRatingConfig } from '~/types/event-question';
-import { isChoiceQuestionType, requiresOptions, requiresRatingConfig, EventQuestionType as QuestionType } from '~/types/event-question';
+import type { EventQuestion, EventQuestionType, EventQuestionOption } from '~/types/event-question';
+import { isChoiceQuestionType, requiresOptions, EventQuestionType as QuestionType } from '~/types/event-question';
 
 /** Message suitable for t(key) or t(key, params) in components */
 export type QuestionValidationMessage = string | { key: string; params?: Record<string, string | number> };
@@ -20,10 +20,6 @@ const V = {
     option_n_value_max: 'event.questions.validation.option_n_value_max',
     option_n_value_chars: 'event.questions.validation.option_n_value_chars',
     option_n_duplicate_value: 'event.questions.validation.option_n_duplicate_value',
-    rating_min: 'event.questions.validation.rating_min',
-    rating_max: 'event.questions.validation.rating_max',
-    rating_max_gt_min: 'event.questions.validation.rating_max_gt_min',
-    rating_step: 'event.questions.validation.rating_step',
     label_required: 'event.questions.validation.label_required',
     label_max: 'event.questions.validation.label_max',
     type_required: 'event.questions.validation.type_required',
@@ -32,9 +28,7 @@ const V = {
     placeholder_max: 'event.questions.validation.placeholder_max',
     help_text_max: 'event.questions.validation.help_text_max',
     type_change_options_removed: 'event.questions.validation.type_change_options_removed',
-    type_change_rating_removed: 'event.questions.validation.type_change_rating_removed',
     type_change_add_option: 'event.questions.validation.type_change_add_option',
-    type_change_rating_settings: 'event.questions.validation.type_change_rating_settings',
     position_duplicate: 'event.questions.validation.position_duplicate',
 } as const;
 
@@ -115,40 +109,6 @@ export function validateOptions(question: EventQuestion): QuestionValidationMess
 }
 
 /**
- * Validates rating configuration
- * @param config - The rating config to validate
- * @returns Array of i18n keys for error messages (empty if valid)
- */
-export function validateRatingConfig(config: EventQuestionRatingConfig | undefined): QuestionValidationMessage[] {
-    const errors: QuestionValidationMessage[] = [];
-
-    if (!config) {
-        return errors;
-    }
-
-    const min = config.min ?? 0;
-    const max = config.max ?? 5;
-
-    if (min < 0) {
-        errors.push(V.rating_min);
-    }
-
-    if (max > 100) {
-        errors.push(V.rating_max);
-    }
-
-    if (max <= min) {
-        errors.push(V.rating_max_gt_min);
-    }
-
-    if (config.step !== undefined && config.step <= 0) {
-        errors.push(V.rating_step);
-    }
-
-    return errors;
-}
-
-/**
  * Validates an individual question
  * @param question - The question to validate
  * @returns Array of i18n keys/params for error messages (empty if valid)
@@ -194,10 +154,6 @@ export function validateQuestion(question: EventQuestion): QuestionValidationMes
         errors.push(...validateOptions(question));
     }
 
-    if (requiresRatingConfig(question.type)) {
-        errors.push(...validateRatingConfig(question.config));
-    }
-
     return errors;
 }
 
@@ -221,16 +177,8 @@ export function checkTypeChangeCompatibility(
         warnings.push(V.type_change_options_removed);
     }
 
-    if (oldType === QuestionType.RATING && newType !== QuestionType.RATING) {
-        warnings.push(V.type_change_rating_removed);
-    }
-
     if (!isChoiceQuestionType(oldType) && isChoiceQuestionType(newType)) {
         warnings.push(V.type_change_add_option);
-    }
-
-    if (oldType !== QuestionType.RATING && newType === QuestionType.RATING) {
-        warnings.push(V.type_change_rating_settings);
     }
 
     if (warnings.length > 0) {
@@ -271,16 +219,6 @@ export function normalizeQuestion(question: Partial<EventQuestion>): EventQuesti
         normalized.options = [];
     }
 
-    // Normalize rating config
-    if (normalized.type === QuestionType.RATING && question.config) {
-        normalized.config = {
-            min: question.config.min ?? 0,
-            max: question.config.max ?? 5,
-            step: question.config.step ?? 1,
-            labels: question.config.labels,
-        };
-    }
-
     return normalized;
 }
 
@@ -301,15 +239,6 @@ export function getDefaultQuestion(type: EventQuestionType, defaultPosition?: nu
     // Add default options for choice types
     if (isChoiceQuestionType(type)) {
         question.options = [];
-    }
-
-    // Add default config for rating type
-    if (type === QuestionType.RATING) {
-        question.config = {
-            min: 0,
-            max: 5,
-            step: 1,
-        };
     }
 
     return question;
