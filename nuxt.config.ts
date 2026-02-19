@@ -50,9 +50,9 @@ export default defineNuxtConfig({
     }, // Disable SSR this project uses CSR
     runtimeConfig: {
         public: {
-            apiUrl: process.env.NUXT_PUBLIC_API_URL || 'http://api.backhaus.local:3055',
-            appUrl: process.env.NUXT_PUBLIC_APP_URL || 'http://dashboard.backhaus.local:3022',
-            apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://api.backhaus.local:3055/api/v1',
+            apiUrl: process.env.NUXT_PUBLIC_API_URL || 'https://api.backhaus.de/api/v1/dashboard',
+            appUrl: process.env.NUXT_PUBLIC_APP_URL || 'https://dashboard.backhaus.de',
+            apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://api.backhaus.de/api/v1',
         },
     },
     build: {
