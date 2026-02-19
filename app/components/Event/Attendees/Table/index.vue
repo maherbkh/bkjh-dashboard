@@ -277,22 +277,34 @@ const closeAnswersModal = () => {
     selectedAttendeeName.value = '';
 };
 
-const formatAnswerValue = (value: string | undefined | null): string => {
+const resolveValueToLabel = (val: string, options: { label: string; value?: string }[] | null): string => {
+    if (!options?.length) return val;
+    const opt = options.find(o => (o.value ?? o.label) === val);
+    return opt ? opt.label : val;
+};
+
+const formatAnswerValue = (answer: { value?: string | null; options?: { label: string; value?: string }[] | null }): string => {
+    const value = answer.value;
+    const options = answer.options;
     if (value == null || value === '') return '—';
     const trimmed = String(value).trim();
     if (!trimmed) return '—';
     try {
         const parsed = JSON.parse(trimmed);
         if (Array.isArray(parsed)) {
-            return parsed.map((item: unknown) => String(item ?? '')).filter(Boolean).join(', ') || '—';
+            const resolved = parsed
+                .map((item: unknown) => String(item ?? ''))
+                .filter(Boolean)
+                .map(v => resolveValueToLabel(v, options ?? null));
+            return resolved.join(', ') || '—';
         }
         if (typeof parsed === 'object' && parsed !== null) {
             return JSON.stringify(parsed, null, 2);
         }
-        return String(parsed);
+        return resolveValueToLabel(String(parsed), options ?? null);
     }
     catch {
-        return trimmed;
+        return resolveValueToLabel(trimmed, options ?? null);
     }
 };
 
@@ -853,7 +865,7 @@ const updateAttendance = async (hasAttended: boolean) => {
                     >
                         <span class="text-sm font-medium leading-snug">{{ answer.label }}</span>
                         <p class="text-sm text-muted-foreground whitespace-pre-wrap wrap-break-word">
-                            {{ formatAnswerValue(answer.value) }}
+                            {{ formatAnswerValue(answer) }}
                         </p>
                     </div>
                     <div
