@@ -9,7 +9,8 @@
     "events": {
       "filters": {
         "select_date": "Select Date"
-      }
+      },
+      "has_workshops": "Has Workshops"
     },
     "information": "Event Information",
     "location": "Location",
@@ -507,6 +508,11 @@
       }
     },
     "is_event_collection": "Event is a collection (with workshops)",
+    "event_details": "Event Details",
+    "registration_details": "Registration Details",
+    "all_workshops": "All Workshops",
+    "view_answers": "View Answers",
+    "registration_answers": "Registration Answers",
     "workshops": {
       "title": "Workshops",
       "add_workshop": "Add workshop",

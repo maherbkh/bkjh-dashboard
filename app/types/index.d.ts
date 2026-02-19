@@ -729,10 +729,13 @@ export interface EventSchedule {
 /** Workshop schedule item (API shape: date, startTime, endTime, note) */
 export interface WorkshopScheduleItem {
     id?: string;
-    date: string; // YYYY-MM-DD
+    workshopId?: string;
+    date: string; // ISO datetime or YYYY-MM-DD
     startTime: string; // HH:mm
     endTime: string; // HH:mm
     note?: string | null;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface WorkshopSpeakerLite {
@@ -754,10 +757,15 @@ export interface Workshop {
     position: number;
     room?: string | null;
     location?: string | null;
+    createdAt?: string;
+    updatedAt?: string;
     schedules?: WorkshopScheduleItem[];
     speakers?: WorkshopSpeakerLite[];
     approvedRegistrationsCount?: number;
     availableSpots?: number;
+    _count?: {
+        registrations: number;
+    };
 }
 
 export interface EventAdminLite {
@@ -766,21 +774,34 @@ export interface EventAdminLite {
     lastName: string;
 }
 
+export interface RegistrationAnswer {
+    id: string;
+    questionId: string;
+    label: string;
+    type: import('~/types/event-question').EventQuestionType;
+    options: import('~/types/event-question').EventQuestionOption[] | null;
+    value: string;
+}
+
 export interface EventRegistration {
-    // Unknown shape for now; align with API when available
     id: string;
     status: 'REJECTED' | 'APPROVED' | 'PENDING';
+    workshopId: string | null;
     registrationDate: string;
+    hasAttended: boolean;
+    notes: string | null;
+    certificate: string | null;
     attendee: {
         id: string;
         firstName: string;
         lastName: string;
         email: string;
-        isEmployee: string;
-        group: string;
-        occupation: string;
+        isEmployee: boolean;
+        group: { id: string; name: string } | null;
+        occupation: { id: string; name: string } | null;
         fullName: string;
     };
+    answers: RegistrationAnswer[];
 }
 
 export type EventData = {
@@ -838,8 +859,10 @@ export type EventData = {
     registrations?: EventRegistration[];
     registrationsCount?: number;
     schedulesCount?: number;
+    questionsCount?: number;
     availableSpots?: number;
     approvedRegistrationsCount?: number;
+    coverUrl?: string | null;
 
 };
 

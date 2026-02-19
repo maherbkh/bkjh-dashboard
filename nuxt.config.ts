@@ -50,9 +50,9 @@ export default defineNuxtConfig({
     }, // Disable SSR this project uses CSR
     runtimeConfig: {
         public: {
-            apiUrl: process.env.NUXT_PUBLIC_API_URL || 'http://api.backhaus.test:3055',
-            appUrl: process.env.NUXT_PUBLIC_APP_URL || 'http://dashboard.backhaus.test:3022',
-            apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://api.backhaus.test:3055/api/v1',
+            apiUrl: process.env.NUXT_PUBLIC_API_URL || 'http://api.backhaus.local:3055',
+            appUrl: process.env.NUXT_PUBLIC_APP_URL || 'http://dashboard.backhaus.local:3022',
+            apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://api.backhaus.local:3055/api/v1',
         },
     },
     build: {
@@ -86,7 +86,7 @@ export default defineNuxtConfig({
                 proxy: `http://ip-api.com/json/**`,
             },
             '/api/media/**': {
-                proxy: 'http://api.backhaus.test:3055/uploads/**',
+                proxy: 'http://api.backhaus.local:3055/uploads/**',
                 headers: {
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -95,7 +95,7 @@ export default defineNuxtConfig({
                 },
             },
             '/get-media-internal/**': {
-                proxy: 'https://api.backhaus.de/api/v1/media/internal/**',
+                proxy: 'http://api.backhaus.local:3055/api/v1/media/internal/**',
                 headers: {
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -110,7 +110,7 @@ export default defineNuxtConfig({
                 },
             },
             '/get-media/**': {
-                proxy: 'http://api.backhaus.de/uploads/public/**',
+                proxy: 'http://api.backhaus.local:3055/uploads/public/**',
                 headers: {
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -118,14 +118,11 @@ export default defineNuxtConfig({
                     'Access-Control-Expose-Headers': 'Content-Disposition, Content-Length, Content-Type',
                 },
             },
-            '/backend/**': {
-                proxy: `${process.env.NUXT_PUBLIC_API_URL || 'http://api.backhaus.test:3055/api/v1/dashboard'}/**`,
-            },
         },
     },
     vite: {
         plugins: [
-            tailwindcss(),
+            tailwindcss() as any,
         ],
         optimizeDeps: {
             include: [

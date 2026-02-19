@@ -194,7 +194,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
 // Helper function to get cover image URL
 const getCoverImageSrc = (event: EventData) => {
     // Priority 1: Use coverUrl if provided by the API
-    // coverUrl format: http://api.backhaus.test:3055/uploads/public/...
+    // coverUrl format: http://api.backhaus.local:3055/uploads/public/...
     // This will be transformed to /get-media/... via proxy
     const coverUrl = (event as any).coverUrl;
     if (coverUrl) {
@@ -313,7 +313,7 @@ const getCoverImageSrc = (event: EventData) => {
                                     >
                                         <Icon
                                             name="solar:image-outline"
-                                            class="!size-5 shrink-0 text-muted-foreground"
+                                            class="size-5! shrink-0 text-muted-foreground"
                                         />
                                     </div>
                                 </div>
@@ -321,9 +321,14 @@ const getCoverImageSrc = (event: EventData) => {
                                     <NuxtLink
                                         :to="`/events/${row.id}/show`"
                                         :title="row.title"
-                                        class="hover:underline hover:text-primary truncate max-w-64 line-clamp-1"
+                                        class="hover:underline hover:text-primary truncate max-w-64 line-clamp-1 flex items-center gap-2"
                                     >
-                                        {{ row.title }}
+                                        <div>{{ row.title }}</div>
+                                        <Icon v-if="row.workshops && row.workshops.length > 0"
+                                            name="solar:server-2-outline"
+                                            :title="$t('academy.events.has_workshops')"
+                                            class="size-4! shrink-0 text-success"
+                                        />
                                     </NuxtLink>
                                     <div
                                         v-if="row.schedules && row.schedules.length > 0"
@@ -387,25 +392,11 @@ const getCoverImageSrc = (event: EventData) => {
                                     <Button
                                         variant="secondary"
                                         size="icon-sm"
-                                        class="!cursor-default font-normal border !border-border aspect-square !size-5 text-xs"
+                                        class="cursor-default! font-normal border border-border! aspect-square size-5! text-xs"
                                     >
                                         {{ row.maxCapacity || 0 }}
                                     </Button>
                                     <span class="text-muted-foreground ml-1.5 text-xs font-normal">{{ $t('event.attendees') }}</span>
-                                </div>
-                                <div>
-                                    <Button
-                                        :variant="(row.isFull || (row.maxCapacity === row.approvedRegistrationsCount)) ? 'destructive' : 'secondary'"
-                                        size="icon-sm"
-                                        :class="[
-                                            'font-normal border aspect-square !size-5 text-xs',
-                                            (row.isFull && row.maxCapacity !== row.approvedRegistrationsCount) ? '!cursor-pointer' : '!cursor-default',
-                                        ]"
-                                        :title="(row.isFull && row.maxCapacity !== row.approvedRegistrationsCount) ? $t('event.manually_set_full') : ''"
-                                    >
-                                        {{ row.approvedRegistrationsCount || 0 }}
-                                    </Button>
-                                    <span :class="(row.isFull || (row.maxCapacity === row.approvedRegistrationsCount)) ? 'text-destructive ml-1.5 text-xs font-normal' : 'text-muted-foreground ml-1.5 text-xs font-normal'">{{ $t('event.approved') }}</span>
                                 </div>
                             </div>
                         </template>
@@ -433,7 +424,7 @@ const getCoverImageSrc = (event: EventData) => {
                                     >
                                         <Icon
                                             name="solar:eye-outline"
-                                            class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                            class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                                         />
                                     </LazyButton>
                                 </NuxtLink>
@@ -448,7 +439,7 @@ const getCoverImageSrc = (event: EventData) => {
                                         >
                                             <Icon
                                                 name="solar:menu-dots-outline"
-                                                class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                                class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                                             />
                                         </Button>
                                     </DropdownMenuTrigger>

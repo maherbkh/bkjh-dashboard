@@ -91,12 +91,12 @@ const handleSelect = (value: string) => {
                     :aria-expanded="open"
                     :disabled="disabled"
                     :class="cn(
-                        'w-full justify-between !bg-background font-normal h-8 text-base md:text-sm',
+                        'w-full min-w-0 justify-between !bg-background font-normal h-8 text-base md:text-sm',
                         hasErrors && '!border-destructive !focus:ring-destructive',
                         !selectedItem && 'text-muted-foreground',
                     )"
                 >
-                    {{ selectedItem ? selectedItem[nameValue] : placeholder }}
+                    <span class="truncate min-w-0">{{ selectedItem ? selectedItem[nameValue] : placeholder }}</span>
                     <Icon
                         name="solar:double-alt-arrow-down-line-duotone"
                         class="ml-2 h-4 w-4 shrink-0 opacity-50"

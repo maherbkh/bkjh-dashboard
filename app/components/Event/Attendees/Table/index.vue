@@ -4,6 +4,7 @@ import { toast } from 'vue-sonner';
 import { useDebounceFn } from '@vueuse/core';
 import { z } from 'zod';
 import type { Certificate } from '~/composables/useCertificateDownload';
+import type { RegistrationAnswer } from '~/types';
 import {
     Dialog,
     DialogContent,
@@ -26,10 +27,12 @@ const { downloadCertificate } = useCertificateDownload();
 interface EventRegistrationLite {
     id?: string | number;
     status?: string;
+    workshopId?: string | null;
     registrationDate?: string;
     hasAttended?: boolean;
     certificate?: Certificate | null;
     notes?: string | null;
+    answers?: RegistrationAnswer[];
     attendee?: {
         id?: string;
         firstName?: string;
@@ -41,10 +44,14 @@ interface EventRegistrationLite {
         occupation?: { id?: string; name?: string } | null;
     };
 }
+
 const props = defineProps<{
     data: EventRegistrationLite[];
     eventId?: string;
     eventTitle?: string;
+    isEventCollection?: boolean;
+    workshopFilter?: string | null;
+    hasQuestions?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -57,6 +64,14 @@ const headerItems = computed(() => [
     { as: 'th' as const, name: t('attendee.registration_info'), id: 'registration' },
 ]);
 
+// Workshop filter — driven by the parent-controlled workshopFilter prop
+const workshopFilteredData = computed(() => {
+    if (!props.isEventCollection || !props.workshopFilter) {
+        return props.data;
+    }
+    return props.data.filter(item => item.workshopId === props.workshopFilter);
+});
+
 const selectedStatusTab = ref<string>('ALL');
 
 const selectStatusTab = (status: 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED') => {
@@ -64,7 +79,7 @@ const selectStatusTab = (status: 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED') =>
 };
 
 const filteredData = computed(() => {
-    return props.data.filter((item: EventRegistrationLite) => {
+    return workshopFilteredData.value.filter((item: EventRegistrationLite) => {
         switch (selectedStatusTab.value) {
             case 'ALL':
                 return true;
@@ -78,13 +93,14 @@ const filteredData = computed(() => {
     });
 });
 
-// Status counts for display in tabs
+// Status counts reflect the active workshop filter
 const statusCounts = computed(() => {
+    const base = workshopFilteredData.value;
     return {
-        all: props.data.length,
-        pending: props.data.filter((item: EventRegistrationLite) => item.status === 'PENDING').length,
-        approved: props.data.filter((item: EventRegistrationLite) => item.status === 'APPROVED').length,
-        rejected: props.data.filter((item: EventRegistrationLite) => item.status === 'REJECTED').length,
+        all: base.length,
+        pending: base.filter((item: EventRegistrationLite) => item.status === 'PENDING').length,
+        approved: base.filter((item: EventRegistrationLite) => item.status === 'APPROVED').length,
+        rejected: base.filter((item: EventRegistrationLite) => item.status === 'REJECTED').length,
     };
 });
 
@@ -116,6 +132,12 @@ const selectedNote = ref<string | null>(null);
 // Reset selected rows when status tab changes
 watch(selectedStatusTab, () => {
     selectedRows.value = [];
+});
+
+// Reset status tab and selection when parent changes the workshop filter
+watch(() => props.workshopFilter, () => {
+    selectedRows.value = [];
+    selectedStatusTab.value = 'ALL';
 });
 
 // Computed property to check if all filtered rows are selected
@@ -236,6 +258,27 @@ const openNoteModal = (note: string | null | undefined) => {
 const closeNoteModal = () => {
     showNoteModal.value = false;
     selectedNote.value = null;
+};
+
+// Answers modal state
+const showAnswersModal = ref(false);
+const selectedAnswers = ref<RegistrationAnswer[]>([]);
+const selectedAttendeeName = ref('');
+
+const openAnswersModal = (row: EventRegistrationLite) => {
+    selectedAnswers.value = row.answers ?? [];
+    selectedAttendeeName.value = row.attendee?.fullName ?? row.attendee?.email ?? '';
+    showAnswersModal.value = true;
+};
+
+const closeAnswersModal = () => {
+    showAnswersModal.value = false;
+    selectedAnswers.value = [];
+    selectedAttendeeName.value = '';
+};
+
+const getAnswerTypeLabel = (type: string): string => {
+    return t(`event.questions.types.${type.toLowerCase()}`);
 };
 
 // Helper function to translate status values
@@ -565,6 +608,24 @@ const updateAttendance = async (hasAttended: boolean) => {
 
                 <template #cell-actions="{ row }">
                     <div class="flex justify-end gap-2">
+                        <!-- Answers icon — shown when the event has questions and this registration has answers -->
+                        <Tooltip v-if="hasQuestions && row.answers && row.answers.length > 0">
+                            <TooltipTrigger as-child>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    @click="openAnswersModal(row)"
+                                >
+                                    <Icon
+                                        name="solar:clipboard-list-linear"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                    />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                {{ $t('event.view_answers') }}
+                            </TooltipContent>
+                        </Tooltip>
                         <NuxtLink :to="`/events/attendees/${row.attendee?.id}`">
                             <LazyButton
                                 :title="$t('action.view')"
@@ -747,6 +808,58 @@ const updateAttendance = async (hasAttended: boolean) => {
                     <Button
                         variant="outline"
                         @click="closeNoteModal"
+                    >
+                        {{ $t('global.close') }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+        <!-- Registration Answers Modal -->
+        <Dialog v-model:open="showAnswersModal">
+            <DialogContent class="max-w-xl">
+                <DialogHeader>
+                    <DialogTitle class="flex items-center gap-2">
+                        <Icon
+                            name="solar:clipboard-list-linear"
+                            class="size-5! shrink-0 opacity-75"
+                        />
+                        {{ $t('event.registration_answers') }}
+                    </DialogTitle>
+                    <DialogDescription v-if="selectedAttendeeName">
+                        {{ selectedAttendeeName }}
+                    </DialogDescription>
+                </DialogHeader>
+                <div class="py-2 flex flex-col gap-3 max-h-[60vh] overflow-y-auto pr-1">
+                    <div
+                        v-for="(answer, index) in selectedAnswers"
+                        :key="answer.id ?? index"
+                        class="rounded-lg border bg-muted/40 px-4 py-3 flex flex-col gap-1"
+                    >
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium leading-snug">{{ answer.label }}</span>
+                            <Badge
+                                variant="outline"
+                                class="text-xs shrink-0 ml-auto"
+                            >
+                                {{ getAnswerTypeLabel(answer.type) }}
+                            </Badge>
+                        </div>
+                        <p class="text-sm text-muted-foreground whitespace-pre-wrap wrap-break-word">
+                            {{ answer.value || '—' }}
+                        </p>
+                    </div>
+                    <div
+                        v-if="selectedAnswers.length === 0"
+                        class="text-sm text-muted-foreground text-center py-4"
+                    >
+                        {{ $t('global.no_data') }}
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button
+                        variant="outline"
+                        @click="closeAnswersModal"
                     >
                         {{ $t('global.close') }}
                     </Button>

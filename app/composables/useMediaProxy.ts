@@ -18,9 +18,9 @@ export const useMediaProxy = () => {
         }
 
         // Transform backend URL to proxy URL
-        // From: http://api.backhaus.test:3055/api/v1/media/internal/...
+        // From: http://api.backhaus.local:3055/api/v1/media/internal/...
         // To: /api/media/internal/...
-        const backendBaseUrl = 'http://api.backhaus.test:3055/api/v1/media/';
+        const backendBaseUrl = 'http://api.backhaus.local:3055/api/v1/media/';
 
         if (originalUrl.startsWith(backendBaseUrl)) {
             return originalUrl.replace(backendBaseUrl, '/api/media/');
@@ -49,13 +49,13 @@ export const useMediaProxy = () => {
         if (!proxyUrl) return proxyUrl;
 
         // If it's already a backend URL, return as-is
-        if (proxyUrl.startsWith('http://api.backhaus.test:3055/')) {
+        if (proxyUrl.startsWith('http://api.backhaus.local:3055/')) {
             return proxyUrl;
         }
 
         // Transform proxy URL back to backend URL
         if (proxyUrl.startsWith('/api/media/')) {
-            return proxyUrl.replace('/api/media/', 'http://api.backhaus.test:3055/api/v1/media/');
+            return proxyUrl.replace('/api/media/', 'http://api.backhaus.local:3055/api/v1/media/');
         }
 
         return proxyUrl;

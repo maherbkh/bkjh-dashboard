@@ -17,8 +17,8 @@ export function useAuthenticatedImage() {
         // If it's a full URL (http/https), extract the path and use proxy
         if (url.startsWith('http')) {
             // Handle different backend URL patterns:
-            // 1. http://api.backhaus.test:3055/api/v1/media/uuid/show -> /api/media/uuid/show
-            // 2. http://api.backhaus.test:3055/uploads/public/... -> /get-media/...
+            // 1. http://api.backhaus.local:3055/api/v1/media/uuid/show -> /api/media/uuid/show
+            // 2. http://api.backhaus.local:3055/uploads/public/... -> /get-media/...
             const urlObj = new URL(url);
             const path = urlObj.pathname;
 

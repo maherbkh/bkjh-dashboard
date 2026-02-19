@@ -275,7 +275,7 @@ Get outlook signature settings including companies and groups with addresses. Th
 **Example Request:**
 ```typescript
 // Direct API call (no proxy needed for public endpoints)
-const { data } = await $fetch('http://api.backhaus.test:3055/api/v1/public/outlook-signature-settings');
+const { data } = await $fetch('http://api.backhaus.local:3055/api/v1/public/outlook-signature-settings');
 
 // Or via proxy if configured
 const { data } = await useApiFetch('/api/public/outlook-signature-settings');
@@ -356,7 +356,7 @@ export const useSettings = () => {
   };
 
   const getOutlookSignatureSettings = async () => {
-    return await $fetch('http://api.backhaus.test:3055/api/v1/public/outlook-signature-settings');
+    return await $fetch('http://api.backhaus.local:3055/api/v1/public/outlook-signature-settings');
   };
 
   return {

@@ -3,10 +3,6 @@ import type { EventData } from '~/types';
 import { useInitials } from '~/composables/useInitials';
 import { toast } from 'vue-sonner';
 import { useUserStore } from '~/stores/user';
-
-const { formatDateShort, formatTimeOnly } = useGermanDateFormat();
-const { getDirectImageSrc } = useAuthenticatedImage();
-
 const props = defineProps<{
     event: EventData;
 }>();
@@ -15,7 +11,21 @@ const emit = defineEmits<{
     reload: [];
 }>();
 
+const { formatDateShort } = useGermanDateFormat();
+const { getDirectImageSrc } = useAuthenticatedImage();
 const { t } = useI18n();
+
+// Workshop filter for collection events — null means "All Workshops"
+const selectedWorkshopId = ref<string | null>(null);
+
+// Prepend an "All" sentinel so the user can reset the filter via the combobox
+const workshopsForSelect = computed(() => {
+    if (!props.event.workshops?.length) return [];
+    return [
+        { id: '', title: t('event.all_workshops') },
+        ...props.event.workshops.map(ws => ({ id: ws.id, title: ws.title })),
+    ];
+});
 
 // Export attendees list
 const isExporting = ref(false);
@@ -373,12 +383,30 @@ const handleSubmitCertificateGeneration = async () => {
                 />
                 <p>{{ collectionWorkshopWarningMessage }}</p>
             </div>
-            <!-- Event Details Grid -->
-            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-                <!-- Main Content -->
-                <div class="xl:col-span-8 space-y-6">
-                    <!-- Description and Content Card -->
-                    <div class="grid lg:grid-cols-3 gap-4">
+            <!-- Tabs: Event Details | Registration Details -->
+            <Tabs
+                default-value="event-details"
+                class="w-full"
+            >
+                <TabsList class="grid w-full grid-cols-2">
+                    <TabsTrigger value="event-details">
+                        {{ $t('event.event_details') }}
+                    </TabsTrigger>
+                    <TabsTrigger value="registration-details">
+                        {{ $t('event.registration_details') }}
+                    </TabsTrigger>
+                </TabsList>
+
+                <!-- Event Details Tab -->
+                <TabsContent
+                    value="event-details"
+                    class="mt-6"
+                >
+                    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                        <!-- Main Content -->
+                        <div class="xl:col-span-8 space-y-6">
+                            <!-- Description and Content Card -->
+                            <div class="grid lg:grid-cols-3 gap-4">
                         <EventBox
                             :title="$t('event.approved_attendees')"
                             icon="solar:user-id-line-duotone"
@@ -405,8 +433,8 @@ const handleSubmitCertificateGeneration = async () => {
                             icon="solar:calendar-line-duotone"
                             :value="event.schedulesCount as number"
                         />
-                    </div>
-                    <Card>
+                            </div>
+                            <Card>
                         <CardHeader>
                             <CardTitle class="flex items-center gap-2">
                                 <Icon
@@ -437,27 +465,6 @@ const handleSubmitCertificateGeneration = async () => {
                                 class="content"
                                 v-html="event.description"
                             />
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle class="flex items-center gap-2">
-                                <Icon
-                                    name="solar:users-group-two-rounded-line-duotone"
-                                    class="size-5! opacity-75 shrink-0"
-                                />
-                                {{ $t("attendee.plural") }}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div>
-                                <EventAttendeesTable
-                                    :data="event.registrations as any[]"
-                                    :event-id="event.id"
-                                    :event-title="event.title"
-                                    @reload="emit('reload')"
-                                />
-                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -686,7 +693,50 @@ const handleSubmitCertificateGeneration = async () => {
                         </CardContent>
                     </Card>
                 </div>
-            </div>
+                    </div>
+                </TabsContent>
+
+                <!-- Registration Details Tab -->
+                <TabsContent
+                    value="registration-details"
+                    class="mt-6"
+                >
+                    <Card>
+                        <CardHeader class="flex! flex-row items-center justify-between gap-4 w-full">
+                            <CardTitle class="flex items-center gap-2 shrink-0">
+                                <Icon
+                                    name="solar:users-group-two-rounded-line-duotone"
+                                    class="size-5! opacity-75 shrink-0"
+                                />
+                                {{ $t("attendee.plural") }}
+                            </CardTitle>
+                            <FormItemSelect
+                                v-if="event.isEventCollection && workshopsForSelect.length > 0"
+                                :model-value="selectedWorkshopId ?? ''"
+                                :data="workshopsForSelect"
+                                name-value="title"
+                                :placeholder="$t('event.all_workshops')"
+                                :searchable="false"
+                                class="min-w-52 flex-1 max-w-md"
+                                @update:model-value="(val) => selectedWorkshopId = val ? String(val) : null"
+                            />
+                        </CardHeader>
+                        <CardContent>
+                            <div>
+                                <EventAttendeesTable
+                                    :data="event.registrations as any[]"
+                                    :event-id="event.id"
+                                    :event-title="event.title"
+                                    :is-event-collection="event.isEventCollection"
+                                    :workshop-filter="selectedWorkshopId"
+                                    :has-questions="(event.questions?.length ?? 0) > 0"
+                                    @reload="emit('reload')"
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
         </div>
 
         <!-- Generate Certificates Dialog -->

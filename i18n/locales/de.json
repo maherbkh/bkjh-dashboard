@@ -9,7 +9,8 @@
     "events": {
       "filters": {
         "select_date": "Datum auswählen"
-      }
+      },
+      "has_workshops": "Hat Workshops"
     },
     "information": "Veranstaltungsinformationen",
     "location": "Standort",
@@ -507,6 +508,11 @@
       }
     },
     "is_event_collection": "Veranstaltung ist eine Sammlung (mit Workshops)",
+    "event_details": "Veranstaltungsdetails",
+    "registration_details": "Registrierungsdetails",
+    "all_workshops": "Alle Workshops",
+    "view_answers": "Antworten anzeigen",
+    "registration_answers": "Registrierungsantworten",
     "workshops": {
       "title": "Workshops",
       "add_workshop": "Workshop hinzufügen",
