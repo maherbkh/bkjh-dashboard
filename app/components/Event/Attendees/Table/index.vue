@@ -277,8 +277,23 @@ const closeAnswersModal = () => {
     selectedAttendeeName.value = '';
 };
 
-const getAnswerTypeLabel = (type: string): string => {
-    return t(`event.questions.types.${type.toLowerCase()}`);
+const formatAnswerValue = (value: string | undefined | null): string => {
+    if (value == null || value === '') return '—';
+    const trimmed = String(value).trim();
+    if (!trimmed) return '—';
+    try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+            return parsed.map((item: unknown) => String(item ?? '')).filter(Boolean).join(', ') || '—';
+        }
+        if (typeof parsed === 'object' && parsed !== null) {
+            return JSON.stringify(parsed, null, 2);
+        }
+        return String(parsed);
+    }
+    catch {
+        return trimmed;
+    }
 };
 
 // Helper function to translate status values
@@ -836,17 +851,9 @@ const updateAttendance = async (hasAttended: boolean) => {
                         :key="answer.id ?? index"
                         class="rounded-lg border bg-muted/40 px-4 py-3 flex flex-col gap-1"
                     >
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-medium leading-snug">{{ answer.label }}</span>
-                            <Badge
-                                variant="outline"
-                                class="text-xs shrink-0 ml-auto"
-                            >
-                                {{ getAnswerTypeLabel(answer.type) }}
-                            </Badge>
-                        </div>
+                        <span class="text-sm font-medium leading-snug">{{ answer.label }}</span>
                         <p class="text-sm text-muted-foreground whitespace-pre-wrap wrap-break-word">
-                            {{ answer.value || '—' }}
+                            {{ formatAnswerValue(answer.value) }}
                         </p>
                     </div>
                     <div
