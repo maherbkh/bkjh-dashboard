@@ -1200,23 +1200,18 @@ const formTitle = computed(() => {
                                     <FormItemArrayInput
                                         id="topics-cert"
                                         v-model="topics"
-                                        :title="t('event.topics') || 'Topics'"
-                                        :placeholder="t('event.topic_placeholder') || 'Enter topic'"
+                                        :title="t('event.topics')"
+                                        :placeholder="t('event.topic_placeholder')"
                                         class="col-span-12"
                                         :errors="errors.topics ? [errors.topics] : []"
-                                        :add-button-text="
-                                            t('action.add') + ' ' + (t('event.topic') || 'Topic')
-                                        "
+                                        :add-button-text="t('action.add') + ' ' + t('event.topic')"
                                         item-id-prefix="topic-cert"
                                     />
                                     <FormItemTextarea
                                         id="certNote"
                                         v-model="certNote"
-                                        :title="t('event.cert_note') || 'Certificate Note'"
-                                        :placeholder="
-                                            t('event.cert_note_description')
-                                                || 'This content will be shown only in Certificate generation process'
-                                        "
+                                        :title="t('event.cert_note')"
+                                        :placeholder="t('event.cert_note_description')"
                                         class="col-span-12"
                                         :errors="errors.certNote ? [errors.certNote] : []"
                                         v-bind="certNoteAttrs"

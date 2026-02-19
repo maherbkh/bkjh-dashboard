@@ -400,6 +400,7 @@
     "transferred": "Transferred",
     "title": "Title",
     "to": "to",
+    "unknown": "Unknown",
     "transferred_to": "Transferred to",
     "upcoming": "Upcoming",
     "updated_at": "Updated At",
@@ -674,6 +675,7 @@
     "preferences": "Preferences",
     "remove_item": "Remove {label}",
     "select_option": "Select Option",
+    "no_options_available": "No options available",
     "no_results": "No results found",
     "selected_count": "{count} selected",
     "unselect_all": "Unselect all"

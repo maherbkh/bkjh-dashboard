@@ -400,6 +400,7 @@
     "this": "diese",
     "title": "Titel",
     "to": "bis",
+    "unknown": "Unbekannt",
     "transferred_to": "Übertragen an",
     "upcoming": "Anstehend",
     "updated_at": "Aktualisiert am",
@@ -674,6 +675,7 @@
     "preferences": "Einstellungen",
     "remove_item": "{label} entfernen",
     "select_option": "Option auswählen",
+    "no_options_available": "Keine Optionen verfügbar",
     "no_results": "Keine Ergebnisse gefunden",
     "selected_count": "{count} ausgewählt",
     "unselect_all": "Alle abwählen"

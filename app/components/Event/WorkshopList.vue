@@ -455,10 +455,10 @@ const workshopCountValid = computed(() => {
                     <FormItemArrayInput
                         v-model="form.topics"
                         :title="t('event.topics')"
-                        :placeholder="t('event.topic_placeholder') || 'Topic'"
+                        :placeholder="t('event.topic_placeholder')"
                         class="col-span-12"
                         :add-button-text="
-                            t('action.add') + ' ' + (t('event.topic') || 'Topic')
+                            t('action.add') + ' ' + t('event.topic')
                         "
                         item-id-prefix="workshop-topic"
                     />

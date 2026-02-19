@@ -35,7 +35,7 @@ const props = withDefaults(defineProps<Props>(), {
     data: () => [],
     keyValue: 'id',
     nameValue: 'name',
-    emptyText: 'No options available',
+    emptyText: undefined,
     searchable: true,
 });
 
@@ -113,7 +113,7 @@ const handleSelect = (value: string) => {
                         :placeholder="t('action.search_placeholder')"
                     />
                     <CommandEmpty v-if="data.length === 0">
-                        {{ emptyText }}
+                        {{ emptyText ?? t('form.no_options_available') }}
                     </CommandEmpty>
                     <CommandEmpty v-else>
                         {{ t('global.messages.no_search_results') }}

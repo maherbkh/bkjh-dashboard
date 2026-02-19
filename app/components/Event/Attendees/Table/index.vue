@@ -382,7 +382,7 @@ const updateAttendance = async (hasAttended: boolean) => {
         if (!validationResult.success) {
             // Status is not APPROVED
             invalidAttendees.push({
-                name: registration.attendee.fullName || registration.attendee.email || 'Unknown',
+                name: registration.attendee.fullName || registration.attendee.email || t('common.unknown'),
                 status: registration.status || 'UNKNOWN',
             });
         }
