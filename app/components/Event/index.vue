@@ -598,7 +598,7 @@ const handleSubmitCertificateGeneration = async () => {
                             />
                         </CardContent>
                     </Card>
-                    <Card>
+                    <Card v-if="!event.isEventCollection || (event.speakers && event.speakers.length > 0)">
                         <CardHeader>
                             <CardTitle>
                                 <Icon
