@@ -488,7 +488,7 @@ watch(() => props.open, (isOpen: boolean) => {
                 </div>
             </div>
 
-            <DialogFooter class="mt-4 border-t pt-4">
+            <DialogFooter class="mt-4 pt-4">
                 <div class="flex items-center justify-between w-full">
                     <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                         <Icon

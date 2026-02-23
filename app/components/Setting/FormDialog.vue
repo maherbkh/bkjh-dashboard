@@ -107,12 +107,11 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-    'update:is-dialog-open': [value: boolean];
-    'update:dialog-mode': [value: 'add' | 'edit'];
-    'update:editing-setting': [value: Setting | null];
-    'submit-and-close': [values: SettingForm];
-    'submit-and-add-new': [values: SettingForm];
-    'close-dialog': [];
+    (e: 'update:is-dialog-open', value: boolean): void;
+    (e: 'update:dialog-mode', value: 'add' | 'edit'): void;
+    (e: 'update:editing-setting', value: Setting | null): void;
+    (e: 'submit-and-close' | 'submit-and-add-new', values: SettingForm): void;
+    (e: 'close-dialog'): void;
 }>();
 
 // Computed properties
@@ -378,11 +377,11 @@ watch(
 
 // Methods
 const onSubmitAndClose = handleSubmit((values) => {
-    emit('submit-and-close', values);
+    emit('submit-and-close', values as SettingForm);
 });
 
 const onSubmitAndAddNew = handleSubmit((values) => {
-    emit('submit-and-add-new', values);
+    emit('submit-and-add-new', values as SettingForm);
 });
 
 const handleClose = () => {
@@ -605,7 +604,7 @@ const handleClose = () => {
                     </div>
                 </form>
             </div>
-            <DialogFooter class="shrink-0 gap-2 border-t pt-4 mt-4">
+            <DialogFooter class="shrink-0 gap-2">
                 <Button
                     type="button"
                     variant="outline"

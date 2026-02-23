@@ -40,12 +40,11 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-    'update:is-dialog-open': [value: boolean];
-    'update:dialog-mode': [value: 'add' | 'edit'];
-    'update:editing-attendee': [value: Attendee | null];
-    'submit-and-close': [values: AttendeeForm];
-    'submit-and-add-new': [values: AttendeeForm];
-    'close-dialog': [];
+    (e: 'update:is-dialog-open', value: boolean): void;
+    (e: 'update:dialog-mode', value: 'add' | 'edit'): void;
+    (e: 'update:editing-attendee', value: Attendee | null): void;
+    (e: 'submit-and-close' | 'submit-and-add-new', values: AttendeeForm): void;
+    (e: 'close-dialog'): void;
 }>();
 
 // Computed properties
@@ -83,11 +82,35 @@ watch(
     { immediate: true },
 );
 
+const defaultAttendeeValues: AttendeeForm = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    groupId: null,
+    occupationId: null,
+    isEmployee: false,
+    isActive: true,
+};
+
 watch(
     () => props.isDialogOpen,
     (isOpen) => {
         if (!isOpen) {
-            resetForm();
+            nextTick(() => {
+                resetForm({ values: defaultAttendeeValues });
+            });
+        }
+    },
+);
+
+// Reset with explicit values when switching to add (Zod v4 / vee-validate error reset)
+watch(
+    () => props.dialogMode,
+    (newMode, oldMode) => {
+        if (newMode === 'add' && (oldMode === 'edit' || oldMode === 'add')) {
+            nextTick(() => {
+                resetForm({ values: defaultAttendeeValues });
+            });
         }
     },
 );
@@ -105,11 +128,11 @@ watch(isEmployee, (newValue) => {
 
 // Methods
 const onSubmitAndClose = handleSubmit((values) => {
-    emit('submit-and-close', values);
+    emit('submit-and-close', values as AttendeeForm);
 });
 
 const onSubmitAndAddNew = handleSubmit((values) => {
-    emit('submit-and-add-new', values);
+    emit('submit-and-add-new', values as AttendeeForm);
 });
 
 const handleClose = () => {

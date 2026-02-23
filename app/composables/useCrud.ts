@@ -40,7 +40,15 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
         return `/${tenant}/${crudPath}${endpoint}`;
     };
 
-    const { handleSubmit, defineField, errors, resetForm, setValues, validateField, setFieldValue } = useForm({
+    const {
+        handleSubmit,
+        defineField,
+        errors,
+        resetForm,
+        setValues,
+        validateField,
+        setFieldValue,
+    } = useForm({
         validationSchema: formSchema ? toZodV4SafeSchema(formSchema) : undefined,
         initialValues: formSchema ? {} : undefined,
     });

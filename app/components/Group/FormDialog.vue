@@ -34,12 +34,11 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-    'update:is-dialog-open': [value: boolean];
-    'update:dialog-mode': [value: 'add' | 'edit'];
-    'update:editing-group': [value: Group | null];
-    'submit-and-close': [values: GroupForm];
-    'submit-and-add-new': [values: GroupForm];
-    'close-dialog': [];
+    (e: 'update:is-dialog-open', value: boolean): void;
+    (e: 'update:dialog-mode', value: 'add' | 'edit'): void;
+    (e: 'update:editing-group', value: Group | null): void;
+    (e: 'submit-and-close' | 'submit-and-add-new', values: GroupForm): void;
+    (e: 'close-dialog'): void;
 }>();
 
 // Computed properties
@@ -73,11 +72,19 @@ watch(
     { immediate: true },
 );
 
+const defaultGroupValues: GroupForm = {
+    name: '',
+    addressId: null,
+    companyIds: [],
+};
+
 watch(
     () => props.isDialogOpen,
     (isOpen) => {
         if (!isOpen) {
-            resetForm();
+            nextTick(() => {
+                resetForm({ values: defaultGroupValues });
+            });
         }
     },
 );
@@ -89,13 +96,7 @@ watch(
         if (newMode === 'add' && (oldMode === 'edit' || oldMode === 'add')) {
             // Reset form when switching to add mode (submitAndAddNew scenario)
             nextTick(() => {
-                resetForm({
-                    values: {
-                        name: '',
-                        addressId: null,
-                        companyIds: [],
-                    },
-                });
+                resetForm({ values: defaultGroupValues });
             });
         }
     },
@@ -103,11 +104,11 @@ watch(
 
 // Methods
 const onSubmitAndClose = handleSubmit((values) => {
-    emit('submit-and-close', values);
+    emit('submit-and-close', values as GroupForm);
 });
 
 const onSubmitAndAddNew = handleSubmit((values) => {
-    emit('submit-and-add-new', values);
+    emit('submit-and-add-new', values as GroupForm);
 });
 
 const handleClose = () => {

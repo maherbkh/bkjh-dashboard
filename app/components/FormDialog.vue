@@ -37,12 +37,10 @@ const handleOpenChange = (value: boolean) => {
                     {{ description }}
                 </DialogDescription>
             </DialogHeader>
-            <Separator />
             <!-- Content slot -->
             <div class="grid gap-4 py-4">
                 <slot name="content" />
             </div>
-            <Separator />
             <!-- Footer slot -->
             <DialogFooter>
                 <slot name="footer" />

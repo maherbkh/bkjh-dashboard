@@ -143,14 +143,13 @@ const props = defineProps<{
     isSubmitting: boolean;
 }>();
 
-// Emits
+// Emits — call-signature form so overload resolution works for submit events
 const emit = defineEmits<{
-    'update:isDialogOpen': [value: boolean];
-    'update:dialogMode': [value: 'add' | 'edit'];
-    'update:editingEventTarget': [value: EventTarget | null];
-    'submit-and-close': [values: EventTargetForm];
-    'submit-and-add-new': [values: EventTargetForm];
-    'close-dialog': [];
+    (e: 'update:isDialogOpen', value: boolean): void;
+    (e: 'update:dialogMode', value: 'add' | 'edit'): void;
+    (e: 'update:editingEventTarget', value: EventTarget | null): void;
+    (e: 'submit-and-close' | 'submit-and-add-new', values: EventTargetForm): void;
+    (e: 'close-dialog'): void;
 }>();
 
 // CRUD operations for form validation
@@ -202,23 +201,45 @@ watch(
     { immediate: true },
 );
 
-// Watch for dialog mode changes
+const defaultEventTargetValues: EventTargetForm = {
+    code: '',
+    name: '',
+    slug: '',
+    position: 0,
+    scope: 'ALL',
+};
+
+// Watch for dialog mode changes — reset with explicit values so errors clear (Zod v4 / vee-validate)
 watch(
     () => props.dialogMode,
     (mode) => {
         if (mode === 'add') {
-            resetForm();
+            nextTick(() => {
+                resetForm({ values: defaultEventTargetValues });
+            });
+        }
+    },
+);
+
+// Clear form when dialog closes
+watch(
+    () => props.isDialogOpen,
+    (isOpen) => {
+        if (!isOpen) {
+            nextTick(() => {
+                resetForm({ values: defaultEventTargetValues });
+            });
         }
     },
 );
 
 // Form submission handlers
 const handleSubmit = handleFormSubmit((values) => {
-    emit('submit-and-close', values);
+    emit('submit-and-close', values as EventTargetForm);
 });
 
 const handleSubmitAndAddNew = handleFormSubmit((values) => {
-    emit('submit-and-add-new', values);
+    emit('submit-and-add-new', values as EventTargetForm);
 });
 
 const handleClose = () => {

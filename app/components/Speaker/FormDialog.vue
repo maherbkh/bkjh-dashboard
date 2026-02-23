@@ -28,7 +28,7 @@
                         id="name"
                         v-model="name"
                         :placeholder="$t('speaker.name_placeholder')"
-                        :error="errors.name"
+                        :errors="errors.name ? [errors.name] : []"
                         required
                         maxlength="100"
                     />
@@ -40,7 +40,7 @@
                         id="qualification"
                         v-model="qualification"
                         :placeholder="$t('speaker.qualification_placeholder')"
-                        :error="errors.qualification"
+                        :errors="errors.qualification ? [errors.qualification] : []"
                         maxlength="500"
                         :rows="3"
                     />
@@ -87,7 +87,7 @@
                         <FormItemSwitch
                             id="isActive"
                             v-model="isActive"
-                            :error="errors.isActive"
+                            :errors="errors.isActive ? [errors.isActive] : []"
                         />
                         <Label for="isActive">{{ isActive ? $t("common.active") : $t("common.inactive") }}</Label>
                     </div>
@@ -153,14 +153,13 @@ const props = defineProps<{
     isSubmitting: boolean;
 }>();
 
-// Emits
+// Emits — call-signature form so overload resolution works for submit events
 const emit = defineEmits<{
-    'update:isDialogOpen': [value: boolean];
-    'update:dialogMode': [value: 'add' | 'edit'];
-    'update:editingSpeaker': [value: Speaker | null];
-    'submit-and-close': [values: SpeakerForm];
-    'submit-and-add-new': [values: SpeakerForm];
-    'close-dialog': [];
+    (e: 'update:isDialogOpen', value: boolean): void;
+    (e: 'update:dialogMode', value: 'add' | 'edit'): void;
+    (e: 'update:editingSpeaker', value: Speaker | null): void;
+    (e: 'submit-and-close' | 'submit-and-add-new', values: SpeakerForm): void;
+    (e: 'close-dialog'): void;
 }>();
 
 // CRUD operations for form validation
@@ -456,12 +455,36 @@ watch(
     { immediate: true },
 );
 
-// Watch for dialog mode changes
+const defaultSpeakerValues: SpeakerForm = {
+    name: '',
+    qualification: '',
+    avatar: null,
+    logo: null,
+    isActive: true,
+};
+
+// Watch for dialog mode changes — reset with explicit values so errors clear (Zod v4 / vee-validate)
 watch(
     () => props.dialogMode,
     (mode) => {
         if (mode === 'add') {
-            resetForm();
+            nextTick(() => {
+                resetForm({ values: defaultSpeakerValues });
+            });
+            avatarMedia.value = null;
+            logoMedia.value = null;
+        }
+    },
+);
+
+// Clear form when dialog closes so errors don’t persist on next open
+watch(
+    () => props.isDialogOpen,
+    (isOpen) => {
+        if (!isOpen) {
+            nextTick(() => {
+                resetForm({ values: defaultSpeakerValues });
+            });
             avatarMedia.value = null;
             logoMedia.value = null;
         }

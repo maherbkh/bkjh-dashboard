@@ -120,14 +120,13 @@ const props = defineProps<{
     isSubmitting: boolean;
 }>();
 
-// Emits
+// Emits — call-signature form so overload resolution works for submit events
 const emit = defineEmits<{
-    'update:isDialogOpen': [value: boolean];
-    'update:dialogMode': [value: 'add' | 'edit'];
-    'update:editingEventCategory': [value: EventCategory | null];
-    'submit-and-close': [values: EventCategoryForm];
-    'submit-and-add-new': [values: EventCategoryForm];
-    'close-dialog': [];
+    (e: 'update:isDialogOpen', value: boolean): void;
+    (e: 'update:dialogMode', value: 'add' | 'edit'): void;
+    (e: 'update:editingEventCategory', value: EventCategory | null): void;
+    (e: 'submit-and-close' | 'submit-and-add-new', values: EventCategoryForm): void;
+    (e: 'close-dialog'): void;
 }>();
 
 // CRUD operations for form validation
@@ -155,14 +154,13 @@ const parentCategoryOptions = ref<SelectOption[]>([]);
 // Fetch parent categories for selection
 const fetchParentCategories = async () => {
     try {
-        const { data } = await useApiFetch<{
-            data: EventCategory[];
-        }>('/academy/event-categories/active');
+        const { data } = await useApiFetch<EventCategory[]>('/academy/event-categories/active');
 
-        parentCategoryOptions.value = data.value?.data?.map(category => ({
+        const list = (data.value as { data?: EventCategory[] } | null)?.data ?? [];
+        parentCategoryOptions.value = list.map(category => ({
             value: category.id,
             label: category.name,
-        })) || [];
+        }));
     }
     catch (error) {
         console.error('Error fetching parent categories:', error);
@@ -192,23 +190,44 @@ watch(
     { immediate: true },
 );
 
-// Watch for dialog mode changes
+const defaultEventCategoryValues: EventCategoryForm = {
+    name: '',
+    isActive: true,
+    position: 0,
+    parentId: null,
+};
+
+// Watch for dialog mode changes — reset with explicit values so errors clear (Zod v4 / vee-validate)
 watch(
     () => props.dialogMode,
     (mode) => {
         if (mode === 'add') {
-            resetForm();
+            nextTick(() => {
+                resetForm({ values: defaultEventCategoryValues });
+            });
+        }
+    },
+);
+
+// Clear form when dialog closes
+watch(
+    () => props.isDialogOpen,
+    (isOpen) => {
+        if (!isOpen) {
+            nextTick(() => {
+                resetForm({ values: defaultEventCategoryValues });
+            });
         }
     },
 );
 
 // Form submission handlers
 const handleSubmit = handleFormSubmit((values) => {
-    emit('submit-and-close', values);
+    emit('submit-and-close', values as EventCategoryForm);
 });
 
 const handleSubmitAndAddNew = handleFormSubmit((values) => {
-    emit('submit-and-add-new', values);
+    emit('submit-and-add-new', values as EventCategoryForm);
 });
 
 const handleClose = () => {

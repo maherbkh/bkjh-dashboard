@@ -52,12 +52,11 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-    'update:is-dialog-open': [value: boolean];
-    'update:dialog-mode': [value: 'add' | 'edit'];
-    'update:editing-event': [value: EventData | null];
-    'submit-and-close': [values: EventForm];
-    'submit-and-add-new': [values: EventForm];
-    'close-dialog': [];
+    (e: 'update:is-dialog-open', value: boolean): void;
+    (e: 'update:dialog-mode', value: 'add' | 'edit'): void;
+    (e: 'update:editing-event', value: EventData | null): void;
+    (e: 'submit-and-close' | 'submit-and-add-new', values: EventForm): void;
+    (e: 'close-dialog'): void;
 }>();
 
 const dialogTitle = computed(() => {
@@ -149,18 +148,15 @@ const onSubmitAndClose = handleSubmit((values) => {
             .filter(t => t.length > 0);
     }
 
-    const submitValues: any = {
+    const submitValues: EventForm = {
         ...values,
         topics: topicsArray, // Always include as array, even if empty
     };
-
-    console.log('Submitting topics:', topicsArray); // Debug log
 
     emit('submit-and-close', submitValues);
 });
 const onSubmitAndAddNew = handleSubmit((values) => {
     // Get topics directly from the reactive field, not from validated values
-    // Filter out empty strings and ensure it's always an array
     let topicsArray: string[] = [];
     if (Array.isArray(topics.value)) {
         topicsArray = topics.value
@@ -168,12 +164,10 @@ const onSubmitAndAddNew = handleSubmit((values) => {
             .filter(t => t.length > 0);
     }
 
-    const submitValues: any = {
+    const submitValues: EventForm = {
         ...values,
-        topics: topicsArray, // Always include as array, even if empty
+        topics: topicsArray,
     };
-
-    console.log('Submitting topics:', topicsArray); // Debug log
 
     emit('submit-and-add-new', submitValues);
 });
