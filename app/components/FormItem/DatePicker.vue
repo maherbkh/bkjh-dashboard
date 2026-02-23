@@ -1,5 +1,5 @@
 <script setup>
-import VueDatePicker from '@vuepic/vue-datepicker';
+import { VueDatePicker } from '@vuepic/vue-datepicker';
 
 const props = defineProps({
     minDate: {

@@ -16,6 +16,21 @@ type CrudOptions = {
     formSchema?: ZodSchema;
 };
 
+/**
+ * Wraps a Zod schema for vee-validate useForm so that initial values are never
+ * derived via getDefaults (which uses Zod v3 internals and breaks on Zod v4).
+ * Validation still uses the schema; only cast() is overridden to return values as-is.
+ */
+function toZodV4SafeSchema(zodSchema: ZodSchema) {
+    const typed = toTypedSchema(zodSchema);
+    return {
+        ...typed,
+        cast(values: unknown) {
+            return values ?? {};
+        },
+    };
+}
+
 export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(options: CrudOptions) => {
     const { t } = useI18n();
     const { crudPath, tenant, translations, formSchema } = options;
@@ -25,9 +40,9 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
         return `/${tenant}/${crudPath}${endpoint}`;
     };
 
-    // VeeValidate form
     const { handleSubmit, defineField, errors, resetForm, setValues, validateField, setFieldValue } = useForm({
-        validationSchema: formSchema ? toTypedSchema(formSchema) : undefined,
+        validationSchema: formSchema ? toZodV4SafeSchema(formSchema) : undefined,
+        initialValues: formSchema ? {} : undefined,
     });
 
     // State management

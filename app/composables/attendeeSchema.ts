@@ -3,15 +3,30 @@ import { z } from 'zod';
 export function createAttendeeSchema(t: (key: string, params?: Record<string, string | number>) => string) {
     return z.object({
         firstName: z
-            .string({ required_error: t('common.first_name') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('common.first_name') + ' ' + t('validation.required')
+                        : t('common.first_name') + ' ' + t('validation.invalid'),
+            })
             .min(2, t('common.first_name') + ' ' + t('validation.min_length', { min: 2 }))
             .max(50, t('common.first_name') + ' ' + t('validation.max_length', { max: 50 })),
         lastName: z
-            .string({ required_error: t('common.last_name') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('common.last_name') + ' ' + t('validation.required')
+                        : t('common.last_name') + ' ' + t('validation.invalid'),
+            })
             .min(2, t('common.last_name') + ' ' + t('validation.min_length', { min: 2 }))
             .max(50, t('common.last_name') + ' ' + t('validation.max_length', { max: 50 })),
         email: z
-            .string({ required_error: t('common.email') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('common.email') + ' ' + t('validation.required')
+                        : t('common.email') + ' ' + t('validation.invalid_email'),
+            })
             .email(t('common.email') + ' ' + t('validation.invalid_email')),
         groupId: z
             .string()
