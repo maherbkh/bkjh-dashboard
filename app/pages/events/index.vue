@@ -254,7 +254,7 @@ const getCoverImageSrc = (event: EventData) => {
                     >
                         <Icon
                             name="solar:clipboard-add-outline"
-                            class="!size-4 shrink-0"
+                            class="size-4! shrink-0"
                         />
                         {{ $t('action.add') }} {{ $t('common.new') }} {{ $t('academy.singular') }}
                     </Button>

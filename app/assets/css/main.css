@@ -292,7 +292,7 @@
 	}
 
 	[data-sonner-toast] {
-		@apply !gap-4 !shadow-xl;
+		@apply gap-4! shadow-xl!;
 	}
 
 	[data-sonner-toast] [data-icon] {
@@ -493,6 +493,7 @@
 
 	input[type="number"] {
 		-moz-appearance: textfield;
+		appearance: textfield;
 	}
 
 	/* Custom Number Input Arrows */

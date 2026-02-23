@@ -1,4 +1,6 @@
 {
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "vue3snippets.enable-compile-vue-file-on-did-save-code": false
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"vue3snippets.enable-compile-vue-file-on-did-save-code": false,
+	"css.lint.unknownAtRules": "ignore",
+	"scss.lint.unknownAtRules": "ignore"
 }

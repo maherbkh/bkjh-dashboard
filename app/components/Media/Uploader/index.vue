@@ -328,7 +328,7 @@ const allowedTypesText = computed(() => {
         <div
             v-if="!multiple && safeFiles.length > 0"
             :class="[
-                'relative rounded-xl border transition-all duration-200 flex flex-col sm:flex-row items-center justify-center gap-3 p-3 h-[8rem]',
+                'relative rounded-xl border transition-all duration-200 flex flex-col sm:flex-row items-center justify-center gap-3 p-3 h-32',
                 'bg-card/50 border-border hover:border-primary/30',
                 errorHandler.isError.value ? 'border-destructive' : '',
                 disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
@@ -396,7 +396,7 @@ const allowedTypesText = computed(() => {
         <div
             v-else
             :class="[
-                'relative border-2 border-dashed rounded-xl p-3 sm:p-4 transition-all duration-300 ease-in-out flex flex-col h-[8rem]',
+                'relative border-2 border-dashed rounded-xl p-3 sm:p-4 transition-all duration-300 ease-in-out flex flex-col h-32',
                 'bg-card/50',
                 dragging ? 'border-solid border-primary bg-primary/10' : 'border-border hover:border-primary/40',
                 errorHandler.isError.value ? 'border-destructive' : '',
