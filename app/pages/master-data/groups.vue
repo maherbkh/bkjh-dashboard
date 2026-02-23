@@ -58,11 +58,6 @@ const headerItems = computed((): TableHeaderItem[] => [
     },
     {
         as: 'th',
-        name: t('address.singular'),
-        id: 'address',
-    },
-    {
-        as: 'th',
         name: t('company.plural'),
         id: 'companies',
     },
@@ -339,8 +334,13 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         @update:model-value="handleSelectAll"
                     >
                         <template #cell-name="{ row }">
-                            <div class="font-medium">
-                                {{ row.name }}
+                            <div>
+                                <div class="font-medium">
+                                    {{ row.name }}
+                                </div>
+                                <div class="text-muted-foreground text-xs font-light">
+                                    {{ row.address?.fullAddress }}
+                                </div>
                             </div>
                         </template>
 
@@ -367,7 +367,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         <template #cell-companies="{ row }">
                             <div
                                 v-if="row.companies && row.companies.length > 0"
-                                class="text-sm"
+                                class="text-xs font-medium"
                             >
                                 <div
                                     v-for="groupCompany in row.companies.slice(0, 2)"
@@ -377,7 +377,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                 </div>
                                 <span
                                     v-if="row.companies.length > 2"
-                                    class="text-muted-foreground"
+                                    class="text-muted-foreground text-xs font-light"
                                 >
                                     +{{ row.companies.length - 2 }} {{ $t('global.common.more') }}
                                 </span>

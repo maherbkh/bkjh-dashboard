@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import type { Company, CompanyForm, TableHeaderItem } from '~/types';
+
 const { t } = useI18n();
+const { formatDate } = useGermanDateFormat();
 
 // Page configuration
 const pageTitle = computed(() => t('company.plural'));
@@ -46,7 +49,7 @@ const sortDir = ref<'asc' | 'desc'>('asc');
 // Computed properties
 const status = computed(() => isLoading.value ? 'pending' : 'success');
 
-const headerItems = computed(() => [
+const headerItems = computed((): TableHeaderItem[] => [
     {
         as: 'th',
         name: t('global.name'),
@@ -56,11 +59,6 @@ const headerItems = computed(() => [
         as: 'th',
         name: t('address.singular'),
         id: 'address',
-    },
-    {
-        as: 'th',
-        name: t('global.management'),
-        id: 'management',
     },
 ]);
 
@@ -345,8 +343,13 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         @update:model-value="handleSelectAll"
                     >
                         <template #cell-name="{ row }">
-                            <div class="font-medium">
-                                {{ row.name }}
+                            <div>
+                                <div class="font-medium">
+                                    {{ row.name }}
+                                </div>
+                                <div class="text-muted-foreground text-xs font-light">
+                                    {{ row.management }}
+                                </div>
                             </div>
                         </template>
 
@@ -364,7 +367,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                 <div class="font-medium">
                                     {{ row.address.streetName }} {{ row.address.buildingNumber }}
                                 </div>
-                                <div class="text-muted-foreground">
+                                <div class="text-muted-foreground text-xs">
                                     {{ row.address.postalCode }} {{ row.address.city }}
                                 </div>
                             </div>
@@ -375,15 +378,8 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                 {{ $t('address.no_address_found') }}
                             </div>
                         </template>
-
-                        <template #cell-management="{ row }">
-                            <div class="text-sm">
-                                {{ row.management }}
-                            </div>
-                        </template>
-
                         <template #cell-created_at="{ row }">
-                            {{ useGermanDateFormat().formatDate(row.createdAt) }}
+                            {{ formatDate(row.createdAt) }}
                         </template>
 
                         <template #cell-actions="{ row }">
@@ -397,7 +393,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                 >
                                     <Icon
                                         name="solar:pen-new-square-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                                     />
                                 </LazyButton>
                                 <LazyButton
@@ -408,7 +404,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                 >
                                     <Icon
                                         name="solar:trash-bin-trash-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-destructive"
                                     />
                                 </LazyButton>
                             </div>

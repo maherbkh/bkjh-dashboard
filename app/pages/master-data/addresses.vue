@@ -2,6 +2,7 @@
 import type { Address, TableHeaderItem, ServerParamsTypes } from '~/types';
 
 const { t } = useI18n();
+const { formatDate } = useGermanDateFormat();
 
 // Page configuration
 const pageTitle = computed(() => t('address.plural'));
@@ -48,7 +49,7 @@ const sortDir = ref<'asc' | 'desc'>('asc');
 // Computed properties
 const status = computed(() => (isLoading.value ? 'pending' : 'success'));
 
-const headerItems = computed(() => [
+const headerItems = computed((): TableHeaderItem[] => [
     {
         as: 'th',
         name: t('street.singular'),
@@ -56,8 +57,8 @@ const headerItems = computed(() => [
     },
     {
         as: 'th',
-        name: t('common.created_at'),
-        id: 'created_at',
+        name: t('city.singular'),
+        id: 'city',
     },
 ]);
 
@@ -317,7 +318,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                 />
                 <template v-else>
                     <PageTable
-                        :header-items="headerItems as TableHeaderItem[]"
+                        :header-items="headerItems"
                         :rows="addresses.map((address: Address) => ({
                             ...address,
                             selected: selectedRows.includes(String(address.id)),
@@ -345,13 +346,12 @@ const handleRowSelected = (id: string, checked: boolean) => {
                             <div class="font-medium">
                                 <span>{{ row.streetName }} {{ row.buildingNumber }}</span>
                             </div>
-                            <div class="text-muted-foreground text-sm">
-                                <span>{{ row.postalCode }} {{ row.city }}</span>
-                            </div>
                         </template>
 
-                        <template #cell-created_at="{ row }">
-                            {{ useGermanDateFormat().formatDate(row.createdAt) }}
+                        <template #cell-city="{ row }">
+                            <div class="font-medium">
+                                <span class="text-muted-foreground">{{ row.postalCode }} </span> <span>{{ row.city }}</span>
+                            </div>
                         </template>
 
                         <template #cell-actions="{ row }">
@@ -365,7 +365,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                 >
                                     <Icon
                                         name="solar:pen-new-square-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                                     />
                                 </LazyButton>
                                 <LazyButton
@@ -376,7 +376,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                 >
                                     <Icon
                                         name="solar:trash-bin-trash-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-destructive"
                                     />
                                 </LazyButton>
                             </div>
