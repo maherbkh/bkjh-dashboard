@@ -358,7 +358,16 @@ const getCoverImageSrc = (event: EventData) => {
 
                         <template #cell-type="{ row }">
                             <div>
-                                <span :class="['text-xs! font-medium text-muted-foreground border border-border rounded-full px-4 py-0.5', row.type === 'ONLINE' ? 'bg-blue-500 text-white' : row.type === 'IN_PERSON' ? 'bg-green-500 text-white' : 'bg-gray-500 text-white']" class="text-xs! font-medium text-muted-foreground border border-border rounded-full px-4 py-0.5">
+                                <span
+                                    :class="[
+                                        'text-xs! font-medium border border-border rounded-full px-4 py-0.5',
+                                        row.type === 'ONLINE'
+                                            ? 'bg-secondary text-secondary-foreground'
+                                            : row.type === 'IN_PERSON'
+                                                ? 'bg-primary text-primary-foreground'
+                                                : 'bg-muted text-muted-foreground',
+                                    ]"
+                                >
                                     {{ $t('academy.type.' + (row.type || '').toLowerCase()) }}
                                 </span>
                             </div>
