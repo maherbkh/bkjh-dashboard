@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import type { Group, GroupForm, TableHeaderItem } from '~/types';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const { t } = useI18n();
 const { confirmDelete, confirmBulkDelete } = useConfirmDialog();
@@ -367,20 +372,32 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         <template #cell-companies="{ row }">
                             <div
                                 v-if="row.companies && row.companies.length > 0"
-                                class="text-xs font-medium"
+                                class="text-xs font-medium inline-flex items-baseline gap-1 flex-wrap"
                             >
-                                <div
-                                    v-for="groupCompany in row.companies.slice(0, 2)"
-                                    :key="groupCompany.id"
+                                <span>{{ row.companies[0].company?.name }}</span>
+                                <Tooltip
+                                    v-if="row.companies.length > 1"
                                 >
-                                    {{ groupCompany.company?.name }}
-                                </div>
-                                <span
-                                    v-if="row.companies.length > 2"
-                                    class="text-muted-foreground text-xs font-light"
-                                >
-                                    +{{ row.companies.length - 2 }} {{ $t('global.common.more') }}
-                                </span>
+                                    <TooltipTrigger as-child>
+                                        <span
+                                            class="text-muted-foreground font-light cursor-help underline decoration-dotted decoration-muted-foreground"
+                                        >
+                                            +{{ row.companies.length - 1 }}
+                                        </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent
+                                        class="max-w-sm"
+                                    >
+                                        <ul class="list-disc list-inside space-y-0.5 text-xs">
+                                            <li
+                                                v-for="(groupCompany, idx) in row.companies"
+                                                :key="groupCompany.id ?? idx"
+                                            >
+                                                {{ groupCompany.company?.name }}
+                                            </li>
+                                        </ul>
+                                    </TooltipContent>
+                                </Tooltip>
                             </div>
                             <span
                                 v-else
