@@ -42,7 +42,7 @@
                         :placeholder="$t('speaker.qualification_placeholder')"
                         :error="errors.qualification"
                         maxlength="500"
-                        rows="3"
+                        :rows="3"
                     />
                     <p class="text-xs text-muted-foreground">
                         {{ $t("speaker.qualification_help") }}
@@ -227,29 +227,32 @@ watch(
                                 } as MediaEntity;
                             }
                         }
-                        else if (data.value?.data) {
-                            avatarEntity = data.value.data;
-                            if (avatarUrl && !avatarEntity.url) {
+                        else {
+                            const response = data.value as { data?: MediaEntity } | null;
+                            if (response?.data) {
+                                avatarEntity = response.data;
+                                if (avatarUrl && !avatarEntity.url) {
+                                    avatarEntity = {
+                                        ...avatarEntity,
+                                        url: avatarUrl,
+                                    } as MediaEntity;
+                                }
+                            }
+                            else if (avatarUrl) {
                                 avatarEntity = {
-                                    ...avatarEntity,
+                                    id: avatarData,
+                                    uuid: avatarData,
+                                    filename: '',
+                                    storedName: '',
+                                    path: '',
                                     url: avatarUrl,
+                                    mimeType: 'image/png',
+                                    extension: '.png',
+                                    size: 0,
+                                    metadata: {},
+                                    accessLevel: AccessLevel.PUBLIC,
                                 } as MediaEntity;
                             }
-                        }
-                        else if (avatarUrl) {
-                            avatarEntity = {
-                                id: avatarData,
-                                uuid: avatarData,
-                                filename: '',
-                                storedName: '',
-                                path: '',
-                                url: avatarUrl,
-                                mimeType: 'image/png',
-                                extension: '.png',
-                                size: 0,
-                                metadata: {},
-                                accessLevel: AccessLevel.PUBLIC,
-                            } as MediaEntity;
                         }
                     }
                     catch (error) {
@@ -277,7 +280,7 @@ watch(
             }
             else if (avatarUrl && typeof avatarUrl === 'string') {
                 const urlParts = avatarUrl.split('/');
-                const filename = urlParts[urlParts.length - 1];
+                const filename = urlParts[urlParts.length - 1] ?? '';
                 const uuidMatch = filename.match(/^([a-f0-9-]+)/);
                 const uuid = uuidMatch ? uuidMatch[1] : '';
 
@@ -349,29 +352,32 @@ watch(
                                 } as MediaEntity;
                             }
                         }
-                        else if (data.value?.data) {
-                            logoEntity = data.value.data;
-                            if (logoUrl && !logoEntity.url) {
+                        else {
+                            const response = data.value as { data?: MediaEntity } | null;
+                            if (response?.data) {
+                                logoEntity = response.data;
+                                if (logoUrl && !logoEntity.url) {
+                                    logoEntity = {
+                                        ...logoEntity,
+                                        url: logoUrl,
+                                    } as MediaEntity;
+                                }
+                            }
+                            else if (logoUrl) {
                                 logoEntity = {
-                                    ...logoEntity,
+                                    id: logoData,
+                                    uuid: logoData,
+                                    filename: '',
+                                    storedName: '',
+                                    path: '',
                                     url: logoUrl,
+                                    mimeType: 'image/png',
+                                    extension: '.png',
+                                    size: 0,
+                                    metadata: {},
+                                    accessLevel: AccessLevel.PUBLIC,
                                 } as MediaEntity;
                             }
-                        }
-                        else if (logoUrl) {
-                            logoEntity = {
-                                id: logoData,
-                                uuid: logoData,
-                                filename: '',
-                                storedName: '',
-                                path: '',
-                                url: logoUrl,
-                                mimeType: 'image/png',
-                                extension: '.png',
-                                size: 0,
-                                metadata: {},
-                                accessLevel: AccessLevel.PUBLIC,
-                            } as MediaEntity;
                         }
                     }
                     catch (error) {
@@ -399,7 +405,7 @@ watch(
             }
             else if (logoUrl && typeof logoUrl === 'string') {
                 const urlParts = logoUrl.split('/');
-                const filename = urlParts[urlParts.length - 1];
+                const filename = urlParts[urlParts.length - 1] ?? '';
                 const uuidMatch = filename.match(/^([a-f0-9-]+)/);
                 const uuid = uuidMatch ? uuidMatch[1] : '';
 

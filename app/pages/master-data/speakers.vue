@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import type { Speaker, SpeakerForm, TableHeaderItem, ServerParamsTypes } from '~/types';
 import { createSpeakerSchema } from '~/composables/speakerSchema';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 import { useGermanDateFormat } from '~/composables/useGermanDateFormat';
 
@@ -55,12 +60,6 @@ const status = computed(() => (isLoading.value ? 'pending' : 'success'));
 const headerItems = computed((): TableHeaderItem[] => [
     {
         as: 'th',
-        name: t('speaker.avatar'),
-        id: 'avatar',
-        sortable: false,
-    },
-    {
-        as: 'th',
         name: t('global.name'),
         id: 'name',
         sortable: true,
@@ -75,7 +74,7 @@ const headerItems = computed((): TableHeaderItem[] => [
         as: 'th',
         name: t('academy.plural'),
         id: 'eventsCount',
-        sortable: true,
+        sortable: false,
     },
 ]);
 
@@ -106,15 +105,16 @@ const handleSearchSubmit = async () => {
     }, Date.now());
 };
 
-const handleSortChange = async (field: string, direction: 'asc' | 'desc') => {
-    sortBy.value = field;
-    sortDir.value = direction;
+async function handleSortChange(dir: 'asc' | 'desc', id: string) {
+    sortDir.value = dir;
+    sortBy.value = id;
+    currentPage.value = 1;
     await fetchItems(currentPage.value, perPage.value, {
         search: searchQuery.value,
         sort_by: sortBy.value,
         sort_dir: sortDir.value,
     }, Date.now());
-};
+}
 
 const handlePageChange = async (page: number) => {
     currentPage.value = page;
@@ -277,20 +277,6 @@ const handleRowSelected = (id: string, checked: boolean) => {
     }
 };
 
-// Toggle active status
-const handleToggleActive = async (speaker: Speaker) => {
-    try {
-        await updateItem(speaker.id, {
-            ...speaker,
-            isActive: !speaker.isActive,
-        });
-    // No need to manually refresh - useCrud handles it automatically
-    }
-    catch (error) {
-        console.error('Error toggling speaker status:', error);
-    }
-};
-
 // Get avatar image source
 const getAvatarImageSrc = (speaker: Speaker) => {
     // Priority 1: Use avatarUrl if provided by the API
@@ -379,40 +365,58 @@ const getAvatarImageSrc = (speaker: Speaker) => {
                         @update:selected-rows="(rows: (string | number)[]) => selectedRows = rows.map(String)"
                         @update:model-value="handleSelectAll"
                     >
-                        <template #cell-avatar="{ row }">
-                            <div class="flex items-center justify-center">
-                                <NuxtImg
-                                    v-if="getAvatarImageSrc(row)"
-                                    :src="getAvatarImageSrc(row)"
-                                    alt="Avatar"
-                                    class="w-10 h-10 rounded-full object-cover border border-border"
-                                />
-                                <div
-                                    v-else
-                                    class="w-10 h-10 rounded-full border border-border bg-muted flex items-center justify-center"
-                                >
-                                    <Icon
-                                        name="solar:user-outline"
-                                        class="size-5 text-muted-foreground"
-                                    />
-                                </div>
-                            </div>
-                        </template>
                         <template #cell-name="{ row }">
-                            <div class="font-medium">
-                                {{ row.name }}
-                            </div>
-                            <div
-                                v-if="row.qualification"
-                                class="text-sm text-muted-foreground truncate line-clamp-1 max-w-64"
-                            >
-                                {{ row.qualification }}
-                            </div>
-                            <div
-                                v-else
-                                class="text-muted-foreground text-sm"
-                            >
-                                {{ $t("common.not_specified") }}
+                            <div class="flex items-center gap-2">
+                                <div class="flex items-center justify-center">
+                                    <NuxtImg
+                                        v-if="getAvatarImageSrc(row)"
+                                        :src="getAvatarImageSrc(row)"
+                                        alt="Avatar"
+                                        class="w-10 h-10 rounded-full object-cover border border-border"
+                                    />
+                                    <div
+                                        v-else
+                                        class="w-10 h-10 rounded-full border border-border bg-muted flex items-center justify-center"
+                                    >
+                                        <Icon
+                                            name="solar:user-outline"
+                                            class="size-5 text-muted-foreground"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="font-medium">
+                                        {{ row.name }}
+                                    </div>
+                                    <Tooltip
+                                        v-if="row.qualification && row.qualification.length > 50"
+                                    >
+                                        <TooltipTrigger as-child>
+                                            <div
+                                                class="text-xs font-light text-muted-foreground truncate line-clamp-1 max-w-64 cursor-default"
+                                            >
+                                                {{ row.qualification }}
+                                            </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent
+                                            class="max-w-sm whitespace-normal"
+                                        >
+                                            {{ row.qualification }}
+                                        </TooltipContent>
+                                    </Tooltip>
+                                    <div
+                                        v-else-if="row.qualification"
+                                        class="text-xs font-light text-muted-foreground truncate line-clamp-1 max-w-64"
+                                    >
+                                        {{ row.qualification }}
+                                    </div>
+                                    <div
+                                        v-else
+                                        class="text-muted-foreground text-sm"
+                                    >
+                                        {{ $t("common.not_specified") }}
+                                    </div>
+                                </div>
                             </div>
                         </template>
                         <template #cell-isActive="{ row }">
@@ -438,7 +442,7 @@ const getAvatarImageSrc = (speaker: Speaker) => {
                                 >
                                     <Icon
                                         name="solar:pen-new-square-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                                     />
                                 </LazyButton>
                                 <LazyButton
@@ -450,7 +454,7 @@ const getAvatarImageSrc = (speaker: Speaker) => {
                                 >
                                     <Icon
                                         name="solar:trash-bin-trash-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-destructive"
                                     />
                                 </LazyButton>
                             </div>
