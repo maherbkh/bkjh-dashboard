@@ -7,22 +7,42 @@ export function createUserSchema(
     // Shared rules
     const baseSchema = {
         firstName: z
-            .string({ required_error: t('user.first_name') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('user.first_name') + ' ' + t('validation.required')
+                        : t('user.first_name') + ' ' + t('validation.invalid'),
+            })
             .min(1, t('user.first_name') + ' ' + t('validation.min_length', { min: 1 }))
             .max(255, t('user.first_name') + ' ' + t('validation.max_length', { max: 255 })),
 
         lastName: z
-            .string({ required_error: t('user.last_name') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('user.last_name') + ' ' + t('validation.required')
+                        : t('user.last_name') + ' ' + t('validation.invalid'),
+            })
             .min(1, t('user.last_name') + ' ' + t('validation.min_length', { min: 1 }))
             .max(255, t('user.last_name') + ' ' + t('validation.max_length', { max: 255 })),
 
         email: z
-            .string({ required_error: t('form.email') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('form.email') + ' ' + t('validation.required')
+                        : t('form.email') + ' ' + t('validation.invalid'),
+            })
             .email(t('form.email') + ' ' + t('validation.invalid'))
             .max(255, t('form.email') + ' ' + t('validation.max_length', { max: 255 })),
 
         username: z
-            .string({ required_error: t('user.username') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('user.username') + ' ' + t('validation.required')
+                        : t('user.username') + ' ' + t('validation.invalid'),
+            })
             .min(1, t('user.username') + ' ' + t('validation.min_length', { min: 1 }))
             .max(255, t('user.username') + ' ' + t('validation.max_length', { max: 255 })),
 
@@ -67,7 +87,13 @@ export function createUserSchema(
             case 'create':
             default:
                 return {
-                    password: z.string({ required_error: t('form.password') + ' ' + t('validation.required') })
+                    password: z
+                        .string({
+                            error: (issue: { input?: unknown }) =>
+                                issue.input === undefined
+                                    ? t('form.password') + ' ' + t('validation.required')
+                                    : t('form.password') + ' ' + t('validation.invalid'),
+                        })
                         .min(8, t('form.password') + ' ' + t('validation.min_length', { min: 8 }))
                         .max(255, t('form.password') + ' ' + t('validation.max_length', { max: 255 })),
                 };

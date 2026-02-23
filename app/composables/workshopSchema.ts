@@ -11,16 +11,31 @@ function getWorkshopScheduleItemSchema(t: (key: string, params?: Record<string, 
     return z.object({
         id: z.string().uuid().optional(),
         date: z
-            .string({ required_error: t('date.singular') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('date.singular') + ' ' + t('validation.required')
+                        : t('date.singular') + ' ' + t('validation.invalid'),
+            })
             .min(1, t('date.singular') + ' ' + t('validation.required'))
             .regex(/^\d{4}-\d{2}-\d{2}$/u, t('date.singular') + ' ' + t('validation.date_format')),
         startTime: z
-            .string({ required_error: t('event.start_time') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('event.start_time') + ' ' + t('validation.required')
+                        : t('event.start_time') + ' ' + t('validation.invalid'),
+            })
             .min(1, t('event.start_time') + ' ' + t('validation.required'))
             .regex(/^\d{2}:\d{2}$/u, t('event.start_time') + ' ' + t('validation.time_format'))
             .max(5),
         endTime: z
-            .string({ required_error: t('event.end_time') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('event.end_time') + ' ' + t('validation.required')
+                        : t('event.end_time') + ' ' + t('validation.invalid'),
+            })
             .min(1, t('event.end_time') + ' ' + t('validation.required'))
             .regex(/^\d{2}:\d{2}$/u, t('event.end_time') + ' ' + t('validation.time_format'))
             .max(5),
@@ -35,12 +50,22 @@ export function createWorkshopSchema(t: (key: string, params?: Record<string, st
     const ScheduleItem = getWorkshopScheduleItemSchema(t);
     return z.object({
         title: z
-            .string({ required_error: t('common.title') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('common.title') + ' ' + t('validation.required')
+                        : t('common.title') + ' ' + t('validation.invalid'),
+            })
             .trim()
             .min(1, t('common.title') + ' ' + t('validation.required'))
             .max(200, t('common.title') + ' ' + t('validation.max_length', { max: 200 })),
         maxCapacity: z
-            .number({ required_error: t('event.max_capacity') + ' ' + t('validation.required') })
+            .number({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('event.max_capacity') + ' ' + t('validation.required')
+                        : t('event.max_capacity') + ' ' + t('validation.invalid'),
+            })
             .int()
             .min(1, t('event.max_capacity') + ' ' + t('validation.min_value', { min: 1 }))
             .max(10000, t('event.max_capacity') + ' ' + t('validation.max_value', { max: 10000 })),

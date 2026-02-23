@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-// Follow existing validation style used in other CRUD schemas
-// - required_error messages composed with translation keys
+// Follow existing validation style used in other CRUD schemas (Zod v4)
+// - error callback for required/invalid type (issue.input === undefined)
 // - min/max constraints with translated messages
 // - uuid validation for foreign keys
 // - numeric ranges with int() where applicable
@@ -16,15 +16,30 @@ function toMinutes(time: string): number {
 function getScheduleItemSchema(t: (key: string, params?: Record<string, string | number>) => string) {
     return z.object({
         date: z
-            .string({ required_error: t('date.singular') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('date.singular') + ' ' + t('validation.required')
+                        : t('date.singular') + ' ' + t('validation.invalid'),
+            })
             .min(1, t('date.singular') + ' ' + t('validation.required'))
             .regex(/^\d{4}-\d{2}-\d{2}$/u, t('date.singular') + ' ' + t('validation.date_format')),
         startTime: z
-            .string({ required_error: t('event.start_time') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('event.start_time') + ' ' + t('validation.required')
+                        : t('event.start_time') + ' ' + t('validation.invalid'),
+            })
             .min(1, t('event.start_time') + ' ' + t('validation.required'))
             .regex(/^\d{2}:\d{2}$/u, t('event.start_time') + ' ' + t('validation.time_format')),
         endTime: z
-            .string({ required_error: t('event.end_time') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('event.end_time') + ' ' + t('validation.required')
+                        : t('event.end_time') + ' ' + t('validation.invalid'),
+            })
             .min(1, t('event.end_time') + ' ' + t('validation.required'))
             .regex(/^\d{2}:\d{2}$/u, t('event.end_time') + ' ' + t('validation.time_format')),
         note: z.string().max(500, t('note.singular') + ' ' + t('validation.max_length', { max: 500 })).optional().nullable(),
@@ -91,7 +106,10 @@ function getQuestionSchema(t: (key: string, params?: Record<string, string | num
 
     const OptionSchema = z.object({
         label: z
-            .string({ required_error: 'Option label is required' })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined ? 'Option label is required' : 'Option label must be text',
+            })
             .min(1, 'Option label is required')
             .max(200, 'Option label must be 200 characters or less'),
         value: z.union([z.string().max(100, 'Option value must be 100 characters or less'), z.null()]).optional().transform(v => v ?? undefined),
@@ -100,7 +118,10 @@ function getQuestionSchema(t: (key: string, params?: Record<string, string | num
     return z.object({
         id: z.string().uuid().optional(),
         label: z
-            .string({ required_error: 'Question label is required' })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined ? 'Question label is required' : 'Question label must be text',
+            })
             .min(1, 'Question label is required')
             .max(500, 'Question label must be 500 characters or less'),
         type: QuestionType,
@@ -177,16 +198,31 @@ export function createEventSchema(
 
     return z.object({
         title: z
-            .string({ required_error: t('event.title') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('event.title') + ' ' + t('validation.required')
+                        : t('event.title') + ' ' + t('validation.invalid'),
+            })
             .trim()
             .min(1, t('event.title') + ' ' + t('validation.min_length', { min: 1 }))
             .max(200, t('event.title') + ' ' + t('validation.max_length', { max: 200 })),
 
         description: z
-            .string({ required_error: t('form.description') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('form.description') + ' ' + t('validation.required')
+                        : t('form.description') + ' ' + t('validation.invalid'),
+            })
             .max(10000, t('form.description') + ' ' + t('validation.max_length', { max: 10000 })),
         shortDescription: z
-            .string({ required_error: t('event.short_description') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('event.short_description') + ' ' + t('validation.required')
+                        : t('event.short_description') + ' ' + t('validation.invalid'),
+            })
             .max(500, t('event.short_description') + ' ' + t('validation.max_length', { max: 500 })),
         certNote: z.string().max(5000, t('event.cert_note') + ' ' + t('validation.max_length', { max: 5000 })).optional(),
         topics: z.array(z.string()).optional().default([]).transform((arr) => {
@@ -209,7 +245,12 @@ export function createEventSchema(
         adminId: z.string().uuid(t('user.admin') + ' ' + t('validation.uuid')).optional(),
 
         maxCapacity: z
-            .number({ required_error: t('event.max_capacity') + ' ' + t('validation.required') })
+            .number({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('event.max_capacity') + ' ' + t('validation.required')
+                        : t('event.max_capacity') + ' ' + t('validation.invalid'),
+            })
             .int(t('event.max_capacity') + ' ' + t('validation.integer'))
             .min(1, t('event.max_capacity') + ' ' + t('validation.min_value', { min: 1 }))
             .max(10000, t('event.max_capacity') + ' ' + t('validation.max_value', { max: 10000 })),
@@ -237,15 +278,30 @@ export function updateEventSchema(
 
     return z.object({
         title: z
-            .string({ required_error: t('event.title') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('event.title') + ' ' + t('validation.required')
+                        : t('event.title') + ' ' + t('validation.invalid'),
+            })
             .trim()
             .min(1, t('event.title') + ' ' + t('validation.min_length', { min: 1 }))
             .max(200, t('event.title') + ' ' + t('validation.max_length', { max: 200 })),
         description: z
-            .string({ required_error: t('form.description') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('form.description') + ' ' + t('validation.required')
+                        : t('form.description') + ' ' + t('validation.invalid'),
+            })
             .max(10000, t('form.description') + ' ' + t('validation.max_length', { max: 10000 })),
         shortDescription: z
-            .string({ required_error: t('event.short_description') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('event.short_description') + ' ' + t('validation.required')
+                        : t('event.short_description') + ' ' + t('validation.invalid'),
+            })
             .max(500, t('event.short_description') + ' ' + t('validation.max_length', { max: 500 })),
         certNote: z.string().max(5000, t('event.cert_note') + ' ' + t('validation.max_length', { max: 5000 })).optional(),
         topics: z.array(z.string()).optional().default([]).transform((arr) => {
@@ -265,7 +321,12 @@ export function updateEventSchema(
             .max(10, t('event_target.singular') + ' ' + t('validation.max_length', { max: 10 })),
         adminId: z.string().uuid(t('user.admin') + ' ' + t('validation.uuid')).optional(),
         maxCapacity: z
-            .number({ required_error: t('event.max_capacity') + ' ' + t('validation.required') })
+            .number({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('event.max_capacity') + ' ' + t('validation.required')
+                        : t('event.max_capacity') + ' ' + t('validation.invalid'),
+            })
             .int(t('event.max_capacity') + ' ' + t('validation.integer'))
             .min(1, t('event.max_capacity') + ' ' + t('validation.min_value', { min: 1 }))
             .max(10000, t('event.max_capacity') + ' ' + t('validation.max_value', { max: 10000 })),

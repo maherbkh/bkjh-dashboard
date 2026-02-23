@@ -3,7 +3,12 @@ import { z } from 'zod';
 export function createSpeakerSchema(t: (key: string, params?: Record<string, string | number>) => string) {
     return z.object({
         name: z
-            .string({ required_error: t('global.name') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('global.name') + ' ' + t('validation.required')
+                        : t('global.name') + ' ' + t('validation.invalid'),
+            })
             .min(1, t('global.name') + ' ' + t('validation.min_length', { min: 1 }))
             .max(100, t('global.name') + ' ' + t('validation.max_length', { max: 100 })),
 

@@ -4,7 +4,10 @@ import { SettingValueType, AppDomain } from '~/types/settings';
 export function createSettingSchema(t: (key: string, params?: Record<string, string | number>) => string) {
     return z.object({
         key: z
-            .string({ required_error: t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined ? t('validation.required') : (t('validation.invalid_key_format') || 'Key must contain only lowercase letters, numbers, dots, underscores, and hyphens'),
+            })
             .min(1, t('validation.required'))
             .max(255, t('validation.max_length', { max: 255 }))
             .regex(
@@ -13,7 +16,10 @@ export function createSettingSchema(t: (key: string, params?: Record<string, str
             ),
 
         name: z
-            .string({ required_error: t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined ? t('validation.required') : t('validation.invalid'),
+            })
             .min(1, t('validation.required'))
             .max(255, t('validation.max_length', { max: 255 })),
 

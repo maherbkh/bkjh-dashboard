@@ -3,12 +3,22 @@ import { z } from 'zod';
 export function createTicketCrudSchema(t: (key: string, params?: Record<string, string | number>) => string) {
     return z.object({
         name: z
-            .string({ required_error: t('global.name') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('global.name') + ' ' + t('validation.required')
+                        : t('global.name') + ' ' + t('validation.invalid'),
+            })
             .min(2, t('global.name') + ' ' + t('validation.min_length', { min: 2 }))
             .max(100, t('global.name') + ' ' + t('validation.max_length', { max: 100 })),
 
         message: z
-            .string({ required_error: t('global.message') + ' ' + t('validation.required') })
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('global.message') + ' ' + t('validation.required')
+                        : t('global.message') + ' ' + t('validation.invalid'),
+            })
             .min(10, t('global.message') + ' ' + t('validation.min_length', { min: 10 }))
             .max(2000, t('global.message') + ' ' + t('validation.max_length', { max: 2000 })),
 
@@ -45,21 +55,27 @@ export function createTicketCrudSchema(t: (key: string, params?: Record<string, 
             .optional(),
 
         groupId: z
-            .number({ invalid_type_error: t('group.singular') + ' ' + t('validation.invalid') })
+            .number({
+                error: () => t('group.singular') + ' ' + t('validation.invalid'),
+            })
             .positive(t('group.singular') + ' ' + t('validation.positive'))
             .optional()
             .nullable(),
 
         categoryId: z
-            .number({ invalid_type_error: t('category.singular') + ' ' + t('validation.invalid') })
+            .number({
+                error: () => t('category.singular') + ' ' + t('validation.invalid'),
+            })
             .positive(t('category.singular') + ' ' + t('validation.positive'))
             .optional()
             .nullable(),
 
         status: z
             .enum(['pending', 'in_progress', 'resolved', 'closed'], {
-                required_error: t('common.status') + ' ' + t('validation.required'),
-                invalid_type_error: t('common.status') + ' ' + t('validation.invalid'),
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('common.status') + ' ' + t('validation.required')
+                        : t('common.status') + ' ' + t('validation.invalid'),
             })
             .default('pending'),
     });

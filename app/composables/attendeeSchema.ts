@@ -37,10 +37,20 @@ export function createAttendeeSchema(t: (key: string, params?: Record<string, st
             .optional()
             .nullable(),
         isEmployee: z
-            .boolean({ required_error: t('attendee.is_employee') + ' ' + t('validation.required') })
+            .boolean({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('attendee.is_employee') + ' ' + t('validation.required')
+                        : t('attendee.is_employee') + ' ' + t('validation.invalid'),
+            })
             .default(false),
         isActive: z
-            .boolean({ required_error: t('common.status') + ' ' + t('validation.required') })
+            .boolean({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined
+                        ? t('common.status') + ' ' + t('validation.required')
+                        : t('common.status') + ' ' + t('validation.invalid'),
+            })
             .default(true),
     }).refine((data) => {
         // If isEmployee is true, groupId and occupationId are required

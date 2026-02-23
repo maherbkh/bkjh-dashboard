@@ -3,18 +3,27 @@ import type { AdminForm } from '~/types';
 
 export const createAdminSchema = (t: (key: string, params?: Record<string, string | number>) => string) => {
     return z.object({
-        firstName: z.string()
-            .min(1, t('validation.required'))
+        firstName: z
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined ? t('validation.required') : t('validation.invalid'),
+            })
             .min(2, t('validation.min_length', { min: 2 }))
             .max(50, t('validation.max_length', { max: 50 })),
 
-        lastName: z.string()
-            .min(1, t('validation.required'))
+        lastName: z
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined ? t('validation.required') : t('validation.invalid'),
+            })
             .min(2, t('validation.min_length', { min: 2 }))
             .max(50, t('validation.max_length', { max: 50 })),
 
-        email: z.string()
-            .min(1, t('validation.required'))
+        email: z
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined ? t('validation.required') : t('validation.invalid'),
+            })
             .email(t('validation.invalid')),
 
         password: z.string()
@@ -46,8 +55,11 @@ export const createAdminSchema = (t: (key: string, params?: Record<string, strin
 // Create schema for admin creation (password required)
 export const createAdminCreateSchema = (t: (key: string, params?: Record<string, string | number>) => string) => {
     return createAdminSchema(t).extend({
-        password: z.string()
-            .min(1, t('validation.required'))
+        password: z
+            .string({
+                error: (issue: { input?: unknown }) =>
+                    issue.input === undefined ? t('validation.required') : t('validation.invalid'),
+            })
             .min(8, t('validation.min_length', { min: 8 }))
             .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
                 message: t('validation.password_strength'),
