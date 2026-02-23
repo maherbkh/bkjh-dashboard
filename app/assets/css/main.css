@@ -317,6 +317,40 @@
 		scrollbar-color: rgba(0, 0, 0, 0.5) transparent;
 	}
 
+	/* Global scrollbar styling: add class "scroll-app" to any scrollable container (use with overflow-y-auto or overflow-auto). Plain CSS so Tailwind v4 content scan does not affect plugin utility generation. */
+	.scroll-app {
+		/* Firefox */
+		scrollbar-width: thin;
+		scrollbar-color: #d1d5db #f3f4f6;
+	}
+	.scroll-app::-webkit-scrollbar-button {
+		display: none;
+		height: 0;
+		width: 0;
+	}
+	.scroll-app::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+		appearance: none;
+	}
+	.scroll-app::-webkit-scrollbar-track {
+		background: #f3f4f6;
+		border-radius: 9999px;
+	}
+	.scroll-app::-webkit-scrollbar-thumb {
+		background: #d1d5db;
+		border-radius: 9999px;
+	}
+	.dark .scroll-app {
+		scrollbar-color: #374151 #111827;
+	}
+	.dark .scroll-app::-webkit-scrollbar-track {
+		background: #111827;
+	}
+	.dark .scroll-app::-webkit-scrollbar-thumb {
+		background: #374151;
+	}
+
 	.table {
 		@apply w-full text-left;
 

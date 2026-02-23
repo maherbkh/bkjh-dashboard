@@ -19,9 +19,10 @@
             </DialogHeader>
 
             <form
-                class="space-y-4"
+                class="flex min-h-0 flex-1 flex-col"
                 @submit.prevent="handleSubmit"
             >
+                <div class="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
                 <div class="space-y-2">
                     <Label for="name">{{ $t("global.name") }}</Label>
                     <FormItemInput
@@ -92,8 +93,9 @@
                         <Label for="isActive">{{ isActive ? $t("common.active") : $t("common.inactive") }}</Label>
                     </div>
                 </div>
+                </div>
 
-                <DialogFooter>
+                <DialogFooter class="shrink-0">
                     <Button
                         type="button"
                         variant="outline"

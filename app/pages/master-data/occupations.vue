@@ -64,11 +64,6 @@ const headerItems = computed(() => [
         name: t('common.status'),
         id: 'isActive',
     },
-    {
-        as: 'th',
-        name: t('common.created_at'),
-        id: 'created_at',
-    },
 ]);
 
 // Initialize data
@@ -367,11 +362,6 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                 {{ row.isActive ? $t("common.active") : $t("common.inactive") }}
                             </Badge>
                         </template>
-
-                        <template #cell-created_at="{ row }">
-                            {{ useGermanDateFormat().formatDate(row.createdAt) }}
-                        </template>
-
                         <template #cell-actions="{ row }">
                             <div class="flex justify-end gap-2">
                                 <LazyButton

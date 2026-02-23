@@ -329,12 +329,31 @@ const getCoverImageSrc = (event: EventData) => {
                                         class="hover:underline hover:text-primary flex min-w-0 max-w-64 items-center gap-2 font-medium"
                                     >
                                         <span class="min-w-0 truncate text-xs!">{{ row.title }}</span>
-                                        <Icon
+                                        <Tooltip
                                             v-if="row.workshops && row.workshops.length > 0"
-                                            name="solar:server-2-outline"
-                                            :title="$t('academy.events.has_workshops')"
-                                            class="size-4! shrink-0 text-success"
-                                        />
+                                        >
+                                            <TooltipTrigger as-child>
+                                                <span class="inline-flex shrink-0 cursor-default">
+                                                    <Icon
+                                                        name="solar:server-2-outline"
+                                                        class="size-4! shrink-0 text-success"
+                                                        aria-hidden
+                                                    />
+                                                </span>
+                                            </TooltipTrigger>
+                                            <TooltipContent class="max-w-xs">
+                                                <p class="font-medium mb-1">{{ $t('academy.events.has_workshops') }}</p>
+                                                <ul class="list-disc list-inside space-y-0.5 text-xs">
+                                                    <li
+                                                        v-for="(w, idx) in row.workshops"
+                                                        :key="w.id ?? idx"
+                                                    >
+                                                        {{ w.title ?? $t('common.not_specified') }}
+                                                        <span>({{ w.maxCapacity ?? 0 }})</span>
+                                                    </li>
+                                                </ul>
+                                            </TooltipContent>
+                                        </Tooltip>
                                     </NuxtLink>
                                     <div
                                         v-if="row.schedules && row.schedules.length > 0"
@@ -375,19 +394,37 @@ const getCoverImageSrc = (event: EventData) => {
                         </template>
 
                         <template #cell-eventCategory="{ row }">
-                            <div class="font-medium max-w-48 line-clamp-1">
-                                <span v-if="row.categories && row.categories.length > 0">
-                                    {{ row.categories.map((cat: any) => cat.eventCategory?.name || cat.name).join(', ') }}
-                                </span>
-                                <span
-                                    v-else-if="row.eventCategory"
-                                >{{ row.eventCategory.name }}</span>
+                            <div class="font-medium text-xs max-w-48 line-clamp-1">
+                                <Tooltip
+                                    v-if="(row.categories && row.categories.length > 0) || row.eventCategory"
+                                >
+                                    <TooltipTrigger as-child>
+                                        <span
+                                            class="block min-w-0 cursor-default truncate"
+                                        >
+                                            <template v-if="row.categories && row.categories.length > 0">
+                                                {{ row.categories.map((cat: any) => cat.eventCategory?.name || cat.name).join(', ') }}
+                                            </template>
+                                            <template v-else-if="row.eventCategory">
+                                                {{ row.eventCategory.name }}
+                                            </template>
+                                        </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent class="max-w-xs">
+                                        <template v-if="row.categories && row.categories.length > 0">
+                                            {{ row.categories.map((cat: any) => cat.eventCategory?.name || cat.name).join(', ') }}
+                                        </template>
+                                        <template v-else-if="row.eventCategory">
+                                            {{ row.eventCategory.name }}
+                                        </template>
+                                    </TooltipContent>
+                                </Tooltip>
                                 <span
                                     v-else
                                     class="text-muted-foreground"
                                 >{{ $t('common.not_assigned') }}</span>
                             </div>
-                            <div class="max-w-48 min-w-0 text-muted-foreground text-xs">
+                            <div class="mt-0.5 max-w-48 min-w-0 text-muted-foreground text-xs">
                                 <template v-if="row.targets && row.targets.length > 0">
                                     <Tooltip v-if="row.targets.length > 1">
                                         <TooltipTrigger as-child>
@@ -423,11 +460,11 @@ const getCoverImageSrc = (event: EventData) => {
                         <template #cell-maxCapacity="{ row }">
                             <div class="flex flex-col gap-1">
                                 <div class="flex items-center gap-0.5">
-                                    <div
-                                        class="flex items-center justify-center rounded-full p-0.5 cursor-default! font-normal border border-border! aspect-square size-5! text-xs"
+                                    <span
+                                        class="min-w-6 text-xs! flex items-center justify-center rounded-md px-1 py-0.5 cursor-default! font-normal border border-border!"
                                     >
                                         {{ row.maxCapacity || 0 }}
-                                    </div>
+                                    </span>
                                     <span class="text-muted-foreground ml-1.5 text-xs font-normal">{{ $t('event.attendees') }}</span>
                                 </div>
                             </div>

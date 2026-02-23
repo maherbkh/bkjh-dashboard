@@ -11,7 +11,7 @@ const props = defineProps<{
     <div
         data-slot="sidebar-content"
         data-sidebar="content"
-        :class="cn('flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden no-scrollbar-arrows scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thin', props.class)"
+        :class="cn('flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden scroll-app', props.class)"
     >
         <slot />
     </div>

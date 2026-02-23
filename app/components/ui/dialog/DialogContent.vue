@@ -34,7 +34,9 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
                 )"
             @open-auto-focus="(event) => event.preventDefault()"
         >
-            <div class="min-h-0 flex-1 overflow-y-auto p-6">
+            <div
+                class="flex min-h-0 flex-1 flex-col overflow-hidden [&>*:first-child]:shrink-0 [&>*:nth-child(2)]:min-h-0 [&>*:nth-child(2)]:flex-1 [&>*:nth-child(3)]:shrink-0"
+            >
                 <slot />
             </div>
 

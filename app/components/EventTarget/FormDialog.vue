@@ -18,114 +18,116 @@
                 </DialogDescription>
             </DialogHeader>
 
-            <form
-                class="space-y-4"
-                @submit.prevent="handleSubmit"
-            >
-                <div class="space-y-2">
-                    <Label for="code">{{ $t("event_target.code") }}</Label>
-                    <FormItemInput
-                        id="code"
-                        v-model="code"
-                        :placeholder="$t('event_target.code_placeholder')"
-                        :error="errors.code"
-                        required
-                        maxlength="10"
-                    />
-                    <p class="text-xs text-muted-foreground">
-                        {{ $t("event_target.code_help") }}
-                    </p>
-                </div>
-
-                <div class="space-y-2">
-                    <Label for="name">{{ $t("global.name") }}</Label>
-                    <FormItemInput
-                        id="name"
-                        v-model="name"
-                        :placeholder="$t('event_target.name_placeholder')"
-                        :error="errors.name"
-                        required
-                    />
-                </div>
-
-                <div class="space-y-2">
-                    <Label for="slug">{{ $t("event_target.slug") }}</Label>
-                    <FormItemInput
-                        id="slug"
-                        v-model="slug"
-                        :placeholder="$t('event_target.slug_placeholder')"
-                        :error="errors.slug"
-                    />
-                    <p class="text-xs text-muted-foreground">
-                        {{ $t("event_target.slug_help") }}
-                    </p>
-                </div>
-
-                <div class="space-y-2">
-                    <Label for="position">{{ $t("common.position") }}</Label>
-                    <FormItemInput
-                        id="position"
-                        v-model.number="position"
-                        type="number"
-                        :placeholder="$t('event_target.position_placeholder')"
-                        :error="errors.position"
-                        min="0"
-                    />
-                </div>
-
-                <div class="space-y-2">
-                    <Label for="scope">{{ $t("event_target.scope") }}</Label>
-                    <FormItemSelect
-                        id="scope"
-                        v-model="scope"
-                        :title="$t('event_target.scope')"
-                        :placeholder="$t('action.select') + ' ' + $t('event_target.scope')"
-                        :errors="errors.scope ? [errors.scope] : []"
-                        :data="[
-                            { id: 'INT', name: $t('event_target.scope_internal') },
-                            { id: 'EXT', name: $t('event_target.scope_external') },
-                            { id: 'ALL', name: $t('event_target.scope_all') },
-                        ]"
-                        key-value="id"
-                        name-value="name"
-                    />
-                </div>
-
-                <DialogFooter>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        :disabled="isSubmitting"
-                        @click="handleClose"
-                    >
-                        {{ $t("action.cancel") }}
-                    </Button>
-                    <Button
-                        v-if="dialogMode === 'add'"
-                        type="button"
-                        variant="outline"
-                        :disabled="isSubmitting"
-                        @click="handleSubmitAndAddNew"
-                    >
-                        {{ $t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new') }}
-                    </Button>
-                    <Button
-                        type="submit"
-                        :disabled="isSubmitting"
-                    >
-                        <Icon
-                            v-if="isSubmitting"
-                            name="solar:refresh-linear"
-                            class="mr-2 h-4 w-4 animate-spin"
+            <div class="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4 pr-5 scroll-app">
+                <form
+                    class="space-y-4"
+                    @submit.prevent="handleSubmit"
+                >
+                    <div class="space-y-2">
+                        <Label for="code">{{ $t("event_target.code") }}</Label>
+                        <FormItemInput
+                            id="code"
+                            v-model="code"
+                            :placeholder="$t('event_target.code_placeholder')"
+                            :error="errors.code"
+                            required
+                            maxlength="10"
                         />
-                        {{
-                            dialogMode === "add"
-                                ? $t("action.add")
-                                : $t("action.update")
-                        }}
-                    </Button>
-                </DialogFooter>
-            </form>
+                        <p class="text-xs text-muted-foreground">
+                            {{ $t("event_target.code_help") }}
+                        </p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <Label for="name">{{ $t("global.name") }}</Label>
+                        <FormItemInput
+                            id="name"
+                            v-model="name"
+                            :placeholder="$t('event_target.name_placeholder')"
+                            :error="errors.name"
+                            required
+                        />
+                    </div>
+
+                    <div class="space-y-2">
+                        <Label for="slug">{{ $t("event_target.slug") }}</Label>
+                        <FormItemInput
+                            id="slug"
+                            v-model="slug"
+                            :placeholder="$t('event_target.slug_placeholder')"
+                            :error="errors.slug"
+                        />
+                        <p class="text-xs text-muted-foreground">
+                            {{ $t("event_target.slug_help") }}
+                        </p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <Label for="position">{{ $t("common.position") }}</Label>
+                        <FormItemInput
+                            id="position"
+                            v-model.number="position"
+                            type="number"
+                            :placeholder="$t('event_target.position_placeholder')"
+                            :error="errors.position"
+                            min="0"
+                        />
+                    </div>
+
+                    <div class="space-y-2">
+                        <Label for="scope">{{ $t("event_target.scope") }}</Label>
+                        <FormItemSelect
+                            id="scope"
+                            v-model="scope"
+                            :title="$t('event_target.scope')"
+                            :placeholder="$t('action.select') + ' ' + $t('event_target.scope')"
+                            :errors="errors.scope ? [errors.scope] : []"
+                            :data="[
+                                { id: 'INT', name: $t('event_target.scope_internal') },
+                                { id: 'EXT', name: $t('event_target.scope_external') },
+                                { id: 'ALL', name: $t('event_target.scope_all') },
+                            ]"
+                            key-value="id"
+                            name-value="name"
+                        />
+                    </div>
+
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            :disabled="isSubmitting"
+                            @click="handleClose"
+                        >
+                            {{ $t("action.cancel") }}
+                        </Button>
+                        <Button
+                            v-if="dialogMode === 'add'"
+                            type="button"
+                            variant="outline"
+                            :disabled="isSubmitting"
+                            @click="handleSubmitAndAddNew"
+                        >
+                            {{ $t('action.save') + ' ' + $t('common.and') + ' ' + $t('action.add') + ' ' + $t('common.new') }}
+                        </Button>
+                        <Button
+                            type="submit"
+                            :disabled="isSubmitting"
+                        >
+                            <Icon
+                                v-if="isSubmitting"
+                                name="solar:refresh-linear"
+                                class="mr-2 h-4 w-4 animate-spin"
+                            />
+                            {{
+                                dialogMode === "add"
+                                    ? $t("action.add")
+                                    : $t("action.update")
+                            }}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </div>
         </DialogContent>
     </Dialog>
 </template>

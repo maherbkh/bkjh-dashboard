@@ -176,8 +176,9 @@ const handleClose = () => {
                     {{ dialogDescription }}
                 </DialogDescription>
             </DialogHeader>
-            <form class="space-y-4">
-                <div class="grid md:grid-cols-12 gap-4 items-start">
+            <div class="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4 pr-5 scroll-app">
+                <form class="space-y-4">
+                    <div class="grid md:grid-cols-12 gap-4 items-start">
                     <FormItemInput
                         id="firstName"
                         v-model="firstName"
@@ -264,8 +265,9 @@ const handleClose = () => {
                         :false-label="$t('user.not_super_admin')"
                         :errors="errors.isSuperAdmin ? [errors.isSuperAdmin] : []"
                     />
-                </div>
-            </form>
+                    </div>
+                </form>
+            </div>
             <DialogFooter class="gap-2">
                 <Button
                     type="button"

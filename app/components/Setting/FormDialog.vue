@@ -398,7 +398,7 @@ const handleClose = () => {
                     {{ dialogDescription }}
                 </DialogDescription>
             </DialogHeader>
-            <div class="flex-1 overflow-y-auto overflow-x-hidden pr-1 no-scrollbar-arrows scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-900">
+            <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 pr-5 scroll-app">
                 <form class="space-y-4">
                     <div class="grid md:grid-cols-12 gap-4">
                         <FormItemInput

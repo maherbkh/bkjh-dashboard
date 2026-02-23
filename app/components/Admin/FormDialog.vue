@@ -186,111 +186,113 @@ const handleClose = () => {
                     {{ dialogDescription }}
                 </DialogDescription>
             </DialogHeader>
-            <form class="space-y-4">
-                <div class="grid md:grid-cols-12 gap-4 items-start">
-                    <FormItemInput
-                        id="firstName"
-                        v-model="firstName"
-                        class="md:col-span-6"
-                        v-bind="firstNameAttrs"
-                        :title="$t('admin.first_name')"
-                        :placeholder="$t('admin.first_name_placeholder')"
-                        :errors="errors.firstName ? [errors.firstName] : []"
-                        required
-                    />
-                    <FormItemInput
-                        id="lastName"
-                        v-model="lastName"
-                        class="md:col-span-6"
-                        v-bind="lastNameAttrs"
-                        :title="$t('admin.last_name')"
-                        :placeholder="$t('admin.last_name_placeholder')"
-                        :errors="errors.lastName ? [errors.lastName] : []"
-                        required
-                    />
-                    <FormItemInput
-                        id="email"
-                        v-model="email"
-                        class="md:col-span-6"
-                        v-bind="emailAttrs"
-                        type="email"
-                        :title="$t('form.email')"
-                        :placeholder="$t('form.email_placeholder')"
-                        :errors="errors.email ? [errors.email] : []"
-                        required
-                    />
-                    <FormItemInput
-                        v-if="dialogMode === 'add'"
-                        id="password"
-                        v-model="password"
-                        class="md:col-span-6"
-                        v-bind="passwordAttrs"
-                        type="password"
-                        use-show-password
-                        :title="$t('form.password')"
-                        :placeholder="$t('form.password_placeholder')"
-                        :errors="errors.password ? [errors.password] : []"
-                        required
-                    />
-                    <FormItemInput
-                        v-if="dialogMode === 'edit'"
-                        id="password"
-                        v-model="password"
-                        class="md:col-span-6"
-                        v-bind="passwordAttrs"
-                        type="password"
-                        use-show-password
-                        :title="$t('form.password')"
-                        :placeholder="$t('admin.password_change_placeholder')"
-                        :errors="errors.password ? [errors.password] : []"
-                    />
-                    <FormItemSelect
-                        id="occupationId"
-                        v-model="occupationId"
-                        class="md:col-span-6"
-                        v-bind="occupationIdAttrs"
-                        :title="$t('occupation.singular')"
-                        :data="occupations"
-                        key-value="id"
-                        name-value="name"
-                        :placeholder="$t('occupation.singular_placeholder')"
-                        :errors="errors.occupationId ? [errors.occupationId] : []"
-                    />
-                    <FormItemMultiSelect
-                        id="apps"
-                        v-model="apps"
-                        class="md:col-span-6"
-                        v-bind="appsAttrs"
-                        :title="$t('admin.apps')"
-                        :data="availableApps"
-                        key-value="id"
-                        name-value="name"
-                        :placeholder="$t('admin.apps_placeholder')"
-                        :errors="errors.apps ? [errors.apps] : []"
-                        required
-                    />
-                    <FormItemSwitch
-                        id="isActive"
-                        v-model="isActive"
-                        class="md:col-span-6"
-                        v-bind="isActiveAttrs"
-                        :title="$t('common.status')"
-                        :true-label="$t('common.active')"
-                        :false-label="$t('common.inactive')"
-                        :errors="errors.isActive ? [errors.isActive] : []"
-                    />
-                    <FormItemSwitch
-                        id="isSuperAdmin"
-                        v-model="isSuperAdmin"
-                        class="md:col-span-6"
-                        v-bind="isSuperAdminAttrs"
-                        :title="$t('admin.is_super_admin')"
-                        :true-label="$t('admin.super_admin')"
-                        :false-label="$t('admin.not_super_admin')"
-                        :errors="errors.isSuperAdmin ? [errors.isSuperAdmin] : []"
-                    />
-                </div>
-            </form>
+            <div class="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4 pr-5 scroll-app">
+                <form class="space-y-4">
+                    <div class="grid md:grid-cols-12 gap-4 items-start">
+                        <FormItemInput
+                            id="firstName"
+                            v-model="firstName"
+                            class="md:col-span-6"
+                            v-bind="firstNameAttrs"
+                            :title="$t('admin.first_name')"
+                            :placeholder="$t('admin.first_name_placeholder')"
+                            :errors="errors.firstName ? [errors.firstName] : []"
+                            required
+                        />
+                        <FormItemInput
+                            id="lastName"
+                            v-model="lastName"
+                            class="md:col-span-6"
+                            v-bind="lastNameAttrs"
+                            :title="$t('admin.last_name')"
+                            :placeholder="$t('admin.last_name_placeholder')"
+                            :errors="errors.lastName ? [errors.lastName] : []"
+                            required
+                        />
+                        <FormItemInput
+                            id="email"
+                            v-model="email"
+                            class="md:col-span-6"
+                            v-bind="emailAttrs"
+                            type="email"
+                            :title="$t('form.email')"
+                            :placeholder="$t('form.email_placeholder')"
+                            :errors="errors.email ? [errors.email] : []"
+                            required
+                        />
+                        <FormItemInput
+                            v-if="dialogMode === 'add'"
+                            id="password"
+                            v-model="password"
+                            class="md:col-span-6"
+                            v-bind="passwordAttrs"
+                            type="password"
+                            use-show-password
+                            :title="$t('form.password')"
+                            :placeholder="$t('form.password_placeholder')"
+                            :errors="errors.password ? [errors.password] : []"
+                            required
+                        />
+                        <FormItemInput
+                            v-if="dialogMode === 'edit'"
+                            id="password"
+                            v-model="password"
+                            class="md:col-span-6"
+                            v-bind="passwordAttrs"
+                            type="password"
+                            use-show-password
+                            :title="$t('form.password')"
+                            :placeholder="$t('admin.password_change_placeholder')"
+                            :errors="errors.password ? [errors.password] : []"
+                        />
+                        <FormItemSelect
+                            id="occupationId"
+                            v-model="occupationId"
+                            class="md:col-span-6"
+                            v-bind="occupationIdAttrs"
+                            :title="$t('occupation.singular')"
+                            :data="occupations"
+                            key-value="id"
+                            name-value="name"
+                            :placeholder="$t('occupation.singular_placeholder')"
+                            :errors="errors.occupationId ? [errors.occupationId] : []"
+                        />
+                        <FormItemMultiSelect
+                            id="apps"
+                            v-model="apps"
+                            class="md:col-span-6"
+                            v-bind="appsAttrs"
+                            :title="$t('admin.apps')"
+                            :data="availableApps"
+                            key-value="id"
+                            name-value="name"
+                            :placeholder="$t('admin.apps_placeholder')"
+                            :errors="errors.apps ? [errors.apps] : []"
+                            required
+                        />
+                        <FormItemSwitch
+                            id="isActive"
+                            v-model="isActive"
+                            class="md:col-span-6"
+                            v-bind="isActiveAttrs"
+                            :title="$t('common.status')"
+                            :true-label="$t('common.active')"
+                            :false-label="$t('common.inactive')"
+                            :errors="errors.isActive ? [errors.isActive] : []"
+                        />
+                        <FormItemSwitch
+                            id="isSuperAdmin"
+                            v-model="isSuperAdmin"
+                            class="md:col-span-6"
+                            v-bind="isSuperAdminAttrs"
+                            :title="$t('admin.is_super_admin')"
+                            :true-label="$t('admin.super_admin')"
+                            :false-label="$t('admin.not_super_admin')"
+                            :errors="errors.isSuperAdmin ? [errors.isSuperAdmin] : []"
+                        />
+                    </div>
+                </form>
+            </div>
             <DialogFooter class="gap-2">
                 <Button
                     type="button"

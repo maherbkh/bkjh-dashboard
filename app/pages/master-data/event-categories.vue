@@ -69,11 +69,6 @@ const headerItems = computed(() => [
         name: t('event_category.parent'),
         id: 'parent',
     },
-    {
-        as: 'th',
-        name: t('common.created_at'),
-        id: 'created_at',
-    },
 ]);
 
 // Initialize data
@@ -388,11 +383,6 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                 —
                             </div>
                         </template>
-
-                        <template #cell-created_at="{ row }">
-                            {{ useGermanDateFormat().formatDate(row.createdAt) }}
-                        </template>
-
                         <template #cell-actions="{ row }">
                             <div class="flex justify-end gap-2">
                                 <LazyButton

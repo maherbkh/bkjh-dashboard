@@ -144,8 +144,9 @@ const addresses = computed(() => resourcesStore.addresses);
                     {{ dialogDescription }}
                 </DialogDescription>
             </DialogHeader>
-            <form class="space-y-4">
-                <div class="grid md:grid-cols-12 gap-4">
+            <div class="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4 pr-5 scroll-app">
+                <form class="space-y-4">
+                    <div class="grid md:grid-cols-12 gap-4">
                     <FormItemInput
                         id="name"
                         v-model="name"
@@ -233,8 +234,9 @@ const addresses = computed(() => resourcesStore.addresses);
                         name-value="fullAddress"
                         empty-text="No addresses found"
                     />
-                </div>
-            </form>
+                    </div>
+                </form>
+            </div>
             <DialogFooter class="gap-2">
                 <Button
                     type="button"

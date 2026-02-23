@@ -37,11 +37,13 @@ const handleOpenChange = (value: boolean) => {
                     {{ description }}
                 </DialogDescription>
             </DialogHeader>
-            <!-- Content slot -->
-            <div class="grid gap-4 py-4">
-                <slot name="content" />
+            <!-- Content slot (scrollable middle) -->
+            <div class="min-h-0 overflow-y-auto p-4">
+                <div class="grid gap-4">
+                    <slot name="content" />
+                </div>
             </div>
-            <!-- Footer slot -->
+            <!-- Footer slot (fixed at bottom) -->
             <DialogFooter>
                 <slot name="footer" />
             </DialogFooter>
