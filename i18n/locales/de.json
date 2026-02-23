@@ -12,7 +12,7 @@
       },
       "has_workshops": "Hat Workshops"
     },
-    "information": "Veranstaltungsinformationen",
+    "information": "informationen",
     "location": "Standort",
     "plural": "Veranstaltungen",
     "room": "Raum",
@@ -41,7 +41,7 @@
       "rejected": "Abgelehnt",
       "recent_registrations": "Aktuelle Anmeldungen",
       "recent_registrations_description": "Ausstehende Veranstaltungsanmeldungen, die eine Aktion erfordern",
-      "event_info": "Veranstaltungsinformationen"
+      "event_info": "informationen"
     }
   },
   "action": {
@@ -454,7 +454,7 @@
     "edit": "Veranstaltung bearbeiten",
     "end_time": "Endzeit",
     "location": "Veranstaltungsort",
-    "max_capacity": "Maximale Kapazität",
+    "max_capacity": "Kapazität",
     "room": "Raum",
     "schedule": "Zeitplan",
     "schedules": "Zeitpläne",
@@ -465,8 +465,8 @@
     "topic": "Thema",
     "topic_placeholder": "Thema eingeben",
     "start_time": "Startzeit",
-    "title": "Veranstaltungstitel",
-    "type": "Veranstaltungstyp",
+    "title": "Titel",
+    "type": "Typ",
     "for_kids": "Für Kinder",
     "disable_registration": "Registrierung deaktivieren",
     "is_full": "Ist voll",

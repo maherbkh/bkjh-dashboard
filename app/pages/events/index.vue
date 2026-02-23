@@ -7,6 +7,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { toast } from 'vue-sonner';
 
 const { t } = useI18n();
@@ -317,13 +322,13 @@ const getCoverImageSrc = (event: EventData) => {
                                         />
                                     </div>
                                 </div>
-                                <div class="font-medium ">
+                                <div class="min-w-0 flex-1 font-medium">
                                     <NuxtLink
                                         :to="`/events/${row.id}/show`"
                                         :title="row.title"
-                                        class="hover:underline hover:text-primary truncate max-w-64 line-clamp-1 flex items-center gap-2"
+                                        class="hover:underline hover:text-primary flex min-w-0 max-w-64 items-center gap-2 font-medium"
                                     >
-                                        <div>{{ row.title }}</div>
+                                        <span class="min-w-0 truncate text-xs!">{{ row.title }}</span>
                                         <Icon v-if="row.workshops && row.workshops.length > 0"
                                             name="solar:server-2-outline"
                                             :title="$t('academy.events.has_workshops')"
@@ -332,7 +337,7 @@ const getCoverImageSrc = (event: EventData) => {
                                     </NuxtLink>
                                     <div
                                         v-if="row.schedules && row.schedules.length > 0"
-                                        class="mt-1 text-muted-foreground flex items-center gap-1 whitespace-nowrap text-xs"
+                                        class="mt-1 text-muted-foreground flex items-center gap-1 whitespace-nowrap text-xs font-light"
                                     >
                                         <div>
                                             {{ formatDateShort(row.schedules[0]?.date) }}
@@ -352,9 +357,11 @@ const getCoverImageSrc = (event: EventData) => {
                         </template>
 
                         <template #cell-type="{ row }">
-                            <Badge variant="outline">
-                                {{ (row.type || '').toString() }}
-                            </Badge>
+                            <div>
+                                <span :class="['text-xs! font-medium text-muted-foreground border border-border rounded-full px-4 py-0.5', row.type === 'ONLINE' ? 'bg-blue-500 text-white' : row.type === 'IN_PERSON' ? 'bg-green-500 text-white' : 'bg-gray-500 text-white']" class="text-xs! font-medium text-muted-foreground border border-border rounded-full px-4 py-0.5">
+                                    {{ $t('academy.type.' + (row.type || '').toLowerCase()) }}
+                                </span>
+                            </div>
                         </template>
 
                         <template #cell-eventCategory="{ row }">
@@ -370,32 +377,47 @@ const getCoverImageSrc = (event: EventData) => {
                                     class="text-muted-foreground"
                                 >{{ $t('common.not_assigned') }}</span>
                             </div>
-                            <div class-font-m="normal truncat text-sm">
-                                <span
-                                    v-if="row.targets && row.targets.length > 0"
-                                    class="text-muted-foreground text-sm"
-                                >{{ row.targets.map((target: any) => target.eventTarget?.name || target.name).join(', ') }}</span>
+                            <div class="max-w-48 min-w-0 text-muted-foreground text-xs">
+                                <template v-if="row.targets && row.targets.length > 0">
+                                    <Tooltip v-if="row.targets.length > 1">
+                                        <TooltipTrigger as-child>
+                                            <div class="flex min-w-0 items-center gap-1 overflow-hidden">
+                                                <span class="min-w-0 truncate">
+                                                    {{ row.targets.map((t: any) => t.eventTarget?.name || t.name).join(', ') }}
+                                                </span>
+                                                <span class="shrink-0">+{{ row.targets.length - 1 }}</span>
+                                            </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent class="max-w-xs">
+                                            {{ row.targets.map((t: any) => t.eventTarget?.name || t.name).join(', ') }}
+                                        </TooltipContent>
+                                    </Tooltip>
+                                    <div
+                                        v-else
+                                        class="min-w-0 truncate"
+                                    >
+                                        {{ row.targets.map((t: any) => t.eventTarget?.name || t.name).join(', ') }}
+                                    </div>
+                                </template>
                                 <span
                                     v-else-if="row.eventTarget"
-                                    class="text-muted-foreground text-sm"
+                                    class="block truncate"
                                 >{{ row.eventTarget.name }}</span>
                                 <span
                                     v-else
-                                    class="text-muted-foreground text-sm"
+                                    class="block truncate"
                                 >{{ $t('common.not_assigned') }}</span>
                             </div>
                         </template>
 
                         <template #cell-maxCapacity="{ row }">
                             <div class="flex flex-col gap-1">
-                                <div>
-                                    <Button
-                                        variant="secondary"
-                                        size="icon-sm"
-                                        class="cursor-default! font-normal border border-border! aspect-square size-5! text-xs"
+                                <div class="flex items-center gap-0.5">
+                                    <div
+                                        class="flex items-center justify-center rounded-full p-0.5 cursor-default! font-normal border border-border! aspect-square size-5! text-xs"
                                     >
                                         {{ row.maxCapacity || 0 }}
-                                    </Button>
+                                    </div>
                                     <span class="text-muted-foreground ml-1.5 text-xs font-normal">{{ $t('event.attendees') }}</span>
                                 </div>
                             </div>
