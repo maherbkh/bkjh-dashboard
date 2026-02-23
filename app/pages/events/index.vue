@@ -329,7 +329,8 @@ const getCoverImageSrc = (event: EventData) => {
                                         class="hover:underline hover:text-primary flex min-w-0 max-w-64 items-center gap-2 font-medium"
                                     >
                                         <span class="min-w-0 truncate text-xs!">{{ row.title }}</span>
-                                        <Icon v-if="row.workshops && row.workshops.length > 0"
+                                        <Icon
+                                            v-if="row.workshops && row.workshops.length > 0"
                                             name="solar:server-2-outline"
                                             :title="$t('academy.events.has_workshops')"
                                             class="size-4! shrink-0 text-success"

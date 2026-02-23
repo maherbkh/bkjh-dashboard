@@ -3,6 +3,7 @@ import type { EventData } from '~/types';
 import { useInitials } from '~/composables/useInitials';
 import { toast } from 'vue-sonner';
 import { useUserStore } from '~/stores/user';
+
 const props = defineProps<{
     event: EventData;
 }>();
@@ -407,292 +408,292 @@ const handleSubmitCertificateGeneration = async () => {
                         <div class="xl:col-span-8 space-y-6">
                             <!-- Description and Content Card -->
                             <div class="grid lg:grid-cols-3 gap-4">
-                        <EventBox
-                            :title="$t('event.approved_attendees')"
-                            icon="solar:user-id-line-duotone"
-                            :value="event.approvedRegistrationsCount as number"
-                            :variant="
-                                event.isFull
-                                    || event.maxCapacity === event.approvedRegistrationsCount
-                                    ? 'destructive'
-                                    : 'default'
-                            "
-                        />
-                        <EventBox
-                            :title="$t('event.pending_attendees')"
-                            icon="solar:users-group-two-rounded-linear"
-                            :value="
-                                Number(
-                                    (event.registrationsCount as number)
-                                        - (event.approvedRegistrationsCount as number),
-                                )
-                            "
-                        />
-                        <EventBox
-                            :title="$t('event.event_days')"
-                            icon="solar:calendar-line-duotone"
-                            :value="event.schedulesCount as number"
-                        />
+                                <EventBox
+                                    :title="$t('event.approved_attendees')"
+                                    icon="solar:user-id-line-duotone"
+                                    :value="event.approvedRegistrationsCount as number"
+                                    :variant="
+                                        event.isFull
+                                            || event.maxCapacity === event.approvedRegistrationsCount
+                                            ? 'destructive'
+                                            : 'default'
+                                    "
+                                />
+                                <EventBox
+                                    :title="$t('event.pending_attendees')"
+                                    icon="solar:users-group-two-rounded-linear"
+                                    :value="
+                                        Number(
+                                            (event.registrationsCount as number)
+                                                - (event.approvedRegistrationsCount as number),
+                                        )
+                                    "
+                                />
+                                <EventBox
+                                    :title="$t('event.event_days')"
+                                    icon="solar:calendar-line-duotone"
+                                    :value="event.schedulesCount as number"
+                                />
                             </div>
                             <Card>
-                        <CardHeader>
-                            <CardTitle class="flex items-center gap-2">
-                                <Icon
-                                    name="solar:clipboard-text-broken"
-                                    class="size-5! opacity-75 shrink-0"
-                                />
-                                {{ $t("global.short_description") }}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p class="whitespace-pre-wrap font-mono">
-                                {{ event.shortDescription }}
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle class="flex items-center gap-2">
-                                <Icon
-                                    name="solar:document-text-linear"
-                                    class="size-5! opacity-75 shrink-0"
-                                />
-                                {{ $t("global.description") }}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p
-                                class="content"
-                                v-html="event.description"
-                            />
-                        </CardContent>
-                    </Card>
-                </div>
-                <div class="xl:col-span-4 space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>
-                                <Icon
-                                    name="solar:documents-minimalistic-outline"
-                                    class="size-5! opacity-75 shrink-0"
-                                />
-                                {{ $t("global.information") }}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent class="flex flex-col divide-y divide-dashed">
-                            <AppListItem
-                                :title="$t('event.type')"
-                                :value="
-                                    event.type
-                                        ? $t('academy.type.' + event.type.toLowerCase())
-                                        : ''
-                                "
-                            />
-                            <AppListItem
-                                :title="$t('category.singular')"
-                                :value="
-                                    event.categories && event.categories.length > 0
-                                        ? event.categories
-                                            .map((cat: any) => cat.eventCategory?.name || cat.name)
-                                            .join(', ')
-                                        : event.eventCategory?.name || $t('common.not_assigned')
-                                "
-                            />
-                            <AppListItem
-                                :title="$t('target.singular')"
-                                :value="
-                                    event.targets && event.targets.length > 0
-                                        ? event.targets
-                                            .map(
-                                                (target: any) =>
-                                                    target.eventTarget?.name || target.name,
-                                            )
-                                            .join(', ')
-                                        : event.eventTarget?.name || $t('common.not_assigned')
-                                "
-                            />
-
-                            <AppListItem
-                                :title="$t('academy.duration')"
-                                :value="
-                                    event.schedulesCount
-                                        + ' '
-                                        + (event.schedulesCount === 1
-                                            ? $t('common.day')
-                                            : $t('common.days'))
-                                "
-                            />
-
-                            <AppListItem
-                                :title="$t('academy.capacity')"
-                                :value="
-                                    event.isEventCollection
-                                        ? event.workshops?.reduce(
-                                            (acc, workshop) => acc + workshop.maxCapacity,
-                                            0,
-                                        )
-                                        : event.maxCapacity
-                                "
-                            />
-
-                            <div
-                                class="flex items-start gap-4 md:flex-row flex-col justify-between first:pt-0 last:pb-0 py-1.5"
-                            >
-                                <div class="font-medium text-muted-foreground">
-                                    {{ $t("event.approved_attendees") }}
-                                </div>
-                                <div class="font-light font-mono">
-                                    <span
-                                        :class="[
-                                            event.isFull
-                                                || event.maxCapacity === event.approvedRegistrationsCount
-                                                ? 'text-destructive'
-                                                : '',
-                                            event.isFull
-                                                && event.maxCapacity !== event.approvedRegistrationsCount
-                                                ? 'cursor-pointer'
-                                                : '',
-                                        ]"
-                                        :title="
-                                            event.isFull
-                                                && event.maxCapacity !== event.approvedRegistrationsCount
-                                                ? $t('event.manually_set_full')
+                                <CardHeader>
+                                    <CardTitle class="flex items-center gap-2">
+                                        <Icon
+                                            name="solar:clipboard-text-broken"
+                                            class="size-5! opacity-75 shrink-0"
+                                        />
+                                        {{ $t("global.short_description") }}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p class="whitespace-pre-wrap font-mono">
+                                        {{ event.shortDescription }}
+                                    </p>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle class="flex items-center gap-2">
+                                        <Icon
+                                            name="solar:document-text-linear"
+                                            class="size-5! opacity-75 shrink-0"
+                                        />
+                                        {{ $t("global.description") }}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p
+                                        class="content"
+                                        v-html="event.description"
+                                    />
+                                </CardContent>
+                            </Card>
+                        </div>
+                        <div class="xl:col-span-4 space-y-6">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>
+                                        <Icon
+                                            name="solar:documents-minimalistic-outline"
+                                            class="size-5! opacity-75 shrink-0"
+                                        />
+                                        {{ $t("global.information") }}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent class="flex flex-col divide-y divide-dashed">
+                                    <AppListItem
+                                        :title="$t('event.type')"
+                                        :value="
+                                            event.type
+                                                ? $t('academy.type.' + event.type.toLowerCase())
                                                 : ''
                                         "
-                                    >
-                                        {{ event.approvedRegistrationsCount || 0 }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <AppListItem
-                                :title="$t('academy.room')"
-                                :value="event.room"
-                            />
-
-                            <AppListItem
-                                :title="$t('academy.location')"
-                                :value="event.location"
-                            />
-
-                            <AppListItem
-                                :title="$t('event.for_kids')"
-                                :value="event.forKids ? $t('common.yes') : $t('common.no')"
-                            />
-
-                            <AppListItem
-                                :title="$t('event.disable_registration')"
-                                :value="
-                                    event.disableRegistration ? $t('common.yes') : $t('common.no')
-                                "
-                            />
-
-                            <AppListItem
-                                :title="$t('event.is_full')"
-                                :value="event.isFull ? $t('common.yes') : $t('common.no')"
-                            />
-
-                            <AppListItem
-                                :title="$t('academy.createdBy')"
-                                :value="event.admin?.firstName + ' ' + event.admin?.lastName"
-                            />
-                        </CardContent>
-                    </Card>
-                    <Card v-if="!event.isEventCollection || (event.speakers && event.speakers.length > 0)">
-                        <CardHeader>
-                            <CardTitle>
-                                <Icon
-                                    name="solar:user-speak-rounded-line-duotone"
-                                    class="size-5! opacity-75 shrink-0"
-                                />
-                                {{ $t("academy.speakers") }}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent class="flex flex-col">
-                            <div
-                                v-for="speaker in event.speakers"
-                                :key="speaker.id"
-                                class="bg-muted/50 p-3 px-4 rounded-2xl border border-border/75 flex items-center gap-4 my-1"
-                            >
-                                <Avatar
-                                    class="size-9 rounded-full border group-active:bg-sidebar-primary group-active:text-sidebar-primary-foreground group-data-[state=open]:bg-sidebar-accent group-data-[state=open]:text-sidebar-accent-foreground"
-                                >
-                                    <AvatarImage
-                                        v-if="getSpeakerAvatarSrc(speaker)"
-                                        :src="getSpeakerAvatarSrc(speaker)"
-                                        :alt="speaker.speaker.name"
-                                        class="bg-background object-cover object-center"
                                     />
-                                    <AvatarFallback class="rounded-full bg-background">
-                                        {{ useInitials(speaker.speaker.name) }}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div class="grid flex-1 text-left text-sm leading-tight">
-                                    <span class="truncate font-semibold">{{
-                                        speaker.speaker.name
-                                    }}</span>
-                                    <span class="truncate text-xs max-w-52">{{
-                                        speaker.speaker.qualification
-                                    }}</span>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>
-                                <Icon
-                                    name="solar:calendar-line-duotone"
-                                    class="size-5! opacity-75 shrink-0"
-                                />
-                                {{ $t("academy.schedules") }}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent class="flex flex-col">
-                            <div
-                                v-for="day in event.schedules"
-                                :key="day.id"
-                                class="bg-muted/50 p-3 px-4 rounded-2xl border border-border/75 flex items-center gap-4 my-1"
-                            >
-                                <div class="grid flex-1 text-left text-sm leading-tight">
-                                    <div class="flex items-center gap-3 justify-between">
-                                        <div class="truncate font-semibold">
-                                            {{ formatDateShort(day.date) }}
-                                        </div>
-                                        <div class="flex items-center gap-2 mt-1 font-medium">
-                                            <div class="truncate opacity-75 flex items-center">
-                                                <Icon
-                                                    name="solar:watch-square-line-duotone"
-                                                    class="size-4! shrink-0 mr-1.5"
-                                                />
-                                                {{ day.startTime }}
-                                            </div>
-                                            <Icon
-                                                name="solar:arrow-right-bold-duotone"
-                                                class="size-5 shrink-0 opacity-75"
-                                            />
-                                            <div class="truncate opacity-75 flex items-center">
-                                                <Icon
-                                                    name="solar:watch-square-line-duotone"
-                                                    class="size-4! shrink-0 mr-1.5"
-                                                />
-                                                {{ day.endTime }}
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <AppListItem
+                                        :title="$t('category.singular')"
+                                        :value="
+                                            event.categories && event.categories.length > 0
+                                                ? event.categories
+                                                    .map((cat: any) => cat.eventCategory?.name || cat.name)
+                                                    .join(', ')
+                                                : event.eventCategory?.name || $t('common.not_assigned')
+                                        "
+                                    />
+                                    <AppListItem
+                                        :title="$t('target.singular')"
+                                        :value="
+                                            event.targets && event.targets.length > 0
+                                                ? event.targets
+                                                    .map(
+                                                        (target: any) =>
+                                                            target.eventTarget?.name || target.name,
+                                                    )
+                                                    .join(', ')
+                                                : event.eventTarget?.name || $t('common.not_assigned')
+                                        "
+                                    />
+
+                                    <AppListItem
+                                        :title="$t('academy.duration')"
+                                        :value="
+                                            event.schedulesCount
+                                                + ' '
+                                                + (event.schedulesCount === 1
+                                                    ? $t('common.day')
+                                                    : $t('common.days'))
+                                        "
+                                    />
+
+                                    <AppListItem
+                                        :title="$t('academy.capacity')"
+                                        :value="
+                                            event.isEventCollection
+                                                ? event.workshops?.reduce(
+                                                    (acc, workshop) => acc + workshop.maxCapacity,
+                                                    0,
+                                                )
+                                                : event.maxCapacity
+                                        "
+                                    />
+
                                     <div
-                                        :class="[
-                                            !day.note && 'italic',
-                                            'font-mono text-xs leading-tight mt-1 text-muted-foreground',
-                                        ]"
+                                        class="flex items-start gap-4 md:flex-row flex-col justify-between first:pt-0 last:pb-0 py-1.5"
                                     >
-                                        {{ day.note ? day.note : $t("common.not_assigned") }}
+                                        <div class="font-medium text-muted-foreground">
+                                            {{ $t("event.approved_attendees") }}
+                                        </div>
+                                        <div class="font-light font-mono">
+                                            <span
+                                                :class="[
+                                                    event.isFull
+                                                        || event.maxCapacity === event.approvedRegistrationsCount
+                                                        ? 'text-destructive'
+                                                        : '',
+                                                    event.isFull
+                                                        && event.maxCapacity !== event.approvedRegistrationsCount
+                                                        ? 'cursor-pointer'
+                                                        : '',
+                                                ]"
+                                                :title="
+                                                    event.isFull
+                                                        && event.maxCapacity !== event.approvedRegistrationsCount
+                                                        ? $t('event.manually_set_full')
+                                                        : ''
+                                                "
+                                            >
+                                                {{ event.approvedRegistrationsCount || 0 }}
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+
+                                    <AppListItem
+                                        :title="$t('academy.room')"
+                                        :value="event.room"
+                                    />
+
+                                    <AppListItem
+                                        :title="$t('academy.location')"
+                                        :value="event.location"
+                                    />
+
+                                    <AppListItem
+                                        :title="$t('event.for_kids')"
+                                        :value="event.forKids ? $t('common.yes') : $t('common.no')"
+                                    />
+
+                                    <AppListItem
+                                        :title="$t('event.disable_registration')"
+                                        :value="
+                                            event.disableRegistration ? $t('common.yes') : $t('common.no')
+                                        "
+                                    />
+
+                                    <AppListItem
+                                        :title="$t('event.is_full')"
+                                        :value="event.isFull ? $t('common.yes') : $t('common.no')"
+                                    />
+
+                                    <AppListItem
+                                        :title="$t('academy.createdBy')"
+                                        :value="event.admin?.firstName + ' ' + event.admin?.lastName"
+                                    />
+                                </CardContent>
+                            </Card>
+                            <Card v-if="!event.isEventCollection || (event.speakers && event.speakers.length > 0)">
+                                <CardHeader>
+                                    <CardTitle>
+                                        <Icon
+                                            name="solar:user-speak-rounded-line-duotone"
+                                            class="size-5! opacity-75 shrink-0"
+                                        />
+                                        {{ $t("academy.speakers") }}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent class="flex flex-col">
+                                    <div
+                                        v-for="speaker in event.speakers"
+                                        :key="speaker.id"
+                                        class="bg-muted/50 p-3 px-4 rounded-2xl border border-border/75 flex items-center gap-4 my-1"
+                                    >
+                                        <Avatar
+                                            class="size-9 rounded-full border group-active:bg-sidebar-primary group-active:text-sidebar-primary-foreground group-data-[state=open]:bg-sidebar-accent group-data-[state=open]:text-sidebar-accent-foreground"
+                                        >
+                                            <AvatarImage
+                                                v-if="getSpeakerAvatarSrc(speaker)"
+                                                :src="getSpeakerAvatarSrc(speaker)"
+                                                :alt="speaker.speaker.name"
+                                                class="bg-background object-cover object-center"
+                                            />
+                                            <AvatarFallback class="rounded-full bg-background">
+                                                {{ useInitials(speaker.speaker.name) }}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div class="grid flex-1 text-left text-sm leading-tight">
+                                            <span class="truncate font-semibold">{{
+                                                speaker.speaker.name
+                                            }}</span>
+                                            <span class="truncate text-xs max-w-52">{{
+                                                speaker.speaker.qualification
+                                            }}</span>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>
+                                        <Icon
+                                            name="solar:calendar-line-duotone"
+                                            class="size-5! opacity-75 shrink-0"
+                                        />
+                                        {{ $t("academy.schedules") }}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent class="flex flex-col">
+                                    <div
+                                        v-for="day in event.schedules"
+                                        :key="day.id"
+                                        class="bg-muted/50 p-3 px-4 rounded-2xl border border-border/75 flex items-center gap-4 my-1"
+                                    >
+                                        <div class="grid flex-1 text-left text-sm leading-tight">
+                                            <div class="flex items-center gap-3 justify-between">
+                                                <div class="truncate font-semibold">
+                                                    {{ formatDateShort(day.date) }}
+                                                </div>
+                                                <div class="flex items-center gap-2 mt-1 font-medium">
+                                                    <div class="truncate opacity-75 flex items-center">
+                                                        <Icon
+                                                            name="solar:watch-square-line-duotone"
+                                                            class="size-4! shrink-0 mr-1.5"
+                                                        />
+                                                        {{ day.startTime }}
+                                                    </div>
+                                                    <Icon
+                                                        name="solar:arrow-right-bold-duotone"
+                                                        class="size-5 shrink-0 opacity-75"
+                                                    />
+                                                    <div class="truncate opacity-75 flex items-center">
+                                                        <Icon
+                                                            name="solar:watch-square-line-duotone"
+                                                            class="size-4! shrink-0 mr-1.5"
+                                                        />
+                                                        {{ day.endTime }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div
+                                                :class="[
+                                                    !day.note && 'italic',
+                                                    'font-mono text-xs leading-tight mt-1 text-muted-foreground',
+                                                ]"
+                                            >
+                                                {{ day.note ? day.note : $t("common.not_assigned") }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
                 </TabsContent>
 
