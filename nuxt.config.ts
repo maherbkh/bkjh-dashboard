@@ -1,5 +1,16 @@
 import tailwindcss from '@tailwindcss/vite';
 
+// Media proxy base URL (build-time: from env so production uses real API host)
+const mediaProxyBase = (() => {
+    const url = process.env.NUXT_PUBLIC_API_BASE_URL || process.env.NUXT_PUBLIC_API_URL || 'https://api.backhaus.de/api/v1';
+    try {
+        return new URL(url).origin;
+    }
+    catch {
+        return 'http://api.backhaus.local:3055';
+    }
+})();
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
 
@@ -86,7 +97,7 @@ export default defineNuxtConfig({
                 proxy: `http://ip-api.com/json/**`,
             },
             '/api/media/**': {
-                proxy: 'http://api.backhaus.local:3055/uploads/**',
+                proxy: `${mediaProxyBase}/api/v1/media/**`,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -95,7 +106,7 @@ export default defineNuxtConfig({
                 },
             },
             '/get-media-internal/**': {
-                proxy: 'http://api.backhaus.local:3055/api/v1/media/internal/**',
+                proxy: `${mediaProxyBase}/api/v1/media/internal/**`,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -110,7 +121,7 @@ export default defineNuxtConfig({
                 },
             },
             '/get-media/**': {
-                proxy: 'http://api.backhaus.local:3055/uploads/public/**',
+                proxy: `${mediaProxyBase}/uploads/public/**`,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'GET, OPTIONS',
