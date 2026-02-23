@@ -23,6 +23,8 @@ interface Props {
     errors?: string[];
     disabled?: boolean;
     placeholder?: string;
+    showGallery?: boolean;
+    logo?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -42,6 +44,8 @@ const props = withDefaults(defineProps<Props>(), {
     errors: () => [],
     disabled: false,
     placeholder: '',
+    showGallery: false,
+    logo: false,
 });
 
 const emit = defineEmits<{
@@ -49,6 +53,7 @@ const emit = defineEmits<{
     'upload:start': [];
     'upload:success': [file: MediaEntity];
     'upload:error': [error: string];
+    'open-gallery': [];
 }>();
 
 const { t } = useI18n();
@@ -305,26 +310,26 @@ const allowedTypesText = computed(() => {
 </script>
 
 <template>
-    <div class="space-y-2 flex flex-col flex-1 min-h-0">
+    <div class="space-y-2 flex flex-col">
         <!-- Label -->
         <label
             v-if="label"
             :for="name"
-            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            class="block text-sm font-medium text-foreground"
         >
             {{ label }}
             <span
                 v-if="required"
-                class="text-red-500 ml-1"
+                class="text-destructive ml-1"
             >*</span>
         </label>
 
-        <!-- Upload Area -->
+        <!-- Compact preview when single file is present (no dashed drop zone) -->
         <div
+            v-if="!multiple && safeFiles.length > 0"
             :class="[
-                'relative border-2 border-dashed rounded-xl p-6 transition-all duration-300 ease-in-out flex-1 flex flex-col min-h-0',
-                'bg-card/50',
-                dragging ? 'border-solid border-primary bg-primary/25' : 'border-border hover:border-primary/50',
+                'relative rounded-xl border transition-all duration-200 flex flex-col sm:flex-row items-center justify-center gap-3 p-3 h-[8rem]',
+                'bg-card/50 border-border hover:border-primary/30',
                 errorHandler.isError.value ? 'border-destructive' : '',
                 disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
             ]"
@@ -333,57 +338,81 @@ const allowedTypesText = computed(() => {
             @dragleave.prevent="handleDragLeave"
             @click="!disabled && fileInputRef?.click()"
         >
-            <!-- Single File Display -->
-            <div
-                v-if="!multiple && safeFiles.length > 0"
-                class="space-y-4"
-            >
-                <div class="flex items-center justify-center">
-                    <div class="relative group">
-                        <NuxtImg
-                            v-if="safeFiles[0]"
-                            :src="getDirectImageSrc(safeFiles[0])"
-                            :alt="safeFiles[0].filename || safeFiles[0].title || 'Preview'"
-                            class="max-h-48 w-auto rounded-lg object-contain"
+            <div class="relative group shrink-0 flex justify-center sm:justify-start">
+                <NuxtImg
+                    v-if="safeFiles[0]"
+                    :src="getDirectImageSrc(safeFiles[0])"
+                    :alt="safeFiles[0].filename || safeFiles[0].title || 'Preview'"
+                    :class="[
+                        'h-20 w-20 sm:h-24 sm:w-24 rounded-lg ring-1 ring-border',
+                        logo ? 'object-contain bg-white' : 'object-cover',
+                    ]"
+                />
+                <div class="absolute inset-0 flex items-center justify-center gap-1.5 rounded-lg bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        class="h-8 w-8 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
+                        :aria-label="t('media.replace')"
+                        @click.stop="fileInputRef?.click()"
+                    >
+                        <Icon
+                            name="solar:refresh-outline"
+                            class="size-4"
                         />
-                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                            <div class="flex gap-2">
-                                <Button
-                                    type="button"
-                                    variant="secondary"
-                                    size="sm"
-                                    @click.stop="fileInputRef?.click()"
-                                >
-                                    <Icon
-                                        name="solar:refresh-outline"
-                                        class="w-4 h-4 mr-2"
-                                    />
-                                    {{ t('media.replace') }}
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="destructive"
-                                    size="sm"
-                                    @click.stop="removeFile(0)"
-                                >
-                                    <Icon
-                                        name="solar:trash-bin-minimalistic-outline"
-                                        class="w-4 h-4 mr-2"
-                                    />
-                                    {{ t('media.remove') }}
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        class="h-8 w-8 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
+                        :aria-label="t('media.remove')"
+                        @click.stop="removeFile(0)"
+                    >
+                        <Icon
+                            name="solar:trash-bin-minimalistic-outline"
+                            class="size-4"
+                        />
+                    </Button>
                 </div>
             </div>
+            <p class="text-xs text-muted-foreground flex-1 hidden sm:block">
+                {{ t('media.drop_or_browse') }}
+            </p>
+            <input
+                :id="name"
+                ref="fileInputRef"
+                :name="name"
+                :multiple="multiple"
+                type="file"
+                class="sr-only"
+                :accept="allowedTypes.map(type => getFileTypeSubtypes(type).map(subtype => `.${subtype}`).join(',')).join(',')"
+                @change="handleFileSelect"
+            >
+        </div>
 
+        <!-- Drop zone: empty state, multiple files, or errors -->
+        <div
+            v-else
+            :class="[
+                'relative border-2 border-dashed rounded-xl p-3 sm:p-4 transition-all duration-300 ease-in-out flex flex-col h-[8rem]',
+                'bg-card/50',
+                dragging ? 'border-solid border-primary bg-primary/10' : 'border-border hover:border-primary/40',
+                errorHandler.isError.value ? 'border-destructive' : '',
+                disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+            ]"
+            @drop.prevent="handleDrop"
+            @dragover.prevent="handleDragOver"
+            @dragleave.prevent="handleDragLeave"
+            @click="!disabled && fileInputRef?.click()"
+        >
             <!-- Multiple Files Display -->
             <div
-                v-else-if="multiple && safeFiles.length > 0"
-                class="space-y-4"
+                v-if="multiple && safeFiles.length > 0"
+                class="space-y-3"
             >
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     <div
                         v-for="(file, index) in safeFiles"
                         :key="file.id"
@@ -449,24 +478,24 @@ const allowedTypesText = computed(() => {
                 @clear-permission="errorHandler.clearPermissionErrors"
             />
 
-            <!-- Upload Prompt -->
+            <!-- Upload Prompt (empty state) -->
             <div
                 v-else
-                class="text-center"
+                class="flex flex-1 min-h-0 flex-col items-center justify-center text-center py-1"
             >
                 <div
                     v-if="loading.getLoadingState('single').isLoading || loading.getLoadingState('multiple').isLoading"
-                    class="space-y-4"
+                    class="space-y-2 py-2"
                 >
                     <div class="relative">
                         <Icon
                             name="solar:upload-square-outline"
-                            class="w-12 h-12 mx-auto text-primary animate-pulse"
+                            class="w-8 h-8 sm:w-10 sm:h-10 mx-auto text-primary animate-pulse"
                         />
                         <div class="absolute inset-0 flex items-center justify-center">
                             <Icon
                                 name="solar:refresh-outline"
-                                class="w-6 h-6 text-primary animate-spin"
+                                class="w-5 h-5 sm:w-6 sm:h-6 text-primary animate-spin"
                             />
                         </div>
                     </div>
@@ -476,61 +505,29 @@ const allowedTypesText = computed(() => {
                 </div>
                 <div
                     v-else
-                    class="space-y-4"
+                    class="space-y-2 py-1"
                 >
                     <div class="relative group">
                         <Icon
                             name="solar:gallery-send-outline"
-                            class="w-12 h-12 mx-auto text-muted-foreground group-hover:text-primary transition-colors duration-300"
+                            class="w-8 h-8 sm:w-9 sm:h-9 mx-auto text-muted-foreground group-hover:text-primary transition-colors duration-200"
                         />
-                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                             <Icon
                                 name="solar:add-circle-outline"
-                                class="w-8 h-8 text-primary"
+                                class="w-6 h-6 sm:w-7 sm:h-7 text-primary"
                             />
                         </div>
                     </div>
-                    <div class="space-y-2">
-                        <p class="text-sm font-medium text-foreground">
-                            {{ placeholder || t('media.upload_prompt') }}
-                        </p>
-                        <p class="text-xs text-muted-foreground">
-                            {{ t('media.drag_drop_or_click') }}
-                        </p>
-                    </div>
-                    <div class="text-xs text-muted-foreground space-y-1">
-                        <p class="flex items-center gap-1">
-                            <Icon
-                                name="solar:file-text-outline"
-                                class="shrink-0 size-3"
-                            />
-                            <span class="font-medium">{{ t('media.allowed_types') }}:</span>
-                            {{ allowedTypesText }}
-                        </p>
-                        <p class="flex items-center gap-1">
-                            <Icon
-                                name="solar:hard-drive-outline"
-                                class="shrink-0 size-3"
-                            />
-                            <span class="font-medium">{{ t('media.max_size') }}:</span>
-                            {{ maxSize }}MB
-                        </p>
-                        <p
-                            v-if="multiple"
-                            class="flex items-center gap-1"
-                        >
-                            <Icon
-                                name="solar:files-outline"
-                                class="shrink-0 size-3"
-                            />
-                            <span class="font-medium">{{ t('media.max_files') }}:</span>
-                            {{ maxFiles }}
-                        </p>
-                    </div>
+                    <p class="text-sm font-medium text-foreground">
+                        {{ placeholder || t('media.drop_or_browse') }}
+                    </p>
+                    <p class="text-xs text-muted-foreground">
+                        {{ t('media.pick_file_up_to', { max: maxSize }) }}
+                    </p>
                 </div>
             </div>
 
-            <!-- Hidden File Input -->
             <input
                 :id="name"
                 ref="fileInputRef"
@@ -541,6 +538,26 @@ const allowedTypesText = computed(() => {
                 :accept="allowedTypes.map(type => getFileTypeSubtypes(type).map(subtype => `.${subtype}`).join(',')).join(',')"
                 @change="handleFileSelect"
             >
+        </div>
+
+        <!-- Footer: Open Gallery -->
+        <div
+            v-if="showGallery"
+            class="pt-2 grid grid-cols-1"
+        >
+            <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                :disabled="disabled"
+                @click="emit('open-gallery')"
+            >
+                <Icon
+                    name="solar:folder-open-outline"
+                    class="size-4 mr-1.5"
+                />
+                {{ t('media.open_gallery') }}
+            </Button>
         </div>
 
         <!-- Error Messages are handled by MediaErrorDisplay component -->

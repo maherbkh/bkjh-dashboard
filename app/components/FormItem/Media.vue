@@ -24,6 +24,7 @@ interface Props {
     disabled?: boolean;
     placeholder?: string;
     showManager?: boolean;
+    logo?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -45,6 +46,7 @@ const props = withDefaults(defineProps<Props>(), {
     disabled: false,
     placeholder: '',
     showManager: true,
+    logo: false,
 });
 
 const emit = defineEmits<{
@@ -162,7 +164,7 @@ const getFileTypeIcon = (mimeType: string) => {
 </script>
 
 <template>
-    <div class="space-y-2 flex flex-col h-full">
+    <div class="space-y-2 flex flex-col">
         <!-- Label -->
         <label
             v-if="label"
@@ -176,7 +178,7 @@ const getFileTypeIcon = (mimeType: string) => {
             >*</span>
         </label>
 
-        <!-- Media Uploader -->
+        <!-- Media Uploader (Open Gallery in footer) -->
         <MediaUploader
             :model-value="props.modelValue"
             :name="name"
@@ -192,30 +194,13 @@ const getFileTypeIcon = (mimeType: string) => {
             :directory="directory"
             :errors="errors"
             :disabled="disabled"
-            :placeholder="placeholder"
+                    :placeholder="placeholder"
+                    :show-gallery="showManager"
+                    :logo="logo"
             @update:model-value="(value) => { emit('update:modelValue', value); }"
             @upload:success="handleUploadSuccess"
+            @open-gallery="openManager"
         />
-
-        <!-- Media Manager Button -->
-        <div
-            v-if="showManager"
-            class="flex items-center gap-2"
-        >
-            <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                :disabled="disabled"
-                @click="openManager"
-            >
-                <Icon
-                    name="solar:folder-open-outline"
-                    class="w-4 h-4 mr-2"
-                />
-                {{ t('media.open_gallery') }}
-            </Button>
-        </div>
 
         <!-- Selected Files Display (Only for Multiple Files) -->
         <div

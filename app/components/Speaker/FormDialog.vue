@@ -49,8 +49,8 @@
                     </p>
                 </div>
 
-                <div class="grid lg:grid-cols-2 gap-4 items-stretch">
-                    <div class="flex flex-col">
+                <div class="grid lg:grid-cols-2 gap-4 items-start">
+                    <div class="flex flex-col w-full">
                         <FormItemMedia
                             id="avatar"
                             v-model="avatarMedia"
@@ -62,11 +62,10 @@
                             :access-level="AccessLevel.PUBLIC"
                             :collection-name="CollectionType.AVATAR"
                             :errors="errors.avatar ? [errors.avatar] : []"
-                            class="flex-1"
                         />
                     </div>
 
-                    <div class="flex flex-col">
+                    <div class="flex flex-col w-full">
                         <FormItemMedia
                             id="logo"
                             v-model="logoMedia"
@@ -78,7 +77,7 @@
                             :access-level="AccessLevel.PUBLIC"
                             :collection-name="CollectionType.COVER"
                             :errors="errors.logo ? [errors.logo] : []"
-                            class="flex-1"
+                            :logo="true"
                         />
                     </div>
                 </div>
