@@ -1,9 +1,13 @@
 <template>
     <div class="flex flex-col gap-6">
         <div class="flex md:flex-row flex-col  justify-between gap-2">
-            <h1 class="text-h1">
-                Update Settings
-            </h1>
+            <div class="text-lg flex items-center gap-2">
+                <Icon
+                    name="solar:settings-outline"
+                    class="size-5! shrink-0 opacity-75"
+                />
+                <div>{{ $t('pages.settings.update_settings.title') }}</div>
+            </div>
             <div class="flex flex-col gap-2">
                 <div class="flex flex-wrap gap-2">
                     <Button
@@ -33,7 +37,7 @@
         >
             <div class="grid grid-cols-12 gap-4 items-start">
                 <div class="sticky top-4  lg:col-span-3 md:col-span-4 col-span-12 self-start">
-                    <nav class="flex flex-col gap-1 p-2 bg-accent/50 rounded-lg text-left">
+                    <nav class="flex flex-col gap-1 p-2 bg-accent/50 rounded-lg text-left border">
                         <div
                             v-for="section in sectionsData"
                             :key="section.id"
@@ -48,7 +52,7 @@
                             <Icon
                                 name="solar:widget-outline"
                                 :class="[
-                                    '!size-4 shrink-0',
+                                    'size-4! shrink-0',
                                     selectedSection === section.id ? 'opacity-100' : 'opacity-75',
                                 ]"
                             />

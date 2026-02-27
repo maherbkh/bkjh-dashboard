@@ -1080,6 +1080,13 @@
     "plural": "Einstellungen",
     "singular": "Einstellung"
   },
+  "pages": {
+    "settings": {
+      "update_settings": {
+        "title": "Einstellungen aktualisieren"
+      }
+    }
+  },
   "profile": {
     "change_password": "Passwort ändern",
     "description": "Ihre persönlichen Informationen und Kontoeinstellungen verwalten",

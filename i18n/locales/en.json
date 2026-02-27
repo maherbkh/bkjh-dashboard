@@ -1079,6 +1079,13 @@
     "plural": "Preferences",
     "singular": "Preference"
   },
+  "pages": {
+    "settings": {
+      "update_settings": {
+        "title": "Update Settings"
+      }
+    }
+  },
   "profile": {
     "change_password": "Change Password",
     "description": "Manage your personal information and account settings",

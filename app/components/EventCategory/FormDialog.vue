@@ -23,51 +23,51 @@
                 @submit.prevent="handleSubmit"
             >
                 <div class="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
-                <div class="space-y-2">
-                    <Label for="name">{{ $t("global.name") }}</Label>
-                    <FormItemInput
-                        id="name"
-                        v-model="name"
-                        :placeholder="$t('event_category.name_placeholder')"
-                        :error="errors.name"
-                        required
-                    />
-                </div>
-
-                <div class="space-y-2">
-                    <Label for="position">{{ $t("common.position") }}</Label>
-                    <FormItemInput
-                        id="position"
-                        v-model.number="position"
-                        type="number"
-                        :placeholder="$t('event_category.position_placeholder')"
-                        :error="errors.position"
-                        min="0"
-                    />
-                </div>
-
-                <div class="space-y-2">
-                    <Label for="parentId">{{ $t("event_category.parent") }}</Label>
-                    <FormItemSelect
-                        id="parentId"
-                        v-model="parentId"
-                        :options="parentCategoryOptions"
-                        :placeholder="$t('event_category.parent_placeholder')"
-                        :error="errors.parentId"
-                        clearable
-                    />
-                </div>
-
-                <div class="space-y-2">
-                    <div class="flex items-center space-x-2">
-                        <FormItemSwitch
-                            id="isActive"
-                            v-model="isActive"
-                            :error="errors.isActive"
+                    <div class="space-y-2">
+                        <Label for="name">{{ $t("global.name") }}</Label>
+                        <FormItemInput
+                            id="name"
+                            v-model="name"
+                            :placeholder="$t('event_category.name_placeholder')"
+                            :error="errors.name"
+                            required
                         />
-                        <Label for="isActive">{{ $t("common.active") }}</Label>
                     </div>
-                </div>
+
+                    <div class="space-y-2">
+                        <Label for="position">{{ $t("common.position") }}</Label>
+                        <FormItemInput
+                            id="position"
+                            v-model.number="position"
+                            type="number"
+                            :placeholder="$t('event_category.position_placeholder')"
+                            :error="errors.position"
+                            min="0"
+                        />
+                    </div>
+
+                    <div class="space-y-2">
+                        <Label for="parentId">{{ $t("event_category.parent") }}</Label>
+                        <FormItemSelect
+                            id="parentId"
+                            v-model="parentId"
+                            :options="parentCategoryOptions"
+                            :placeholder="$t('event_category.parent_placeholder')"
+                            :error="errors.parentId"
+                            clearable
+                        />
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center space-x-2">
+                            <FormItemSwitch
+                                id="isActive"
+                                v-model="isActive"
+                                :error="errors.isActive"
+                            />
+                            <Label for="isActive">{{ $t("common.active") }}</Label>
+                        </div>
+                    </div>
                 </div>
 
                 <DialogFooter class="shrink-0">

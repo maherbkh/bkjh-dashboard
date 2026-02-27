@@ -147,93 +147,93 @@ const addresses = computed(() => resourcesStore.addresses);
             <div class="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4 pr-5 scroll-app">
                 <form class="space-y-4">
                     <div class="grid md:grid-cols-12 gap-4">
-                    <FormItemInput
-                        id="name"
-                        v-model="name"
-                        class="md:col-span-12"
-                        v-bind="nameAttrs"
-                        :title="$t('global.name')"
-                        :placeholder="$t('global.name')"
-                        :errors="errors.name ? [errors.name] : []"
-                        required
-                    />
-                    <FormItemInput
-                        id="location"
-                        v-model="location"
-                        class="md:col-span-6"
-                        v-bind="locationAttrs"
-                        :title="$t('location.singular')"
-                        :placeholder="$t('location.singular')"
-                        :errors="errors.location ? [errors.location] : []"
-                        required
-                    />
+                        <FormItemInput
+                            id="name"
+                            v-model="name"
+                            class="md:col-span-12"
+                            v-bind="nameAttrs"
+                            :title="$t('global.name')"
+                            :placeholder="$t('global.name')"
+                            :errors="errors.name ? [errors.name] : []"
+                            required
+                        />
+                        <FormItemInput
+                            id="location"
+                            v-model="location"
+                            class="md:col-span-6"
+                            v-bind="locationAttrs"
+                            :title="$t('location.singular')"
+                            :placeholder="$t('location.singular')"
+                            :errors="errors.location ? [errors.location] : []"
+                            required
+                        />
 
-                    <FormItemInput
-                        id="register"
-                        v-model="register"
-                        class="md:col-span-6"
-                        v-bind="registerAttrs"
-                        :title="$t('partner.register')"
-                        :placeholder="$t('partner.register')"
-                        :errors="errors.register ? [errors.register] : []"
-                        required
-                    />
+                        <FormItemInput
+                            id="register"
+                            v-model="register"
+                            class="md:col-span-6"
+                            v-bind="registerAttrs"
+                            :title="$t('partner.register')"
+                            :placeholder="$t('partner.register')"
+                            :errors="errors.register ? [errors.register] : []"
+                            required
+                        />
 
-                    <FormItemInput
-                        id="partnerName"
-                        v-model="partnerName"
-                        v-bind="partnerNameAttrs"
-                        class="md:col-span-6"
-                        :title="$t('partner.singular')"
-                        :placeholder="$t('partner.singular')"
-                        :errors="errors['partner.name'] ? [errors['partner.name']] : []"
-                        required
-                    />
-                    <FormItemInput
-                        id="partnerLocation"
-                        v-model="partnerLocation"
-                        class="md:col-span-6"
-                        v-bind="partnerLocationAttrs"
-                        :title="$t('partner.singular') + ' ' + $t('location.singular')"
-                        :placeholder="$t('partner.singular') + ' ' + $t('location.singular')"
-                        :errors="errors['partner.location'] ? [errors['partner.location']] : []"
-                        required
-                    />
+                        <FormItemInput
+                            id="partnerName"
+                            v-model="partnerName"
+                            v-bind="partnerNameAttrs"
+                            class="md:col-span-6"
+                            :title="$t('partner.singular')"
+                            :placeholder="$t('partner.singular')"
+                            :errors="errors['partner.name'] ? [errors['partner.name']] : []"
+                            required
+                        />
+                        <FormItemInput
+                            id="partnerLocation"
+                            v-model="partnerLocation"
+                            class="md:col-span-6"
+                            v-bind="partnerLocationAttrs"
+                            :title="$t('partner.singular') + ' ' + $t('location.singular')"
+                            :placeholder="$t('partner.singular') + ' ' + $t('location.singular')"
+                            :errors="errors['partner.location'] ? [errors['partner.location']] : []"
+                            required
+                        />
 
-                    <FormItemInput
-                        id="partnerRegister"
-                        v-model="partnerRegister"
-                        class="md:col-span-6"
-                        v-bind="partnerRegisterAttrs"
-                        :title="$t('partner.register')"
-                        :placeholder="$t('partner.register')"
-                        :errors="errors['partner.register'] ? [errors['partner.register']] : []"
-                        required
-                    />
+                        <FormItemInput
+                            id="partnerRegister"
+                            v-model="partnerRegister"
+                            class="md:col-span-6"
+                            v-bind="partnerRegisterAttrs"
+                            :title="$t('partner.register')"
+                            :placeholder="$t('partner.register')"
+                            :errors="errors['partner.register'] ? [errors['partner.register']] : []"
+                            required
+                        />
 
-                    <FormItemInput
-                        id="management"
-                        v-model="management"
-                        class="md:col-span-6"
-                        v-bind="managementAttrs"
-                        :title="$t('global.management')"
-                        :placeholder="$t('global.management')"
-                        :errors="errors.management ? [errors.management] : []"
-                        required
-                    />
-                    <FormItemSelect
-                        id="address-id"
-                        v-model="addressId"
-                        :title="t('address.singular')"
-                        :placeholder="t('action.select') + ' ' + t('address.singular')"
-                        class="md:col-span-12"
-                        :errors="errors.addressId ? [errors.addressId] : []"
-                        v-bind="addressIdAttrs"
-                        :data="addresses || []"
-                        key-value="id"
-                        name-value="fullAddress"
-                        empty-text="No addresses found"
-                    />
+                        <FormItemInput
+                            id="management"
+                            v-model="management"
+                            class="md:col-span-6"
+                            v-bind="managementAttrs"
+                            :title="$t('global.management')"
+                            :placeholder="$t('global.management')"
+                            :errors="errors.management ? [errors.management] : []"
+                            required
+                        />
+                        <FormItemSelect
+                            id="address-id"
+                            v-model="addressId"
+                            :title="t('address.singular')"
+                            :placeholder="t('action.select') + ' ' + t('address.singular')"
+                            class="md:col-span-12"
+                            :errors="errors.addressId ? [errors.addressId] : []"
+                            v-bind="addressIdAttrs"
+                            :data="addresses || []"
+                            key-value="id"
+                            name-value="fullAddress"
+                            empty-text="No addresses found"
+                        />
                     </div>
                 </form>
             </div>

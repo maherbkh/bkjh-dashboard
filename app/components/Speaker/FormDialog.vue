@@ -23,76 +23,76 @@
                 @submit.prevent="handleSubmit"
             >
                 <div class="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
-                <div class="space-y-2">
-                    <Label for="name">{{ $t("global.name") }}</Label>
-                    <FormItemInput
-                        id="name"
-                        v-model="name"
-                        :placeholder="$t('speaker.name_placeholder')"
-                        :errors="errors.name ? [errors.name] : []"
-                        required
-                        maxlength="100"
-                    />
-                </div>
-
-                <div class="space-y-2">
-                    <Label for="qualification">{{ $t("speaker.qualification") }}</Label>
-                    <FormItemTextarea
-                        id="qualification"
-                        v-model="qualification"
-                        :placeholder="$t('speaker.qualification_placeholder')"
-                        :errors="errors.qualification ? [errors.qualification] : []"
-                        maxlength="500"
-                        :rows="3"
-                    />
-                    <p class="text-xs text-muted-foreground">
-                        {{ $t("speaker.qualification_help") }}
-                    </p>
-                </div>
-
-                <div class="grid lg:grid-cols-2 gap-4 items-start">
-                    <div class="flex flex-col w-full">
-                        <FormItemMedia
-                            id="avatar"
-                            v-model="avatarMedia"
-                            :label="$t('speaker.avatar') || 'Avatar'"
-                            name="avatar"
-                            :multiple="false"
-                            :max-files="1"
-                            :allowed-types="['image']"
-                            :access-level="AccessLevel.PUBLIC"
-                            :collection-name="CollectionType.AVATAR"
-                            :errors="errors.avatar ? [errors.avatar] : []"
+                    <div class="space-y-2">
+                        <Label for="name">{{ $t("global.name") }}</Label>
+                        <FormItemInput
+                            id="name"
+                            v-model="name"
+                            :placeholder="$t('speaker.name_placeholder')"
+                            :errors="errors.name ? [errors.name] : []"
+                            required
+                            maxlength="100"
                         />
                     </div>
 
-                    <div class="flex flex-col w-full">
-                        <FormItemMedia
-                            id="logo"
-                            v-model="logoMedia"
-                            :label="$t('speaker.logo') || 'Logo'"
-                            name="logo"
-                            :multiple="false"
-                            :max-files="1"
-                            :allowed-types="['image']"
-                            :access-level="AccessLevel.PUBLIC"
-                            :collection-name="CollectionType.COVER"
-                            :errors="errors.logo ? [errors.logo] : []"
-                            :logo="true"
+                    <div class="space-y-2">
+                        <Label for="qualification">{{ $t("speaker.qualification") }}</Label>
+                        <FormItemTextarea
+                            id="qualification"
+                            v-model="qualification"
+                            :placeholder="$t('speaker.qualification_placeholder')"
+                            :errors="errors.qualification ? [errors.qualification] : []"
+                            maxlength="500"
+                            :rows="3"
                         />
+                        <p class="text-xs text-muted-foreground">
+                            {{ $t("speaker.qualification_help") }}
+                        </p>
                     </div>
-                </div>
 
-                <div class="space-y-2">
-                    <div class="flex items-center space-x-2">
-                        <FormItemSwitch
-                            id="isActive"
-                            v-model="isActive"
-                            :errors="errors.isActive ? [errors.isActive] : []"
-                        />
-                        <Label for="isActive">{{ isActive ? $t("common.active") : $t("common.inactive") }}</Label>
+                    <div class="grid lg:grid-cols-2 gap-4 items-start">
+                        <div class="flex flex-col w-full">
+                            <FormItemMedia
+                                id="avatar"
+                                v-model="avatarMedia"
+                                :label="$t('speaker.avatar') || 'Avatar'"
+                                name="avatar"
+                                :multiple="false"
+                                :max-files="1"
+                                :allowed-types="['image']"
+                                :access-level="AccessLevel.PUBLIC"
+                                :collection-name="CollectionType.AVATAR"
+                                :errors="errors.avatar ? [errors.avatar] : []"
+                            />
+                        </div>
+
+                        <div class="flex flex-col w-full">
+                            <FormItemMedia
+                                id="logo"
+                                v-model="logoMedia"
+                                :label="$t('speaker.logo') || 'Logo'"
+                                name="logo"
+                                :multiple="false"
+                                :max-files="1"
+                                :allowed-types="['image']"
+                                :access-level="AccessLevel.PUBLIC"
+                                :collection-name="CollectionType.COVER"
+                                :errors="errors.logo ? [errors.logo] : []"
+                                :logo="true"
+                            />
+                        </div>
                     </div>
-                </div>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center space-x-2">
+                            <FormItemSwitch
+                                id="isActive"
+                                v-model="isActive"
+                                :errors="errors.isActive ? [errors.isActive] : []"
+                            />
+                            <Label for="isActive">{{ isActive ? $t("common.active") : $t("common.inactive") }}</Label>
+                        </div>
+                    </div>
                 </div>
 
                 <DialogFooter class="shrink-0">
