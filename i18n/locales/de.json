@@ -1092,7 +1092,7 @@
         "missing_in_api": "In API fehlend",
         "missing_in_db": "In DB fehlend",
         "date": "Datum",
-        "title": "Titel",
+        "column_title": "Titel",
         "state_code": "Bundesland",
         "holidays_compare_hint": "Klicke auf \"Aktuelle Feiertage prüfen\", um Doppelte, in der API fehlende und in der DB fehlende Einträge anzuzeigen.",
         "no_records_duplicated": "Es wurden keine doppelten Einträge gefunden.",

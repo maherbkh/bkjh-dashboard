@@ -191,7 +191,7 @@
                                                                     @keydown.space.prevent="toggleSort(section.sectionKey, 'title')"
                                                                 >
                                                                     <span class="inline-flex items-center gap-1">
-                                                                        {{ $t('pages.settings.update_settings.title') }}
+                                                                        {{ $t('pages.settings.update_settings.column_title') }}
                                                                         <Icon
                                                                             :name="getSortState(section.sectionKey).key === 'title' ? (getSortState(section.sectionKey).dir === 'asc' ? 'solar:sort-from-top-to-bottom-linear' : 'solar:sort-from-bottom-to-top-linear') : 'solar:sort-from-top-to-bottom-linear'"
                                                                             class="size-4! shrink-0 opacity-70"

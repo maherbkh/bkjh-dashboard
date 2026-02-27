@@ -1091,7 +1091,7 @@
         "missing_in_api": "Missing in API",
         "missing_in_db": "Missing in DB",
         "date": "Date",
-        "title": "Title",
+        "column_title": "Title",
         "state_code": "State Code",
         "holidays_compare_hint": "Click \"Check current holidays\" to see duplicated, missing in API, and missing in DB.",
         "no_records_duplicated": "No records have been found as duplicated.",
