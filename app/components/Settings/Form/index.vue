@@ -1,6 +1,6 @@
 <template>
     <form
-        class="space-y-6"
+        class="space-y-6 rounded-lg border border-dashed border-border bg-muted/30 p-4"
         @submit.prevent="handleSubmit"
     >
         <div
@@ -20,34 +20,34 @@
             <FormItemInput
                 v-if="setting.type === SettingValueType.STRING"
                 :id="`setting-${setting.id}-value`"
-                v-model="settingValues[index]"
+                :model-value="String(settingValues[index] ?? '')"
                 :title="setting.name || keyToLabel(setting.key)"
                 :placeholder="$t('setting.value_placeholder') || 'Enter value'"
                 :disabled="disabled || readonly"
                 :readonly="readonly"
                 :errors="settingErrors[index] || []"
-                @update:model-value="(val) => handleValueChange(index, val)"
+                @update:model-value="(val) => handleValueChange(index, val ?? '')"
             />
 
             <!-- NUMBER Type -->
             <FormItemInput
                 v-else-if="setting.type === SettingValueType.NUMBER"
                 :id="`setting-${setting.id}-value`"
-                v-model="settingValues[index]"
+                :model-value="String(settingValues[index] ?? '')"
                 type="number"
                 :title="setting.name || keyToLabel(setting.key)"
                 :placeholder="$t('setting.value_placeholder') || 'Enter number'"
                 :disabled="disabled || readonly"
                 :readonly="readonly"
                 :errors="settingErrors[index] || []"
-                @update:model-value="(val) => handleValueChange(index, val)"
+                @update:model-value="(val) => handleValueChange(index, val ?? '')"
             />
 
             <!-- BOOLEAN Type -->
             <FormItemSwitch
                 v-else-if="setting.type === SettingValueType.BOOLEAN"
                 :id="`setting-${setting.id}-value`"
-                v-model="settingValues[index]"
+                :model-value="Boolean(settingValues[index])"
                 :title="setting.name || keyToLabel(setting.key)"
                 :true-label="$t('common.true') || 'True'"
                 :false-label="$t('common.false') || 'False'"
@@ -71,7 +71,7 @@
                     >
                         <Icon
                             :name="(jsonViewMode[index] || 'structured') === 'text' ? 'solar:text-field-outline' : 'solar:code-2-outline'"
-                            class="!size-4 mr-1"
+                            class="size-4! mr-1"
                         />
                         {{ (jsonViewMode[index] || 'structured') === 'text' ? 'Text View' : 'Structured View' }}
                     </Button>
@@ -113,7 +113,7 @@
                                     >
                                         <Icon
                                             name="solar:alt-arrow-down-outline"
-                                            class="!size-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-0 rotate-90"
+                                            class="size-4! transition-transform duration-200 group-data-[state=open]/collapsible:rotate-0 rotate-90"
                                         />
                                         <span>Item {{ itemIndex + 1 }}</span>
                                     </CollapsibleTrigger>
@@ -145,7 +145,7 @@
                                 >
                                     <Icon
                                         name="solar:trash-bin-minimalistic-outline"
-                                        class="!size-4"
+                                        class="size-4!"
                                     />
                                 </Button>
                             </div>
@@ -160,7 +160,7 @@
                         >
                             <Icon
                                 name="solar:add-circle-outline"
-                                class="!size-4 mr-2"
+                                class="size-4! mr-2"
                             />
                             Add Item
                         </Button>
@@ -516,12 +516,13 @@ const handleValueChange = (index: number, val: any) => {
             newValue = val;
     }
 
-    // Update local setting
+    // Update local setting and form value ref
     const updatedSetting = {
         ...setting,
         value: newValue,
     };
     localSettings.value[index] = updatedSetting;
+    settingValues.value[index] = newValue;
 
     // Emit updates
     if (props.emitMode === 'individual' || props.emitMode === 'both') {

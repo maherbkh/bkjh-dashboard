@@ -1082,7 +1082,24 @@
   "pages": {
     "settings": {
       "update_settings": {
-        "title": "Update Settings"
+        "title": "Update Settings",
+        "external_data": "External Data",
+        "german_holidays": "German Holidays",
+        "fetch_year_holidays": "Fetch {year} Holidays",
+        "check_current_holidays": "Check current holidays",
+        "exist_duplications": "Duplicated",
+        "missing_in_api": "Missing in API",
+        "missing_in_db": "Missing in DB",
+        "date": "Date",
+        "title": "Title",
+        "state_code": "State Code",
+        "holidays_compare_hint": "Click \"Check current holidays\" to see duplicated, missing in API, and missing in DB.",
+        "no_records_duplicated": "No records have been found as duplicated.",
+        "no_records_missing_in_api": "No records have been found as missing in API.",
+        "no_records_missing_in_db": "No records have been found as missing in DB.",
+        "upsert_missing_to_db": "Upsert to DB",
+        "bulk_upsert_success": "Upsert completed",
+        "bulk_upsert_result": "{created} created, {updated} updated"
       }
     }
   },

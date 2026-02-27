@@ -1083,7 +1083,24 @@
   "pages": {
     "settings": {
       "update_settings": {
-        "title": "Einstellungen aktualisieren"
+        "title": "Einstellungen aktualisieren",
+        "external_data": "Externe Daten",
+        "german_holidays": "Deutsche Feiertage",
+        "fetch_year_holidays": "Feiertage {year} abrufen",
+        "check_current_holidays": "Aktuelle Feiertage prüfen",
+        "exist_duplications": "Doppelte",
+        "missing_in_api": "In API fehlend",
+        "missing_in_db": "In DB fehlend",
+        "date": "Datum",
+        "title": "Titel",
+        "state_code": "Bundesland",
+        "holidays_compare_hint": "Klicke auf \"Aktuelle Feiertage prüfen\", um Doppelte, in der API fehlende und in der DB fehlende Einträge anzuzeigen.",
+        "no_records_duplicated": "Es wurden keine doppelten Einträge gefunden.",
+        "no_records_missing_in_api": "Es wurden keine Einträge gefunden, die in der API fehlen.",
+        "no_records_missing_in_db": "Es wurden keine Einträge gefunden, die in der DB fehlen.",
+        "upsert_missing_to_db": "In DB übernehmen",
+        "bulk_upsert_success": "Übernahme abgeschlossen",
+        "bulk_upsert_result": "{created} erstellt, {updated} aktualisiert"
       }
     }
   },
