@@ -21,6 +21,8 @@ const delegatedProps = reactiveOmit(props, 'class');
         :class="cn(badgeVariants({ variant }), props.class)"
         v-bind="delegatedProps"
     >
-        <slot />
+        <span class="inline-block leading-none align-middle">
+            <slot />
+        </span>
     </Primitive>
 </template>

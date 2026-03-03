@@ -1,6 +1,6 @@
 <template>
     <thead>
-        <tr class="uppercase text-sm">
+        <tr class="uppercase text-xs">
             <th
                 v-if="selectable"
                 class="w-10 pr-0 whitespace-nowrap"

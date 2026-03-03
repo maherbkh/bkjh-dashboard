@@ -19,7 +19,7 @@ defineProps({
     <div class="flex flex-col gap-4 items-center place-content-center min-h-36 text-muted-foreground py-8">
         <Icon
             name="bi:database-fill-x"
-            class="!size-20 opacity-50 "
+            class="size-20! opacity-50 "
         />
         <div class="text-center">
             <h4 class="text-lg">

@@ -43,12 +43,12 @@ function getValueByPath(obj: any, path: string): any {
                     v-if="selectable"
                     class="text-right py-3"
                 >
-                    <Skeleton class="size-4 ml-auto !rounded-md" />
+                    <Skeleton class="size-4 ml-auto rounded-md!" />
                 </td>
                 <td
                     v-for="(column, index) in props.columns"
                     :key="column.id"
-                    class="text-left py-3"
+                    class="text-left py-1.5"
                 >
                     <Skeleton class="h-4 w-full" />
                     <Skeleton
@@ -56,7 +56,7 @@ function getValueByPath(obj: any, path: string): any {
                         class="mt-2 h-4 w-1/2"
                     />
                 </td>
-                <td class="text-right py-3">
+                <td class="text-right py-1.5">
                     <Skeleton class="h-4 w-16 ml-auto" />
                 </td>
             </tr>

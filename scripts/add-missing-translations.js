@@ -458,7 +458,7 @@ const missingTranslations = {
         'requester.cell': 'Antragsteller Handy',
         'requester.email': 'Antragsteller E-Mail',
         'requester.information': 'Antragsteller Informationen',
-        'requester.name': 'Antragsteller Name',
+        'requester.name': 'Antragsteller',
         'requester.phone': 'Antragsteller Telefon',
         'requester.plural': 'Antragsteller',
         'requester.singular': 'Antragsteller',

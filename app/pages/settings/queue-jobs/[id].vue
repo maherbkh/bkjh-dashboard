@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ApiResponse } from '~/composables/useApiFetch';
 import type { QueueJob, QueueJobResponse, QueueJobRetryResponse, QueueJobStatus, QueueName } from '~/types';
 import { useUserStore } from '~/stores/user';
 import { toast } from 'vue-sonner';
@@ -38,7 +39,10 @@ const { data: jobData, pending: isLoading, error, refresh } = useApiFetch<QueueJ
     },
 );
 
-const job = computed(() => jobData.value?.data as QueueJob | undefined);
+const job = computed((): QueueJob | undefined => {
+    const response = jobData.value as ApiResponse<QueueJobResponse> | null | undefined;
+    return response?.data as QueueJob | undefined;
+});
 
 // Check if job is not found
 const isJobNotFound = computed(() => {
@@ -99,7 +103,7 @@ const handleRetry = async () => {
             return;
         }
 
-        if (data.value?.success) {
+        if ((data.value as ApiResponse<QueueJobRetryResponse> | null)?.data?.success) {
             toast.success(t('queue_job.retry_success'));
             // Refresh job data
             await refresh();
@@ -181,7 +185,7 @@ const formattedPayload = computed(() => {
                 >
                     <Icon
                         name="solar:arrow-left-outline"
-                        class="!size-5"
+                        class="size-5!"
                     />
                 </LazyButton>
                 <div>

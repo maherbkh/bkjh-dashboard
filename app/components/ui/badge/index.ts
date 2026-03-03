@@ -4,14 +4,14 @@ import type { VariantProps } from 'class-variance-authority';
 export { default as Badge } from './Badge.vue';
 
 export const badgeVariants = cva(
-    'inline-flex items-center uppercase justify-center rounded-full border px-5 py-0.5 font-medium text-xs w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden',
+    'leading-none inline-flex items-center uppercase justify-center rounded-full border px-2 h-4 py-0.5 border border-border font-normal text-xs leading-none w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none [&>*]:leading-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden',
     {
         variants: {
             variant: {
                 default:
           'bg-primary/80 text-primary-foreground [a&]:hover:bg-primary/90 border-primary',
                 secondary:
-          'bg-background text-secondary-foreground [a&]:hover:bg-secondary/90 border-secondary',
+          'bg-background text-secondary-foreground [a&]:hover:bg-secondary/90 border-secondary-foreground/10',
 
                 destructive:
          'bg-red-100 text-red-800 dark:bg-red-300/90 [a&]:hover:bg-red-300/90 border-red-400/25',

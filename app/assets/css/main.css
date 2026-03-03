@@ -231,6 +231,14 @@
 		text-overflow: ellipsis !important;
 		white-space: nowrap !important;
 	}
+
+	*, *::before, *::after {
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0;
+		line-height: 1;           /* Key fix */
+		font-synthesis: none;     /* Prevents synthetic bold/italic spacing */
+	  }
 	
 	/* Ensure chart containers clip content */
 	[class*="chart"] svg,
@@ -377,7 +385,7 @@
 		}
 
 		td {
-			@apply px-5 py-3 border-b;
+			@apply px-5 py-1.5 border-b;
 		}
 
 		&.table-dark {

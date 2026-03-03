@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import type {
+    ServerParamsTypes,
+    SortDirection,
     SupportTicket,
-    TicketStatus,
     TableHeaderItem,
+    TicketStatus,
 } from '~/types';
 import { useUserStore } from '~/stores/user';
 
 const { t } = useI18n();
-const { formatDate } = useGermanDateFormat();
+const { formatDateParts } = useGermanDateFormat();
 // Page configuration
 const pageTitle = computed(() => t('ticket.plural'));
 const pageIcon = usePageIcon();
@@ -99,6 +101,14 @@ async function handleSortChange(dir: 'asc' | 'desc', id: string) {
     await fetchItems(currentPage.value, perPage.value, buildParams(true));
     selectedRows.value = [];
 }
+
+const tableParams = computed<ServerParamsTypes>(() => ({
+    page: currentPage.value,
+    length: perPage.value,
+    sortBy: sortBy.value ?? '',
+    sortDir: (sortDir.value ?? 'asc') as SortDirection,
+    search: searchQuery.value ?? '',
+}));
 
 const headerItems = computed(() => [
     {
@@ -363,13 +373,7 @@ const userStore = useUserStore();
                         :loading="isLoading"
                         :skeleton-rows="perPage"
                         :selectable="true"
-                        :params="{
-                            page: currentPage,
-                            length: perPage,
-                            sortBy: sortBy,
-                            sortDir: sortDir,
-                            search: searchQuery,
-                        }"
+                        :params="tableParams"
                         :model-value="isAllSelected"
                         @toggle-sort="handleSortChange"
                         @row-selected="(id: number | string, checked: boolean) => handleRowSelected(String(id), checked)"
@@ -379,7 +383,7 @@ const userStore = useUserStore();
                         @update:model-value="handleSelectAll"
                     >
                         <template #cell-ticketNumber="{ row }">
-                            <div class="font-medium">
+                            <div class="font-medium text-xs">
                                 <NuxtLink
                                     :to="`/support-tickets/${row.id}`"
                                     class="hover:text-primary hover:underline"
@@ -390,16 +394,18 @@ const userStore = useUserStore();
                         </template>
 
                         <template #cell-requester="{ row }">
-                            <div class="font-medium">
-                                {{ row.requester.name }}
+                            <div class="font-medium text-xs">
+                                <div class="truncate max-w-32 inline-block">
+                                    {{ row.requester.name }}
+                                </div>
                                 <Icon
                                     v-if="row.attachments && row.attachments.length > 0"
                                     title="Has Attachments"
                                     name="solar:folder-favourite-bookmark-bold-duotone"
-                                    class="!size-4 text-success shrink-0 ml-1.5"
+                                    class="size-4! text-success shrink-0 ml-1.5"
                                 />
                             </div>
-                            <div class="text-muted-foreground text-sm">
+                            <div class="text-muted-foreground text-xs">
                                 {{ row.requester.email }}
                             </div>
                         </template>
@@ -408,6 +414,7 @@ const userStore = useUserStore();
                             <div>
                                 <Badge
                                     v-if="row.statuses"
+                                    class="text-xs! shrink-0"
                                     :variant="
                                         getStatusVariant(getLatestStatus(row.statuses)?.status || 'PENDING')
                                     "
@@ -423,11 +430,11 @@ const userStore = useUserStore();
                                 <div
                                     v-if="row.admin"
                                     :class="[(userStore.user?.id === row.admin?.id && 'text-success')]"
-                                    class="text-xs flex items-center gap-2 rounded-full font-medium bg-background w-fit border px-2 py-0.5 border-border/50 mt-1 text-sm"
+                                    class="text-xs flex items-center gap-2 rounded-full font-medium bg-background w-fit border px-2 py-0.5 border-border/50 mt-1"
                                 >
                                     <Icon
                                         name="solar:user-circle-line-duotone"
-                                        class="!size-4 shrink-0 opacity-50"
+                                        class="size-3! shrink-0 opacity-50"
                                     />
                                     {{ row.admin?.firstName + ' ' + row.admin?.lastName }}
                                 </div>
@@ -435,7 +442,10 @@ const userStore = useUserStore();
                         </template>
 
                         <template #cell-category="{ row }">
-                            <span v-if="row.ticketCategory">
+                            <span
+                                v-if="row.ticketCategory"
+                                class="text-xs font-normal"
+                            >
                                 {{ row.ticketCategory.name }}
                             </span>
                             <span
@@ -447,19 +457,41 @@ const userStore = useUserStore();
                         </template>
 
                         <template #cell-group="{ row }">
-                            <span v-if="row.group">
+                            <span
+                                v-if="row.group"
+                                class="text-xs font-normal"
+                            >
                                 {{ row.group.name }}
                             </span>
                             <span
                                 v-else
-                                class="text-muted-foreground"
+                                class="text-muted-foreground/75 italic font-normal text-xs"
                             >
                                 {{ $t("common.not_assigned") }}
                             </span>
                         </template>
 
                         <template #cell-createdAt="{ row }">
-                            {{ formatDate(row.createdAt) }}
+                            <div class="flex flex-col gap-1">
+                                <div class="text-xs font-normal flex items-center gap-1">
+                                    <Icon
+                                        name="solar:calendar-mark-line-duotone"
+                                        class="size-4! shrink-0 opacity-75"
+                                    />
+                                    <div class="mt-0.25">
+                                        {{ formatDateParts(row.createdAt)?.date }}
+                                    </div>
+                                </div>
+                                <div class="text-xs font-normal text-muted-foreground flex items-center gap-1">
+                                    <Icon
+                                        name="solar:watch-round-outline"
+                                        class="size-4! shrink-0 opacity-75"
+                                    />
+                                    <div class="mt-0.25">
+                                        {{ formatDateParts(row.createdAt)?.time }}
+                                    </div>
+                                </div>
+                            </div>
                         </template>
 
                         <template #cell-actions="{ row }">
@@ -473,7 +505,7 @@ const userStore = useUserStore();
                                     >
                                         <Icon
                                             name="solar:eye-outline"
-                                            class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                            class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                                         />
                                     </LazyButton>
                                 </NuxtLink>
@@ -486,7 +518,7 @@ const userStore = useUserStore();
                                 >
                                     <Icon
                                         name="solar:pen-new-square-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                                     />
                                 </LazyButton>
                                 <LazyButton
@@ -497,7 +529,7 @@ const userStore = useUserStore();
                                 >
                                     <Icon
                                         name="solar:trash-bin-trash-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-destructive"
                                     />
                                 </LazyButton>
                             </div>
