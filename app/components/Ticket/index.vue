@@ -7,7 +7,7 @@
         >
             <Icon
                 name="solar:refresh-linear"
-                class="!size-8 shrink-0 animate-spin"
+                class="size-8! shrink-0 animate-spin"
             />
             <span class="ml-2">{{ $t("global.loading") }}</span>
         </div>
@@ -20,7 +20,7 @@
             <div class="flex items-center justify-center size-20 rounded-full bg-muted mb-6">
                 <Icon
                     name="solar:ticket-cross-outline"
-                    class="!size-10 text-muted-foreground"
+                    class="size-10! text-muted-foreground"
                 />
             </div>
             <h2 class="text-2xl font-semibold text-foreground mb-2">
@@ -155,6 +155,7 @@
 import { toast } from 'vue-sonner';
 
 // Fetch ticket data
+import type { ApiResponse } from '~/composables/useApiFetch';
 import type { SupportTicket } from '~/types';
 
 const props = defineProps<{
@@ -175,13 +176,14 @@ const pageDescription = computed(() =>
 );
 
 // Fetch ticket data
-const { data: ticketData, pending: isLoading, error, refresh } = useApiFetch<{
-    status: boolean;
-    message: string;
-    data: SupportTicket;
-}>(`/support/tickets/${props.id}`);
+const { data: ticketData, pending: isLoading, error, refresh } = useApiFetch<SupportTicket>(
+    `/support/tickets/${props.id}`,
+);
 
-const ticket = computed(() => ticketData.value?.data as SupportTicket | undefined);
+const ticket = computed((): SupportTicket | undefined => {
+    const response = ticketData.value as ApiResponse<SupportTicket> | null | undefined;
+    return response?.data;
+});
 
 // Check if ticket is not found
 const isTicketNotFound = computed(() => {
