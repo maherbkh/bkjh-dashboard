@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 const { t } = useI18n();
@@ -13,6 +14,8 @@ const props = withDefaults(defineProps<{
     errors?: string[];
     trueLabel?: string;
     falseLabel?: string;
+    trueTooltip?: string;
+    falseTooltip?: string;
     flexRow?: boolean;
     showSideLabel?: boolean;
 }>(), {
@@ -37,6 +40,12 @@ const switchValue = computed<boolean>({
 const displayTrueLabel = computed(() => props.trueLabel || t('common.on'));
 const displayFalseLabel = computed(() => props.falseLabel || t('common.off'));
 
+// Tooltip for current value (only when defined for current state)
+const currentTooltip = computed(() =>
+    switchValue.value ? props.trueTooltip : props.falseTooltip,
+);
+const showTooltip = computed(() => currentTooltip.value != null && currentTooltip.value !== '');
+
 // Computed wrapper classes
 const wrapperClasses = computed(() =>
     cn('grid w-full items-center gap-1.5', props.flexRow && 'flex items-center justify-between space-x-2'),
@@ -55,7 +64,38 @@ const wrapperClasses = computed(() =>
                 class="text-destructive font-semibold"
             >*</span>
         </Label>
-        <div :class="[(title && 'mt-2'), 'flex items-center space-x-2']">
+        <Tooltip
+            v-if="showTooltip"
+            :delay-duration="300"
+        >
+            <TooltipTrigger as-child>
+                <div
+                    :class="[(title && 'mt-2'), 'flex items-center space-x-2 w-fit cursor-default']"
+                >
+                    <Switch
+                        :id="id"
+                        v-model="switchValue"
+                        v-bind="$attrs"
+                        :disabled="disabled"
+                        :aria-invalid="errors.length > 0"
+                    />
+                    <Label
+                        v-if="showSideLabel && (displayTrueLabel || displayFalseLabel)"
+                        :for="id"
+                        class="mt-0.25 text-xs font-normal text-muted-foreground whitespace-nowrap"
+                    >
+                        {{ switchValue ? displayTrueLabel : displayFalseLabel }}
+                    </Label>
+                </div>
+            </TooltipTrigger>
+            <TooltipContent>
+                {{ currentTooltip }}
+            </TooltipContent>
+        </Tooltip>
+        <div
+            v-else
+            :class="[(title && 'mt-2'), 'flex items-center space-x-2']"
+        >
             <Switch
                 :id="id"
                 v-model="switchValue"
@@ -66,7 +106,7 @@ const wrapperClasses = computed(() =>
             <Label
                 v-if="showSideLabel && (displayTrueLabel || displayFalseLabel)"
                 :for="id"
-                class="text-sm text-muted-foreground"
+                class="mt-0.25 text-xs font-normal text-muted-foreground whitespace-nowrap"
             >
                 {{ switchValue ? displayTrueLabel : displayFalseLabel }}
             </Label>

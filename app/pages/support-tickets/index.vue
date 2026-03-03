@@ -51,10 +51,15 @@ const currentPage = ref(1);
 const perPage = ref(25);
 const sortBy = ref<string | null>(null);
 const sortDir = ref<'asc' | 'desc' | null>(null);
+const finished = ref(false);
+const onlyAssignedToMe = ref(false);
 
 // Helper function to build params object (only includes sort params if not null)
 const buildParams = (includeSearch = false) => {
-    const params: Record<string, any> = {};
+    const params: Record<string, any> = {
+        finished: finished.value,
+        onlyAuth: onlyAssignedToMe.value,
+    };
     if (includeSearch && searchQuery.value) {
         params.search = searchQuery.value;
     }
@@ -83,6 +88,18 @@ const handleReset = async () => {
 };
 
 const handleSearchSubmit = async () => {
+    currentPage.value = 1;
+    await fetchItems(currentPage.value, perPage.value, buildParams(true));
+    selectedRows.value = [];
+};
+
+const handleFinishedChange = async () => {
+    currentPage.value = 1;
+    await fetchItems(currentPage.value, perPage.value, buildParams(true));
+    selectedRows.value = [];
+};
+
+const handleOnlyAssignedToMeChange = async () => {
     currentPage.value = 1;
     await fetchItems(currentPage.value, perPage.value, buildParams(true));
     selectedRows.value = [];
@@ -334,6 +351,32 @@ const userStore = useUserStore();
             @add-new="openAddDialog"
         >
             <template #actions>
+                <div class="flex flex-wrap items-center gap-2 place-content-center">
+                    <div class="shrink-0">
+                        <FormItemSwitch
+                            id="finished"
+                            v-model="finished"
+                            :disabled="isLoading"
+                            :true-label="$t('ticket.finished')"
+                            :false-label="$t('ticket.not_finished')"
+                            :true-tooltip="$t('ticket.tooltip_finished_true')"
+                            :false-tooltip="$t('ticket.tooltip_finished_false')"
+                            @update:model-value="handleFinishedChange"
+                        />
+                    </div>
+                    <div class="shrink-0">
+                        <FormItemSwitch
+                            id="only-assigned-to-me"
+                            v-model="onlyAssignedToMe"
+                            :disabled="isLoading"
+                            :true-label="$t('ticket.only_assigned_to_me')"
+                            :false-label="$t('ticket.not_only_assigned_to_me')"
+                            :true-tooltip="$t('ticket.tooltip_only_assigned_true')"
+                            :false-tooltip="$t('ticket.tooltip_only_assigned_false')"
+                            @update:model-value="handleOnlyAssignedToMeChange"
+                        />
+                    </div>
+                </div>
                 <LazyButton
                     v-if="selectedRows.length > 0"
                     class="cursor-pointer"
