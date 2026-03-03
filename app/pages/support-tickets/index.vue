@@ -357,10 +357,10 @@ const userStore = useUserStore();
                             id="finished"
                             v-model="finished"
                             :disabled="isLoading"
-                            :true-label="$t('ticket.finished')"
-                            :false-label="$t('ticket.not_finished')"
-                            :true-tooltip="$t('ticket.tooltip_finished_true')"
-                            :false-tooltip="$t('ticket.tooltip_finished_false')"
+                            :false-label="$t('ticket.finished')"
+                            :true-label="$t('ticket.not_finished')"
+                            :false-tooltip="$t('ticket.tooltip_finished_true')"
+                            :true-tooltip="$t('ticket.tooltip_finished_false')"
                             @update:model-value="handleFinishedChange"
                         />
                     </div>
@@ -369,10 +369,10 @@ const userStore = useUserStore();
                             id="only-assigned-to-me"
                             v-model="onlyAssignedToMe"
                             :disabled="isLoading"
-                            :true-label="$t('ticket.only_assigned_to_me')"
-                            :false-label="$t('ticket.not_only_assigned_to_me')"
-                            :true-tooltip="$t('ticket.tooltip_only_assigned_true')"
-                            :false-tooltip="$t('ticket.tooltip_only_assigned_false')"
+                            :false-label="$t('ticket.only_assigned_to_me')"
+                            :true-label="$t('ticket.not_only_assigned_to_me')"
+                            :false-tooltip="$t('ticket.tooltip_only_assigned_true')"
+                            :true-tooltip="$t('ticket.tooltip_only_assigned_false')"
                             @update:model-value="handleOnlyAssignedToMeChange"
                         />
                     </div>
