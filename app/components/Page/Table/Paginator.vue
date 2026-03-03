@@ -20,9 +20,20 @@ function goToPage(page: number) {
     }
 }
 
-const pageNumbers = computed(() =>
-    Array.from({ length: lastPage.value }, (_, i) => i + 1),
-);
+/** Number of page links to show at start and at end; middle is truncated with ellipsis. */
+const PAGINATION_SIDES = 5;
+
+type PageSlot = number | 'ellipsis';
+
+const pageSlots = computed<PageSlot[]>(() => {
+    const last = lastPage.value || 1;
+    if (last <= PAGINATION_SIDES * 2) {
+        return Array.from({ length: last }, (_, i) => i + 1);
+    }
+    const start = Array.from({ length: PAGINATION_SIDES }, (_, i) => i + 1);
+    const end = Array.from({ length: PAGINATION_SIDES }, (_, i) => last - PAGINATION_SIDES + 1 + i);
+    return [...start, 'ellipsis', ...end];
+});
 </script>
 
 <template>
@@ -38,17 +49,21 @@ const pageNumbers = computed(() =>
                 @click="goToPage((currentPage || 1) - 1)"
             />
             <template
-                v-for="page in pageNumbers"
-                :key="page"
+                v-for="(slot, idx) in pageSlots"
+                :key="slot === 'ellipsis' ? `ellipsis-${idx}` : slot"
             >
                 <PaginationItem
+                    v-if="slot !== 'ellipsis'"
                     class="cursor-pointer disabled:cursor-not-allowed"
-                    :value="page"
-                    :is-active="page === (currentPage || 1)"
-                    @click="goToPage(page)"
+                    :value="slot"
+                    :is-active="slot === (currentPage || 1)"
+                    @click="goToPage(slot)"
                 >
-                    {{ page }}
+                    {{ slot }}
                 </PaginationItem>
+                <PaginationEllipsis
+                    v-else
+                />
             </template>
             <PaginationNext
                 class="cursor-pointer disabled:cursor-not-allowed"
