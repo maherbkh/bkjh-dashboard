@@ -1,5 +1,6 @@
 <script setup>
 import { VueDatePicker } from '@vuepic/vue-datepicker';
+import { de, enUS } from 'date-fns/locale';
 
 const props = defineProps({
     minDate: {
@@ -103,11 +104,13 @@ const availableLocales = computed(() => {
 // Resolve locale and week start from Nuxt i18n when not provided via props
 const resolvedLocale = computed(() => {
     const val = props.locale || i18nLocale.value || 'de';
-    return val === 'en' ? 'en' : 'de';
+    // vue-datepicker 12.x passes the locale prop directly to date-fns format/parse,
+    // so it must be a date-fns locale object — not a string.
+    return val === 'en' ? enUS : de;
 });
 const resolvedWeekStart = computed(() => {
     if (typeof props.weekStart === 'number') return props.weekStart;
-    return String(resolvedLocale.value).startsWith('en') ? 0 : 1;
+    return resolvedLocale.value.code.startsWith('en') ? 0 : 1;
 });
 const value = ref(props.modelValue);
 onMounted(() => {
@@ -137,7 +140,7 @@ watchEffect(() => {
             >*</span>
         </Label>
         <VueDatePicker
-            :key="String(resolvedLocale)"
+            :key="resolvedLocale.code"
             v-model="value"
             :teleport="false"
             :enable-time-picker="timePicker"

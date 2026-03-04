@@ -142,10 +142,6 @@ export default defineNuxtConfig({
                 'pinia',
                 '@vueuse/core',
             ],
-            exclude: [
-                // Exclude heavy dependencies from pre-bundling
-                '@morev/vue-transitions',
-            ],
         },
         build: {
             sourcemap: false, // turn off sourcemaps

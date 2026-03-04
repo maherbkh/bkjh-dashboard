@@ -195,7 +195,6 @@
 <script lang="ts" setup>
 import { cn } from '@/lib/utils';
 import { toast } from 'vue-sonner';
-import { TransitionExpand, TransitionSlide } from '@morev/vue-transitions';
 import type { TicketStatusChangePayload } from '~/types';
 import RTEditor from '~/components/FormItem/RTEditor.vue';
 
