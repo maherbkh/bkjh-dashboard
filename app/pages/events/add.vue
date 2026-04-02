@@ -1,5 +1,4 @@
-<script setup lang="ts">
-import { until } from '@vueuse/core';
+﻿<script setup lang="ts">
 import { toast } from 'vue-sonner';
 
 import type { EventForm } from '~/composables/eventSchema';
@@ -9,7 +8,6 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
-// Step slug <-> index for URL sync
 const STEP_SLUG_TO_INDEX: Record<string, number> = {
     'details': 0,
     'cover': 1,
@@ -32,7 +30,6 @@ function syncStepToUrl(stepIndex: number, slug: string) {
     router.replace(next);
 }
 
-// Page configuration
 const pageTitle = computed(() => t('action.add') + ' ' + t('academy.singular'));
 const pageIcon = usePageIcon();
 const pageDescription = computed(() => t('action.add') + ' ' + t('academy.singular'));
@@ -47,65 +44,57 @@ useSeoMeta({
     description: pageDescription,
     ogDescription: pageDescription,
 });
-// Validation schema is used inside EventForm component; no CRUD here
 
-// State
 const isSubmitting = ref(false);
 
-// Duplication logic
-const duplicateEventId = computed(() => route.query.duplicate as string);
-const isDuplicating = computed(() => !!duplicateEventId.value);
-
-// Reactive data for duplicate event
-const duplicateEventData = ref<EventData | null>(null);
-const isLoadingDuplicate = ref(false);
-
-let duplicateFetchSeq = 0;
-
-// Fetch event data for duplication when ID is available
-watch(duplicateEventId, async (id) => {
-    if (!id) {
-        duplicateFetchSeq++;
-        duplicateEventData.value = null;
-        isLoadingDuplicate.value = false;
-        return;
+const duplicateEventId = computed(() => {
+    const raw = route.query.duplicate;
+    if (Array.isArray(raw)) {
+        const first = raw[0];
+        return typeof first === 'string' ? first.trim() : '';
     }
+    return typeof raw === 'string' ? raw.trim() : '';
+});
 
-    const seq = ++duplicateFetchSeq;
-    isLoadingDuplicate.value = true;
-    try {
-        const { data, error, pending } = useApiFetch<EventData>(`/academy/events/${id}`, {
-            server: false,
-        });
-        await until(pending).toBe(false);
-        if (seq !== duplicateFetchSeq) return;
-        if (error.value) {
-            console.error('Error fetching event for duplication:', error.value);
-            duplicateEventData.value = null;
-        }
-        else {
-            duplicateEventData.value = data.value?.data ?? null;
-        }
-    }
-    catch (error) {
-        if (seq === duplicateFetchSeq) {
-            console.error('Error fetching event for duplication:', error);
-            duplicateEventData.value = null;
-        }
-    }
-    finally {
-        if (seq === duplicateFetchSeq) {
-            isLoadingDuplicate.value = false;
-        }
-    }
-}, { immediate: true });
+const isDuplicating = computed(() => duplicateEventId.value.length > 0);
 
-// Form submission
+const duplicateAsyncKey = computed(
+    () => `events-add-duplicate:${duplicateEventId.value || 'none'}`,
+);
+
+const {
+    data: duplicateApiResponse,
+    pending: isDuplicatePending,
+    error: duplicateFetchError,
+    refresh: refreshDuplicateFetch,
+} = useAsyncData(
+    duplicateAsyncKey,
+    () => {
+        const id = duplicateEventId.value;
+        if (!id) return Promise.resolve(null);
+        return fetchDashboardApi<EventData>(`/academy/events/${id}`);
+    },
+    {
+        watch: [duplicateEventId],
+        server: false,
+        immediate: true,
+        default: () => null,
+    },
+);
+
+const duplicateEventData = computed(() => duplicateApiResponse.value?.data ?? null);
+
+const duplicateLoadFailed = computed(
+    () =>
+        isDuplicating.value
+        && !isDuplicatePending.value
+        && (!!duplicateFetchError.value || duplicateEventData.value == null),
+);
+
 const onSubmit = async (values: EventForm, options?: { isEventCollection?: boolean }) => {
     isSubmitting.value = true;
 
-    // Ensure topics is always an array, never null or undefined
-    const payload: any = {
+    const payload: Record<string, unknown> = {
         ...values,
         topics: Array.isArray(values.topics) ? values.topics : [],
     };
@@ -124,7 +113,7 @@ const onSubmit = async (values: EventForm, options?: { isEventCollection?: boole
 
     if (data.value) {
         toast.success(t('global.messages.success'));
-        const eventId = (data.value as any)?.data?.id;
+        const eventId = (data.value as { data?: { id: string } })?.data?.id;
         if (options?.isEventCollection && eventId) {
             await navigateTo(`/events/${eventId}/edit?step=workshops&collection=1`, { replace: true });
         }
@@ -136,7 +125,6 @@ const onSubmit = async (values: EventForm, options?: { isEventCollection?: boole
     isSubmitting.value = false;
 };
 
-// Cancel handler
 const handleCancel = () => {
     router.back();
 };
@@ -158,7 +146,67 @@ const handleCancel = () => {
             </Button>
         </PageHeader>
 
+        <div
+            v-if="isDuplicating && isDuplicatePending"
+            class="space-y-4 rounded-lg border border-border bg-card p-6"
+            role="status"
+            :aria-label="$t('event.duplicate_load_loading')"
+        >
+            <div class="flex items-center gap-3 text-muted-foreground">
+                <Icon
+                    name="solar:refresh-bold"
+                    class="size-6 shrink-0 animate-spin motion-reduce:animate-none"
+                    aria-hidden="true"
+                />
+                <p class="text-sm font-medium text-foreground">
+                    {{ $t('event.duplicate_load_loading') }}
+                </p>
+            </div>
+            <div class="space-y-3">
+                <Skeleton class="h-10 w-full max-w-xl" />
+                <Skeleton class="h-24 w-full" />
+                <Skeleton class="h-10 w-full max-w-md" />
+            </div>
+        </div>
+
+        <Alert
+            v-else-if="duplicateLoadFailed"
+            variant="destructive"
+            class="border-destructive/50"
+        >
+            <AlertTitle>{{ $t('event.duplicate_load_failed_title') }}</AlertTitle>
+            <AlertDescription class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <span>{{ $t('event.duplicate_load_failed_description') }}</span>
+                <div class="flex shrink-0 flex-wrap gap-2">
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        :disabled="isDuplicatePending"
+                        @click="refreshDuplicateFetch"
+                    >
+                        <Icon
+                            v-if="isDuplicatePending"
+                            name="solar:refresh-bold"
+                            class="mr-2 size-4 animate-spin motion-reduce:animate-none"
+                            aria-hidden="true"
+                        />
+                        {{ $t('action.retry') }}
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        @click="handleCancel"
+                    >
+                        {{ $t('action.back') }}
+                    </Button>
+                </div>
+            </AlertDescription>
+        </Alert>
+
         <EventForm
+            v-else
             mode="add"
             :initial-data="duplicateEventData"
             :initial-step="initialStep"

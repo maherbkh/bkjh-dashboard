@@ -449,6 +449,9 @@
   },
   "event": {
     "add": "Veranstaltung hinzufügen",
+    "duplicate_load_loading": "Event zum Duplizieren wird geladen…",
+    "duplicate_load_failed_title": "Event konnte nicht geladen werden",
+    "duplicate_load_failed_description": "Das Event konnte nicht zum Duplizieren geladen werden. Prüf deine Verbindung oder versuch es noch mal.",
     "cover": "Titelbild",
     "date": "Veranstaltungsdatum",
     "edit": "Veranstaltung bearbeiten",

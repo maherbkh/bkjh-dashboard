@@ -449,6 +449,9 @@
   },
   "event": {
     "add": "Add Event",
+    "duplicate_load_loading": "Loading event to duplicate…",
+    "duplicate_load_failed_title": "Could not load event",
+    "duplicate_load_failed_description": "The event could not be loaded for duplication. Check your connection or try again.",
     "cover": "Cover Image",
     "date": "Event Date",
     "edit": "Edit Event",
