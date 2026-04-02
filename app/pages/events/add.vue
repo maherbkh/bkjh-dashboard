@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { until } from '@vueuse/core';
 import { toast } from 'vue-sonner';
 
 import type { EventForm } from '~/composables/eventSchema';
@@ -59,26 +60,43 @@ const isDuplicating = computed(() => !!duplicateEventId.value);
 const duplicateEventData = ref<EventData | null>(null);
 const isLoadingDuplicate = ref(false);
 
+let duplicateFetchSeq = 0;
+
 // Fetch event data for duplication when ID is available
 watch(duplicateEventId, async (id) => {
-    if (id) {
-        isLoadingDuplicate.value = true;
-        try {
-            const { data } = await useApiFetch<EventData>(`/academy/events/${id}`, {
-                server: false,
-            });
-            duplicateEventData.value = data.value?.data || null;
+    if (!id) {
+        duplicateFetchSeq++;
+        duplicateEventData.value = null;
+        isLoadingDuplicate.value = false;
+        return;
+    }
+
+    const seq = ++duplicateFetchSeq;
+    isLoadingDuplicate.value = true;
+    try {
+        const { data, error, pending } = useApiFetch<EventData>(`/academy/events/${id}`, {
+            server: false,
+        });
+        await until(pending).toBe(false);
+        if (seq !== duplicateFetchSeq) return;
+        if (error.value) {
+            console.error('Error fetching event for duplication:', error.value);
+            duplicateEventData.value = null;
         }
-        catch (error) {
+        else {
+            duplicateEventData.value = data.value?.data ?? null;
+        }
+    }
+    catch (error) {
+        if (seq === duplicateFetchSeq) {
             console.error('Error fetching event for duplication:', error);
             duplicateEventData.value = null;
         }
-        finally {
+    }
+    finally {
+        if (seq === duplicateFetchSeq) {
             isLoadingDuplicate.value = false;
         }
-    }
-    else {
-        duplicateEventData.value = null;
     }
 }, { immediate: true });
 
