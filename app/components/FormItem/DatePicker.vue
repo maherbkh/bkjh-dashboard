@@ -142,7 +142,7 @@ watchEffect(() => {
         <VueDatePicker
             :key="resolvedLocale.code"
             v-model="value"
-            :teleport="false"
+            :teleport="true"
             :enable-time-picker="timePicker"
             :time-picker="onlyTime"
             :auto-apply="autoApply"

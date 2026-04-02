@@ -68,7 +68,7 @@
                         {{ $t('ticket.status_change_dialog_description') }}
                     </DialogDescription>
                 </DialogHeader>
-                <div class="space-y-4">
+                <div class="scroll-app space-y-4">
                     <div class="space-y-2">
                         <Label for="status-note">{{ $t('ticket.status_note') }}</Label>
                         <RTEditor

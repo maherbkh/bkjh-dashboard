@@ -38,7 +38,7 @@ const handleOpenChange = (value: boolean) => {
                 </DialogDescription>
             </DialogHeader>
             <!-- Content slot (scrollable middle) -->
-            <div class="min-h-0 overflow-y-auto p-4">
+            <div class="min-h-0 overflow-x-hidden overflow-y-auto px-0 pr-5 scroll-app">
                 <div class="grid gap-4">
                     <slot name="content" />
                 </div>

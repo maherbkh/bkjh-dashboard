@@ -760,7 +760,7 @@ const formTitle = computed(() => {
                     </div>
                 </div>
 
-                <div class="relative overflow-x-hidden overflow-y-visible min-w-0">
+                <div class="relative min-w-0 overflow-x-hidden overflow-y-visible">
                     <TransitionSlide
                         mode="out-in"
                         :offset="slideOffset"
@@ -999,6 +999,7 @@ const formTitle = computed(() => {
                                 v-else-if="currentStep === 3"
                                 icon="solar:calendar-outline"
                                 :title="t('event.form.steps.date_time_management')"
+                                content-class="min-h-48 overflow-x-hidden overflow-y-visible"
                             >
                                 <div class="grid grid-cols-12 items-start gap-5">
                                     <div class="col-span-12">

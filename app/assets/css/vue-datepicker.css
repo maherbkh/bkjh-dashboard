@@ -697,7 +697,13 @@
     height: var(--dp-cell-size);
 }
 .dp--tp-wrap {
-    max-width: var(--dp-menu-min-width);
+    /* Full menu width so the time-picker bar (and clock icon) align with the calendar, not a narrow left strip */
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .dp--tp-wrap[data-dp-mobile] {
     max-width: 100%;

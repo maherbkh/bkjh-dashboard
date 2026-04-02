@@ -22,7 +22,7 @@
                 class="flex min-h-0 flex-1 flex-col"
                 @submit.prevent="handleSubmit"
             >
-                <div class="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
+                <div class="min-h-0 flex-1 space-y-4 overflow-x-hidden overflow-y-auto px-0 pr-5 scroll-app">
                     <div class="space-y-2">
                         <Label for="name">{{ $t("global.name") }}</Label>
                         <FormItemInput
