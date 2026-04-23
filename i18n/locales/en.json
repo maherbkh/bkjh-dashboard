@@ -51,6 +51,47 @@
       "title": "Cars Booking",
       "description": "Cars booking workspace",
       "empty_state": "Cars booking page is ready for your custom design."
+    },
+    "calendar": {
+      "search_placeholder": "Search cars by name or plate",
+      "car_column": "Car",
+      "empty": "No cars match your current filters.",
+      "view": {
+        "day": "Day",
+        "three_days": "3 Days",
+        "week": "1 Week",
+        "two_weeks": "2 Weeks",
+        "month": "Month"
+      },
+      "granularity": {
+        "hourly": "24h",
+        "half_hour": "48x30m"
+      },
+      "actions": {
+        "filter": "Filter",
+        "prev": "Previous",
+        "next": "Next",
+        "today": "Today",
+        "fullscreen": "Fullscreen",
+        "exit_fullscreen": "Exit fullscreen"
+      },
+      "legend": {
+        "available": "Available",
+        "approved": "Approved",
+        "pending": "Pending",
+        "rejected": "Rejected",
+        "canceled": "Canceled"
+      },
+      "tooltip": {
+        "status": "Status",
+        "requester": "Requester",
+        "email": "Email",
+        "start": "Start",
+        "end": "End",
+        "safe_reference": "Safe reference",
+        "group_id": "Group ID"
+      },
+      "safe_pin_available": "Safe PIN available"
     }
   },
   "car": {

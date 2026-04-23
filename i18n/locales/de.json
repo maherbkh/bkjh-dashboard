@@ -51,6 +51,47 @@
       "title": "Auto-Buchung",
       "description": "Arbeitsbereich fur Auto-Buchungen",
       "empty_state": "Die Seite fur Auto-Buchungen ist bereit fur dein eigenes Design."
+    },
+    "calendar": {
+      "search_placeholder": "Suche Autos nach Name oder Kennzeichen",
+      "car_column": "Auto",
+      "empty": "Keine Autos passen zu deinen aktuellen Filtern.",
+      "view": {
+        "day": "Tag",
+        "three_days": "3 Tage",
+        "week": "1 Woche",
+        "two_weeks": "2 Wochen",
+        "month": "Monat"
+      },
+      "granularity": {
+        "hourly": "24h",
+        "half_hour": "48x30m"
+      },
+      "actions": {
+        "filter": "Filter",
+        "prev": "Zuruck",
+        "next": "Weiter",
+        "today": "Heute",
+        "fullscreen": "Vollbild",
+        "exit_fullscreen": "Vollbild verlassen"
+      },
+      "legend": {
+        "available": "Verfugbar",
+        "approved": "Genehmigt",
+        "pending": "Ausstehend",
+        "rejected": "Abgelehnt",
+        "canceled": "Storniert"
+      },
+      "tooltip": {
+        "status": "Status",
+        "requester": "Anfragende Person",
+        "email": "E-Mail",
+        "start": "Start",
+        "end": "Ende",
+        "safe_reference": "Safe-Referenz",
+        "group_id": "Gruppen-ID"
+      },
+      "safe_pin_available": "Safe-PIN verfugbar"
     }
   },
   "car": {
