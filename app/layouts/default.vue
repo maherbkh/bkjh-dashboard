@@ -8,7 +8,7 @@
             :duration="5000"
             :height="4"
             :throttle="0"
-            class="z-[9999]"
+            class="z-9999"
             color="oklch(58.8% 0.158 241.966)"
         />
         <AppSidebar />
