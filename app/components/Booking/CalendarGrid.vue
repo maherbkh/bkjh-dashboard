@@ -5,6 +5,7 @@ import type {
     BookingRangeCellData,
     BookingCalendarViewMode,
 } from '~/composables/useBookingCalendarView';
+import type { BookingActionSelection } from '~/composables/useBookingActions';
 import {
     Tooltip,
     TooltipContent,
@@ -20,6 +21,9 @@ type Props = {
 };
 
 const props = defineProps<Props>();
+const emit = defineEmits<{
+    (e: 'select-action', payload: BookingActionSelection): void;
+}>();
 const { formatDate, formatDateOnly, formatDate: formatDateTimeDisplay } = useGermanDateFormat();
 
 const showTimeScale = computed(() => {
@@ -234,59 +238,66 @@ function shouldHighlightToday(): boolean {
                                             v-for="segment in getDayCellData(car.id, day).segments"
                                             :key="`${segment.bookingId}-${segment.lane}`"
                                         >
-                                            <Tooltip>
-                                                <TooltipTrigger as-child>
-                                                    <button
-                                                        type="button"
-                                                        :class="segmentClass(segment.status, segment.isStart, segment.isEnd)"
-                                                        :style="{
-                                                            left: `${segment.leftPct}%`,
-                                                            width: `${segment.widthPct}%`,
-                                                            top: getSegmentTopPx(segment.lane),
-                                                        }"
-                                                    />
-                                                </TooltipTrigger>
-                                                <TooltipContent
-                                                    align="start"
-                                                    class="max-w-xs text-xs bg-popover text-popover-foreground border border-border shadow-md rounded-lg px-3 py-2"
-                                                >
-                                                    <div class="space-y-1.5">
-                                                        <p class="font-semibold text-foreground">
-                                                            {{ car.name }} ({{ car.plateNumber }})
-                                                        </p>
-                                                        <p class="text-muted-foreground">
-                                                            {{ $t('booking.calendar.tooltip.status') }}: {{ segment.label }}
-                                                        </p>
-                                                        <p class="text-muted-foreground">
-                                                            {{ $t('booking.calendar.tooltip.requester') }}: {{ segment.requesterName }}
-                                                        </p>
-                                                        <p class="text-muted-foreground">
-                                                            {{ $t('booking.calendar.tooltip.email') }}: {{ segment.requesterEmail }}
-                                                        </p>
-                                                        <p class="text-muted-foreground">
-                                                            {{ $t('booking.calendar.tooltip.start') }}: {{ formatDateTime(segment.startsAt) }}
-                                                        </p>
-                                                        <p class="text-muted-foreground">
-                                                            {{ $t('booking.calendar.tooltip.end') }}: {{ formatDateTime(segment.endsAt) }}
-                                                        </p>
-                                                        <p class="text-muted-foreground">
-                                                            {{ $t('booking.calendar.tooltip.safe_reference') }}: {{ segment.safeReference }}
-                                                        </p>
-                                                        <p
-                                                            v-if="segment.groupId"
-                                                            class="text-muted-foreground"
+                                            <BookingActionMenu
+                                                :segment="segment"
+                                                @select-action="emit('select-action', $event)"
+                                            >
+                                                <div class="contents">
+                                                    <Tooltip>
+                                                        <TooltipTrigger as-child>
+                                                            <button
+                                                                type="button"
+                                                                :class="segmentClass(segment.status, segment.isStart, segment.isEnd)"
+                                                                :style="{
+                                                                    left: `${segment.leftPct}%`,
+                                                                    width: `${segment.widthPct}%`,
+                                                                    top: getSegmentTopPx(segment.lane),
+                                                                }"
+                                                            />
+                                                        </TooltipTrigger>
+                                                        <TooltipContent
+                                                            align="start"
+                                                            class="max-w-xs text-xs bg-popover text-popover-foreground border border-border shadow-md rounded-lg px-3 py-2"
                                                         >
-                                                            {{ $t('booking.calendar.tooltip.group_id') }}: {{ segment.groupName || segment.groupId }}
-                                                        </p>
-                                                        <p
-                                                            v-if="segment.safePinAvailable"
-                                                            class="text-primary font-medium"
-                                                        >
-                                                            {{ $t('booking.calendar.safe_pin_available') }}: {{ segment.safePin }}
-                                                        </p>
-                                                    </div>
-                                                </TooltipContent>
-                                            </Tooltip>
+                                                            <div class="space-y-1.5">
+                                                                <p class="font-semibold text-foreground">
+                                                                    {{ car.name }} ({{ car.plateNumber }})
+                                                                </p>
+                                                                <p class="text-muted-foreground">
+                                                                    {{ $t('booking.calendar.tooltip.status') }}: {{ segment.label }}
+                                                                </p>
+                                                                <p class="text-muted-foreground">
+                                                                    {{ $t('booking.calendar.tooltip.requester') }}: {{ segment.requesterName }}
+                                                                </p>
+                                                                <p class="text-muted-foreground">
+                                                                    {{ $t('booking.calendar.tooltip.email') }}: {{ segment.requesterEmail }}
+                                                                </p>
+                                                                <p class="text-muted-foreground">
+                                                                    {{ $t('booking.calendar.tooltip.start') }}: {{ formatDateTime(segment.startsAt) }}
+                                                                </p>
+                                                                <p class="text-muted-foreground">
+                                                                    {{ $t('booking.calendar.tooltip.end') }}: {{ formatDateTime(segment.endsAt) }}
+                                                                </p>
+                                                                <p class="text-muted-foreground">
+                                                                    {{ $t('booking.calendar.tooltip.safe_reference') }}: {{ segment.safeReference }}
+                                                                </p>
+                                                                <p
+                                                                    v-if="segment.groupId"
+                                                                    class="text-muted-foreground"
+                                                                >
+                                                                    {{ $t('booking.calendar.tooltip.group_id') }}: {{ segment.groupName || segment.groupId }}
+                                                                </p>
+                                                                <p
+                                                                    v-if="segment.safePinAvailable"
+                                                                    class="text-primary font-medium"
+                                                                >
+                                                                    {{ $t('booking.calendar.safe_pin_available') }}: {{ segment.safePin }}
+                                                                </p>
+                                                            </div>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </div>
+                                            </BookingActionMenu>
                                         </div>
                                     </div>
                                 </div>
@@ -308,59 +319,66 @@ function shouldHighlightToday(): boolean {
                                         v-for="segment in getRangeCellData(car.id).segments"
                                         :key="`${segment.bookingId}-${segment.lane}`"
                                     >
-                                        <Tooltip>
-                                            <TooltipTrigger as-child>
-                                                <button
-                                                    type="button"
-                                                    :class="segmentClass(segment.status, segment.isStart, segment.isEnd)"
-                                                    :style="{
-                                                        left: `${segment.leftPct}%`,
-                                                        width: `${segment.widthPct}%`,
-                                                        top: getSegmentTopPx(segment.lane),
-                                                    }"
-                                                />
-                                            </TooltipTrigger>
-                                            <TooltipContent
-                                                align="start"
-                                                class="max-w-xs text-xs bg-popover text-popover-foreground border border-border shadow-md rounded-lg px-3 py-2"
-                                            >
-                                                <div class="space-y-1.5">
-                                                    <p class="font-semibold text-foreground">
-                                                        {{ car.name }} ({{ car.plateNumber }})
-                                                    </p>
-                                                    <p class="text-muted-foreground">
-                                                        {{ $t('booking.calendar.tooltip.status') }}: {{ segment.label }}
-                                                    </p>
-                                                    <p class="text-muted-foreground">
-                                                        {{ $t('booking.calendar.tooltip.requester') }}: {{ segment.requesterName }}
-                                                    </p>
-                                                    <p class="text-muted-foreground">
-                                                        {{ $t('booking.calendar.tooltip.email') }}: {{ segment.requesterEmail }}
-                                                    </p>
-                                                    <p class="text-muted-foreground">
-                                                        {{ $t('booking.calendar.tooltip.start') }}: {{ formatDateTime(segment.startsAt) }}
-                                                    </p>
-                                                    <p class="text-muted-foreground">
-                                                        {{ $t('booking.calendar.tooltip.end') }}: {{ formatDateTime(segment.endsAt) }}
-                                                    </p>
-                                                    <p class="text-muted-foreground">
-                                                        {{ $t('booking.calendar.tooltip.safe_reference') }}: {{ segment.safeReference }}
-                                                    </p>
-                                                    <p
-                                                        v-if="segment.groupId"
-                                                        class="text-muted-foreground"
+                                        <BookingActionMenu
+                                            :segment="segment"
+                                            @select-action="emit('select-action', $event)"
+                                        >
+                                            <div class="contents">
+                                                <Tooltip>
+                                                    <TooltipTrigger as-child>
+                                                        <button
+                                                            type="button"
+                                                            :class="segmentClass(segment.status, segment.isStart, segment.isEnd)"
+                                                            :style="{
+                                                                left: `${segment.leftPct}%`,
+                                                                width: `${segment.widthPct}%`,
+                                                                top: getSegmentTopPx(segment.lane),
+                                                            }"
+                                                        />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent
+                                                        align="start"
+                                                        class="max-w-xs text-xs bg-popover text-popover-foreground border border-border shadow-md rounded-lg px-3 py-2"
                                                     >
-                                                        {{ $t('booking.calendar.tooltip.group_id') }}: {{ segment.groupName || segment.groupId }}
-                                                    </p>
-                                                    <p
-                                                        v-if="segment.safePinAvailable"
-                                                        class="text-primary font-medium"
-                                                    >
-                                                        {{ $t('booking.calendar.safe_pin_available') }}: {{ segment.safePin }}
-                                                    </p>
-                                                </div>
-                                            </TooltipContent>
-                                        </Tooltip>
+                                                        <div class="space-y-1.5">
+                                                            <p class="font-semibold text-foreground">
+                                                                {{ car.name }} ({{ car.plateNumber }})
+                                                            </p>
+                                                            <p class="text-muted-foreground">
+                                                                {{ $t('booking.calendar.tooltip.status') }}: {{ segment.label }}
+                                                            </p>
+                                                            <p class="text-muted-foreground">
+                                                                {{ $t('booking.calendar.tooltip.requester') }}: {{ segment.requesterName }}
+                                                            </p>
+                                                            <p class="text-muted-foreground">
+                                                                {{ $t('booking.calendar.tooltip.email') }}: {{ segment.requesterEmail }}
+                                                            </p>
+                                                            <p class="text-muted-foreground">
+                                                                {{ $t('booking.calendar.tooltip.start') }}: {{ formatDateTime(segment.startsAt) }}
+                                                            </p>
+                                                            <p class="text-muted-foreground">
+                                                                {{ $t('booking.calendar.tooltip.end') }}: {{ formatDateTime(segment.endsAt) }}
+                                                            </p>
+                                                            <p class="text-muted-foreground">
+                                                                {{ $t('booking.calendar.tooltip.safe_reference') }}: {{ segment.safeReference }}
+                                                            </p>
+                                                            <p
+                                                                v-if="segment.groupId"
+                                                                class="text-muted-foreground"
+                                                            >
+                                                                {{ $t('booking.calendar.tooltip.group_id') }}: {{ segment.groupName || segment.groupId }}
+                                                            </p>
+                                                            <p
+                                                                v-if="segment.safePinAvailable"
+                                                                class="text-primary font-medium"
+                                                            >
+                                                                {{ $t('booking.calendar.safe_pin_available') }}: {{ segment.safePin }}
+                                                            </p>
+                                                        </div>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </div>
+                                        </BookingActionMenu>
                                     </div>
                                 </div>
                             </div>

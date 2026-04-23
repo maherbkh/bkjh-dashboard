@@ -95,6 +95,12 @@ type CarBookingListItem = {
     updatedAt: string;
 };
 
+export type BookingCalendarRecord = CarBookingListItem;
+export type BookingGroupOption = {
+    id: string;
+    name: string;
+};
+
 type CarsIndexPayload = {
     data: Car[];
     meta: {
@@ -188,6 +194,20 @@ function isAfterSafePinThreshold(date: Date): boolean {
     return minutes >= (16 * 60 + 30);
 }
 
+function createLocalIsoLike(value: string): string {
+    if (!value) return value;
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toISOString();
+}
+
+function createMockBookingId(): string {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+    }
+    return `mock-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+}
+
 export function useBookingCalendarView() {
     const { t } = useI18n();
     const { formatDate, formatDateOnly, formatTimeOnly } = useGermanDateFormat();
@@ -196,8 +216,11 @@ export function useBookingCalendarView() {
     const anchorDate = ref<Date>(today);
     const viewMode = ref<BookingCalendarViewMode>('day');
     const searchQuery = ref('');
+    const showRejected = ref(true);
+    const showCanceled = ref(true);
 
-    const apiList = carBookingsDemoPayload.responses.list.data.data as readonly CarBookingListItem[];
+    const initialDemoRecords = carBookingsDemoPayload.responses.list.data.data as readonly CarBookingListItem[];
+    const bookingRecords = ref<CarBookingListItem[]>(initialDemoRecords.map(item => ({ ...item })));
 
     const cars = ref<BookingCalendarCar[]>(
         carBookingsDemoPayload.cars.map(car => ({
@@ -207,12 +230,15 @@ export function useBookingCalendarView() {
         })),
     );
     const groupNameById = ref<Record<string, string>>({});
+    const groupOptions = computed<BookingGroupOption[]>(() => {
+        return Object.entries(groupNameById.value).map(([id, name]) => ({ id, name }));
+    });
 
     const slots = computed<BookingCalendarSlot[]>(() => {
         const availableCarIds = cars.value.map(car => car.id);
         const fallbackCarBySourceCarId = new Map<string, string>();
 
-        const mapped = apiList.map((booking, index) => ({
+        const mapped = bookingRecords.value.map((booking, index) => ({
             id: booking.id,
             // Keep backend carId when available.
             // If not available, keep a stable fallback per source carId
@@ -274,7 +300,11 @@ export function useBookingCalendarView() {
             }
         }
 
-        return sanitized;
+        return sanitized.filter((booking) => {
+            if (booking.status === 'REJECTED' && !showRejected.value) return false;
+            if (booking.status === 'CANCELED' && !showCanceled.value) return false;
+            return true;
+        });
     });
 
     function mapBookingStatusToCellStatus(status: BookingApiStatus): Exclude<BookingCellStatus, 'available'> {
@@ -285,6 +315,60 @@ export function useBookingCalendarView() {
             CANCELED: 'canceled',
         };
         return statusMap[status];
+    }
+
+    function getBookingById(bookingId: string): BookingCalendarRecord | null {
+        return bookingRecords.value.find(item => item.id === bookingId) ?? null;
+    }
+
+    function updateBooking(bookingId: string, patch: Partial<Omit<BookingCalendarRecord, 'id'>>): BookingCalendarRecord | null {
+        const index = bookingRecords.value.findIndex(item => item.id === bookingId);
+        if (index === -1) return null;
+
+        const current = bookingRecords.value[index];
+        const next: BookingCalendarRecord = {
+            ...current,
+            ...patch,
+            startsAt: patch.startsAt ? createLocalIsoLike(patch.startsAt) : current.startsAt,
+            endsAt: patch.endsAt ? createLocalIsoLike(patch.endsAt) : current.endsAt,
+            updatedAt: new Date().toISOString(),
+        };
+
+        bookingRecords.value.splice(index, 1, next);
+        return next;
+    }
+
+    function changeBookingStatus(bookingId: string, status: BookingApiStatus): BookingCalendarRecord | null {
+        return updateBooking(bookingId, { status });
+    }
+
+    function duplicateBooking(bookingId: string): BookingCalendarRecord | null {
+        const source = getBookingById(bookingId);
+        if (!source) return null;
+
+        const sourceStart = new Date(source.startsAt);
+        const sourceEnd = new Date(source.endsAt);
+        const durationMs = Math.max(sourceEnd.getTime() - sourceStart.getTime(), 30 * 60 * 1000);
+        const nextStart = new Date(sourceEnd);
+        const nextEnd = new Date(nextStart.getTime() + durationMs);
+        const nowIso = new Date().toISOString();
+
+        const duplicate: BookingCalendarRecord = {
+            ...source,
+            id: createMockBookingId(),
+            startsAt: nextStart.toISOString(),
+            endsAt: nextEnd.toISOString(),
+            status: 'PENDING',
+            createdAt: nowIso,
+            updatedAt: nowIso,
+        };
+
+        bookingRecords.value.push(duplicate);
+        return duplicate;
+    }
+
+    function cancelBooking(bookingId: string): BookingCalendarRecord | null {
+        return changeBookingStatus(bookingId, 'CANCELED');
     }
 
     async function loadCarsFromIndex() {
@@ -645,6 +729,8 @@ export function useBookingCalendarView() {
         anchorDate,
         viewMode,
         searchQuery,
+        showRejected,
+        showCanceled,
         visibleDates,
         slotsPerDay,
         timelineSlots,
@@ -657,5 +743,11 @@ export function useBookingCalendarView() {
         getCellMeta,
         getDayCellData,
         getRangeCellData,
+        getBookingById,
+        updateBooking,
+        changeBookingStatus,
+        duplicateBooking,
+        cancelBooking,
+        groupOptions,
     };
 }

@@ -5,6 +5,8 @@ type Props = {
     searchQuery: string;
     viewMode: BookingCalendarViewMode;
     rangeLabel: string;
+    showRejected: boolean;
+    showCanceled: boolean;
     isFullscreen?: boolean;
 };
 
@@ -16,13 +18,24 @@ const emit = defineEmits<{
     (e: 'go-prev'): void;
     (e: 'go-next'): void;
     (e: 'go-today'): void;
-    (e: 'open-filter'): void;
+    (e: 'update:show-rejected', value: boolean): void;
+    (e: 'update:show-canceled', value: boolean): void;
     (e: 'toggle-fullscreen'): void;
 }>();
 
 const localSearchQuery = computed({
     get: () => props.searchQuery,
     set: (value: string) => emit('update:search-query', value),
+});
+
+const localShowRejected = computed({
+    get: () => props.showRejected,
+    set: (value: boolean) => emit('update:show-rejected', value),
+});
+
+const localShowCanceled = computed({
+    get: () => props.showCanceled,
+    set: (value: boolean) => emit('update:show-canceled', value),
 });
 
 function onViewModeChange(value: string | string[] | undefined) {
@@ -43,17 +56,22 @@ function onViewModeChange(value: string | string[] | undefined) {
             />
 
             <div class="flex flex-wrap items-center gap-2 xl:ml-auto">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    @click="emit('open-filter')"
-                >
-                    <Icon
-                        name="solar:filter-linear"
-                        class="size-4"
-                    />
-                    {{ $t('booking.calendar.actions.filter') }}
-                </Button>
+                <FormItemSwitch
+                    id="toggle-show-rejected"
+                    v-model="localShowRejected"
+                    :title="$t('booking.calendar.legend.rejected')"
+                    :true-label="$t('ui.show')"
+                    :false-label="$t('ui.hide')"
+                    :show-side-label="false"
+                />
+                <FormItemSwitch
+                    id="toggle-show-canceled"
+                    v-model="localShowCanceled"
+                    :title="$t('booking.calendar.legend.canceled')"
+                    :true-label="$t('ui.show')"
+                    :false-label="$t('ui.hide')"
+                    :show-side-label="false"
+                />
                 <Button
                     variant="outline"
                     size="sm"

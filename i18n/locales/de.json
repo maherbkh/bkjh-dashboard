@@ -91,7 +91,49 @@
         "safe_reference": "Safe-Referenz",
         "group_id": "Gruppen-ID"
       },
-      "safe_pin_available": "Safe-PIN verfugbar"
+      "safe_pin_available": "Safe-PIN verfugbar",
+      "action_menu": {
+        "edit": "Buchung bearbeiten",
+        "duplicate": "Buchung duplizieren",
+        "change_status": "Status andern",
+        "cancel_booking": "Buchung stornieren"
+      },
+      "action_dialog": {
+        "title": {
+          "edit": "Buchung bearbeiten",
+          "change_status": "Buchungsstatus andern",
+          "duplicate": "Buchung duplizieren",
+          "cancel": "Buchung stornieren"
+        },
+        "description": {
+          "edit": "Aktualisiere die Buchungsdetails und halte die Timeline konsistent.",
+          "change_status": "Wahle den neuen Buchungsstatus aus.",
+          "duplicate": "Erstelle eine neue Buchung als Duplikat dieser Buchung.",
+          "cancel": "Markiere diese Buchung als storniert."
+        },
+        "confirm": {
+          "edit": "Anderungen speichern",
+          "change_status": "Status aktualisieren",
+          "duplicate": "Duplikat erstellen",
+          "cancel": "Stornierung bestatigen"
+        },
+        "fields": {
+          "status": "Status",
+          "starts_at": "Startet am",
+          "ends_at": "Endet am",
+          "requester_name": "Name der anfragenden Person",
+          "requester_email": "E-Mail der anfragenden Person",
+          "group_id": "Gruppen-ID",
+          "safe_reference": "Safe-Referenz",
+          "safe_pin": "Safe-PIN"
+        }
+      },
+      "status_options": {
+        "pending": "Ausstehend",
+        "approved": "Genehmigt",
+        "rejected": "Abgelehnt",
+        "canceled": "Storniert"
+      }
     }
   },
   "car": {

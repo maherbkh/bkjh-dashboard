@@ -8,6 +8,8 @@ const isCalendarFullscreen = ref(false);
 const {
     viewMode,
     searchQuery,
+    showRejected,
+    showCanceled,
     visibleDates,
     filteredCars,
     currentRangeLabel,
@@ -17,7 +19,32 @@ const {
     goToToday,
     getDayCellData,
     getRangeCellData,
+    getBookingById,
+    updateBooking,
+    changeBookingStatus,
+    duplicateBooking,
+    cancelBooking,
+    groupOptions,
 } = useBookingCalendarView();
+
+const {
+    currentAction,
+    isDialogOpen,
+    selectedBooking,
+    pendingStatus,
+    statusOptions,
+    editForm,
+    isSubmitting,
+    openAction,
+    closeDialog,
+    confirmAction,
+} = useBookingActions({
+    getBookingById,
+    updateBooking,
+    changeBookingStatus,
+    duplicateBooking,
+    cancelBooking,
+});
 
 function toggleCalendarFullscreen() {
     isCalendarFullscreen.value = !isCalendarFullscreen.value;
@@ -68,9 +95,13 @@ useSeoMeta({
                 :search-query="searchQuery"
                 :view-mode="viewMode"
                 :range-label="currentRangeLabel"
+                :show-rejected="showRejected"
+                :show-canceled="showCanceled"
                 :is-fullscreen="isCalendarFullscreen"
                 @update:search-query="searchQuery = $event"
                 @update:view-mode="setViewMode"
+                @update:show-rejected="showRejected = $event"
+                @update:show-canceled="showCanceled = $event"
                 @go-prev="goToPreviousRange"
                 @go-next="goToNextRange"
                 @go-today="goToToday"
@@ -85,6 +116,7 @@ useSeoMeta({
                 :view-mode="viewMode"
                 :get-day-cell-data="getDayCellData"
                 :get-range-cell-data="getRangeCellData"
+                @select-action="openAction"
             />
 
             <div class="w-full px-4 py-3 lg:px-16">
@@ -120,6 +152,21 @@ useSeoMeta({
                     </Button>
                 </div>
             </div>
+
+            <BookingActionDialog
+                :open="isDialogOpen"
+                :action="currentAction"
+                :booking="selectedBooking"
+                :status-options="statusOptions"
+                :group-options="groupOptions"
+                :pending-status="pendingStatus"
+                :edit-form="editForm"
+                :is-submitting="isSubmitting"
+                @update:open="(value) => value ? null : closeDialog()"
+                @update:pending-status="pendingStatus = $event"
+                @update:edit-form="editForm = $event"
+                @confirm="confirmAction"
+            />
         </div>
     </div>
 </template>

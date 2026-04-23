@@ -112,16 +112,53 @@ const resolvedWeekStart = computed(() => {
     if (typeof props.weekStart === 'number') return props.weekStart;
     return resolvedLocale.value.code.startsWith('en') ? 0 : 1;
 });
+const resolvedFormat = computed(() => {
+    return props.format ? props.format : props.timePicker ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd';
+});
+
+function valueToComparable(input) {
+    if (input instanceof Date) {
+        return input.getTime();
+    }
+
+    if (Array.isArray(input)) {
+        return JSON.stringify(input.map(valueToComparable));
+    }
+
+    if (input && typeof input === 'object') {
+        try {
+            return JSON.stringify(input);
+        }
+        catch {
+            return String(input);
+        }
+    }
+
+    return input ?? null;
+}
+
+function isSameValue(a, b) {
+    return valueToComparable(a) === valueToComparable(b);
+}
+
 const value = ref(props.modelValue);
-onMounted(() => {
-    value.value = props.modelValue;
-});
-watchEffect(() => {
-    emit('update:model-value', value.value);
-});
-watchEffect(() => {
-    value.value = props.modelValue;
-});
+
+watch(
+    () => props.modelValue,
+    (nextValue) => {
+        if (!isSameValue(nextValue, value.value)) {
+            value.value = nextValue;
+        }
+    },
+    { immediate: true },
+);
+
+function onUpdateModelValue(nextValue) {
+    value.value = nextValue;
+    if (!isSameValue(nextValue, props.modelValue)) {
+        emit('update:model-value', nextValue);
+    }
+}
 
 // Display formatting handled directly in the input slot; model remains yyyy-MM-dd
 </script>
@@ -141,15 +178,15 @@ watchEffect(() => {
         </Label>
         <VueDatePicker
             :key="resolvedLocale.code"
-            v-model="value"
+            :model-value="value"
             :teleport="true"
             :enable-time-picker="timePicker"
             :time-picker="onlyTime"
             :auto-apply="autoApply"
             :locale="resolvedLocale"
             :week-start="resolvedWeekStart"
-            :format="format ? format : timePicker ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd'"
-            :model-type="format ? format : timePicker ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd'"
+            :format="resolvedFormat"
+            :model-type="resolvedFormat"
             :autocomplete="autocomplete"
             :placeholder="placeholder"
             :name="name"
@@ -159,6 +196,7 @@ watchEffect(() => {
             :min-date="minDate"
             :max-date="maxDate"
             :class="{ 'has-error': errors.length > 0 }"
+            @update:model-value="onUpdateModelValue"
         >
             <template #dp-input="{ value: inputValue }">
                 <div class="relative w-full cursor-pointer">
@@ -176,7 +214,7 @@ watchEffect(() => {
                         class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground bg-background border-input flex h-8 w-full min-w-0 rounded-full border px-4 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-5 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
                         :class="[icon ? 'pl-8' : '']"
                         type="text"
-                        :value="onlyTime ? String(inputValue || '') : formatDateOnly(inputValue)"
+                        :value="onlyTime ? String(inputValue || '') : String(inputValue || formatDateOnly(inputValue))"
                     >
                 </div>
             </template>

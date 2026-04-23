@@ -91,7 +91,49 @@
         "safe_reference": "Safe reference",
         "group_id": "Group ID"
       },
-      "safe_pin_available": "Safe PIN available"
+      "safe_pin_available": "Safe PIN available",
+      "action_menu": {
+        "edit": "Edit booking",
+        "duplicate": "Duplicate booking",
+        "change_status": "Change status",
+        "cancel_booking": "Cancel booking"
+      },
+      "action_dialog": {
+        "title": {
+          "edit": "Edit booking",
+          "change_status": "Change booking status",
+          "duplicate": "Duplicate booking",
+          "cancel": "Cancel booking"
+        },
+        "description": {
+          "edit": "Update booking details and keep the timeline in sync.",
+          "change_status": "Select the new booking status to apply.",
+          "duplicate": "Create a new booking by duplicating this one.",
+          "cancel": "Mark this booking as canceled."
+        },
+        "confirm": {
+          "edit": "Save changes",
+          "change_status": "Update status",
+          "duplicate": "Create duplicate",
+          "cancel": "Confirm cancel"
+        },
+        "fields": {
+          "status": "Status",
+          "starts_at": "Starts at",
+          "ends_at": "Ends at",
+          "requester_name": "Requester name",
+          "requester_email": "Requester email",
+          "group_id": "Group ID",
+          "safe_reference": "Safe reference",
+          "safe_pin": "Safe PIN"
+        }
+      },
+      "status_options": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "canceled": "Canceled"
+      }
     }
   },
   "car": {
