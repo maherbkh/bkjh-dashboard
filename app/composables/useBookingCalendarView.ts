@@ -177,6 +177,12 @@ function intervalsOverlap(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date): b
     return aEnd > bStart && aStart < bEnd;
 }
 
+function getClampedInterval(slot: BookingCalendarSlot, rangeStart: Date, rangeEnd: Date): { startMs: number; endMs: number } {
+    const startMs = Math.max(slot.start.getTime(), rangeStart.getTime());
+    const endMs = Math.min(slot.end.getTime(), rangeEnd.getTime());
+    return { startMs, endMs };
+}
+
 function isAfterSafePinThreshold(date: Date): boolean {
     const minutes = date.getHours() * 60 + date.getMinutes();
     return minutes >= (16 * 60 + 30);
@@ -501,26 +507,43 @@ export function useBookingCalendarView() {
         const dayEnd = new Date(dayStart);
         dayEnd.setDate(dayEnd.getDate() + 1);
 
-        const source = slots.value
-            .filter(slot => slot.carId === carId && intervalsOverlap(slot.start, slot.end, dayStart, dayEnd))
-            .sort((a, b) => a.start.getTime() - b.start.getTime());
+        const rangeStart = normalizeDate(visibleDates.value[0] ?? dayStart);
+        const rangeEnd = new Date(normalizeDate(visibleDates.value[visibleDates.value.length - 1] ?? dayStart));
+        rangeEnd.setDate(rangeEnd.getDate() + 1);
 
-        const laneEndMinutes: number[] = [];
+        const rangeSource = slots.value
+            .filter(slot => slot.carId === carId && intervalsOverlap(slot.start, slot.end, rangeStart, rangeEnd))
+            .sort((a, b) => {
+                const startDiff = a.start.getTime() - b.start.getTime();
+                if (startDiff !== 0) return startDiff;
+                const endDiff = b.end.getTime() - a.end.getTime();
+                if (endDiff !== 0) return endDiff;
+                return a.id.localeCompare(b.id);
+            });
+
+        const laneEndMs: number[] = [];
+        const laneByBookingId = new Map<string, number>();
+        for (const slot of rangeSource) {
+            const { startMs, endMs } = getClampedInterval(slot, rangeStart, rangeEnd);
+            let lane = laneEndMs.findIndex(end => startMs >= end);
+            if (lane === -1) {
+                lane = laneEndMs.length;
+                laneEndMs.push(endMs);
+            }
+            else {
+                laneEndMs[lane] = endMs;
+            }
+            laneByBookingId.set(slot.id, lane);
+        }
+
+        const source = rangeSource.filter(slot => intervalsOverlap(slot.start, slot.end, dayStart, dayEnd));
         const segments: BookingDaySegment[] = source.map((slot) => {
             const segmentStart = slot.start > dayStart ? slot.start : dayStart;
             const segmentEnd = slot.end < dayEnd ? slot.end : dayEnd;
 
             const startMin = Math.max(0, (segmentStart.getTime() - dayStart.getTime()) / 60000);
             const endMin = Math.min(1440, (segmentEnd.getTime() - dayStart.getTime()) / 60000);
-
-            let lane = laneEndMinutes.findIndex(end => startMin >= end);
-            if (lane === -1) {
-                lane = laneEndMinutes.length;
-                laneEndMinutes.push(endMin);
-            }
-            else {
-                laneEndMinutes[lane] = endMin;
-            }
+            const lane = laneByBookingId.get(slot.id) ?? 0;
 
             const status = mapBookingStatusToCellStatus(slot.status);
             const isStart = slot.start >= dayStart && slot.start < dayEnd;
@@ -550,7 +573,7 @@ export function useBookingCalendarView() {
 
         return {
             segments,
-            laneCount: Math.max(laneEndMinutes.length, 1),
+            laneCount: Math.max(...segments.map(segment => segment.lane + 1), 1),
         };
     }
 

@@ -31,22 +31,8 @@ const isContinuousRangeView = computed(() => {
 const isThinSessionView = computed(() => {
     return props.viewMode === 'week' || props.viewMode === '2weeks' || props.viewMode === 'month';
 });
-
-const dayColumnWidth = computed(() => {
-    switch (props.viewMode) {
-        case 'day':
-            return 460;
-        case '3days':
-            return 300;
-        case 'week':
-            return 260;
-        case '2weeks':
-            return 190;
-        case 'month':
-            return 150;
-        default:
-            return 220;
-    }
+const hideInnerDayBorder = computed(() => {
+    return props.viewMode === 'week';
 });
 
 const dayHeaderDateFormat = computed(() => {
@@ -56,28 +42,31 @@ const dayHeaderDateFormat = computed(() => {
     return 'DD.MM.YYYY';
 });
 
-const shouldFitDatesToWidth = computed(() => {
-    const fitViews: BookingCalendarViewMode[] = ['week', '2weeks', 'month'];
-    return fitViews.includes(props.viewMode);
-});
-
 const gridTemplateColumns = computed(() => {
-    if (shouldFitDatesToWidth.value) {
-        return `6rem repeat(${props.visibleDates.length}, minmax(0, 1fr))`;
-    }
-    return `16rem repeat(${props.visibleDates.length}, minmax(${dayColumnWidth.value}px, 1fr))`;
+    return `6rem repeat(${props.visibleDates.length}, minmax(0, 1fr))`;
 });
 
 function segmentClass(status: BookingDayCellData['segments'][number]['status'], isStart: boolean, isEnd: boolean): string {
-    const shape = isStart && isEnd
-        ? 'rounded-[6px]'
-        : isStart
-            ? 'rounded-l-[6px] rounded-r-[2px]'
-            : isEnd
-                ? 'rounded-r-[6px] rounded-l-[2px]'
-                : 'rounded-[2px]';
-    const rangeShape = 'rounded-full';
-    const base = `absolute top-1 ${isThinSessionView.value ? 'h-2' : 'h-[20px]'} border shadow-sm transition-colors duration-150 ${isContinuousRangeView.value ? rangeShape : shape}`;
+    const shape = isContinuousRangeView.value
+        ? (
+                isStart && isEnd
+                    ? 'rounded-full'
+                    : isStart
+                        ? 'rounded-l-full rounded-r-[2px]'
+                        : isEnd
+                            ? 'rounded-r-full rounded-l-none'
+                            : 'rounded-none'
+            )
+        : (
+                isStart && isEnd
+                    ? 'rounded-[6px]'
+                    : isStart
+                        ? 'rounded-l-[6px] rounded-r-[2px]'
+                        : isEnd
+                            ? 'rounded-r-[6px] rounded-l-none'
+                            : 'rounded-none'
+            );
+    const base = `absolute top-1 ${isThinSessionView.value ? 'h-2' : 'h-[20px]'} border shadow-sm origin-center transition-transform transition-colors duration-300 ease-in-out hover:scale-[1.03] ${shape}`;
 
     if (status === 'approved') {
         return `${base} bg-success/80 border-success/90`;
@@ -104,27 +93,46 @@ function getLaneStepPx(): number {
 }
 
 function getSegmentTopPx(lane: number): string {
-    const baseTop = isThinSessionView.value ? 1 : 4;
+    // In thin views keep a visual py-2 (8px top + 8px bottom)
+    // and center the lane stack inside each vehicle row.
+    const baseTop = isThinSessionView.value ? 8 : 4;
     return `${(lane * getLaneStepPx()) + baseTop}px`;
 }
 
 function getCellMinHeightPx(laneCount: number): string {
     if (isThinSessionView.value) {
-        return `${Math.max(12, laneCount * getLaneStepPx() + 4)}px`;
+        // Exact stack height for h-2 + gap-1 lanes:
+        // n * 8px + (n - 1) * 4px
+        const exactThinStackHeight = (laneCount * 8) + ((laneCount - 1) * 4);
+        // Add py-2 around the stack: 8px top + 8px bottom.
+        return `${Math.max(24, exactThinStackHeight + 16)}px`;
     }
     return `${Math.max(28, laneCount * getLaneStepPx() + 8)}px`;
+}
+
+function getWeekRowLaneCount(carId: string): number {
+    if (props.viewMode !== 'week') {
+        return 1;
+    }
+
+    return props.visibleDates.reduce((max, day) => {
+        const laneCount = props.getDayCellData(carId, day).laneCount;
+        return Math.max(max, laneCount);
+    }, 1);
+}
+
+function getDayCellMinHeight(carId: string, day: Date): string {
+    if (props.viewMode === 'week') {
+        return getCellMinHeightPx(getWeekRowLaneCount(carId));
+    }
+    return getCellMinHeightPx(props.getDayCellData(carId, day).laneCount);
 }
 </script>
 
 <template>
     <div class="rounded-xl border bg-card shadow-sm">
         <div class="max-h-[72vh] overflow-auto">
-            <div
-                :class="shouldFitDatesToWidth ? 'w-full min-w-0' : 'min-w-max'"
-                :style="{
-                    minWidth: shouldFitDatesToWidth ? undefined : `${256 + (visibleDates.length * dayColumnWidth)}px`,
-                }"
-            >
+            <div class="w-full min-w-0">
                 <div
                     class="sticky top-0 z-30 grid border-b bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/85"
                     :style="{ gridTemplateColumns }"
@@ -162,12 +170,16 @@ function getCellMinHeightPx(laneCount: number): string {
                 <template v-if="cars.length > 0">
                     <div class="divide-y divide-border/70">
                         <div
-                            v-for="car in cars"
+                            v-for="(car, carIndex) in cars"
                             :key="car.id"
-                            class="grid hover:bg-muted/20"
+                            :class="[
+                                'grid transition-colors',
+                                carIndex % 2 === 0 ? 'bg-muted/50' : 'bg-background',
+                                'hover:bg-muted/60',
+                            ]"
                             :style="{ gridTemplateColumns }"
                         >
-                            <div class="sticky left-0 z-20 border-r bg-card/95 p-2.5 backdrop-blur min-w-0 max-w-64">
+                            <div class="sticky left-0 z-20 border-r bg-card/95 p-2.5 backdrop-blur min-w-0 max-w-64 flex flex-col justify-center">
                                 <p class="text-xs font-semibold leading-tight truncate">
                                     {{ car.name }}
                                 </p>
@@ -183,9 +195,12 @@ function getCellMinHeightPx(laneCount: number): string {
                                     class="border-r last:border-r-0 p-1 bg-muted/5"
                                 >
                                     <div
-                                        class="relative rounded-md border border-border/55 bg-background/80"
+                                        :class="[
+                                            'relative rounded-md bg-background/80 overflow-hidden',
+                                            hideInnerDayBorder ? '' : 'border border-border/55',
+                                        ]"
                                         :style="{
-                                            minHeight: getCellMinHeightPx(getDayCellData(car.id, day).laneCount),
+                                            minHeight: getDayCellMinHeight(car.id, day),
                                             backgroundImage: showTimeScale
                                                 ? 'repeating-linear-gradient(to right, hsl(var(--border) / 0.18) 0, hsl(var(--border) / 0.18) 1px, transparent 1px, transparent calc(100% / 48)), repeating-linear-gradient(to right, hsl(var(--border) / 0.38) 0, hsl(var(--border) / 0.38) 1px, transparent 1px, transparent calc(100% / 24))'
                                                 : 'repeating-linear-gradient(to right, hsl(var(--border) / 0.30) 0, hsl(var(--border) / 0.30) 1px, transparent 1px, transparent calc(100% / 24))',
@@ -258,7 +273,7 @@ function getCellMinHeightPx(laneCount: number): string {
                                 :style="{ gridColumn: `2 / span ${visibleDates.length}` }"
                             >
                                 <div
-                                    class="relative"
+                                    class="relative overflow-hidden"
                                     :style="{
                                         'minHeight': getCellMinHeightPx(getRangeCellData(car.id).laneCount),
                                         'backgroundImage': 'repeating-linear-gradient(to right, hsl(var(--border) / 0.30) 0, hsl(var(--border) / 0.30) 1px, transparent 1px, transparent calc(100% / var(--day-count)))',
