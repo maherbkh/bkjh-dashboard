@@ -44,6 +44,34 @@
       "event_info": "Event Information"
     }
   },
+  "booking": {
+    "plural": "Booking",
+    "singular": "Booking"
+  },
+  "car": {
+    "singular": "Car",
+    "plural": "Cars",
+    "description": "Manage cars for booking operations",
+    "add": "Add a new car",
+    "edit": "Edit car information",
+    "model": "Model",
+    "model_placeholder": "Enter car model",
+    "plate_number": "Plate Number",
+    "plate_number_placeholder": "Enter plate number",
+    "type": "Type",
+    "automatic": "Automatic",
+    "automatic_description": "Enable if this car uses automatic transmission",
+    "automatic_yes": "Automatic",
+    "automatic_no": "Manual",
+    "max": "Range",
+    "max_placeholder": "Enter range",
+    "types": {
+      "petrol": "Petrol",
+      "diesel": "Diesel",
+      "electric": "Electric",
+      "hybrid": "Hybrid"
+    }
+  },
   "action": {
     "actions": "Actions",
     "activate": "Activate",
@@ -1569,6 +1597,25 @@
     "edit_success": "User edited successfully",
     "no_users_found": "No users found",
     "update_success": "User updated successfully"
+  },
+  "dashboard": {
+    "booking": {
+      "cars": {
+        "success": {
+          "created": "Car created successfully",
+          "retrieved": "Car retrieved successfully",
+          "updated": "Car updated successfully",
+          "deleted": "Car deleted successfully",
+          "list_retrieved": "Cars retrieved successfully"
+        },
+        "errors": {
+          "not_found": "Car not found",
+          "plate_exists": "Plate number already exists",
+          "max_required_for_electric_hybrid": "Range is required for electric and hybrid cars",
+          "max_must_be_null_for_fuel_types": "Range must be empty for petrol and diesel cars"
+        }
+      }
+    }
   },
   "validation": {
     "alpha": "Must contain only letters",

@@ -1,4 +1,4 @@
-type AppSlugType = 'support' | 'academy' | 'dashboard';
+type AppSlugType = 'support' | 'academy' | 'dashboard' | 'booking';
 
 export const useAppStore = defineStore('app', () => {
     // App state stored in cookie

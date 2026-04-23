@@ -479,6 +479,27 @@ export type GroupForm = {
     company_ids?: number[];
 };
 
+export type CarType = 'petrol' | 'diesel' | 'electric' | 'hybrid';
+
+export type Car = {
+    id: string;
+    model: string;
+    plateNumber: string;
+    type: CarType;
+    automatic: boolean;
+    max: number | null;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type CarForm = {
+    model: string;
+    plateNumber: string;
+    type: CarType;
+    automatic?: boolean;
+    max?: number | null;
+};
+
 // Fix the TableHeaderItem type to ensure id is required
 export type TableHeaderItem = {
     name: string;

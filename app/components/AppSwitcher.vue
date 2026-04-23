@@ -2,7 +2,7 @@
 import { useSidebar } from '~/components/ui/sidebar';
 import { useAppStore } from '~/stores/app';
 
-type AppSlugType = 'support' | 'academy';
+type AppSlugType = 'support' | 'academy' | 'booking' | 'dashboard';
 
 const props = defineProps<{
     apps: {
@@ -27,7 +27,7 @@ const activeApp = computed(() => {
 
 // Handle app switching
 const handleAppClick = (app: typeof props.apps[0]) => {
-    if (app.slug === 'support' || app.slug === 'academy') {
+    if (app.slug === 'support' || app.slug === 'academy' || app.slug === 'booking' || app.slug === 'dashboard') {
         appStore.setAppSlug(app.slug as AppSlugType);
         // Navigate to home dashboard page when app is switched
         navigateTo('/');
@@ -44,10 +44,10 @@ const handleAppClick = (app: typeof props.apps[0]) => {
                         size="lg"
                         class="ease-in-out duration-300 bg-sidebar-accent group data-[state=open]:bg-sidebar-primary data-[state=open]:text-sidebar-primary-foreground cursor-pointer"
                     >
-                        <div class="ease-in-out duration-150 flex aspect-square group-data-[state=open]:bg-sidebar-accent group-data-[state=open]:text-sidebar-accent-foreground !size-9 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                        <div class="ease-in-out duration-150 flex aspect-square group-data-[state=open]:bg-sidebar-accent group-data-[state=open]:text-sidebar-accent-foreground size-9! items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                             <Icon
                                 :name="activeApp.logo"
-                                class="!size-5"
+                                class="size-5!"
                             />
                         </div>
                         <div class="grid flex-1 text-left text-sm leading-tight">

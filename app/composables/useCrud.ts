@@ -6,7 +6,7 @@ import type { CrudItem, PaginatedResponse, Category } from '~/types';
 
 type CrudOptions = {
     crudPath: string;
-    tenant: 'shared' | 'academy' | 'support';
+    tenant: 'shared' | 'academy' | 'support' | 'dashboard' | 'booking';
     translations?: {
         add_success?: string;
         edit_success?: string;
@@ -397,7 +397,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
 // Category type is now imported from ~/types
 
 // Convenience function for categories
-export function useCategoryCrud(tenant: 'shared' | 'academy' | 'support' = 'shared') {
+export function useCategoryCrud(tenant: 'shared' | 'academy' | 'support' | 'dashboard' | 'booking' = 'shared') {
     const { t } = useI18n();
 
     return useCrud<Category>({

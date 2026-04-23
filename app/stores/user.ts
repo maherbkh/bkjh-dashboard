@@ -76,7 +76,7 @@ export const useUserStore = defineStore('user', () => {
             else if (userApps.length > 0) {
                 // Use first app from user's available apps
                 const firstUserApp = userApps[0];
-                appStore.setAppSlug(firstUserApp as 'support' | 'academy');
+                appStore.setAppSlug(firstUserApp as 'support' | 'academy' | 'booking' | 'dashboard');
             }
             else {
                 // Fallback to dashboard if user has no apps

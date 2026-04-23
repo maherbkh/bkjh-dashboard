@@ -44,6 +44,34 @@
       "event_info": "informationen"
     }
   },
+  "booking": {
+    "plural": "Buchung",
+    "singular": "Buchung"
+  },
+  "car": {
+    "singular": "Auto",
+    "plural": "Autos",
+    "description": "Verwalte Autos fur Buchungsvorgange",
+    "add": "Neues Auto hinzufugen",
+    "edit": "Autoinformationen bearbeiten",
+    "model": "Modell",
+    "model_placeholder": "Automodell eingeben",
+    "plate_number": "Kennzeichen",
+    "plate_number_placeholder": "Kennzeichen eingeben",
+    "type": "Typ",
+    "automatic": "Automatik",
+    "automatic_description": "Aktivieren, wenn das Auto ein Automatikgetriebe hat",
+    "automatic_yes": "Automatik",
+    "automatic_no": "Manuell",
+    "max": "Reichweite",
+    "max_placeholder": "Reichweite eingeben",
+    "types": {
+      "petrol": "Benzin",
+      "diesel": "Diesel",
+      "electric": "Elektro",
+      "hybrid": "Hybrid"
+    }
+  },
   "action": {
     "actions": "Aktionen",
     "activate": "Aktivieren",
@@ -1572,6 +1600,25 @@
     "edit_success": "Benutzer erfolgreich bearbeitet",
     "no_users_found": "Keine Benutzer gefunden",
     "update_success": "Benutzer erfolgreich aktualisiert"
+  },
+  "dashboard": {
+    "booking": {
+      "cars": {
+        "success": {
+          "created": "Auto erfolgreich erstellt",
+          "retrieved": "Auto erfolgreich geladen",
+          "updated": "Auto erfolgreich aktualisiert",
+          "deleted": "Auto erfolgreich gelöscht",
+          "list_retrieved": "Autos erfolgreich geladen"
+        },
+        "errors": {
+          "not_found": "Auto nicht gefunden",
+          "plate_exists": "Kennzeichen existiert bereits",
+          "max_required_for_electric_hybrid": "Reichweite ist fur Elektro- und Hybridautos erforderlich",
+          "max_must_be_null_for_fuel_types": "Reichweite muss bei Benzin- und Dieselautos leer sein"
+        }
+      }
+    }
   },
   "validation": {
     "alpha": "Darf nur Buchstaben enthalten",

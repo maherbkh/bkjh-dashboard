@@ -13,13 +13,13 @@ export const useNavigationData = (): ComputedRef<{
         url: string;
         icon: string;
         isActive?: boolean;
-        apps: ('support' | 'academy' | 'dashboard')[];
+        apps: ('support' | 'academy' | 'dashboard' | 'booking')[];
         requireSuperAdmin?: boolean;
         items: Array<{
             title: string;
             url: string;
             icon: string;
-            apps: ('support' | 'academy')[];
+            apps: ('support' | 'academy' | 'dashboard' | 'booking')[];
             requireSuperAdmin?: boolean;
         }>;
     }>;
@@ -43,6 +43,11 @@ export const useNavigationData = (): ComputedRef<{
                     logo: 'solar:calendar-linear',
                     slug: 'academy',
                 },
+                {
+                    name: t('booking.plural'),
+                    logo: 'solar:bus-outline',
+                    slug: 'booking',
+                },
             ],
             navMain: [
                 {
@@ -57,7 +62,7 @@ export const useNavigationData = (): ComputedRef<{
                     url: '#',
                     icon: 'solar:server-2-outline',
                     isActive: true,
-                    apps: ['support', 'academy'],
+                    apps: ['support', 'academy', 'booking'],
                     items: [
                         {
                             title: t('company.plural'),
@@ -108,6 +113,12 @@ export const useNavigationData = (): ComputedRef<{
                             url: '/master-data/occupations',
                             icon: 'solar:case-round-minimalistic-line-duotone',
                             apps: ['support', 'academy'],
+                        },
+                        {
+                            title: t('car.plural'),
+                            url: '/master-data/cars',
+                            icon: 'solar:bus-outline',
+                            apps: ['booking'],
                         },
                     ],
                 },
@@ -207,7 +218,7 @@ export const useNavigationData = (): ComputedRef<{
                 return true;
             }
             // Check if item is for current app
-            return item.apps && item.apps.includes(appStore.appSlug as 'support' | 'academy');
+            return item.apps && item.apps.includes(appStore.appSlug as 'support' | 'academy' | 'dashboard' | 'booking');
         }).map((item: any) => ({
             ...item,
             items: item.items.filter((subItem: any) => {
@@ -220,7 +231,7 @@ export const useNavigationData = (): ComputedRef<{
                     return true;
                 }
                 // Check if sub-item is for current app
-                return subItem.apps && subItem.apps.includes(appStore.appSlug as 'support' | 'academy');
+                return subItem.apps && subItem.apps.includes(appStore.appSlug as 'support' | 'academy' | 'dashboard' | 'booking');
             }),
         }));
 
