@@ -55,23 +55,25 @@ function onViewModeChange(value: string | string[] | undefined) {
                 class="w-full xl:max-w-sm"
             />
 
-            <div class="flex flex-wrap items-center gap-2 xl:ml-auto">
-                <FormItemSwitch
-                    id="toggle-show-rejected"
-                    v-model="localShowRejected"
-                    :title="$t('booking.calendar.legend.rejected')"
-                    :true-label="$t('ui.show')"
-                    :false-label="$t('ui.hide')"
-                    :show-side-label="false"
-                />
-                <FormItemSwitch
-                    id="toggle-show-canceled"
-                    v-model="localShowCanceled"
-                    :title="$t('booking.calendar.legend.canceled')"
-                    :true-label="$t('ui.show')"
-                    :false-label="$t('ui.hide')"
-                    :show-side-label="false"
-                />
+            <div class="flex flex-wrap items-center gap-3 xl:ml-auto">
+                <div class="inline-flex items-center gap-2">
+                    <span class="text-xs font-medium text-muted-foreground">
+                        {{ $t('booking.calendar.legend.rejected') }}
+                    </span>
+                    <Switch
+                        id="toggle-show-rejected"
+                        v-model="localShowRejected"
+                    />
+                </div>
+                <div class="inline-flex items-center gap-2">
+                    <span class="text-xs font-medium text-muted-foreground">
+                        {{ $t('booking.calendar.legend.canceled') }}
+                    </span>
+                    <Switch
+                        id="toggle-show-canceled"
+                        v-model="localShowCanceled"
+                    />
+                </div>
                 <Button
                     variant="outline"
                     size="sm"
