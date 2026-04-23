@@ -57,35 +57,6 @@ function onViewModeChange(value: string | string[] | undefined) {
                 <Button
                     variant="outline"
                     size="sm"
-                    @click="emit('go-prev')"
-                >
-                    <Icon
-                        name="solar:alt-arrow-left-linear"
-                        class="size-4"
-                    />
-                    {{ $t('booking.calendar.actions.prev') }}
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    @click="emit('go-today')"
-                >
-                    {{ $t('booking.calendar.actions.today') }}
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    @click="emit('go-next')"
-                >
-                    {{ $t('booking.calendar.actions.next') }}
-                    <Icon
-                        name="solar:alt-arrow-right-linear"
-                        class="size-4"
-                    />
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
                     @click="emit('toggle-fullscreen')"
                 >
                     <Icon

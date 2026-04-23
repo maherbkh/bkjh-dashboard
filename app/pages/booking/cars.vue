@@ -86,6 +86,40 @@ useSeoMeta({
                 :get-day-cell-data="getDayCellData"
                 :get-range-cell-data="getRangeCellData"
             />
+
+            <div class="w-full px-4 py-3 lg:px-16">
+                <div class="flex items-center justify-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        @click="goToPreviousRange"
+                    >
+                        <Icon
+                            name="solar:alt-arrow-left-linear"
+                            class="size-4"
+                        />
+                        {{ t('booking.calendar.actions.prev') }}
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        @click="goToToday"
+                    >
+                        {{ t('booking.calendar.actions.today') }}
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        @click="goToNextRange"
+                    >
+                        {{ t('booking.calendar.actions.next') }}
+                        <Icon
+                            name="solar:alt-arrow-right-linear"
+                            class="size-4"
+                        />
+                    </Button>
+                </div>
+            </div>
         </div>
     </div>
 </template>

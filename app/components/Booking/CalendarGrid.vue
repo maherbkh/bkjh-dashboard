@@ -127,6 +127,17 @@ function getDayCellMinHeight(carId: string, day: Date): string {
     }
     return getCellMinHeightPx(props.getDayCellData(carId, day).laneCount);
 }
+
+function isTodayDate(day: Date): boolean {
+    const today = new Date();
+    return day.getFullYear() === today.getFullYear()
+        && day.getMonth() === today.getMonth()
+        && day.getDate() === today.getDate();
+}
+
+function shouldHighlightToday(): boolean {
+    return props.viewMode === 'week' || props.viewMode === '2weeks' || props.viewMode === 'month';
+}
 </script>
 
 <template>
@@ -146,9 +157,19 @@ function getDayCellMinHeight(carId: string, day: Date): string {
                     <div
                         v-for="day in visibleDates"
                         :key="day.toISOString()"
-                        class="border-r last:border-r-0 px-2 py-1.5 text-left bg-muted/20"
+                        :class="[
+                            'border-r last:border-r-0 px-2 py-1.5 text-left',
+                            shouldHighlightToday() && isTodayDate(day)
+                                ? 'bg-primary/10 ring-1 ring-inset ring-primary/40'
+                                : 'bg-muted/20',
+                        ]"
                     >
-                        <p class="text-[10px] font-semibold text-foreground">
+                        <p
+                            :class="[
+                                'text-[10px] font-semibold',
+                                shouldHighlightToday() && isTodayDate(day) ? 'text-primary' : 'text-foreground',
+                            ]"
+                        >
                             {{ formatDate(day, 'ddd') }}
                         </p>
                         <p class="text-[9px] text-muted-foreground">
@@ -192,7 +213,10 @@ function getDayCellMinHeight(carId: string, day: Date): string {
                                 <div
                                     v-for="day in visibleDates"
                                     :key="`${car.id}-${day.toISOString()}`"
-                                    class="border-r last:border-r-0 p-1 bg-muted/5"
+                                    :class="[
+                                        'border-r last:border-r-0 p-1',
+                                        shouldHighlightToday() && isTodayDate(day) ? 'bg-primary/5' : 'bg-muted/5',
+                                    ]"
                                 >
                                     <div
                                         :class="[
