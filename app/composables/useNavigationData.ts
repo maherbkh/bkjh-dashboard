@@ -117,7 +117,7 @@ export const useNavigationData = (): ComputedRef<{
                         {
                             title: t('car.plural'),
                             url: '/master-data/cars',
-                            icon: 'solar:bus-outline',
+                            icon: 'mingcute:car-3-line',
                             apps: ['booking'],
                         },
                     ],
@@ -162,6 +162,21 @@ export const useNavigationData = (): ComputedRef<{
                             url: '/events/attendees',
                             icon: 'solar:users-group-rounded-outline',
                             apps: ['academy'],
+                        },
+                    ],
+                },
+                {
+                    title: t('booking.plural'),
+                    url: '#',
+                    icon: 'solar:calendar-mark-outline',
+                    isActive: false,
+                    apps: ['booking'],
+                    items: [
+                        {
+                            title: t('booking.cars_booking.title'),
+                            url: '/booking/cars',
+                            icon: 'mingcute:car-3-line',
+                            apps: ['booking'],
                         },
                     ],
                 },

@@ -46,7 +46,12 @@
   },
   "booking": {
     "plural": "Booking",
-    "singular": "Booking"
+    "singular": "Booking",
+    "cars_booking": {
+      "title": "Cars Booking",
+      "description": "Cars booking workspace",
+      "empty_state": "Cars booking page is ready for your custom design."
+    }
   },
   "car": {
     "singular": "Car",

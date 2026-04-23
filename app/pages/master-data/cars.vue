@@ -264,7 +264,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
     <div class="flex flex-col gap-4">
         <PageHeaderActions
             :page-title="pageTitle"
-            :page-icon="pageIcon || 'solar:bus-outline'"
+            :page-icon="pageIcon || 'mingcute:car-3-line'"
             @add-new="openAddDialog"
         >
             <template #actions>

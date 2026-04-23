@@ -46,7 +46,12 @@
   },
   "booking": {
     "plural": "Buchung",
-    "singular": "Buchung"
+    "singular": "Buchung",
+    "cars_booking": {
+      "title": "Auto-Buchung",
+      "description": "Arbeitsbereich fur Auto-Buchungen",
+      "empty_state": "Die Seite fur Auto-Buchungen ist bereit fur dein eigenes Design."
+    }
   },
   "car": {
     "singular": "Auto",
