@@ -37,6 +37,7 @@ const {
     refreshBookings,
     upsertBookingRecord,
     groupOptions,
+    carOptions,
 } = useBookingCalendarView();
 
 const {
@@ -50,6 +51,7 @@ const {
     customEmails,
     emailError,
     showSafeFields,
+    allowEditCar,
     shouldAutoShowSafeFields,
     isInternalEmail: checkInternalEmail,
     statusOptions,
@@ -162,6 +164,13 @@ function parseBooleanQuery(value: string | null, defaultValue: boolean): boolean
     if (value === '1' || value === 'true') return true;
     if (value === '0' || value === 'false') return false;
     return defaultValue;
+}
+
+function onUpdateViewMode(...args: unknown[]) {
+    const value = args[0];
+    if (value === 'day' || value === '3days' || value === 'week' || value === '2weeks' || value === 'month') {
+        setViewMode(value);
+    }
 }
 
 function hydrateCalendarStateFromQuery() {
@@ -292,7 +301,7 @@ useSeoMeta({
                 :show-canceled="showCanceled"
                 :is-fullscreen="isCalendarFullscreen"
                 @update:search-query="searchQuery = $event"
-                @update:view-mode="setViewMode"
+                @update:view-mode="onUpdateViewMode"
                 @update:selected-range="selectedDateRange = $event"
                 @update:show-rejected="showRejected = $event"
                 @update:show-canceled="showCanceled = $event"
@@ -353,6 +362,7 @@ useSeoMeta({
                 :booking="selectedBooking"
                 :status-options="statusOptions"
                 :group-options="groupOptions"
+                :car-options="carOptions"
                 :pending-status="pendingStatus"
                 :status-note="statusNote"
                 :send-email="sendEmail"
@@ -360,17 +370,19 @@ useSeoMeta({
                 :custom-emails="customEmails"
                 :email-error="emailError"
                 :show-safe-fields="showSafeFields"
+                :allow-edit-car="allowEditCar"
                 :should-auto-show-safe-fields="shouldAutoShowSafeFields"
                 :is-internal-email="isRequesterInternalEmail"
                 :edit-form="editForm"
                 :is-submitting="isSubmitting"
-                @update:open="(value) => value ? null : closeDialog()"
+                @update:open="(value: boolean) => value ? null : closeDialog()"
                 @update:pending-status="pendingStatus = $event"
                 @update:status-note="statusNote = $event"
                 @update:send-email="sendEmail = $event"
                 @update:email-option="emailOption = $event"
                 @update:custom-emails="customEmails = $event"
                 @update:show-safe-fields="showSafeFields = $event"
+                @update:allow-edit-car="allowEditCar = $event"
                 @update:edit-form="editForm = $event"
                 @confirm="confirmAction"
             />

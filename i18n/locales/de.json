@@ -126,8 +126,13 @@
           "requester_email": "E-Mail der anfragenden Person",
           "distance": "Strecke",
           "requester_note": "Notiz der anfragenden Person",
+          "requester_note_empty": "Keine Notiz der anfragenden Person",
+          "car": "Auto",
+          "allow_edit_car": "Auto bearbeiten erlauben",
           "admin_note": "Admin-Notiz",
+          "backhaus_note": "Backhaus-Notiz",
           "group_name": "Gruppe",
+          "not_defined": "Nicht definiert",
           "group_id": "Gruppen-ID",
           "duration": "Dauer",
           "safe_reference": "Safe-Referenz",
@@ -148,6 +153,11 @@
           "invalid": "Bitte gib gultige E-Mail-Adresse(n) ein",
           "internal": "Interne E-Mail",
           "external": "Externe E-Mail"
+        },
+        "sections": {
+          "car_booking": "Auto-Buchung",
+          "request_details": "Anfragedetails",
+          "admin_details": "Backhaus-Details"
         }
       },
       "status_options": {

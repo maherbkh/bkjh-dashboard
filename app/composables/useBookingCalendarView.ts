@@ -106,6 +106,10 @@ export type BookingGroupOption = {
     id: string;
     name: string;
 };
+export type BookingCarOption = {
+    id: string;
+    name: string;
+};
 
 type CarsIndexPayload = {
     data: Car[];
@@ -264,6 +268,12 @@ export function useBookingCalendarView() {
     const groupNameById = ref<Record<string, string>>({});
     const groupOptions = computed<BookingGroupOption[]>(() => {
         return Object.entries(groupNameById.value).map(([id, name]) => ({ id, name }));
+    });
+    const carOptions = computed<BookingCarOption[]>(() => {
+        return cars.value.map(car => ({
+            id: car.id,
+            name: `${car.name} (${car.plateNumber})`,
+        }));
     });
 
     const slots = computed<BookingCalendarSlot[]>(() => {
@@ -1014,5 +1024,6 @@ export function useBookingCalendarView() {
         refreshBookings,
         upsertBookingRecord,
         groupOptions,
+        carOptions,
     };
 }

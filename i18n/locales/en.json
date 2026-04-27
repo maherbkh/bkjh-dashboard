@@ -126,8 +126,13 @@
           "requester_email": "Requester email",
           "distance": "Distance",
           "requester_note": "Requester note",
+          "requester_note_empty": "No requester note",
+          "car": "Car",
+          "allow_edit_car": "Allow Edit Car",
           "admin_note": "Admin note",
+          "backhaus_note": "Backhaus Note",
           "group_name": "Group",
+          "not_defined": "Not Defined",
           "group_id": "Group ID",
           "duration": "Duration",
           "safe_reference": "Safe reference",
@@ -148,6 +153,11 @@
           "invalid": "Please enter valid email address(es)",
           "internal": "Internal email",
           "external": "External email"
+        },
+        "sections": {
+          "car_booking": "Car Booking",
+          "request_details": "Request Details",
+          "admin_details": "Admin Details"
         }
       },
       "status_options": {

@@ -12,6 +12,7 @@ export type BookingActionSelection = {
 };
 
 export type BookingEditForm = {
+    carId: string;
     startsAt: string;
     endsAt: string;
     requesterName: string;
@@ -80,7 +81,9 @@ export function useBookingActions(options: UseBookingActionsOptions) {
     const customEmails = ref('');
     const emailError = ref('');
     const showSafeFields = ref(false);
+    const allowEditCar = ref(false);
     const editForm = ref<BookingEditForm>({
+        carId: '',
         startsAt: '',
         endsAt: '',
         requesterName: '',
@@ -209,6 +212,7 @@ export function useBookingActions(options: UseBookingActionsOptions) {
 
     function hydrateEditForm(booking: BookingCalendarRecord) {
         editForm.value = {
+            carId: booking.carId,
             startsAt: toDateTimeLocalValue(booking.startsAt),
             endsAt: toDateTimeLocalValue(booking.endsAt),
             requesterName: booking.requesterName,
@@ -236,6 +240,7 @@ export function useBookingActions(options: UseBookingActionsOptions) {
         customEmails.value = '';
         emailError.value = '';
         showSafeFields.value = false;
+        allowEditCar.value = false;
         loadStatusOptions(booking.status);
         isDialogOpen.value = true;
     }
@@ -248,6 +253,7 @@ export function useBookingActions(options: UseBookingActionsOptions) {
         customEmails.value = '';
         emailError.value = '';
         showSafeFields.value = false;
+        allowEditCar.value = false;
     }
 
     async function confirmAction(): Promise<BookingCalendarRecord | null> {
@@ -265,6 +271,7 @@ export function useBookingActions(options: UseBookingActionsOptions) {
                     requesterNote: editForm.value.requesterNote || null,
                     adminNote: editForm.value.adminNote || null,
                     groupId: editForm.value.groupId || null,
+                    carId: allowEditCar.value ? (editForm.value.carId || selectedBooking.value?.carId || '') : undefined,
                     safeReference: editForm.value.safeReference,
                     safePin: editForm.value.safePin,
                 });
@@ -329,6 +336,7 @@ export function useBookingActions(options: UseBookingActionsOptions) {
         customEmails,
         emailError,
         showSafeFields,
+        allowEditCar,
         shouldAutoShowSafeFields,
         isInternalEmail,
         statusOptions,
