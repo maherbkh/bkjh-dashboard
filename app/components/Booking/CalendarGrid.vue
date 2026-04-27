@@ -26,28 +26,105 @@ const emit = defineEmits<{
 }>();
 const { formatDate, formatDateOnly, formatDate: formatDateTimeDisplay } = useGermanDateFormat();
 
+const PRESET_LENGTH: Record<Exclude<BookingCalendarViewMode, 'month'>, number> = {
+    day: 1,
+    '3days': 3,
+    week: 7,
+    '2weeks': 14,
+};
+
+function resolveStyleModeByDayCount(dayCount: number): BookingCalendarViewMode {
+    if (dayCount <= 1) return 'day';
+    if (dayCount <= 3) return '3days';
+    if (dayCount <= 7) return 'week';
+    if (dayCount <= 14) return '2weeks';
+    return 'month';
+}
+
+const effectiveDayCount = computed(() => props.visibleDates.length);
+const isCustomRangeActive = computed(() => {
+    if (props.viewMode === 'month') {
+        return effectiveDayCount.value !== 28
+            && effectiveDayCount.value !== 29
+            && effectiveDayCount.value !== 30
+            && effectiveDayCount.value !== 31;
+    }
+    return effectiveDayCount.value !== PRESET_LENGTH[props.viewMode];
+});
+const effectiveStyleMode = computed<BookingCalendarViewMode>(() => {
+    if (!isCustomRangeActive.value) {
+        return props.viewMode;
+    }
+    return resolveStyleModeByDayCount(effectiveDayCount.value);
+});
+
 const showTimeScale = computed(() => {
-    return props.viewMode === 'day' || props.viewMode === '3days';
+    return effectiveStyleMode.value === 'day' || effectiveStyleMode.value === '3days';
 });
 const isContinuousRangeView = computed(() => {
-    return props.viewMode === 'month' || props.viewMode === '2weeks';
+    return effectiveStyleMode.value === 'month' || effectiveStyleMode.value === '2weeks';
 });
 const isThinSessionView = computed(() => {
-    return props.viewMode === 'week' || props.viewMode === '2weeks' || props.viewMode === 'month';
+    return effectiveStyleMode.value === 'week' || effectiveStyleMode.value === '2weeks' || effectiveStyleMode.value === 'month';
 });
 const hideInnerDayBorder = computed(() => {
-    return props.viewMode === 'week';
+    return effectiveStyleMode.value === 'week';
 });
 
 const dayHeaderDateFormat = computed(() => {
-    if (props.viewMode === '2weeks' || props.viewMode === 'month') {
+    if (props.visibleDates.length > 60) {
+        return 'DD.MM';
+    }
+    if (effectiveStyleMode.value === '2weeks' || effectiveStyleMode.value === 'month') {
         return 'DD.MM';
     }
     return 'DD.MM.YYYY';
 });
 
+const dayHeaderWeekdayFormat = computed(() => {
+    return props.visibleDates.length > 45 ? 'dd' : 'ddd';
+});
+
+const dayCount = computed(() => props.visibleDates.length);
+const leftColumnWidthPx = 96;
+const isLongRange = computed(() => dayCount.value > 30);
+
+const dayColumnMinWidthPx = computed(() => {
+    if (dayCount.value > 60) return 60;
+    if (dayCount.value > 45) return 52;
+    return 44;
+});
+
 const gridTemplateColumns = computed(() => {
-    return `6rem repeat(${props.visibleDates.length}, minmax(0, 1fr))`;
+    if (isLongRange.value) {
+        return `${leftColumnWidthPx}px repeat(${dayCount.value}, minmax(${dayColumnMinWidthPx.value}px, 1fr))`;
+    }
+    return `${leftColumnWidthPx}px repeat(${dayCount.value}, minmax(0, 1fr))`;
+});
+
+const timelineMinWidthPx = computed(() => {
+    if (!isLongRange.value) return 0;
+    return leftColumnWidthPx + dayCount.value * dayColumnMinWidthPx.value;
+});
+
+const timelineInnerStyle = computed(() => {
+    return {
+        minWidth: isLongRange.value ? `${timelineMinWidthPx.value}px` : '100%',
+    };
+});
+
+const dayHeaderCellClass = computed(() => {
+    return isLongRange.value
+        ? 'border-r last:border-r-0 px-1.5 py-1 text-left'
+        : 'border-r last:border-r-0 px-2 py-1.5 text-left';
+});
+
+const dayHeaderWeekdayClass = computed(() => {
+    return isLongRange.value ? 'text-[9px] font-semibold leading-tight' : 'text-[10px] font-semibold';
+});
+
+const dayHeaderDateClass = computed(() => {
+    return isLongRange.value ? 'text-[8px] leading-tight text-muted-foreground' : 'text-[9px] text-muted-foreground';
 });
 
 function segmentClass(status: BookingDayCellData['segments'][number]['status'], isStart: boolean, isEnd: boolean): string {
@@ -70,7 +147,7 @@ function segmentClass(status: BookingDayCellData['segments'][number]['status'], 
                             ? 'rounded-r-[6px] rounded-l-none'
                             : 'rounded-none'
             );
-    const base = `absolute top-1 ${isThinSessionView.value ? 'h-2' : 'h-[20px]'} border shadow-sm origin-center transition-transform transition-colors duration-300 ease-in-out hover:scale-[1.03] ${shape}`;
+    const base = `absolute top-1 ${isThinSessionView.value ? 'h-2' : 'h-[20px]'} cursor-pointer border shadow-sm origin-center transition-transform transition-colors duration-300 ease-in-out hover:scale-[1.03] ${shape}`;
 
     if (status === 'approved') {
         return `${base} bg-success/80 border-success/90`;
@@ -145,14 +222,25 @@ function shouldHighlightToday(): boolean {
 </script>
 
 <template>
-    <div class="rounded-xl border bg-card shadow-sm">
-        <div class="max-h-[72vh] overflow-auto">
-            <div class="w-full min-w-0">
+    <div class="rounded-xl border bg-card shadow-sm min-w-0 max-w-full overflow-hidden">
+        <div class="scroll-app max-h-[72vh] overflow-y-auto overflow-x-hidden">
+            <div
+                class="scroll-app w-full max-w-full overflow-x-auto overflow-y-hidden"
+                tabindex="0"
+                :aria-label="$t('booking.cars_booking.title')"
+            >
+                <div
+                    class="w-full min-w-max"
+                    :style="timelineInnerStyle"
+                >
                 <div
                     class="sticky top-0 z-30 grid border-b bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/85"
                     :style="{ gridTemplateColumns }"
                 >
-                    <div class="sticky left-0 z-40 border-r bg-card p-2.5 min-w-0 max-w-64">
+                    <div
+                        class="sticky left-0 z-40 border-r bg-card p-2.5 min-w-0"
+                        :style="{ width: `${leftColumnWidthPx}px`, minWidth: `${leftColumnWidthPx}px` }"
+                    >
                         <p class="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                             {{ $t('booking.calendar.car_column') }}
                         </p>
@@ -162,7 +250,7 @@ function shouldHighlightToday(): boolean {
                         v-for="day in visibleDates"
                         :key="day.toISOString()"
                         :class="[
-                            'border-r last:border-r-0 px-2 py-1.5 text-left',
+                            dayHeaderCellClass,
                             shouldHighlightToday() && isTodayDate(day)
                                 ? 'bg-primary/10 ring-1 ring-inset ring-primary/40'
                                 : 'bg-muted/20',
@@ -170,13 +258,13 @@ function shouldHighlightToday(): boolean {
                     >
                         <p
                             :class="[
-                                'text-[10px] font-semibold',
+                                dayHeaderWeekdayClass,
                                 shouldHighlightToday() && isTodayDate(day) ? 'text-primary' : 'text-foreground',
                             ]"
                         >
-                            {{ formatDate(day, 'ddd') }}
+                            {{ formatDate(day, dayHeaderWeekdayFormat) }}
                         </p>
-                        <p class="text-[9px] text-muted-foreground">
+                        <p :class="dayHeaderDateClass">
                             {{ formatDate(day, dayHeaderDateFormat) }}
                         </p>
                         <div
@@ -204,7 +292,10 @@ function shouldHighlightToday(): boolean {
                             ]"
                             :style="{ gridTemplateColumns }"
                         >
-                            <div class="sticky left-0 z-20 border-r bg-card/95 p-2.5 backdrop-blur min-w-0 max-w-64 flex flex-col justify-center">
+                            <div
+                                class="sticky left-0 z-20 border-r bg-card/95 p-2.5 backdrop-blur min-w-0 flex flex-col justify-center"
+                                :style="{ width: `${leftColumnWidthPx}px`, minWidth: `${leftColumnWidthPx}px` }"
+                            >
                                 <p class="text-xs font-semibold leading-tight truncate">
                                     {{ car.name }}
                                 </p>
@@ -392,6 +483,7 @@ function shouldHighlightToday(): boolean {
                 >
                     {{ $t('booking.calendar.empty') }}
                 </div>
+            </div>
             </div>
         </div>
     </div>

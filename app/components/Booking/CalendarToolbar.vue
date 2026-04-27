@@ -4,10 +4,10 @@ import type { BookingCalendarViewMode } from '~/composables/useBookingCalendarVi
 type Props = {
     searchQuery: string;
     viewMode: BookingCalendarViewMode;
-    rangeLabel: string;
     showRejected: boolean;
     showCanceled: boolean;
     isFullscreen?: boolean;
+    selectedRange: string | [string, string] | null;
 };
 
 const props = defineProps<Props>();
@@ -21,6 +21,7 @@ const emit = defineEmits<{
     (e: 'update:show-rejected', value: boolean): void;
     (e: 'update:show-canceled', value: boolean): void;
     (e: 'toggle-fullscreen'): void;
+    (e: 'update:selected-range', value: string | [string, string] | null): void;
 }>();
 
 const localSearchQuery = computed({
@@ -36,6 +37,11 @@ const localShowRejected = computed({
 const localShowCanceled = computed({
     get: () => props.showCanceled,
     set: (value: boolean) => emit('update:show-canceled', value),
+});
+
+const selectedRangeModel = computed({
+    get: () => props.selectedRange,
+    set: (value: string | [string, string] | null) => emit('update:selected-range', value),
 });
 
 function onViewModeChange(value: string | string[] | undefined) {
@@ -88,14 +94,14 @@ function onViewModeChange(value: string | string[] | undefined) {
             </div>
         </div>
 
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div class="flex flex-col lg:flex-row gap-2 w-full md:w-auto">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 min-w-0">
+            <div class="flex flex-col lg:flex-row gap-2 w-full min-w-0">
                 <ToggleGroup
                     type="single"
                     variant="outline"
                     size="sm"
                     :model-value="viewMode"
-                    class="w-full md:w-auto md:min-w-[560px]"
+                    class="w-full min-w-0 flex-wrap justify-start"
                     @update:model-value="onViewModeChange"
                 >
                     <ToggleGroupItem value="day">
@@ -116,11 +122,14 @@ function onViewModeChange(value: string | string[] | undefined) {
                 </ToggleGroup>
             </div>
 
-            <div class="text-xs md:text-sm font-medium text-foreground md:text-right space-y-0.5">
-                <p>{{ rangeLabel }}</p>
-                <p class="text-muted-foreground font-normal">
-                    {{ $t('booking.calendar.granularity.half_hour') }}
-                </p>
+            <div class="w-full md:max-w-[380px] min-w-0">
+                <FormItemDatePicker
+                    v-model="selectedRangeModel"
+                    :placeholder="$t('booking.calendar.date_range_placeholder')"
+                    :time-picker="false"
+                    :range="viewMode !== 'day'"
+                    :auto-apply="true"
+                />
             </div>
         </div>
     </div>

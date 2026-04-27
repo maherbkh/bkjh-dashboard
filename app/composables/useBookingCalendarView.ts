@@ -149,6 +149,8 @@ const VIEW_LENGTH: Record<Exclude<BookingCalendarViewMode, 'month'>, number> = {
     '2weeks': 14,
 };
 
+const BOOKING_VIEW_MODES: BookingCalendarViewMode[] = ['day', '3days', 'week', '2weeks', 'month'];
+
 function normalizeDate(date: Date): Date {
     const normalized = new Date(date);
     normalized.setHours(0, 0, 0, 0);
@@ -159,6 +161,36 @@ function addDays(date: Date, days: number): Date {
     const next = new Date(date);
     next.setDate(next.getDate() + days);
     return normalizeDate(next);
+}
+
+function formatIsoDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function getInclusiveRangeLength(start: Date, end: Date): number {
+    const startMs = normalizeDate(start).getTime();
+    const endMs = normalizeDate(end).getTime();
+    return Math.max(1, Math.floor((endMs - startMs) / 86400000) + 1);
+}
+
+function parseDateInput(value: unknown): Date | null {
+    if (value instanceof Date) {
+        return Number.isNaN(value.getTime()) ? null : normalizeDate(value);
+    }
+
+    if (typeof value === 'string') {
+        const parsed = new Date(value);
+        return Number.isNaN(parsed.getTime()) ? null : normalizeDate(parsed);
+    }
+
+    return null;
+}
+
+function isBookingViewMode(value: string): value is BookingCalendarViewMode {
+    return BOOKING_VIEW_MODES.includes(value as BookingCalendarViewMode);
 }
 
 function createDateRange(start: Date, end: Date): Date[] {
@@ -214,6 +246,7 @@ export function useBookingCalendarView() {
 
     const today = normalizeDate(new Date());
     const anchorDate = ref<Date>(today);
+    const customRange = ref<[Date, Date] | null>(null);
     const viewMode = ref<BookingCalendarViewMode>('day');
     const searchQuery = ref('');
     const showRejected = ref(true);
@@ -451,6 +484,11 @@ export function useBookingCalendarView() {
     });
 
     const visibleDates = computed<Date[]>(() => {
+        if (customRange.value) {
+            const [rangeStart, rangeEnd] = customRange.value;
+            return createDateRange(rangeStart, rangeEnd);
+        }
+
         const anchor = normalizeDate(anchorDate.value);
 
         if (viewMode.value === 'month') {
@@ -518,15 +556,134 @@ export function useBookingCalendarView() {
         return `${formatDateOnly(first)} - ${formatDateOnly(last)}`;
     });
 
+    const selectedDateRange = computed<string | [string, string] | null>({
+        get() {
+            const dates = visibleDates.value;
+            if (!dates.length) return null;
+            if (viewMode.value === 'day') {
+                return formatIsoDate(dates[0]);
+            }
+            return [
+                formatIsoDate(dates[0]),
+                formatIsoDate(dates[dates.length - 1]),
+            ];
+        },
+        set(nextValue) {
+            if (viewMode.value === 'day') {
+                if (typeof nextValue === 'string' && nextValue.length > 0) {
+                    const parsedDate = parseDateInput(nextValue);
+                    if (parsedDate) {
+                        customRange.value = [parsedDate, parsedDate];
+                        anchorDate.value = parsedDate;
+                        return;
+                    }
+                }
+                if (Array.isArray(nextValue) && nextValue.length > 0) {
+                    const parsedDate = parseDateInput(nextValue[0]);
+                    if (parsedDate) {
+                        customRange.value = [parsedDate, parsedDate];
+                        anchorDate.value = parsedDate;
+                        return;
+                    }
+                }
+                const todayDate = normalizeDate(new Date());
+                customRange.value = [todayDate, todayDate];
+                anchorDate.value = todayDate;
+                return;
+            }
+
+            if (!Array.isArray(nextValue) || nextValue.length < 2) {
+                customRange.value = null;
+                return;
+            }
+
+            const parsedStart = parseDateInput(nextValue[0]);
+            const parsedEnd = parseDateInput(nextValue[1]);
+            if (!parsedStart || !parsedEnd) {
+                customRange.value = null;
+                return;
+            }
+
+            const rangeStart = parsedStart <= parsedEnd ? parsedStart : parsedEnd;
+            const rangeEnd = parsedStart <= parsedEnd ? parsedEnd : parsedStart;
+
+            customRange.value = [rangeStart, rangeEnd];
+            anchorDate.value = rangeStart;
+        },
+    });
+
     function setViewMode(mode: BookingCalendarViewMode) {
+        customRange.value = null;
         viewMode.value = mode;
+        if (mode === 'day') {
+            anchorDate.value = normalizeDate(new Date());
+            return;
+        }
         if (mode === 'month') {
             const current = normalizeDate(anchorDate.value);
             anchorDate.value = new Date(current.getFullYear(), current.getMonth(), 1);
         }
     }
 
+    function setViewModeFromQuery(mode: string | null): BookingCalendarViewMode {
+        const nextMode = (mode && isBookingViewMode(mode)) ? mode : 'day';
+        setViewMode(nextMode);
+        return nextMode;
+    }
+
+    function setSelectedDateRangeFromQuery(start: string | null, end: string | null): boolean {
+        if (!start || !end) {
+            customRange.value = null;
+            return false;
+        }
+
+        const parsedStart = parseDateInput(start);
+        const parsedEnd = parseDateInput(end);
+
+        if (!parsedStart || !parsedEnd) {
+            customRange.value = null;
+            return false;
+        }
+
+        const rangeStart = parsedStart <= parsedEnd ? parsedStart : parsedEnd;
+        const rangeEnd = parsedStart <= parsedEnd ? parsedEnd : parsedStart;
+        customRange.value = [rangeStart, rangeEnd];
+        anchorDate.value = rangeStart;
+        return true;
+    }
+
+    function setSelectedDateFromQuery(date: string | null): boolean {
+        if (!date) {
+            const todayDate = normalizeDate(new Date());
+            customRange.value = [todayDate, todayDate];
+            anchorDate.value = todayDate;
+            return false;
+        }
+
+        const parsedDate = parseDateInput(date);
+        if (!parsedDate) {
+            const todayDate = normalizeDate(new Date());
+            customRange.value = [todayDate, todayDate];
+            anchorDate.value = todayDate;
+            return false;
+        }
+
+        customRange.value = [parsedDate, parsedDate];
+        anchorDate.value = parsedDate;
+        return true;
+    }
+
     function goToPreviousRange() {
+        if (customRange.value) {
+            const [rangeStart, rangeEnd] = customRange.value;
+            const rangeLength = getInclusiveRangeLength(rangeStart, rangeEnd);
+            customRange.value = [
+                addDays(rangeStart, -rangeLength),
+                addDays(rangeEnd, -rangeLength),
+            ];
+            return;
+        }
+
         if (viewMode.value === 'month') {
             const current = normalizeDate(anchorDate.value);
             anchorDate.value = new Date(current.getFullYear(), current.getMonth() - 1, 1);
@@ -536,6 +693,16 @@ export function useBookingCalendarView() {
     }
 
     function goToNextRange() {
+        if (customRange.value) {
+            const [rangeStart, rangeEnd] = customRange.value;
+            const rangeLength = getInclusiveRangeLength(rangeStart, rangeEnd);
+            customRange.value = [
+                addDays(rangeStart, rangeLength),
+                addDays(rangeEnd, rangeLength),
+            ];
+            return;
+        }
+
         if (viewMode.value === 'month') {
             const current = normalizeDate(anchorDate.value);
             anchorDate.value = new Date(current.getFullYear(), current.getMonth() + 1, 1);
@@ -545,6 +712,14 @@ export function useBookingCalendarView() {
     }
 
     function goToToday() {
+        if (customRange.value) {
+            const [rangeStart, rangeEnd] = customRange.value;
+            const rangeLength = getInclusiveRangeLength(rangeStart, rangeEnd);
+            const nextStart = normalizeDate(new Date());
+            customRange.value = [nextStart, addDays(nextStart, rangeLength - 1)];
+            return;
+        }
+
         const now = normalizeDate(new Date());
         anchorDate.value = viewMode.value === 'month'
             ? new Date(now.getFullYear(), now.getMonth(), 1)
@@ -736,6 +911,10 @@ export function useBookingCalendarView() {
         timelineSlots,
         filteredCars,
         currentRangeLabel,
+        selectedDateRange,
+        setViewModeFromQuery,
+        setSelectedDateFromQuery,
+        setSelectedDateRangeFromQuery,
         setViewMode,
         goToPreviousRange,
         goToNextRange,

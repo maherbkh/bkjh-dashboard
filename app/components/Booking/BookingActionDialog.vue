@@ -55,6 +55,15 @@ const statusSelectItems = computed(() => {
     }));
 });
 
+const statusBadgeVariant = computed(() => {
+    if (!props.booking) return 'secondary';
+
+    if (props.booking.status === 'APPROVED') return 'success';
+    if (props.booking.status === 'PENDING') return 'pending';
+    if (props.booking.status === 'REJECTED') return 'destructive';
+    return 'secondary';
+});
+
 function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEditForm[K]) {
     emit('update:edit-form', {
         ...props.editForm,
@@ -77,11 +86,43 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
             <div class="space-y-4 py-1">
                 <div
                     v-if="booking"
-                    class="rounded-md border bg-muted/30 p-3 text-sm space-y-1"
+                    class="rounded-md border bg-muted/30 p-3 text-sm divide-y divide-dashed divide-muted-foreground/30"
                 >
-                    <p><span class="font-medium">{{ $t('booking.calendar.action_dialog.fields.requester_name') }}:</span> {{ booking.requesterName }}</p>
-                    <p><span class="font-medium">{{ $t('booking.calendar.action_dialog.fields.requester_email') }}:</span> {{ booking.requesterEmail }}</p>
-                    <p><span class="font-medium">{{ $t('booking.calendar.action_dialog.fields.status') }}:</span> {{ $t(`booking.calendar.status_options.${booking.status.toLowerCase()}`) }}</p>
+                    <p class="pt-0 pb-2">
+                        <span class="font-light inline-flex items-center">
+                            <Icon
+                                name="solar:user-linear"
+                                class="size-4 mr-1.5 opacity-75"
+                            />
+                            {{ $t('booking.calendar.action_dialog.fields.requester_name') }}:
+                        </span>
+                        <span class="font-semibold ml-3">{{ booking.requesterName }}</span>
+                    </p>
+                    <p class="py-2">
+                        <span class="font-light inline-flex items-center">
+                            <Icon
+                                name="solar:letter-linear"
+                                class="size-4 mr-1.5 opacity-75"
+                            />
+                            {{ $t('booking.calendar.action_dialog.fields.requester_email') }}:
+                        </span>
+                        <span class="font-semibold ml-3">{{ booking.requesterEmail }}</span>
+                    </p>
+                    <p class="pt-2 pb-0">
+                        <span class="font-light inline-flex items-center">
+                            <Icon
+                                name="solar:clipboard-check-linear"
+                                class="size-4 mr-1.5 opacity-75"
+                            />
+                            {{ $t('booking.calendar.action_dialog.fields.status') }}:
+                        </span>
+                        <Badge
+                            class="ml-3"
+                            :variant="statusBadgeVariant"
+                        >
+                            {{ $t(`booking.calendar.status_options.${booking.status.toLowerCase()}`) }}
+                        </Badge>
+                    </p>
                 </div>
 
                 <template v-if="action === 'change_status'">

@@ -54,6 +54,7 @@
     },
     "calendar": {
       "search_placeholder": "Search cars by name or plate",
+      "date_range_placeholder": "Select date range",
       "car_column": "Car",
       "empty": "No cars match your current filters.",
       "view": {

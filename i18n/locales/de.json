@@ -54,6 +54,7 @@
     },
     "calendar": {
       "search_placeholder": "Suche Autos nach Name oder Kennzeichen",
+      "date_range_placeholder": "Datumsbereich auswählen",
       "car_column": "Auto",
       "empty": "Keine Autos passen zu deinen aktuellen Filtern.",
       "view": {

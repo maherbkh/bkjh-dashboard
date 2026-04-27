@@ -91,7 +91,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:model-value']);
 const { locale: i18nLocale, locales } = useI18n();
-const { formatDateOnly } = useGermanDateFormat();
+const { formatDate, formatDateOnly } = useGermanDateFormat();
 
 // Get available locales like AppLangSelector
 const availableLocales = computed(() => {
@@ -160,6 +160,33 @@ function onUpdateModelValue(nextValue) {
     }
 }
 
+const germanDisplayFormat = computed(() => {
+    return props.timePicker ? 'DD.MM.YYYY, HH:mm' : 'DD.MM.YYYY';
+});
+
+function formatDisplayValue(inputValue) {
+    if (props.onlyTime) {
+        return String(inputValue || '');
+    }
+
+    if (Array.isArray(value.value)) {
+        const [start, end] = value.value;
+        const startFormatted = start ? formatDate(start, germanDisplayFormat.value) : '';
+        const endFormatted = end ? formatDate(end, germanDisplayFormat.value) : '';
+        if (startFormatted && endFormatted) {
+            return `${startFormatted} - ${endFormatted}`;
+        }
+        return startFormatted || String(inputValue || '');
+    }
+
+    if (typeof value.value === 'string' || value.value instanceof Date) {
+        const formatted = formatDate(value.value, germanDisplayFormat.value);
+        return formatted || String(inputValue || formatDateOnly(inputValue));
+    }
+
+    return String(inputValue || formatDateOnly(inputValue));
+}
+
 // Display formatting handled directly in the input slot; model remains yyyy-MM-dd
 </script>
 
@@ -214,7 +241,7 @@ function onUpdateModelValue(nextValue) {
                         class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground bg-background border-input flex h-8 w-full min-w-0 rounded-full border px-4 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-5 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
                         :class="[icon ? 'pl-8' : '']"
                         type="text"
-                        :value="onlyTime ? String(inputValue || '') : String(inputValue || formatDateOnly(inputValue))"
+                        :value="formatDisplayValue(inputValue)"
                     >
                 </div>
             </template>

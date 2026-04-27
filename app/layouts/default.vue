@@ -12,8 +12,8 @@
             color="oklch(58.8% 0.158 241.966)"
         />
         <AppSidebar />
-        <SidebarInset>
-            <div class="flex min-h-svh flex-1 flex-col gap-4">
+        <SidebarInset class="min-w-0 max-w-full overflow-x-hidden">
+            <div class="flex min-h-svh flex-1 flex-col gap-4 min-w-0 max-w-full overflow-x-hidden">
                 <header class="flex h-12 shrink-0 items-center border-b justify-between md:pr-4 gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
                     <div class="flex items-center gap-2 px-4">
                         <SidebarTrigger class="-ml-1" />
@@ -29,7 +29,7 @@
                         <AppLangSelector />
                     </div>
                 </header>
-                <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+                <div class="flex flex-1 flex-col gap-4 p-4 pt-0 min-w-0 max-w-full overflow-x-hidden">
                     <slot />
                 </div>
             </div>

@@ -25,6 +25,25 @@ const emit = defineEmits<{
 
 const statusOptions: BookingApiStatus[] = ['PENDING', 'APPROVED', 'REJECTED', 'CANCELED'];
 
+function isCurrentStatus(status: BookingApiStatus): boolean {
+    return props.segment.status === status.toLowerCase();
+}
+
+function getStatusIcon(status: BookingApiStatus): string {
+    if (status === 'APPROVED') return 'solar:check-circle-linear';
+    if (status === 'PENDING') return 'solar:clock-circle-linear';
+    if (status === 'REJECTED') return 'solar:close-circle-linear';
+    return 'solar:stop-circle-linear';
+}
+
+function getStatusClasses(status: BookingApiStatus): string {
+    const base = 'gap-2';
+    if (status === 'APPROVED') return `${base} text-success`;
+    if (status === 'PENDING') return `${base} text-warning`;
+    if (status === 'REJECTED') return `${base} text-destructive`;
+    return `${base} text-muted-foreground`;
+}
+
 function emitAction(
     action: BookingActionSelection['action'],
     nextStatus?: BookingApiStatus,
@@ -67,9 +86,21 @@ function emitAction(
                     <ContextMenuItem
                         v-for="status in statusOptions"
                         :key="status"
+                        :disabled="false"
+                        :class="[
+                            'cursor-pointer',
+                            getStatusClasses(status),
+                            isCurrentStatus(status) ? 'bg-accent/40 font-semibold ring-1 ring-border/60' : '',
+                        ]"
                         @select="emitAction('change_status', status)"
                     >
+                        <Icon :name="getStatusIcon(status)" />
                         {{ $t(`booking.calendar.status_options.${status.toLowerCase()}`) }}
+                        <Icon
+                            v-if="isCurrentStatus(status)"
+                            name="solar:check-read-linear"
+                            class="ml-auto"
+                        />
                     </ContextMenuItem>
                 </ContextMenuSubContent>
             </ContextMenuSub>
