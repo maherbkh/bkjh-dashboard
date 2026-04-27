@@ -37,6 +37,14 @@ const {
     isDialogOpen,
     selectedBooking,
     pendingStatus,
+    statusNote,
+    sendEmail,
+    emailOption,
+    customEmails,
+    emailError,
+    showSafeFields,
+    shouldAutoShowSafeFields,
+    isInternalEmail,
     statusOptions,
     editForm,
     isSubmitting,
@@ -273,10 +281,23 @@ useSeoMeta({
                 :status-options="statusOptions"
                 :group-options="groupOptions"
                 :pending-status="pendingStatus"
+                :status-note="statusNote"
+                :send-email="sendEmail"
+                :email-option="emailOption"
+                :custom-emails="customEmails"
+                :email-error="emailError"
+                :show-safe-fields="showSafeFields"
+                :should-auto-show-safe-fields="shouldAutoShowSafeFields"
+                :is-internal-email="isInternalEmail(selectedBooking?.requesterEmail)"
                 :edit-form="editForm"
                 :is-submitting="isSubmitting"
                 @update:open="(value) => value ? null : closeDialog()"
                 @update:pending-status="pendingStatus = $event"
+                @update:status-note="statusNote = $event"
+                @update:send-email="sendEmail = $event"
+                @update:email-option="emailOption = $event"
+                @update:custom-emails="customEmails = $event"
+                @update:show-safe-fields="showSafeFields = $event"
                 @update:edit-form="editForm = $event"
                 @confirm="confirmAction"
             />

@@ -39,6 +39,9 @@ Main fields:
 - `status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELED'`
 - `requesterName: string`
 - `requesterEmail: string`
+- `distance: number` (integer, `> 1`)
+- `requesterNote: string | null`
+- `adminNote: string | null`
 - `groupId: string | null`
 - `safeReference: string`
 - `safePin: string`
@@ -58,6 +61,7 @@ Main fields:
 
 - `carId` must exist, otherwise `car_not_found`.
 - `groupId` (if provided and not null) must exist, otherwise `group_not_found`.
+- `groupId` is optional for both create and update.
 
 ### Overlap rule
 
@@ -65,12 +69,78 @@ Main fields:
   - existing `endsAt > new.startsAt`
   - existing `startsAt < new.endsAt`
   - same `carId`
+- If admin changes `carId` in update and resulting status is `APPROVED`, free-slot overlap check runs on the **new car** for the requested range.
 - DB exclusion constraint also enforces this to avoid race conditions.
 
 ### List masking
 
 - List endpoint intentionally excludes `safePin`.
 - Get-by-id and create/update responses include `safePin`.
+- List endpoint includes: `distance`, `requesterNote`, `adminNote`.
+
+### Realtime updates (Socket.IO)
+
+- Namespace: `/dashboard-realtime`
+- Room/channel: `dashboard.booking.car-bookings`
+- Subscribe event: `booking:subscribe`
+- Unsubscribe event: `booking:unsubscribe`
+- Server broadcast event (on successful create): `booking.created`
+- Auth: same dashboard bearer token used by HTTP APIs
+- Authorization: admin must have `booking` app access (or be super admin)
+
+Frontend subscription flow:
+
+1. Connect to namespace `/dashboard-realtime` with dashboard bearer token.
+2. Emit `booking:subscribe` to join room `dashboard.booking.car-bookings`.
+3. Listen for `booking.created` and prepend/append record in list state.
+4. Emit `booking:unsubscribe` on page leave or when list module unmounts.
+
+Socket auth examples:
+
+- `handshake.auth.token`: `Bearer <access_token>` (recommended)
+- or header: `Authorization: Bearer <access_token>`
+
+Minimal client example:
+
+```ts
+import { io } from 'socket.io-client';
+
+const socket = io('https://YOUR_API_HOST/dashboard-realtime', {
+  auth: { token: `Bearer ${accessToken}` },
+});
+
+socket.emit('booking:subscribe', {});
+
+socket.on('booking.created', (payload) => {
+  // Update booking listing state
+  // payload has list-safe fields and excludes safePin
+});
+
+// Cleanup
+socket.emit('booking:unsubscribe', {});
+socket.disconnect();
+```
+
+`booking.created` payload (list-safe, excludes `safePin`):
+
+```json
+{
+  "id": "2d16e552-cd73-43d7-9c67-7a0ea7b68cd9",
+  "carId": "6ec0d225-9a21-4be8-9a8e-3b094b9e6b56",
+  "startsAt": "2026-04-25T09:00:00.000Z",
+  "endsAt": "2026-04-25T11:00:00.000Z",
+  "status": "APPROVED",
+  "requesterName": "John Doe",
+  "requesterEmail": "john@example.com",
+  "distance": 25,
+  "requesterNote": "Could be delayed by 10 minutes",
+  "adminNote": null,
+  "groupId": null,
+  "safeReference": "Safe A / Slot 3",
+  "createdAt": "2026-04-23T12:00:00.000Z",
+  "updatedAt": "2026-04-23T12:00:00.000Z"
+}
+```
 
 ---
 
@@ -87,8 +157,10 @@ Main fields:
   "carId": "6ec0d225-9a21-4be8-9a8e-3b094b9e6b56",
   "startsAt": "2026-04-25T09:00:00.000Z",
   "endsAt": "2026-04-25T11:00:00.000Z",
+  "distance": 12,
   "requesterName": "John Doe",
   "requesterEmail": "john@example.com",
+  "requesterNote": "Please prepare EV charging card",
   "safeReference": "Safe A / Slot 3",
   "safePin": "4931"
 }
@@ -101,10 +173,12 @@ Main fields:
   "carId": "6ec0d225-9a21-4be8-9a8e-3b094b9e6b56",
   "startsAt": "2026-04-25T09:00:00.000Z",
   "endsAt": "2026-04-25T11:00:00.000Z",
+  "distance": 25,
   "status": "PENDING",
   "requesterName": "John Doe",
   "requesterEmail": "john@example.com",
   "groupId": "e2f70428-c21c-4f13-9b61-a4476a6b1d95",
+  "requesterNote": "Could be delayed by 10 minutes",
   "safeReference": "Safe A / Slot 3",
   "safePin": "4931"
 }
@@ -118,7 +192,9 @@ Main fields:
 - `status`: optional enum (`PENDING | APPROVED | REJECTED | CANCELED`)
 - `requesterName`: required string, trimmed, max 200
 - `requesterEmail`: required valid email, lowercased, max 320
-- `groupId`: optional UUID v4
+- `distance`: required integer, must be greater than 1
+- `groupId`: optional UUID v4 (or omitted/null)
+- `requesterNote`: optional string, trimmed (textarea)
 - `safeReference`: required string, trimmed, max 200
 - `safePin`: required string, trimmed, max 100
 
@@ -136,6 +212,9 @@ Main fields:
     "status": "APPROVED",
     "requesterName": "John Doe",
     "requesterEmail": "john@example.com",
+    "distance": 25,
+    "requesterNote": "Could be delayed by 10 minutes",
+    "adminNote": null,
     "groupId": null,
     "safeReference": "Safe A / Slot 3",
     "safePin": "4931",
@@ -144,6 +223,41 @@ Main fields:
   }
 }
 ```
+
+---
+
+## 1.1) Booking Status Select List (for dropdowns)
+
+Use this endpoint to build status dropdown options and disable the current status in edit UI.
+
+**GET** `/dashboard/shared/select-lists/car-booking-statuses`
+
+### Query params
+
+- `currentStatus` (optional): `PENDING | APPROVED | REJECTED | CANCELED`
+
+### Example
+
+`GET /dashboard/shared/select-lists/car-booking-statuses?currentStatus=APPROVED`
+
+### Success response
+
+```json
+{
+  "success": true,
+  "message": "Car booking statuses retrieved successfully",
+  "data": [
+    { "value": "PENDING", "label": "Pending", "disabled": false },
+    { "value": "APPROVED", "label": "Approved", "disabled": true },
+    { "value": "REJECTED", "label": "Rejected", "disabled": false },
+    { "value": "CANCELED", "label": "Canceled", "disabled": false }
+  ]
+}
+```
+
+### Validation error
+
+- Invalid `currentStatus` -> `400 Bad Request`
 
 ---
 
@@ -195,6 +309,9 @@ Allowed `sort_by` values:
         "status": "APPROVED",
         "requesterName": "John Doe",
         "requesterEmail": "john@example.com",
+        "distance": 25,
+        "requesterNote": "Could be delayed by 10 minutes",
+        "adminNote": null,
         "groupId": null,
         "safeReference": "Safe A / Slot 3",
         "createdAt": "2026-04-23T12:00:00.000Z",
@@ -243,6 +360,9 @@ Allowed `sort_by` values:
     "status": "APPROVED",
     "requesterName": "John Doe",
     "requesterEmail": "john@example.com",
+    "distance": 25,
+    "requesterNote": "Could be delayed by 10 minutes",
+    "adminNote": null,
     "groupId": null,
     "safeReference": "Safe A / Slot 3",
     "safePin": "4931",
@@ -266,12 +386,16 @@ Allowed `sort_by` values:
 
 ```json
 {
+  "carId": "6ec0d225-9a21-4be8-9a8e-3b094b9e6b56",
   "startsAt": "2026-04-25T10:00:00.000Z",
   "endsAt": "2026-04-25T12:00:00.000Z",
+  "distance": 42,
   "status": "REJECTED",
   "requesterName": "John D.",
   "requesterEmail": "john.d@example.com",
   "groupId": "e2f70428-c21c-4f13-9b61-a4476a6b1d95",
+  "requesterNote": "Need a child seat",
+  "adminNote": "Rejected due to schedule conflict",
   "safeReference": "Safe B / Slot 2",
   "safePin": "7284"
 }
@@ -284,10 +408,13 @@ All fields are optional:
 - `carId`: UUID
 - `startsAt`: date
 - `endsAt`: date
+- `distance`: integer, must be greater than 1
 - `status`: enum (`PENDING | APPROVED | REJECTED | CANCELED`)
 - `requesterName`: string, max 200
 - `requesterEmail`: valid email, max 320
-- `groupId`: UUID or `null` (set `null` to clear group)
+- `groupId`: UUID or `null` (optional; set `null` to clear group)
+- `requesterNote`: optional string
+- `adminNote`: optional string
 - `safeReference`: string, max 200
 - `safePin`: string, max 100
 
@@ -295,6 +422,7 @@ All fields are optional:
 
 - Existing booking in `CANCELED` status cannot be updated.
 - If resulting status is `APPROVED`, overlap check runs.
+- If `carId` changes and resulting status is `APPROVED`, overlap check runs against the target car and requested interval.
 
 ### Success response
 
@@ -310,6 +438,9 @@ All fields are optional:
     "status": "REJECTED",
     "requesterName": "John D.",
     "requesterEmail": "john.d@example.com",
+    "distance": 42,
+    "requesterNote": "Need a child seat",
+    "adminNote": "Rejected due to schedule conflict",
     "groupId": "e2f70428-c21c-4f13-9b61-a4476a6b1d95",
     "safeReference": "Safe B / Slot 2",
     "safePin": "7284",

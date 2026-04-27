@@ -124,9 +124,27 @@
           "ends_at": "Endet am",
           "requester_name": "Name der anfragenden Person",
           "requester_email": "E-Mail der anfragenden Person",
+          "group_name": "Gruppe",
           "group_id": "Gruppen-ID",
+          "duration": "Dauer",
           "safe_reference": "Safe-Referenz",
-          "safe_pin": "Safe-PIN"
+          "safe_pin": "Safe-PIN",
+          "note": "Notiz",
+          "note_placeholder": "Fuge eine optionale Notiz zu dieser Statusanderung hinzu...",
+          "send_email": "E-Mail-Benachrichtigung senden",
+          "show_safe_fields": "Safe-Referenz und PIN ausfullen"
+        },
+        "email": {
+          "requester": "E-Mail der anfragenden Person",
+          "requester_description": "An die E-Mail der anfragenden Person senden",
+          "other": "Andere E-Mail",
+          "other_description": "An eine andere E-Mail-Adresse senden",
+          "custom_emails": "E-Mail-Adressen",
+          "custom_emails_placeholder": "E-Mail-Adresse(n) durch Komma \",\" getrennt",
+          "required": "E-Mail der anfragenden Person ist erforderlich",
+          "invalid": "Bitte gib gultige E-Mail-Adresse(n) ein",
+          "internal": "Interne E-Mail",
+          "external": "Externe E-Mail"
         }
       },
       "status_options": {

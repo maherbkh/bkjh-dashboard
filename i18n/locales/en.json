@@ -124,9 +124,27 @@
           "ends_at": "Ends at",
           "requester_name": "Requester name",
           "requester_email": "Requester email",
+          "group_name": "Group",
           "group_id": "Group ID",
+          "duration": "Duration",
           "safe_reference": "Safe reference",
-          "safe_pin": "Safe PIN"
+          "safe_pin": "Safe PIN",
+          "note": "Note",
+          "note_placeholder": "Add an optional note for this status change...",
+          "send_email": "Send email notification",
+          "show_safe_fields": "Provide Safe reference and PIN"
+        },
+        "email": {
+          "requester": "Requester email",
+          "requester_description": "Send to requester email",
+          "other": "Other email",
+          "other_description": "Send to another email address",
+          "custom_emails": "Email addresses",
+          "custom_emails_placeholder": "Email address(es) separated by comma \",\"",
+          "required": "Requester email is required",
+          "invalid": "Please enter valid email address(es)",
+          "internal": "Internal email",
+          "external": "External email"
         }
       },
       "status_options": {

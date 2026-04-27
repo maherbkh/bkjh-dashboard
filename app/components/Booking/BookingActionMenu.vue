@@ -48,6 +48,10 @@ function emitAction(
     action: BookingActionSelection['action'],
     nextStatus?: BookingApiStatus,
 ) {
+    if (action === 'change_status' && nextStatus && isCurrentStatus(nextStatus)) {
+        isMenuOpen.value = false;
+        return;
+    }
     isMenuOpen.value = false;
     nextTick(() => {
         emit('select-action', {

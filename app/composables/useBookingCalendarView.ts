@@ -371,8 +371,22 @@ export function useBookingCalendarView() {
         return next;
     }
 
-    function changeBookingStatus(bookingId: string, status: BookingApiStatus): BookingCalendarRecord | null {
-        return updateBooking(bookingId, { status });
+    function changeBookingStatus(
+        bookingId: string,
+        status: BookingApiStatus,
+        context?: {
+            note?: string;
+            sendEmail?: boolean;
+            email?: string;
+            safeReference?: string;
+            safePin?: string;
+        },
+    ): BookingCalendarRecord | null {
+        return updateBooking(bookingId, {
+            status,
+            safeReference: context?.safeReference,
+            safePin: context?.safePin,
+        });
     }
 
     function duplicateBooking(bookingId: string): BookingCalendarRecord | null {

@@ -21,10 +21,22 @@ export type BookingEditForm = {
     safePin: string;
 };
 
+export type BookingEmailOption = 'requester' | 'other';
+
 type UseBookingActionsOptions = {
     getBookingById: (bookingId: string) => BookingCalendarRecord | null;
     updateBooking: (bookingId: string, patch: Partial<Omit<BookingCalendarRecord, 'id'>>) => BookingCalendarRecord | null;
-    changeBookingStatus: (bookingId: string, status: BookingApiStatus) => BookingCalendarRecord | null;
+    changeBookingStatus: (
+        bookingId: string,
+        status: BookingApiStatus,
+        context?: {
+            note?: string;
+            sendEmail?: boolean;
+            email?: string;
+            safeReference?: string;
+            safePin?: string;
+        },
+    ) => BookingCalendarRecord | null;
     duplicateBooking: (bookingId: string) => BookingCalendarRecord | null;
     cancelBooking: (bookingId: string) => BookingCalendarRecord | null;
 };
@@ -42,11 +54,18 @@ function toDateTimeLocalValue(value: string): string {
 }
 
 export function useBookingActions(options: UseBookingActionsOptions) {
+    const { t } = useI18n();
     const selectedBookingId = ref<string | null>(null);
     const currentAction = ref<BookingActionType | null>(null);
     const isDialogOpen = ref(false);
     const pendingStatus = ref<BookingApiStatus>('PENDING');
     const isSubmitting = ref(false);
+    const statusNote = ref('');
+    const sendEmail = ref(false);
+    const emailOption = ref<BookingEmailOption>('requester');
+    const customEmails = ref('');
+    const emailError = ref('');
+    const showSafeFields = ref(false);
     const editForm = ref<BookingEditForm>({
         startsAt: '',
         endsAt: '',
@@ -60,6 +79,73 @@ export function useBookingActions(options: UseBookingActionsOptions) {
     const selectedBooking = computed(() => {
         if (!selectedBookingId.value) return null;
         return options.getBookingById(selectedBookingId.value);
+    });
+
+    const internalEmailDomains = [
+        'backhaus-blog.de',
+        'backhaus.de',
+        'backhaus.firma.cc',
+        'backhaus-informiert.de',
+        'backhaus-jugendhilfe.com',
+        'backhaus-jugendhilfe.de',
+        'backhaus-kinderhilfe.com',
+        'backhaus-kinderhilfe.de',
+        'backhaus-profifamilie.de',
+        'bkjh.de',
+        'bkjh-news.de',
+        'gerhardbackhaus.com',
+        'gerhard-backhaus.com',
+        'gerhardbackhaus.de',
+        'gerhard-backhaus.de',
+        'kind-im-mittelpunkt.com',
+        'kind-im-mittelpunkt.de',
+        'kind-im-mittelpunkt.info',
+        'mariannebackhaus.com',
+        'marianne-backhaus.com',
+        'mariannebackhaus.de',
+        'marianne-backhaus.de',
+        'marianne-backhaus.eu',
+        'pflegefamilie.de',
+        'profifamilie.com',
+        'profifamilie.de',
+        'profifamilie.eu',
+        'profifamilie.info',
+        'profifamilie.net',
+        'profifamilie.org',
+        'sebastianbackhaus.com',
+        'sebastian-backhaus.com',
+        'sebastian-backhaus.de',
+        'backhaus-akademie.de',
+    ];
+
+    function isInternalEmail(email: string | undefined): boolean {
+        if (!email) return false;
+        const domain = email.split('@')[1]?.toLowerCase();
+        return domain ? internalEmailDomains.includes(domain) : false;
+    }
+
+    function validateEmails(emailString: string): boolean {
+        if (!emailString.trim()) return false;
+        const emails = emailString.split(',').map(e => e.trim().toLowerCase());
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emails.every(email => emailRegex.test(email));
+    }
+
+    function isOutsideBusinessWindow(date: Date): boolean {
+        const day = date.getDay(); // 0 Sunday, 5 Friday, 6 Saturday
+        const minutes = date.getHours() * 60 + date.getMinutes();
+        if (day === 0 || day === 6) return true;
+        if (day === 5) return minutes >= (14 * 60);
+        return minutes >= (16 * 60);
+    }
+
+    const shouldAutoShowSafeFields = computed(() => {
+        if (pendingStatus.value !== 'APPROVED') return false;
+        if (!selectedBooking.value) return false;
+        const start = new Date(selectedBooking.value.startsAt);
+        const end = new Date(selectedBooking.value.endsAt);
+        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return false;
+        return isOutsideBusinessWindow(start) || isOutsideBusinessWindow(end);
     });
 
     const statusTransitions = computed<Record<BookingApiStatus, BookingApiStatus[]>>(() => ({
@@ -94,11 +180,23 @@ export function useBookingActions(options: UseBookingActionsOptions) {
         currentAction.value = selection.action;
         pendingStatus.value = selection.nextStatus ?? booking.status;
         hydrateEditForm(booking);
+        statusNote.value = '';
+        sendEmail.value = false;
+        emailOption.value = 'requester';
+        customEmails.value = '';
+        emailError.value = '';
+        showSafeFields.value = false;
         isDialogOpen.value = true;
     }
 
     function closeDialog() {
         isDialogOpen.value = false;
+        statusNote.value = '';
+        sendEmail.value = false;
+        emailOption.value = 'requester';
+        customEmails.value = '';
+        emailError.value = '';
+        showSafeFields.value = false;
     }
 
     async function confirmAction(): Promise<BookingCalendarRecord | null> {
@@ -119,7 +217,35 @@ export function useBookingActions(options: UseBookingActionsOptions) {
             }
 
             if (currentAction.value === 'change_status') {
-                return options.changeBookingStatus(selectedBookingId.value, pendingStatus.value);
+                let email: string | undefined;
+
+                if (sendEmail.value) {
+                    if (emailOption.value === 'other') {
+                        if (!validateEmails(customEmails.value)) {
+                            emailError.value = t('booking.calendar.action_dialog.email.invalid');
+                            return null;
+                        }
+                        email = customEmails.value
+                            .split(',')
+                            .map(e => e.trim().toLowerCase())
+                            .join(',');
+                    }
+                    else {
+                        email = selectedBooking.value?.requesterEmail;
+                        if (!email) {
+                            emailError.value = t('booking.calendar.action_dialog.email.required');
+                            return null;
+                        }
+                    }
+                }
+
+                return options.changeBookingStatus(selectedBookingId.value, pendingStatus.value, {
+                    note: statusNote.value.trim() || undefined,
+                    sendEmail: sendEmail.value,
+                    email,
+                    safeReference: (shouldAutoShowSafeFields.value || showSafeFields.value) ? editForm.value.safeReference : undefined,
+                    safePin: (shouldAutoShowSafeFields.value || showSafeFields.value) ? editForm.value.safePin : undefined,
+                });
             }
 
             if (currentAction.value === 'duplicate') {
@@ -134,7 +260,7 @@ export function useBookingActions(options: UseBookingActionsOptions) {
         }
         finally {
             isSubmitting.value = false;
-            isDialogOpen.value = false;
+            closeDialog();
         }
     }
 
@@ -143,6 +269,14 @@ export function useBookingActions(options: UseBookingActionsOptions) {
         isDialogOpen,
         selectedBooking,
         pendingStatus,
+        statusNote,
+        sendEmail,
+        emailOption,
+        customEmails,
+        emailError,
+        showSafeFields,
+        shouldAutoShowSafeFields,
+        isInternalEmail,
         statusOptions,
         editForm,
         isSubmitting,

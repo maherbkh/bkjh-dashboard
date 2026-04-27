@@ -21,6 +21,7 @@ type Props = {
     nameValue?: string;
     emptyText?: string;
     searchable?: boolean;
+    disabledKey?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -37,6 +38,7 @@ const props = withDefaults(defineProps<Props>(), {
     nameValue: 'name',
     emptyText: undefined,
     searchable: true,
+    disabledKey: 'disabled',
 });
 
 const emit = defineEmits<{
@@ -67,6 +69,8 @@ const handleSelect = (value: string) => {
     handleValueChange(value);
     open.value = false;
 };
+
+const isItemDisabled = (item: SelectOption) => Boolean(item?.[props.disabledKey]);
 </script>
 
 <template>
@@ -91,8 +95,8 @@ const handleSelect = (value: string) => {
                     :aria-expanded="open"
                     :disabled="disabled"
                     :class="cn(
-                        'w-full min-w-0 justify-between !bg-background font-normal h-8 text-base md:text-sm',
-                        hasErrors && '!border-destructive !focus:ring-destructive',
+                        'w-full min-w-0 justify-between bg-background! font-normal h-8 text-base md:text-sm',
+                        hasErrors && 'border-destructive! focus:ring-destructive!',
                         !selectedItem && 'text-muted-foreground',
                     )"
                 >
@@ -123,15 +127,21 @@ const handleSelect = (value: string) => {
                             <CommandItem
                                 v-for="item in data"
                                 :key="item[keyValue]"
-                                class="cursor-pointer hover:bg-accent hover:text-accent-foreground my-1"
-                                :class="selectedValue === (item[keyValue]?.toString() ?? '') ? 'bg-accent text-accent-foreground' : ''"
+                                :disabled="isItemDisabled(item)"
+                                class="my-1"
+                                :class="[
+                                    isItemDisabled(item)
+                                        ? 'cursor-not-allowed opacity-50'
+                                        : 'cursor-pointer hover:bg-accent hover:text-accent-foreground',
+                                    selectedValue === (item[keyValue]?.toString() ?? '') ? 'bg-accent text-accent-foreground' : '',
+                                ]"
                                 :value="item[keyValue]?.toString() ?? ''"
-                                @select="() => handleSelect(item[keyValue]?.toString() ?? '')"
+                                @select="() => !isItemDisabled(item) && handleSelect(item[keyValue]?.toString() ?? '')"
                             >
                                 <Icon
                                     name="solar:check-circle-line-duotone"
                                     :class="cn(
-                                        'mr-2 !size-4 shrink-0 text-success',
+                                        'mr-2 size-4! shrink-0 text-success',
                                         selectedValue === (item[keyValue]?.toString() ?? '') ? 'opacity-100' : 'opacity-0',
                                     )"
                                 />
