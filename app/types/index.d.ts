@@ -487,6 +487,7 @@ export type Car = {
     plateNumber: string;
     type: CarType;
     automatic: boolean;
+    isActive: boolean;
     max: number | null;
     createdAt: string;
     updatedAt: string;
@@ -497,6 +498,7 @@ export type CarForm = {
     plateNumber: string;
     type: CarType;
     automatic?: boolean;
+    isActive?: boolean;
     max?: number | null;
 };
 

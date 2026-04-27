@@ -113,10 +113,10 @@ const isItemDisabled = (item: SelectOption) => Boolean(item?.[props.disabledKey]
             >
                 <Command v-model="selectedValue">
                     <CommandInput
-                        v-if="searchable"
+                        v-if="props.searchable"
                         :placeholder="t('action.search_placeholder')"
                     />
-                    <CommandEmpty v-if="data.length === 0">
+                    <CommandEmpty v-if="props.data.length === 0">
                         {{ emptyText ?? t('form.no_options_available') }}
                     </CommandEmpty>
                     <CommandEmpty v-else>
@@ -125,7 +125,7 @@ const isItemDisabled = (item: SelectOption) => Boolean(item?.[props.disabledKey]
                     <CommandList class="space-y-2">
                         <CommandGroup>
                             <CommandItem
-                                v-for="item in data"
+                                v-for="item in props.data"
                                 :key="item[keyValue]"
                                 :disabled="isItemDisabled(item)"
                                 class="my-1"

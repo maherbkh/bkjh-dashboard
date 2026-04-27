@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useUserStore } from '~/stores/user';
+
 const { t } = useI18n();
 const pageIcon = usePageIcon();
 const route = useRoute();
@@ -7,6 +9,9 @@ const router = useRouter();
 const pageTitle = computed(() => t('booking.cars_booking.title'));
 const pageDescription = computed(() => t('booking.cars_booking.description'));
 const isCalendarFullscreen = ref(false);
+const userStore = useUserStore();
+const runtimeConfig = useRuntimeConfig();
+const realtimeSocket = shallowRef<any>(null);
 const {
     viewMode,
     searchQuery,
@@ -29,6 +34,8 @@ const {
     changeBookingStatus,
     duplicateBooking,
     cancelBooking,
+    refreshBookings,
+    upsertBookingRecord,
     groupOptions,
 } = useBookingCalendarView();
 
@@ -44,7 +51,7 @@ const {
     emailError,
     showSafeFields,
     shouldAutoShowSafeFields,
-    isInternalEmail,
+    isInternalEmail: checkInternalEmail,
     statusOptions,
     editForm,
     isSubmitting,
@@ -57,6 +64,11 @@ const {
     changeBookingStatus,
     duplicateBooking,
     cancelBooking,
+});
+
+const isRequesterInternalEmail = computed(() => {
+    if (typeof checkInternalEmail !== 'function') return false;
+    return checkInternalEmail(selectedBooking.value?.requesterEmail);
 });
 
 const isSyncingQuery = ref(false);
@@ -74,11 +86,71 @@ function onEscapeFullscreen(event: KeyboardEvent) {
 onMounted(() => {
     window.addEventListener('keydown', onEscapeFullscreen);
     hydrateCalendarStateFromQuery();
+    initializeRealtime();
 });
 
 onBeforeUnmount(() => {
     window.removeEventListener('keydown', onEscapeFullscreen);
+    teardownRealtime();
 });
+
+async function initializeRealtime() {
+    if (!import.meta.client) return;
+    const token = userStore.accessToken;
+    if (!token) return;
+
+    try {
+        const { io } = await import('socket.io-client');
+        const rawSocketBase = runtimeConfig.public.websocketBaseUrl
+            || runtimeConfig.public.apiBaseUrl
+            || runtimeConfig.public.apiUrl
+            || runtimeConfig.public.appUrl
+            || window.location.origin;
+        const socketBase = String(rawSocketBase).replace(/\/+$/, '');
+        const socket = io(`${socketBase}/dashboard-realtime`, {
+            auth: { token: `Bearer ${token}` },
+            transports: ['websocket'],
+        });
+
+        socket.on('connect', () => {
+            socket.emit('booking:subscribe', {});
+        });
+
+        socket.on('booking.created', (payload: Record<string, any>) => {
+            if (!payload?.id) return;
+            upsertBookingRecord({
+                id: String(payload.id),
+                carId: String(payload.carId),
+                startsAt: String(payload.startsAt),
+                endsAt: String(payload.endsAt),
+                status: payload.status,
+                requesterName: String(payload.requesterName || ''),
+                requesterEmail: String(payload.requesterEmail || ''),
+                distance: Number(payload.distance || 0),
+                requesterNote: payload.requesterNote ?? null,
+                adminNote: payload.adminNote ?? null,
+                groupId: payload.groupId ? String(payload.groupId) : null,
+                safeReference: String(payload.safeReference || ''),
+                safePin: '',
+                createdAt: String(payload.createdAt || new Date().toISOString()),
+                updatedAt: String(payload.updatedAt || new Date().toISOString()),
+            });
+        });
+
+        realtimeSocket.value = socket;
+    }
+    catch (error) {
+        console.error('Failed to initialize booking realtime socket:', error);
+    }
+}
+
+function teardownRealtime() {
+    const socket = realtimeSocket.value;
+    if (!socket) return;
+    socket.emit('booking:unsubscribe', {});
+    socket.disconnect();
+    realtimeSocket.value = null;
+}
 
 function getSingleQueryParam(value: string | string[] | undefined): string | null {
     if (Array.isArray(value)) return value[0] ?? null;
@@ -172,6 +244,7 @@ watch(
     [viewMode, selectedDateRange, showRejected, showCanceled],
     () => {
         syncCalendarStateToQuery();
+        refreshBookings();
     },
     { deep: true },
 );
@@ -251,21 +324,21 @@ useSeoMeta({
                             name="solar:alt-arrow-left-linear"
                             class="size-4"
                         />
-                        {{ t('booking.calendar.actions.prev') }}
+                        {{ $t('booking.calendar.actions.prev') }}
                     </Button>
                     <Button
                         variant="outline"
                         size="sm"
                         @click="goToToday"
                     >
-                        {{ t('booking.calendar.actions.today') }}
+                        {{ $t('booking.calendar.actions.today') }}
                     </Button>
                     <Button
                         variant="outline"
                         size="sm"
                         @click="goToNextRange"
                     >
-                        {{ t('booking.calendar.actions.next') }}
+                        {{ $t('booking.calendar.actions.next') }}
                         <Icon
                             name="solar:alt-arrow-right-linear"
                             class="size-4"
@@ -288,7 +361,7 @@ useSeoMeta({
                 :email-error="emailError"
                 :show-safe-fields="showSafeFields"
                 :should-auto-show-safe-fields="shouldAutoShowSafeFields"
-                :is-internal-email="isInternalEmail(selectedBooking?.requesterEmail)"
+                :is-internal-email="isRequesterInternalEmail"
                 :edit-form="editForm"
                 :is-submitting="isSubmitting"
                 @update:open="(value) => value ? null : closeDialog()"

@@ -16,16 +16,30 @@ export type BookingEditForm = {
     endsAt: string;
     requesterName: string;
     requesterEmail: string;
+    distance: string;
+    requesterNote: string;
+    adminNote: string;
     groupId: string;
     safeReference: string;
     safePin: string;
 };
 
 export type BookingEmailOption = 'requester' | 'other';
+export type BookingStatusOption = {
+    value: BookingApiStatus;
+    label: string;
+    disabled: boolean;
+};
+
+type BookingStatusOptionApiItem = {
+    value: string;
+    label?: string;
+    disabled?: boolean;
+};
 
 type UseBookingActionsOptions = {
     getBookingById: (bookingId: string) => BookingCalendarRecord | null;
-    updateBooking: (bookingId: string, patch: Partial<Omit<BookingCalendarRecord, 'id'>>) => BookingCalendarRecord | null;
+    updateBooking: (bookingId: string, patch: Partial<Omit<BookingCalendarRecord, 'id'>>) => Promise<BookingCalendarRecord | null>;
     changeBookingStatus: (
         bookingId: string,
         status: BookingApiStatus,
@@ -36,9 +50,9 @@ type UseBookingActionsOptions = {
             safeReference?: string;
             safePin?: string;
         },
-    ) => BookingCalendarRecord | null;
-    duplicateBooking: (bookingId: string) => BookingCalendarRecord | null;
-    cancelBooking: (bookingId: string) => BookingCalendarRecord | null;
+    ) => Promise<BookingCalendarRecord | null>;
+    duplicateBooking: (bookingId: string) => Promise<BookingCalendarRecord | null>;
+    cancelBooking: (bookingId: string) => Promise<BookingCalendarRecord | null>;
 };
 
 function toDateTimeLocalValue(value: string): string {
@@ -71,6 +85,9 @@ export function useBookingActions(options: UseBookingActionsOptions) {
         endsAt: '',
         requesterName: '',
         requesterEmail: '',
+        distance: '',
+        requesterNote: '',
+        adminNote: '',
         groupId: '',
         safeReference: '',
         safePin: '',
@@ -148,17 +165,47 @@ export function useBookingActions(options: UseBookingActionsOptions) {
         return isOutsideBusinessWindow(start) || isOutsideBusinessWindow(end);
     });
 
-    const statusTransitions = computed<Record<BookingApiStatus, BookingApiStatus[]>>(() => ({
-        PENDING: ['APPROVED', 'REJECTED', 'CANCELED'],
-        APPROVED: ['PENDING', 'REJECTED', 'CANCELED'],
-        REJECTED: ['PENDING', 'APPROVED', 'CANCELED'],
-        CANCELED: ['PENDING', 'APPROVED', 'REJECTED'],
-    }));
+    const statusOptions = ref<BookingStatusOption[]>([]);
+    const bookingApiStatuses: BookingApiStatus[] = ['PENDING', 'APPROVED', 'REJECTED', 'CANCELED'];
 
-    const statusOptions = computed<BookingApiStatus[]>(() => {
-        const status = selectedBooking.value?.status ?? 'PENDING';
-        return [status, ...statusTransitions.value[status]];
-    });
+    function isBookingApiStatus(value: string): value is BookingApiStatus {
+        return bookingApiStatuses.includes(value as BookingApiStatus);
+    }
+
+    async function loadStatusOptions(currentStatus: BookingApiStatus) {
+        try {
+            const response = await fetchDashboardApi<BookingStatusOptionApiItem[]>('/shared/select-lists/car-booking-statuses', {
+                query: { currentStatus },
+            });
+            const optionsFromApi = response.data ?? [];
+            const sanitized = optionsFromApi
+                .filter(item => isBookingApiStatus(String(item.value)))
+                .map((item) => {
+                    const value = item.value as BookingApiStatus;
+                    return {
+                        value,
+                        // Keep translation source in app i18n, same as other CRUD UIs.
+                        label: t(`booking.calendar.status_options.${value.toLowerCase()}`),
+                        disabled: Boolean(item.disabled),
+                    };
+                });
+
+            statusOptions.value = sanitized.length > 0
+                ? sanitized
+                : bookingApiStatuses.map(value => ({
+                        value,
+                        label: t(`booking.calendar.status_options.${value.toLowerCase()}`),
+                        disabled: value === currentStatus,
+                    }));
+        }
+        catch {
+            statusOptions.value = bookingApiStatuses.map(value => ({
+                value,
+                label: t(`booking.calendar.status_options.${value.toLowerCase()}`),
+                disabled: value === currentStatus,
+            }));
+        }
+    }
 
     function hydrateEditForm(booking: BookingCalendarRecord) {
         editForm.value = {
@@ -166,9 +213,12 @@ export function useBookingActions(options: UseBookingActionsOptions) {
             endsAt: toDateTimeLocalValue(booking.endsAt),
             requesterName: booking.requesterName,
             requesterEmail: booking.requesterEmail,
+            distance: String(booking.distance ?? ''),
+            requesterNote: booking.requesterNote ?? '',
+            adminNote: booking.adminNote ?? '',
             groupId: booking.groupId ?? '',
             safeReference: booking.safeReference,
-            safePin: booking.safePin,
+            safePin: booking.safePin ?? '',
         };
     }
 
@@ -186,6 +236,7 @@ export function useBookingActions(options: UseBookingActionsOptions) {
         customEmails.value = '';
         emailError.value = '';
         showSafeFields.value = false;
+        loadStatusOptions(booking.status);
         isDialogOpen.value = true;
     }
 
@@ -210,6 +261,9 @@ export function useBookingActions(options: UseBookingActionsOptions) {
                     endsAt: editForm.value.endsAt,
                     requesterName: editForm.value.requesterName,
                     requesterEmail: editForm.value.requesterEmail,
+                    distance: Number(editForm.value.distance || 0),
+                    requesterNote: editForm.value.requesterNote || null,
+                    adminNote: editForm.value.adminNote || null,
                     groupId: editForm.value.groupId || null,
                     safeReference: editForm.value.safeReference,
                     safePin: editForm.value.safePin,

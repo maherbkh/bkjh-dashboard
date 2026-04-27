@@ -20,7 +20,10 @@ type Props = {
     getRangeCellData: (carId: string) => BookingRangeCellData;
 };
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    cars: () => [],
+    visibleDates: () => [],
+});
 const emit = defineEmits<{
     (e: 'select-action', payload: BookingActionSelection): void;
 }>();

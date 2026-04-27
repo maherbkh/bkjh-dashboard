@@ -66,6 +66,11 @@ const headerItems = computed((): TableHeaderItem[] => [
     },
     {
         as: 'th',
+        name: t('car.is_active'),
+        id: 'isActive',
+    },
+    {
+        as: 'th',
         name: t('car.max'),
         id: 'max',
     },
@@ -96,6 +101,7 @@ const handleEdit = async (car: Car) => {
         plateNumber: car.plateNumber,
         type: car.type,
         automatic: car.automatic,
+        isActive: car.isActive,
         max: car.max,
     });
     isDialogOpen.value = true;
@@ -354,6 +360,12 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         >
                             —
                         </span>
+                    </template>
+
+                    <template #cell-isActive="{ row }">
+                        <Badge :variant="row.isActive ? 'success' : 'secondary'">
+                            {{ row.isActive ? $t('car.active_yes') : $t('car.active_no') }}
+                        </Badge>
                     </template>
 
                     <template #cell-actions="{ row }">

@@ -41,6 +41,7 @@ export function createCarSchema(t: (key: string, params?: Record<string, string 
                 .transform(value => value.toUpperCase()),
             type: z.enum(['petrol', 'diesel', 'electric', 'hybrid']),
             automatic: z.boolean().optional().default(false),
+            isActive: z.boolean().optional().default(true),
             max: maxSchema.optional().default(null),
         })
         .superRefine((values, ctx) => {

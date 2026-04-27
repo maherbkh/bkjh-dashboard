@@ -12,6 +12,7 @@ const [model, modelAttrs] = defineField('model');
 const [plateNumber, plateNumberAttrs] = defineField('plateNumber');
 const [type, typeAttrs] = defineField('type');
 const [automatic, automaticAttrs] = defineField('automatic');
+const [isActive, isActiveAttrs] = defineField('isActive');
 const [max, maxAttrs] = defineField('max');
 
 type Props = {
@@ -68,6 +69,7 @@ watch(
                 plateNumber: newCar.plateNumber,
                 type: newCar.type,
                 automatic: newCar.automatic,
+                isActive: newCar.isActive,
                 max: newCar.max,
             });
         }
@@ -80,6 +82,7 @@ const defaultCarValues: CarForm = {
     plateNumber: '',
     type: 'petrol',
     automatic: false,
+    isActive: true,
     max: null,
 };
 
@@ -184,6 +187,15 @@ const handleClose = () => {
                         class="col-span-12"
                         :errors="errors.automatic ? [errors.automatic] : []"
                         v-bind="automaticAttrs"
+                    />
+                    <FormItemSwitch
+                        id="isActive"
+                        v-model="isActive"
+                        :title="t('car.is_active')"
+                        :description="t('car.is_active_description')"
+                        class="col-span-12"
+                        :errors="errors.isActive ? [errors.isActive] : []"
+                        v-bind="isActiveAttrs"
                     />
                 </div>
             </form>

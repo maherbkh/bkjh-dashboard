@@ -1,4 +1,3 @@
-import { carBookingsDemoPayload } from '~/data/booking/carBookingsDemoPayload';
 import type { Car } from '~/types';
 
 export type BookingCalendarViewMode = 'day' | '3days' | 'week' | '2weeks' | 'month';
@@ -22,6 +21,9 @@ type BookingCalendarSlot = {
     groupId: string | null;
     safeReference: string;
     safePin: string;
+    distance: number;
+    requesterNote: string | null;
+    adminNote: string | null;
     safePinAvailable: boolean;
 };
 
@@ -44,6 +46,7 @@ export type BookingDaySegment = {
     endsAt: Date;
     requesterName: string;
     requesterEmail: string;
+    distance: number;
     groupId: string | null;
     groupName: string | null;
     safeReference: string;
@@ -88,9 +91,12 @@ type CarBookingListItem = {
     status: BookingApiStatus;
     requesterName: string;
     requesterEmail: string;
+    distance: number;
+    requesterNote: string | null;
+    adminNote: string | null;
     groupId: string | null;
     safeReference: string;
-    safePin: string;
+    safePin?: string;
     createdAt: string;
     updatedAt: string;
 };
@@ -252,16 +258,9 @@ export function useBookingCalendarView() {
     const showRejected = ref(true);
     const showCanceled = ref(true);
 
-    const initialDemoRecords = carBookingsDemoPayload.responses.list.data.data as readonly CarBookingListItem[];
-    const bookingRecords = ref<CarBookingListItem[]>(initialDemoRecords.map(item => ({ ...item })));
+    const bookingRecords = ref<CarBookingListItem[]>([]);
 
-    const cars = ref<BookingCalendarCar[]>(
-        carBookingsDemoPayload.cars.map(car => ({
-            id: car.id,
-            name: car.model,
-            plateNumber: car.plateNumber,
-        })),
-    );
+    const cars = ref<BookingCalendarCar[]>([]);
     const groupNameById = ref<Record<string, string>>({});
     const groupOptions = computed<BookingGroupOption[]>(() => {
         return Object.entries(groupNameById.value).map(([id, name]) => ({ id, name }));
@@ -295,45 +294,15 @@ export function useBookingCalendarView() {
             status: booking.status,
             requesterName: booking.requesterName,
             requesterEmail: booking.requesterEmail,
+            distance: booking.distance,
+            requesterNote: booking.requesterNote,
+            adminNote: booking.adminNote,
             groupId: booking.groupId,
             safeReference: booking.safeReference,
-            safePin: booking.safePin,
+            safePin: booking.safePin ?? '',
             safePinAvailable: booking.status === 'APPROVED' && isAfterSafePinThreshold(new Date(booking.startsAt)),
         }));
-
-        // Enforce demo business rule:
-        // per car, APPROVED bookings must not overlap.
-        const byCar = new Map<string, BookingCalendarSlot[]>();
-        for (const booking of mapped) {
-            if (!byCar.has(booking.carId)) {
-                byCar.set(booking.carId, []);
-            }
-            byCar.get(booking.carId)!.push(booking);
-        }
-
-        const sanitized: BookingCalendarSlot[] = [];
-        for (const [, carBookings] of byCar.entries()) {
-            const approvedAccepted: BookingCalendarSlot[] = [];
-            const ordered = [...carBookings].sort((a, b) => a.start.getTime() - b.start.getTime());
-
-            for (const booking of ordered) {
-                if (booking.status !== 'APPROVED') {
-                    sanitized.push(booking);
-                    continue;
-                }
-
-                const hasApprovedOverlap = approvedAccepted.some(existing =>
-                    intervalsOverlap(existing.start, existing.end, booking.start, booking.end),
-                );
-
-                if (!hasApprovedOverlap) {
-                    approvedAccepted.push(booking);
-                    sanitized.push(booking);
-                }
-            }
-        }
-
-        return sanitized.filter((booking) => {
+        return mapped.filter((booking) => {
             if (booking.status === 'REJECTED' && !showRejected.value) return false;
             if (booking.status === 'CANCELED' && !showCanceled.value) return false;
             return true;
@@ -354,24 +323,49 @@ export function useBookingCalendarView() {
         return bookingRecords.value.find(item => item.id === bookingId) ?? null;
     }
 
-    function updateBooking(bookingId: string, patch: Partial<Omit<BookingCalendarRecord, 'id'>>): BookingCalendarRecord | null {
+    function upsertBookingRecord(booking: BookingCalendarRecord): BookingCalendarRecord {
+        const normalized: BookingCalendarRecord = {
+            ...booking,
+            safePin: booking.safePin ?? '',
+            requesterNote: booking.requesterNote ?? null,
+            adminNote: booking.adminNote ?? null,
+            distance: Number(booking.distance ?? 0),
+        };
+        const index = bookingRecords.value.findIndex(item => item.id === booking.id);
+        if (index === -1) {
+            bookingRecords.value.unshift(normalized);
+        }
+        else {
+            bookingRecords.value.splice(index, 1, normalized);
+        }
+        return normalized;
+    }
+
+    async function updateBooking(bookingId: string, patch: Partial<Omit<BookingCalendarRecord, 'id'>>): Promise<BookingCalendarRecord | null> {
         const index = bookingRecords.value.findIndex(item => item.id === bookingId);
         if (index === -1) return null;
 
         const current = bookingRecords.value[index];
-        const next: BookingCalendarRecord = {
+        const payload = {
+            ...patch,
+            startsAt: patch.startsAt ? createLocalIsoLike(patch.startsAt) : undefined,
+            endsAt: patch.endsAt ? createLocalIsoLike(patch.endsAt) : undefined,
+        };
+        const response = await fetchDashboardApi<BookingCalendarRecord>(`/booking/car-bookings/${bookingId}`, {
+            method: 'PATCH',
+            body: payload,
+        });
+        const next = response.data ?? {
             ...current,
             ...patch,
             startsAt: patch.startsAt ? createLocalIsoLike(patch.startsAt) : current.startsAt,
             endsAt: patch.endsAt ? createLocalIsoLike(patch.endsAt) : current.endsAt,
             updatedAt: new Date().toISOString(),
         };
-
-        bookingRecords.value.splice(index, 1, next);
-        return next;
+        return upsertBookingRecord(next);
     }
 
-    function changeBookingStatus(
+    async function changeBookingStatus(
         bookingId: string,
         status: BookingApiStatus,
         context?: {
@@ -381,15 +375,16 @@ export function useBookingCalendarView() {
             safeReference?: string;
             safePin?: string;
         },
-    ): BookingCalendarRecord | null {
+    ): Promise<BookingCalendarRecord | null> {
         return updateBooking(bookingId, {
             status,
+            adminNote: context?.note,
             safeReference: context?.safeReference,
             safePin: context?.safePin,
         });
     }
 
-    function duplicateBooking(bookingId: string): BookingCalendarRecord | null {
+    async function duplicateBooking(bookingId: string): Promise<BookingCalendarRecord | null> {
         const source = getBookingById(bookingId);
         if (!source) return null;
 
@@ -400,21 +395,35 @@ export function useBookingCalendarView() {
         const nextEnd = new Date(nextStart.getTime() + durationMs);
         const nowIso = new Date().toISOString();
 
-        const duplicate: BookingCalendarRecord = {
+        const payload: Partial<BookingCalendarRecord> = {
             ...source,
-            id: createMockBookingId(),
             startsAt: nextStart.toISOString(),
             endsAt: nextEnd.toISOString(),
             status: 'PENDING',
-            createdAt: nowIso,
-            updatedAt: nowIso,
         };
-
-        bookingRecords.value.push(duplicate);
-        return duplicate;
+        delete payload.id;
+        delete payload.createdAt;
+        delete payload.updatedAt;
+        const response = await fetchDashboardApi<BookingCalendarRecord>('/booking/car-bookings', {
+            method: 'POST',
+            body: payload,
+        });
+        if (!response.data) {
+            const duplicate: BookingCalendarRecord = {
+                ...(source as BookingCalendarRecord),
+                id: createMockBookingId(),
+                startsAt: nextStart.toISOString(),
+                endsAt: nextEnd.toISOString(),
+                status: 'PENDING',
+                createdAt: nowIso,
+                updatedAt: nowIso,
+            };
+            return upsertBookingRecord(duplicate);
+        }
+        return upsertBookingRecord(response.data);
     }
 
-    function cancelBooking(bookingId: string): BookingCalendarRecord | null {
+    async function cancelBooking(bookingId: string): Promise<BookingCalendarRecord | null> {
         return changeBookingStatus(bookingId, 'CANCELED');
     }
 
@@ -492,11 +501,6 @@ export function useBookingCalendarView() {
         }
     }
 
-    onMounted(() => {
-        loadCarsFromIndex();
-        loadGroupsFromIndex();
-    });
-
     const visibleDates = computed<Date[]>(() => {
         if (customRange.value) {
             const [rangeStart, rangeEnd] = customRange.value;
@@ -515,6 +519,70 @@ export function useBookingCalendarView() {
         const rangeEnd = addDays(anchor, length - 1);
         return createDateRange(anchor, rangeEnd);
     });
+
+    async function loadBookingsFromApi() {
+        try {
+            if (visibleDates.value.length === 0) return;
+            const startsFrom = new Date(normalizeDate(visibleDates.value[0]));
+            const endsBefore = new Date(normalizeDate(visibleDates.value[visibleDates.value.length - 1]));
+            endsBefore.setDate(endsBefore.getDate() + 1);
+
+            const aggregated: BookingCalendarRecord[] = [];
+            let page = 1;
+            let lastPage = 1;
+
+            do {
+                const response = await fetchDashboardApi<{
+                data: BookingCalendarRecord[];
+                meta: {
+                    currentPage: number;
+                    lastPage: number;
+                };
+            }>('/booking/car-bookings', {
+                query: {
+                    page,
+                    length: 100,
+                    sort_by: 'startsAt',
+                    sort_dir: 'asc',
+                    startsFrom: startsFrom.toISOString(),
+                    endsBefore: endsBefore.toISOString(),
+                },
+            });
+
+                const payload = response.data;
+                if (payload?.data?.length) {
+                    aggregated.push(...payload.data);
+                }
+                lastPage = payload?.meta?.lastPage ?? 1;
+                page += 1;
+            } while (page <= lastPage);
+
+            bookingRecords.value = aggregated;
+        }
+        catch (error) {
+            console.error('Failed to load booking records:', error);
+        }
+    }
+
+    async function refreshBookings() {
+        await loadBookingsFromApi();
+    }
+
+    onMounted(() => {
+        loadCarsFromIndex();
+        loadGroupsFromIndex();
+        loadBookingsFromApi();
+    });
+
+    watch(
+        () => [
+            visibleDates.value[0]?.toISOString() ?? '',
+            visibleDates.value[visibleDates.value.length - 1]?.toISOString() ?? '',
+        ],
+        () => {
+            loadBookingsFromApi();
+        },
+    );
 
     const minutesPerSlot = computed(() => 30);
     const slotsPerDay = computed(() => 48);
@@ -831,6 +899,7 @@ export function useBookingCalendarView() {
                 endsAt: slot.end,
                 requesterName: slot.requesterName,
                 requesterEmail: slot.requesterEmail,
+                distance: slot.distance,
                 groupId: slot.groupId,
                 groupName: slot.groupId ? (groupNameById.value[String(slot.groupId)] ?? null) : null,
                 safeReference: slot.safeReference,
@@ -895,6 +964,7 @@ export function useBookingCalendarView() {
                 endsAt: slot.end,
                 requesterName: slot.requesterName,
                 requesterEmail: slot.requesterEmail,
+                distance: slot.distance,
                 groupId: slot.groupId,
                 groupName: slot.groupId ? (groupNameById.value[String(slot.groupId)] ?? null) : null,
                 safeReference: slot.safeReference,
@@ -941,6 +1011,8 @@ export function useBookingCalendarView() {
         changeBookingStatus,
         duplicateBooking,
         cancelBooking,
+        refreshBookings,
+        upsertBookingRecord,
         groupOptions,
     };
 }

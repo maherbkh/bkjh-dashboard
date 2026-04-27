@@ -64,6 +64,7 @@ export default defineNuxtConfig({
             apiUrl: process.env.NUXT_PUBLIC_API_URL || 'https://api.backhaus.de/api/v1/dashboard',
             appUrl: process.env.NUXT_PUBLIC_APP_URL || 'https://dashboard.backhaus.de',
             apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://api.backhaus.de/api/v1',
+            websocketBaseUrl: process.env.NUXT_PUBLIC_WEBSOCKET_BASE_URL || process.env.WEBSOCKET_BASE_URL || '',
         },
     },
     build: {

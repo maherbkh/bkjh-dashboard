@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { BookingApiStatus, BookingCalendarRecord, BookingGroupOption } from '~/composables/useBookingCalendarView';
-import type { BookingActionType, BookingEditForm, BookingEmailOption } from '~/composables/useBookingActions';
+import type { BookingActionType, BookingEditForm, BookingEmailOption, BookingStatusOption } from '~/composables/useBookingActions';
 import {
     Dialog,
     DialogContent,
@@ -14,7 +14,7 @@ type Props = {
     open: boolean;
     action: BookingActionType | null;
     booking: BookingCalendarRecord | null;
-    statusOptions: BookingApiStatus[];
+    statusOptions: BookingStatusOption[];
     groupOptions: BookingGroupOption[];
     pendingStatus: BookingApiStatus;
     statusNote: string;
@@ -64,9 +64,9 @@ const confirmLabelKey = computed(() => {
 
 const statusSelectItems = computed(() => {
     return props.statusOptions.map(status => ({
-        id: status,
-        name: t(`booking.calendar.status_options.${status.toLowerCase()}`),
-        disabled: props.booking?.status === status,
+        id: status.value,
+        name: status.label || t(`booking.calendar.status_options.${status.value.toLowerCase()}`),
+        disabled: status.disabled,
     }));
 });
 
@@ -210,6 +210,16 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                             {{ $t('booking.calendar.action_dialog.fields.duration') }}:
                         </span>
                         <span class="font-semibold ml-3">{{ bookingDuration }}</span>
+                    </p>
+                    <p class="py-2">
+                        <span class="font-light inline-flex items-center">
+                            <Icon
+                                name="solar:road-circle-linear"
+                                class="size-4 mr-1.5 opacity-75"
+                            />
+                            {{ $t('booking.calendar.action_dialog.fields.distance') }}:
+                        </span>
+                        <span class="font-semibold ml-3">{{ booking.distance }}</span>
                     </p>
                     <p class="pt-2 pb-0">
                         <span class="font-light inline-flex items-center">
@@ -376,6 +386,28 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                             :title="$t('booking.calendar.action_dialog.fields.requester_email')"
                             icon="solar:letter-linear"
                             @update:model-value="updateField('requesterEmail', String($event ?? ''))"
+                        />
+                        <FormItemInput
+                            id="booking-action-distance"
+                            type="number"
+                            :model-value="editForm.distance"
+                            :title="$t('booking.calendar.action_dialog.fields.distance')"
+                            icon="solar:road-circle-linear"
+                            @update:model-value="updateField('distance', String($event ?? ''))"
+                        />
+                        <FormItemTextarea
+                            id="booking-action-requester-note"
+                            :model-value="editForm.requesterNote"
+                            :title="$t('booking.calendar.action_dialog.fields.requester_note')"
+                            :rows="3"
+                            @update:model-value="updateField('requesterNote', String($event ?? ''))"
+                        />
+                        <FormItemTextarea
+                            id="booking-action-admin-note"
+                            :model-value="editForm.adminNote"
+                            :title="$t('booking.calendar.action_dialog.fields.admin_note')"
+                            :rows="3"
+                            @update:model-value="updateField('adminNote', String($event ?? ''))"
                         />
                         <FormItemSelect
                             id="booking-action-group-id"
