@@ -46,6 +46,11 @@ type PoolEntry = {
 
 const _pool = new Map<string, PoolEntry>();
 
+// Debug: expose pool in browser console → window.__realtimePool
+if (import.meta.client) {
+    (window as unknown as Record<string, unknown>).__realtimePool = _pool;
+}
+
 function _getEntry(key: string): PoolEntry {
     if (!_pool.has(key)) {
         _pool.set(key, {
@@ -125,6 +130,7 @@ export function useRealtimeSocket(config: RealtimeSocketConfig) {
             // System events → update state + fan-out to bus
             socket.on('connect', () => {
                 entry.connectionState.value = 'live';
+                console.info(`[realtime:${config.key}] connected`, socket.id);
                 _dispatch(entry.bus, 'connect', undefined);
             });
 
@@ -132,16 +138,19 @@ export function useRealtimeSocket(config: RealtimeSocketConfig) {
                 if (entry.stopping) return;
                 // 'io server disconnect' = server actively closed us, don't loop
                 entry.connectionState.value = reason === 'io server disconnect' ? 'idle' : 'recovering';
+                console.warn(`[realtime:${config.key}] disconnected`, reason);
                 _dispatch(entry.bus, 'disconnect', reason);
             });
 
             socket.on('connect_error', (err) => {
                 if (!entry.stopping) entry.connectionState.value = 'recovering';
+                console.error(`[realtime:${config.key}] connect_error`, err.message, err);
                 _dispatch(entry.bus, 'connect_error', err);
             });
 
             // Application events → fan-out to bus
             socket.onAny((event: string, payload: unknown) => {
+                console.info(`[realtime:${config.key}] event:${event}`, payload);
                 _dispatch(entry.bus, event, payload);
             });
 

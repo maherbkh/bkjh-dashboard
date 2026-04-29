@@ -143,13 +143,18 @@ export function useBookingRealtime(config: BookingRealtimeConfig, callbacks: Boo
     // so no events are missed during the connection handshake.
 
     const offConnect = socket.on('connect', () => {
+        console.info('[booking-realtime] emitting booking:subscribe');
         socket.emit('booking:subscribe', {});
     });
 
     const offCreated = socket.on('booking.created', (payload) => {
+        console.info('[booking-realtime] booking.created raw payload:', payload);
         const record = _normalizeRecord(payload);
         if (record) callbacks.onCreated?.(record);
-        else callbacks.onInvalidPayload?.();
+        else {
+            console.warn('[booking-realtime] booking.created payload failed normalization:', payload);
+            callbacks.onInvalidPayload?.();
+        }
     });
 
     const offUpdated = socket.on('booking.updated', (payload) => {
