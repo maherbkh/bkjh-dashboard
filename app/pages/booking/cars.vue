@@ -250,9 +250,9 @@ async function initializeRealtime(nextToken?: string) {
         const rawSocketBase = String(runtimeConfig.public.websocketBaseUrl || window.location.origin).replace(/\/+$/, '');
         // Socket.IO connects via HTTP(S) upgrade — coerce ws(s):// to http(s)://
         const socketBase = rawSocketBase.replace(/^wss:\/\//, 'https://').replace(/^ws:\/\//, 'http://');
-        const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+        const rawToken = token.startsWith('Bearer ') ? token.slice(7) : token;
         const socket = io(`${socketBase}/dashboard-realtime`, {
-            auth: { token: authToken },
+            auth: { token: rawToken },
             transports: ['websocket', 'polling'],
             withCredentials: true,
             autoConnect: true,
