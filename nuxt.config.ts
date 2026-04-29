@@ -64,7 +64,9 @@ export default defineNuxtConfig({
             apiUrl: process.env.NUXT_PUBLIC_API_URL || 'https://api.backhaus.de/api/v1/dashboard',
             appUrl: process.env.NUXT_PUBLIC_APP_URL || 'https://dashboard.backhaus.de',
             apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://api.backhaus.de/api/v1',
-            websocketBaseUrl: process.env.NUXT_PUBLIC_WEBSOCKET_BASE_URL || process.env.WEBSOCKET_BASE_URL || '',
+            // Use NUXT_PUBLIC_WEBSOCKET_BASE_URL for runtime override; WEBSOCKET_BASE_URL is build-time only.
+            // Value must be http(s):// — ws(s):// is coerced at runtime in the socket initializer.
+            websocketBaseUrl: process.env.NUXT_PUBLIC_WEBSOCKET_BASE_URL || process.env.WEBSOCKET_BASE_URL || mediaProxyBase,
         },
     },
     build: {

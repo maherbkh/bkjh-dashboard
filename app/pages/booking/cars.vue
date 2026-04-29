@@ -247,12 +247,9 @@ async function initializeRealtime(nextToken?: string) {
             teardownRealtime('token-changed');
         }
         const { io } = await import('socket.io-client');
-        const rawSocketBase = runtimeConfig.public.websocketBaseUrl
-            || runtimeConfig.public.apiBaseUrl
-            || runtimeConfig.public.apiUrl
-            || runtimeConfig.public.appUrl
-            || window.location.origin;
-        const socketBase = String(rawSocketBase).replace(/\/+$/, '');
+        const rawSocketBase = String(runtimeConfig.public.websocketBaseUrl || window.location.origin).replace(/\/+$/, '');
+        // Socket.IO connects via HTTP(S) upgrade — coerce ws(s):// to http(s)://
+        const socketBase = rawSocketBase.replace(/^wss:\/\//, 'https://').replace(/^ws:\/\//, 'http://');
         const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
         const socket = io(`${socketBase}/dashboard-realtime`, {
             auth: { token: authToken },
