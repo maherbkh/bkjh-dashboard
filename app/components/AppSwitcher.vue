@@ -58,7 +58,9 @@ const handleAppClick = (app: typeof props.apps[0]) => {
                                     {{ activeApp.name }}
                                 </span>
                             </div>
-                            <p class="text-xs mt-0.5 truncate opacity-75">{{ activeApp.description }}</p>
+                            <p class="text-xs mt-0.5 truncate opacity-75">
+                                {{ activeApp.description }}
+                            </p>
                         </div>
                         <Icon
                             name="solar:alt-arrow-down-outline"
@@ -67,7 +69,7 @@ const handleAppClick = (app: typeof props.apps[0]) => {
                     </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                    class="w-[--reka-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                    class="w-[--reka-dropdown-menu-trigger-width] min-w-56 max-w-64 rounded-lg"
                     align="start"
                     :side="isMobile ? 'bottom' : 'right'"
                     :side-offset="4"
@@ -75,25 +77,29 @@ const handleAppClick = (app: typeof props.apps[0]) => {
                     <DropdownMenuLabel class="text-xs text-muted-foreground">
                         {{ $t('application.plural') }}
                     </DropdownMenuLabel>
-                    <DropdownMenuItem
-                        v-for="(app, index) in apps"
-                        :key="app.name"
-                        class="gap-2 px-2 py-1 cursor-pointer my-1"
-                        :class="{ 'bg-accent': app.slug === appStore.appSlug }"
-                        @click="() => handleAppClick(app)"
-                    >
-                        <div class="flex size-6 items-center justify-center rounded-sm border">
-                            <Icon
-                                :name="app.logo"
-                                class="size-5 shrink-0"
-                            />
-                        </div>
-                        <div>
-                            <div>{{ app.name }}</div>
-                            <p class="text-xs text-muted-foreground mt-0.5 truncate">{{ app.description }}</p>
-                        </div>
-                        <DropdownMenuShortcut>⌘{{ index + 1 }}</DropdownMenuShortcut>
-                    </DropdownMenuItem>
+                    <div class="flex flex-col divide-y divide-border/50">
+                        <DropdownMenuItem
+                            v-for="(app, index) in apps"
+                            :key="app.name"
+                            class="gap-2 px-2 py-1.5 cursor-pointer my-1.5"
+                            :class="{ 'bg-accent': app.slug === appStore.appSlug }"
+                            @click="() => handleAppClick(app)"
+                        >
+                            <div class="flex size-6 items-center justify-center rounded-sm border">
+                                <Icon
+                                    :name="app.logo"
+                                    class="size-5 shrink-0"
+                                />
+                            </div>
+                            <div class="grid flex-1 text-left leading-tight gap-0.5 text-xs">
+                                <div>{{ app.name }}</div>
+                                <p class="text-[0.625rem] text-muted-foreground mt-0.5 truncate">
+                                    {{ app.description }}
+                                </p>
+                            </div>
+                            <DropdownMenuShortcut>⌘{{ index + 1 }}</DropdownMenuShortcut>
+                        </DropdownMenuItem>
+                    </div>
                 </DropdownMenuContent>
             </DropdownMenu>
         </SidebarMenuItem>

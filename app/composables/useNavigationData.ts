@@ -37,7 +37,7 @@ export const useNavigationData = (): ComputedRef<{
                     name: t('it_support.singular'),
                     logo: 'solar:chat-round-call-linear',
                     slug: 'support',
-                    description: 'SOme Test text',
+                    description: 'SOme Test textsss sssss sss as i need to test length ',
                 },
                 {
                     name: t('academy.plural'),
