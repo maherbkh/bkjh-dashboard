@@ -137,8 +137,8 @@ async function initializeRealtime() {
                 createdAt: String(payload.createdAt || new Date().toISOString()),
                 updatedAt: String(payload.updatedAt || new Date().toISOString()),
             });
+            console.log('socket.on booking.created', payload);
         });
-
         realtimeSocket.value = socket;
     }
     catch (error) {
