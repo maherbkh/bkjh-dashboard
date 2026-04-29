@@ -3,7 +3,7 @@
     "all": "Alle",
     "capacity": "Kapazität",
     "createdBy": "Erstellt von",
-    "description": "Akademie und Aktivitäten verwalten",
+    "description": "Kurse und Trainings organisieren.",
     "duration": "Dauer",
     "pending": "Ausstehend",
     "events": {
@@ -47,6 +47,7 @@
   "booking": {
     "plural": "Buchung",
     "singular": "Buchung",
+    "description": "Buchungen zentral steuern.",
     "cars_booking": {
       "title": "Auto-Buchung",
       "description": "Arbeitsbereich fur Auto-Buchungen",
@@ -925,7 +926,8 @@
   },
   "it_support": {
     "plural": "IT-Support",
-    "singular": "IT-Support"
+    "singular": "IT-Support",
+    "description": "Tickets effizient verwalten."
   },
   "language": {
     "description": "Wählen Sie Ihre bevorzugte Sprache für die Anwendung",

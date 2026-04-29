@@ -3,7 +3,7 @@
     "all": "All",
     "capacity": "Capacity",
     "createdBy": "Created By",
-    "description": "Manage academy events and activities",
+    "description": "Organize training content.",
     "duration": "Duration",
     "pending": "Pending",
     "events": {
@@ -47,6 +47,7 @@
   "booking": {
     "plural": "Booking",
     "singular": "Booking",
+    "description": "Control all appointments.",
     "cars_booking": {
       "title": "Cars Booking",
       "description": "Cars booking workspace",
@@ -925,7 +926,8 @@
   },
   "it_support": {
     "plural": "IT Support",
-    "singular": "IT Support"
+    "singular": "IT Support",
+    "description": "Manage support tickets."
   },
   "language": {
     "description": "Choose your preferred language for the application",
