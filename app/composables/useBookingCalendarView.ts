@@ -263,6 +263,9 @@ export function useBookingCalendarView() {
     const showCanceled = ref(true);
 
     const bookingRecords = ref<CarBookingListItem[]>([]);
+    const isBookingsRefreshInFlight = ref(false);
+    const hasPendingBookingsRefresh = ref(false);
+    const latestBookingsRequestId = ref(0);
 
     const cars = ref<BookingCalendarCar[]>([]);
     const groupNameById = ref<Record<string, string>>({});
@@ -531,6 +534,8 @@ export function useBookingCalendarView() {
     });
 
     async function loadBookingsFromApi() {
+        const requestId = latestBookingsRequestId.value + 1;
+        latestBookingsRequestId.value = requestId;
         try {
             if (visibleDates.value.length === 0) return;
             const startsFrom = new Date(normalizeDate(visibleDates.value[0]));
@@ -567,7 +572,9 @@ export function useBookingCalendarView() {
                 page += 1;
             } while (page <= lastPage);
 
-            bookingRecords.value = aggregated;
+            if (requestId === latestBookingsRequestId.value) {
+                bookingRecords.value = aggregated;
+            }
         }
         catch (error) {
             console.error('Failed to load booking records:', error);
@@ -575,7 +582,44 @@ export function useBookingCalendarView() {
     }
 
     async function refreshBookings() {
-        await loadBookingsFromApi();
+        if (isBookingsRefreshInFlight.value) {
+            hasPendingBookingsRefresh.value = true;
+            return;
+        }
+
+        isBookingsRefreshInFlight.value = true;
+        try {
+            await loadBookingsFromApi();
+        }
+        finally {
+            isBookingsRefreshInFlight.value = false;
+            if (hasPendingBookingsRefresh.value) {
+                hasPendingBookingsRefresh.value = false;
+                await refreshBookings();
+            }
+        }
+    }
+
+    function getVisibleRangeBounds(): { startsFrom: Date; endsBefore: Date } | null {
+        if (visibleDates.value.length === 0) return null;
+        const startsFrom = normalizeDate(visibleDates.value[0]);
+        const endsBefore = addDays(normalizeDate(visibleDates.value[visibleDates.value.length - 1]), 1);
+        return { startsFrom, endsBefore };
+    }
+
+    function isBookingWithinVisibleRange(startsAt: string, endsAt: string): boolean {
+        const bounds = getVisibleRangeBounds();
+        if (!bounds) return false;
+        const start = new Date(startsAt);
+        const end = new Date(endsAt);
+        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return false;
+        return intervalsOverlap(start, end, bounds.startsFrom, bounds.endsBefore);
+    }
+
+    function passesStatusVisibility(status: BookingApiStatus): boolean {
+        if (status === 'REJECTED' && !showRejected.value) return false;
+        if (status === 'CANCELED' && !showCanceled.value) return false;
+        return true;
     }
 
     onMounted(() => {
@@ -1023,6 +1067,8 @@ export function useBookingCalendarView() {
         cancelBooking,
         refreshBookings,
         upsertBookingRecord,
+        isBookingWithinVisibleRange,
+        passesStatusVisibility,
         groupOptions,
         carOptions,
     };
