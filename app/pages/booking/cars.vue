@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { Socket } from 'socket.io-client';
-import type { BookingApiStatus, BookingCalendarRecord } from '~/composables/useBookingCalendarView';
 import { useUserStore } from '~/stores/user';
 
 const { t } = useI18n();
@@ -13,37 +11,9 @@ const pageDescription = computed(() => t('booking.cars_booking.description'));
 const isCalendarFullscreen = ref(false);
 const userStore = useUserStore();
 const runtimeConfig = useRuntimeConfig();
-const realtimeSocket = shallowRef<Socket | null>(null);
-const currentSocketToken = ref<string | null>(null);
-const socketState = ref<'idle' | 'starting' | 'live' | 'recovering' | 'stopped'>('idle');
-const isRealtimeStopping = ref(false);
-const isRealtimeInitializing = ref(false);
+
 const FALLBACK_REFRESH_THROTTLE_MS = 2000;
 let fallbackRefreshTimeout: ReturnType<typeof setTimeout> | null = null;
-const realtimeStats = reactive({
-    eventsReceived: 0,
-    eventsApplied: 0,
-    eventsDroppedInvalidPayload: 0,
-    eventsDroppedFilteredOut: 0,
-    fallbackRefreshTriggered: 0,
-});
-
-type BookingCreatedPayload = {
-    id: string;
-    carId: string;
-    startsAt: string;
-    endsAt: string;
-    status: BookingApiStatus;
-    requesterName?: string;
-    requesterEmail?: string;
-    distance?: number;
-    requesterNote?: string | null;
-    adminNote?: string | null;
-    groupId?: string | null;
-    safeReference?: string;
-    createdAt?: string;
-    updatedAt?: string;
-};
 const {
     viewMode,
     searchQuery,
@@ -68,6 +38,7 @@ const {
     cancelBooking,
     refreshBookings,
     upsertBookingRecord,
+    removeBookingRecord,
     isBookingWithinVisibleRange,
     passesStatusVisibility,
     groupOptions,
@@ -119,24 +90,6 @@ function onEscapeFullscreen(event: KeyboardEvent) {
     }
 }
 
-onMounted(() => {
-    window.addEventListener('keydown', onEscapeFullscreen);
-    hydrateCalendarStateFromQuery();
-});
-
-onBeforeUnmount(() => {
-    window.removeEventListener('keydown', onEscapeFullscreen);
-    teardownRealtime('stopped');
-    clearFallbackRefreshTimeout();
-});
-
-const isDevMode = import.meta.dev;
-
-function logRealtime(event: string, details?: Record<string, unknown>) {
-    if (!isDevMode) return;
-    console.info(`[booking-realtime] ${event}`, details || {});
-}
-
 function clearFallbackRefreshTimeout() {
     if (!fallbackRefreshTimeout) return;
     clearTimeout(fallbackRefreshTimeout);
@@ -147,200 +100,54 @@ function scheduleFallbackRefresh() {
     if (fallbackRefreshTimeout) return;
     fallbackRefreshTimeout = setTimeout(async () => {
         fallbackRefreshTimeout = null;
-        realtimeStats.fallbackRefreshTriggered += 1;
         await refreshBookings();
     }, FALLBACK_REFRESH_THROTTLE_MS);
 }
 
-function getStatus(value: unknown): BookingApiStatus | null {
-    if (value === 'PENDING' || value === 'APPROVED' || value === 'REJECTED' || value === 'CANCELED') {
-        return value;
-    }
-    return null;
-}
-
-function getRealtimePayloadSource(input: unknown): unknown {
-    if (!input || typeof input !== 'object') return null;
-    const record = input as Record<string, unknown>;
-    if (record.data && typeof record.data === 'object') {
-        return record.data;
-    }
-    return input;
-}
-
-function isBookingCreatedPayload(value: unknown): value is BookingCreatedPayload {
-    if (!value || typeof value !== 'object') return false;
-    const source = value as Record<string, unknown>;
-    return typeof source.id === 'string'
-        && typeof source.carId === 'string'
-        && typeof source.startsAt === 'string'
-        && typeof source.endsAt === 'string'
-        && getStatus(source.status) !== null;
-}
-
-function normalizeRealtimePayload(input: unknown): BookingCalendarRecord | null {
-    const source = getRealtimePayloadSource(input);
-    if (!isBookingCreatedPayload(source)) return null;
-    const status = getStatus(source.status);
-    if (!status) return null;
-
-    return {
-        id: source.id,
-        carId: source.carId,
-        startsAt: source.startsAt,
-        endsAt: source.endsAt,
-        status,
-        requesterName: typeof source.requesterName === 'string' ? source.requesterName : '',
-        requesterEmail: typeof source.requesterEmail === 'string' ? source.requesterEmail : '',
-        distance: Number(source.distance ?? 0),
-        requesterNote: typeof source.requesterNote === 'string' ? source.requesterNote : null,
-        adminNote: typeof source.adminNote === 'string' ? source.adminNote : null,
-        groupId: typeof source.groupId === 'string' ? source.groupId : null,
-        safeReference: typeof source.safeReference === 'string' ? source.safeReference : '',
-        safePin: '',
-        createdAt: typeof source.createdAt === 'string' ? source.createdAt : new Date().toISOString(),
-        updatedAt: typeof source.updatedAt === 'string' ? source.updatedAt : new Date().toISOString(),
-    };
-}
-
-function handleBookingCreatedEvent(payload: unknown) {
-    realtimeStats.eventsReceived += 1;
-    const normalized = normalizeRealtimePayload(payload);
-    if (!normalized) {
-        realtimeStats.eventsDroppedInvalidPayload += 1;
-        logRealtime('drop.invalid_payload', { payload });
-        scheduleFallbackRefresh();
-        return;
-    }
-
-    const isVisibleInCurrentPage = passesStatusVisibility(normalized.status)
-        && isBookingWithinVisibleRange(normalized.startsAt, normalized.endsAt);
-    upsertBookingRecord(normalized);
-
-    if (!isVisibleInCurrentPage) {
-        realtimeStats.eventsDroppedFilteredOut += 1;
-        logRealtime('drop.filtered_out', {
-            bookingId: normalized.id,
-            status: normalized.status,
-        });
-        return;
-    }
-
-    realtimeStats.eventsApplied += 1;
-    logRealtime('event.applied', { bookingId: normalized.id, status: normalized.status });
-}
-
-async function initializeRealtime(nextToken?: string) {
-    if (!import.meta.client) return;
-    if (isRealtimeInitializing.value) return;
-    const token = nextToken || userStore.accessToken;
-    if (!token) return;
-    if (realtimeSocket.value && currentSocketToken.value === token && !isRealtimeStopping.value) {
-        return;
-    }
-
-    isRealtimeInitializing.value = true;
-    socketState.value = 'starting';
-
-    try {
-        if (realtimeSocket.value) {
-            teardownRealtime('token-changed');
-        }
-        const { io } = await import('socket.io-client');
-        const rawSocketBase = String(runtimeConfig.public.websocketBaseUrl || window.location.origin).replace(/\/+$/, '');
-        // Socket.IO connects via HTTP(S) upgrade — coerce ws(s):// to http(s)://
-        const socketBase = rawSocketBase.replace(/^wss:\/\//, 'https://').replace(/^ws:\/\//, 'http://');
-        const rawToken = token.startsWith('Bearer ') ? token.slice(7) : token;
-        const socket = io(`${socketBase}/dashboard-realtime`, {
-            auth: { token: rawToken },
-            transports: ['websocket', 'polling'],
-            withCredentials: true,
-            autoConnect: true,
-            reconnection: true,
-            reconnectionAttempts: Infinity,
-            reconnectionDelay: 500,
-            reconnectionDelayMax: 5000,
-            timeout: 10000,
-        });
-
-        socket.on('connect', () => {
-            socket.emit('booking:subscribe', {});
-            socketState.value = 'live';
-            logRealtime('connect', { id: socket.id, state: socketState.value });
-        });
-
-        socket.on('disconnect', (reason) => {
-            if (isRealtimeStopping.value) return;
-            socketState.value = 'recovering';
-            logRealtime('disconnect', { reason });
-        });
-
-        socket.on('connect_error', (error) => {
-            if (isRealtimeStopping.value) return;
-            socketState.value = 'recovering';
-            logRealtime('connect_error', { message: error.message });
-        });
-
-        socket.on('booking.created', (payload: unknown) => {
-            handleBookingCreatedEvent(payload);
-        });
-
-        realtimeSocket.value = socket;
-        currentSocketToken.value = token;
-    }
-    catch (error) {
-        socketState.value = 'recovering';
-        console.error('Failed to initialize booking realtime socket:', error);
-    }
-    finally {
-        isRealtimeInitializing.value = false;
-    }
-}
-
-function teardownRealtime(reason: 'token-changed' | 'auth-invalid' | 'stopped') {
-    isRealtimeStopping.value = true;
-    const socket = realtimeSocket.value;
-    if (!socket) {
-        currentSocketToken.value = null;
-        socketState.value = reason === 'stopped' ? 'stopped' : 'idle';
-        isRealtimeStopping.value = false;
-        return;
-    }
-
-    try {
-        socket.emit('booking:unsubscribe', {});
-    }
-    catch {
-        // ignore transport errors during teardown
-    }
-
-    socket.removeAllListeners();
-    socket.disconnect();
-    realtimeSocket.value = null;
-    currentSocketToken.value = null;
-    socketState.value = reason === 'stopped' ? 'stopped' : 'idle';
-    isRealtimeStopping.value = false;
-}
+const { connect: connectRealtime, stop: stopRealtime } = useBookingRealtime(
+    {
+        getSocketUrl: () => {
+            const raw = String(runtimeConfig.public.websocketBaseUrl || window.location.origin).replace(/\/+$/, '');
+            return raw.replace(/^wss:\/\//, 'https://').replace(/^ws:\/\//, 'http://') + '/dashboard-realtime';
+        },
+        getToken: () => userStore.accessToken ?? undefined,
+    },
+    {
+        onCreated: (record) => {
+            upsertBookingRecord(record);
+            const visible = passesStatusVisibility(record.status)
+                && isBookingWithinVisibleRange(record.startsAt, record.endsAt);
+            if (!visible) scheduleFallbackRefresh();
+        },
+        onUpdated: upsertBookingRecord,
+        onDeleted: removeBookingRecord,
+        onInvalidPayload: scheduleFallbackRefresh,
+    },
+);
 
 watch(
     () => userStore.accessToken,
-    (nextToken, previousToken) => {
-        const next = typeof nextToken === 'string' ? nextToken : '';
-        const previous = typeof previousToken === 'string' ? previousToken : '';
-
-        if (!next) {
-            teardownRealtime('auth-invalid');
+    (token) => {
+        if (!token) {
+            stopRealtime();
             return;
         }
-
-        if (realtimeSocket.value && next === previous && next === currentSocketToken.value) {
-            return;
-        }
-
-        void initializeRealtime(next);
+        void connectRealtime();
     },
     { immediate: true },
 );
+
+onMounted(() => {
+    window.addEventListener('keydown', onEscapeFullscreen);
+    hydrateCalendarStateFromQuery();
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener('keydown', onEscapeFullscreen);
+    // leave() is called automatically by useBookingRealtime's onUnmounted hook.
+    // stopRealtime() is only called on logout via the token watcher above.
+    clearFallbackRefreshTimeout();
+});
 
 function getSingleQueryParam(value: string | string[] | undefined): string | null {
     if (Array.isArray(value)) return value[0] ?? null;

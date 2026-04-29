@@ -262,7 +262,7 @@ export function useBookingCalendarView() {
     const showRejected = ref(true);
     const showCanceled = ref(true);
 
-    const bookingRecords = ref<CarBookingListItem[]>([]);
+    const bookingRecords = shallowRef<CarBookingListItem[]>([]);
     const isBookingsRefreshInFlight = ref(false);
     const hasPendingBookingsRefresh = ref(false);
     const latestBookingsRequestId = ref(0);
@@ -346,12 +346,18 @@ export function useBookingCalendarView() {
         };
         const index = bookingRecords.value.findIndex(item => item.id === booking.id);
         if (index === -1) {
-            bookingRecords.value.unshift(normalized);
+            bookingRecords.value = [normalized, ...bookingRecords.value];
         }
         else {
-            bookingRecords.value.splice(index, 1, normalized);
+            const next = [...bookingRecords.value];
+            next[index] = normalized;
+            bookingRecords.value = next;
         }
         return normalized;
+    }
+
+    function removeBookingRecord(bookingId: string): void {
+        bookingRecords.value = bookingRecords.value.filter(item => item.id !== bookingId);
     }
 
     async function updateBooking(bookingId: string, patch: Partial<Omit<BookingCalendarRecord, 'id'>>): Promise<BookingCalendarRecord | null> {
@@ -1067,6 +1073,7 @@ export function useBookingCalendarView() {
         cancelBooking,
         refreshBookings,
         upsertBookingRecord,
+        removeBookingRecord,
         isBookingWithinVisibleRange,
         passesStatusVisibility,
         groupOptions,
