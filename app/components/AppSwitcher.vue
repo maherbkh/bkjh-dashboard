@@ -9,6 +9,7 @@ const props = defineProps<{
         name: string;
         logo: string;
         slug: string;
+        description: string;
     }[];
 }>();
 
@@ -22,6 +23,7 @@ const activeApp = computed(() => {
         name: '',
         logo: 'solar:question-circle-linear', // fallback icon
         slug: 'support',
+        description: '',
     };
 });
 
@@ -51,9 +53,12 @@ const handleAppClick = (app: typeof props.apps[0]) => {
                             />
                         </div>
                         <div class="grid flex-1 text-left text-sm leading-tight">
-                            <span class="truncate font-semibold">
-                                {{ activeApp.name }}
-                            </span>
+                            <div>
+                                <span class="truncate font-semibold">
+                                    {{ activeApp.name }}
+                                </span>
+                            </div>
+                            <p class="text-xs mt-0.5 truncate opacity-75">{{ activeApp.description }}</p>
                         </div>
                         <Icon
                             name="solar:alt-arrow-down-outline"
@@ -83,7 +88,10 @@ const handleAppClick = (app: typeof props.apps[0]) => {
                                 class="size-5 shrink-0"
                             />
                         </div>
-                        {{ app.name }}
+                        <div>
+                            <div>{{ app.name }}</div>
+                            <p class="text-xs text-muted-foreground mt-0.5 truncate">{{ app.description }}</p>
+                        </div>
                         <DropdownMenuShortcut>⌘{{ index + 1 }}</DropdownMenuShortcut>
                     </DropdownMenuItem>
                 </DropdownMenuContent>

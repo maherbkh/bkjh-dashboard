@@ -37,16 +37,19 @@ export const useNavigationData = (): ComputedRef<{
                     name: t('it_support.singular'),
                     logo: 'solar:chat-round-call-linear',
                     slug: 'support',
+                    description: 'SOme Test text',
                 },
                 {
                     name: t('academy.plural'),
                     logo: 'solar:calendar-linear',
                     slug: 'academy',
+                    description: 'SOme Test text',
                 },
                 {
                     name: t('booking.plural'),
-                    logo: 'solar:bus-outline',
+                    logo: 'solar:calendar-add-outline',
                     slug: 'booking',
+                    description: 'SOme Test text',
                 },
             ],
             navMain: [

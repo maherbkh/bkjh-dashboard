@@ -153,9 +153,9 @@ type GroupsIndexPayload = {
 };
 
 const VIEW_LENGTH: Record<Exclude<BookingCalendarViewMode, 'month'>, number> = {
-    day: 1,
+    'day': 1,
     '3days': 3,
-    week: 7,
+    'week': 7,
     '2weeks': 14,
 };
 
@@ -543,21 +543,21 @@ export function useBookingCalendarView() {
 
             do {
                 const response = await fetchDashboardApi<{
-                data: BookingCalendarRecord[];
-                meta: {
-                    currentPage: number;
-                    lastPage: number;
-                };
-            }>('/booking/car-bookings', {
-                query: {
-                    page,
-                    length: 100,
-                    sort_by: 'startsAt',
-                    sort_dir: 'asc',
-                    startsFrom: startsFrom.toISOString(),
-                    endsBefore: endsBefore.toISOString(),
-                },
-            });
+                    data: BookingCalendarRecord[];
+                    meta: {
+                        currentPage: number;
+                        lastPage: number;
+                    };
+                }>('/booking/car-bookings', {
+                    query: {
+                        page,
+                        length: 100,
+                        sort_by: 'startsAt',
+                        sort_dir: 'asc',
+                        startsFrom: startsFrom.toISOString(),
+                        endsBefore: endsBefore.toISOString(),
+                    },
+                });
 
                 const payload = response.data;
                 if (payload?.data?.length) {

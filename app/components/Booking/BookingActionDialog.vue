@@ -38,16 +38,16 @@ const { t } = useI18n();
 const { formatDate } = useGermanDateFormat();
 
 const emit = defineEmits<{
-    (e: 'update:open', value: boolean): void;
-    (e: 'update:pending-status', value: BookingApiStatus): void;
-    (e: 'update:status-note', value: string): void;
-    (e: 'update:send-email', value: boolean): void;
-    (e: 'update:email-option', value: BookingEmailOption): void;
-    (e: 'update:custom-emails', value: string): void;
-    (e: 'update:show-safe-fields', value: boolean): void;
-    (e: 'update:allow-edit-car', value: boolean): void;
-    (e: 'update:edit-form', value: BookingEditForm): void;
-    (e: 'confirm'): void;
+    'update:open': [value: boolean];
+    'update:pending-status': [value: BookingApiStatus];
+    'update:status-note': [value: string];
+    'update:send-email': [value: boolean];
+    'update:email-option': [value: BookingEmailOption];
+    'update:custom-emails': [value: string];
+    'update:show-safe-fields': [value: boolean];
+    'update:allow-edit-car': [value: boolean];
+    'update:edit-form': [value: BookingEditForm];
+    'confirm': [];
 }>();
 
 const titleKey = computed(() => {

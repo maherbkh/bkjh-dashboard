@@ -13,8 +13,8 @@ import {
 } from '@/components/ui/tooltip';
 
 type Props = {
-    cars: BookingCalendarCar[];
-    visibleDates: Date[];
+    cars?: BookingCalendarCar[];
+    visibleDates?: Date[];
     viewMode: BookingCalendarViewMode;
     getDayCellData: (carId: string, day: Date) => BookingDayCellData;
     getRangeCellData: (carId: string) => BookingRangeCellData;
@@ -30,9 +30,9 @@ const emit = defineEmits<{
 const { formatDate, formatDateOnly, formatDate: formatDateTimeDisplay } = useGermanDateFormat();
 
 const PRESET_LENGTH: Record<Exclude<BookingCalendarViewMode, 'month'>, number> = {
-    day: 1,
+    'day': 1,
     '3days': 3,
-    week: 7,
+    'week': 7,
     '2weeks': 14,
 };
 
@@ -236,100 +236,181 @@ function shouldHighlightToday(): boolean {
                     class="w-full min-w-max"
                     :style="timelineInnerStyle"
                 >
-                <div
-                    class="sticky top-0 z-30 grid border-b bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/85"
-                    :style="{ gridTemplateColumns }"
-                >
                     <div
-                        class="sticky left-0 z-40 border-r bg-card p-2.5 min-w-0"
-                        :style="{ width: `${leftColumnWidthPx}px`, minWidth: `${leftColumnWidthPx}px` }"
+                        class="sticky top-0 z-30 grid border-b bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/85"
+                        :style="{ gridTemplateColumns }"
                     >
-                        <p class="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                            {{ $t('booking.calendar.car_column') }}
-                        </p>
-                    </div>
+                        <div
+                            class="sticky left-0 z-40 border-r bg-card p-2.5 min-w-0"
+                            :style="{ width: `${leftColumnWidthPx}px`, minWidth: `${leftColumnWidthPx}px` }"
+                        >
+                            <p class="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                                {{ $t('booking.calendar.car_column') }}
+                            </p>
+                        </div>
 
-                    <div
-                        v-for="day in visibleDates"
-                        :key="day.toISOString()"
-                        :class="[
-                            dayHeaderCellClass,
-                            shouldHighlightToday() && isTodayDate(day)
-                                ? 'bg-primary/10 ring-1 ring-inset ring-primary/40'
-                                : 'bg-muted/20',
-                        ]"
-                    >
-                        <p
+                        <div
+                            v-for="day in visibleDates"
+                            :key="day.toISOString()"
                             :class="[
-                                dayHeaderWeekdayClass,
-                                shouldHighlightToday() && isTodayDate(day) ? 'text-primary' : 'text-foreground',
+                                dayHeaderCellClass,
+                                shouldHighlightToday() && isTodayDate(day)
+                                    ? 'bg-primary/10 ring-1 ring-inset ring-primary/40'
+                                    : 'bg-muted/20',
                             ]"
                         >
-                            {{ formatDate(day, dayHeaderWeekdayFormat) }}
-                        </p>
-                        <p :class="dayHeaderDateClass">
-                            {{ formatDate(day, dayHeaderDateFormat) }}
-                        </p>
-                        <div
-                            v-if="showTimeScale"
-                            class="mt-1 flex justify-between text-[8px] text-muted-foreground/85"
-                        >
-                            <span>00:00</span>
-                            <span>06:00</span>
-                            <span>12:00</span>
-                            <span>18:00</span>
-                            <span>24:00</span>
+                            <p
+                                :class="[
+                                    dayHeaderWeekdayClass,
+                                    shouldHighlightToday() && isTodayDate(day) ? 'text-primary' : 'text-foreground',
+                                ]"
+                            >
+                                {{ formatDate(day, dayHeaderWeekdayFormat) }}
+                            </p>
+                            <p :class="dayHeaderDateClass">
+                                {{ formatDate(day, dayHeaderDateFormat) }}
+                            </p>
+                            <div
+                                v-if="showTimeScale"
+                                class="mt-1 flex justify-between text-[8px] text-muted-foreground/85"
+                            >
+                                <span>00:00</span>
+                                <span>06:00</span>
+                                <span>12:00</span>
+                                <span>18:00</span>
+                                <span>24:00</span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <template v-if="cars.length > 0">
-                    <div class="divide-y divide-border/70">
-                        <div
-                            v-for="(car, carIndex) in cars"
-                            :key="car.id"
-                            :class="[
-                                'grid transition-colors',
-                                carIndex % 2 === 0 ? 'bg-muted/50' : 'bg-background',
-                                'hover:bg-muted/60',
-                            ]"
-                            :style="{ gridTemplateColumns }"
-                        >
+                    <template v-if="cars.length > 0">
+                        <div class="divide-y divide-border/70">
                             <div
-                                class="sticky left-0 z-20 border-r bg-card/95 p-2.5 backdrop-blur min-w-0 flex flex-col justify-center"
-                                :style="{ width: `${leftColumnWidthPx}px`, minWidth: `${leftColumnWidthPx}px` }"
+                                v-for="(car, carIndex) in cars"
+                                :key="car.id"
+                                :class="[
+                                    'grid transition-colors',
+                                    carIndex % 2 === 0 ? 'bg-muted/50' : 'bg-background',
+                                    'hover:bg-muted/60',
+                                ]"
+                                :style="{ gridTemplateColumns }"
                             >
-                                <p class="text-xs font-semibold leading-tight truncate">
-                                    {{ car.name }}
-                                </p>
-                                <p class="text-[11px] text-muted-foreground truncate">
-                                    {{ car.plateNumber }}
-                                </p>
-                            </div>
-
-                            <template v-if="!isContinuousRangeView">
                                 <div
-                                    v-for="day in visibleDates"
-                                    :key="`${car.id}-${day.toISOString()}`"
-                                    :class="[
-                                        'border-r last:border-r-0 p-1',
-                                        shouldHighlightToday() && isTodayDate(day) ? 'bg-primary/5' : 'bg-muted/5',
-                                    ]"
+                                    class="sticky left-0 z-20 border-r bg-card/95 p-2.5 backdrop-blur min-w-0 flex flex-col justify-center"
+                                    :style="{ width: `${leftColumnWidthPx}px`, minWidth: `${leftColumnWidthPx}px` }"
+                                >
+                                    <p class="text-xs font-semibold leading-tight truncate">
+                                        {{ car.name }}
+                                    </p>
+                                    <p class="text-[11px] text-muted-foreground truncate">
+                                        {{ car.plateNumber }}
+                                    </p>
+                                </div>
+
+                                <template v-if="!isContinuousRangeView">
+                                    <div
+                                        v-for="day in visibleDates"
+                                        :key="`${car.id}-${day.toISOString()}`"
+                                        :class="[
+                                            'border-r last:border-r-0 p-1',
+                                            shouldHighlightToday() && isTodayDate(day) ? 'bg-primary/5' : 'bg-muted/5',
+                                        ]"
+                                    >
+                                        <div
+                                            :class="[
+                                                'relative rounded-md bg-background/80 overflow-hidden',
+                                                hideInnerDayBorder ? '' : 'border border-border/55',
+                                            ]"
+                                            :style="{
+                                                minHeight: getDayCellMinHeight(car.id, day),
+                                                backgroundImage: showTimeScale
+                                                    ? 'repeating-linear-gradient(to right, hsl(var(--border) / 0.18) 0, hsl(var(--border) / 0.18) 1px, transparent 1px, transparent calc(100% / 48)), repeating-linear-gradient(to right, hsl(var(--border) / 0.38) 0, hsl(var(--border) / 0.38) 1px, transparent 1px, transparent calc(100% / 24))'
+                                                    : 'repeating-linear-gradient(to right, hsl(var(--border) / 0.30) 0, hsl(var(--border) / 0.30) 1px, transparent 1px, transparent calc(100% / 24))',
+                                            }"
+                                        >
+                                            <div
+                                                v-for="segment in getDayCellData(car.id, day).segments"
+                                                :key="`${segment.bookingId}-${segment.lane}`"
+                                            >
+                                                <BookingActionMenu
+                                                    :segment="segment"
+                                                    @select-action="emit('select-action', $event)"
+                                                >
+                                                    <div class="contents">
+                                                        <Tooltip>
+                                                            <TooltipTrigger as-child>
+                                                                <button
+                                                                    type="button"
+                                                                    :class="segmentClass(segment.status, segment.isStart, segment.isEnd)"
+                                                                    :style="{
+                                                                        left: `${segment.leftPct}%`,
+                                                                        width: `${segment.widthPct}%`,
+                                                                        top: getSegmentTopPx(segment.lane),
+                                                                    }"
+                                                                />
+                                                            </TooltipTrigger>
+                                                            <TooltipContent
+                                                                align="start"
+                                                                class="max-w-xs text-xs bg-popover text-popover-foreground border border-border shadow-md rounded-lg px-3 py-2"
+                                                            >
+                                                                <div class="space-y-1.5">
+                                                                    <p class="font-semibold text-foreground">
+                                                                        {{ car.name }} ({{ car.plateNumber }})
+                                                                    </p>
+                                                                    <p class="text-muted-foreground">
+                                                                        {{ $t('booking.calendar.tooltip.status') }}: {{ segment.label }}
+                                                                    </p>
+                                                                    <p class="text-muted-foreground">
+                                                                        {{ $t('booking.calendar.tooltip.requester') }}: {{ segment.requesterName }}
+                                                                    </p>
+                                                                    <p class="text-muted-foreground">
+                                                                        {{ $t('booking.calendar.tooltip.email') }}: {{ segment.requesterEmail }}
+                                                                    </p>
+                                                                    <p class="text-muted-foreground">
+                                                                        {{ $t('booking.calendar.tooltip.start') }}: {{ formatDateTime(segment.startsAt) }}
+                                                                    </p>
+                                                                    <p class="text-muted-foreground">
+                                                                        {{ $t('booking.calendar.tooltip.end') }}: {{ formatDateTime(segment.endsAt) }}
+                                                                    </p>
+                                                                    <p class="text-muted-foreground">
+                                                                        {{ $t('booking.calendar.tooltip.safe_reference') }}: {{ segment.safeReference }}
+                                                                    </p>
+                                                                    <p
+                                                                        v-if="segment.groupId"
+                                                                        class="text-muted-foreground"
+                                                                    >
+                                                                        {{ $t('booking.calendar.tooltip.group_id') }}: {{ segment.groupName || segment.groupId }}
+                                                                    </p>
+                                                                    <p
+                                                                        v-if="segment.safePinAvailable"
+                                                                        class="text-primary font-medium"
+                                                                    >
+                                                                        {{ $t('booking.calendar.safe_pin_available') }}: {{ segment.safePin }}
+                                                                    </p>
+                                                                </div>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </div>
+                                                </BookingActionMenu>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <div
+                                    v-else
+                                    class="border-r last:border-r-0 bg-muted/5"
+                                    :style="{ gridColumn: `2 / span ${visibleDates.length}` }"
                                 >
                                     <div
-                                        :class="[
-                                            'relative rounded-md bg-background/80 overflow-hidden',
-                                            hideInnerDayBorder ? '' : 'border border-border/55',
-                                        ]"
+                                        class="relative overflow-hidden"
                                         :style="{
-                                            minHeight: getDayCellMinHeight(car.id, day),
-                                            backgroundImage: showTimeScale
-                                                ? 'repeating-linear-gradient(to right, hsl(var(--border) / 0.18) 0, hsl(var(--border) / 0.18) 1px, transparent 1px, transparent calc(100% / 48)), repeating-linear-gradient(to right, hsl(var(--border) / 0.38) 0, hsl(var(--border) / 0.38) 1px, transparent 1px, transparent calc(100% / 24))'
-                                                : 'repeating-linear-gradient(to right, hsl(var(--border) / 0.30) 0, hsl(var(--border) / 0.30) 1px, transparent 1px, transparent calc(100% / 24))',
+                                            'minHeight': getCellMinHeightPx(getRangeCellData(car.id).laneCount),
+                                            'backgroundImage': 'repeating-linear-gradient(to right, hsl(var(--border) / 0.30) 0, hsl(var(--border) / 0.30) 1px, transparent 1px, transparent calc(100% / var(--day-count)))',
+                                            '--day-count': String(visibleDates.length),
                                         }"
                                     >
                                         <div
-                                            v-for="segment in getDayCellData(car.id, day).segments"
+                                            v-for="segment in getRangeCellData(car.id).segments"
                                             :key="`${segment.bookingId}-${segment.lane}`"
                                         >
                                             <BookingActionMenu
@@ -395,98 +476,17 @@ function shouldHighlightToday(): boolean {
                                         </div>
                                     </div>
                                 </div>
-                            </template>
-                            <div
-                                v-else
-                                class="border-r last:border-r-0 bg-muted/5"
-                                :style="{ gridColumn: `2 / span ${visibleDates.length}` }"
-                            >
-                                <div
-                                    class="relative overflow-hidden"
-                                    :style="{
-                                        'minHeight': getCellMinHeightPx(getRangeCellData(car.id).laneCount),
-                                        'backgroundImage': 'repeating-linear-gradient(to right, hsl(var(--border) / 0.30) 0, hsl(var(--border) / 0.30) 1px, transparent 1px, transparent calc(100% / var(--day-count)))',
-                                        '--day-count': String(visibleDates.length),
-                                    }"
-                                >
-                                    <div
-                                        v-for="segment in getRangeCellData(car.id).segments"
-                                        :key="`${segment.bookingId}-${segment.lane}`"
-                                    >
-                                        <BookingActionMenu
-                                            :segment="segment"
-                                            @select-action="emit('select-action', $event)"
-                                        >
-                                            <div class="contents">
-                                                <Tooltip>
-                                                    <TooltipTrigger as-child>
-                                                        <button
-                                                            type="button"
-                                                            :class="segmentClass(segment.status, segment.isStart, segment.isEnd)"
-                                                            :style="{
-                                                                left: `${segment.leftPct}%`,
-                                                                width: `${segment.widthPct}%`,
-                                                                top: getSegmentTopPx(segment.lane),
-                                                            }"
-                                                        />
-                                                    </TooltipTrigger>
-                                                    <TooltipContent
-                                                        align="start"
-                                                        class="max-w-xs text-xs bg-popover text-popover-foreground border border-border shadow-md rounded-lg px-3 py-2"
-                                                    >
-                                                        <div class="space-y-1.5">
-                                                            <p class="font-semibold text-foreground">
-                                                                {{ car.name }} ({{ car.plateNumber }})
-                                                            </p>
-                                                            <p class="text-muted-foreground">
-                                                                {{ $t('booking.calendar.tooltip.status') }}: {{ segment.label }}
-                                                            </p>
-                                                            <p class="text-muted-foreground">
-                                                                {{ $t('booking.calendar.tooltip.requester') }}: {{ segment.requesterName }}
-                                                            </p>
-                                                            <p class="text-muted-foreground">
-                                                                {{ $t('booking.calendar.tooltip.email') }}: {{ segment.requesterEmail }}
-                                                            </p>
-                                                            <p class="text-muted-foreground">
-                                                                {{ $t('booking.calendar.tooltip.start') }}: {{ formatDateTime(segment.startsAt) }}
-                                                            </p>
-                                                            <p class="text-muted-foreground">
-                                                                {{ $t('booking.calendar.tooltip.end') }}: {{ formatDateTime(segment.endsAt) }}
-                                                            </p>
-                                                            <p class="text-muted-foreground">
-                                                                {{ $t('booking.calendar.tooltip.safe_reference') }}: {{ segment.safeReference }}
-                                                            </p>
-                                                            <p
-                                                                v-if="segment.groupId"
-                                                                class="text-muted-foreground"
-                                                            >
-                                                                {{ $t('booking.calendar.tooltip.group_id') }}: {{ segment.groupName || segment.groupId }}
-                                                            </p>
-                                                            <p
-                                                                v-if="segment.safePinAvailable"
-                                                                class="text-primary font-medium"
-                                                            >
-                                                                {{ $t('booking.calendar.safe_pin_available') }}: {{ segment.safePin }}
-                                                            </p>
-                                                        </div>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </div>
-                                        </BookingActionMenu>
-                                    </div>
-                                </div>
                             </div>
                         </div>
-                    </div>
-                </template>
+                    </template>
 
-                <div
-                    v-else
-                    class="p-10 text-center text-sm text-muted-foreground"
-                >
-                    {{ $t('booking.calendar.empty') }}
+                    <div
+                        v-else
+                        class="p-10 text-center text-sm text-muted-foreground"
+                    >
+                        {{ $t('booking.calendar.empty') }}
+                    </div>
                 </div>
-            </div>
             </div>
         </div>
     </div>

@@ -13,15 +13,15 @@ type Props = {
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-    (e: 'update:search-query', value: string): void;
-    (e: 'update:view-mode', value: BookingCalendarViewMode): void;
-    (e: 'go-prev'): void;
-    (e: 'go-next'): void;
-    (e: 'go-today'): void;
-    (e: 'update:show-rejected', value: boolean): void;
-    (e: 'update:show-canceled', value: boolean): void;
-    (e: 'toggle-fullscreen'): void;
-    (e: 'update:selected-range', value: string | [string, string] | null): void;
+    'update:search-query': [value: string];
+    'update:view-mode': [value: BookingCalendarViewMode];
+    'go-prev': [];
+    'go-next': [];
+    'go-today': [];
+    'update:show-rejected': [value: boolean];
+    'update:show-canceled': [value: boolean];
+    'toggle-fullscreen': [];
+    'update:selected-range': [value: string | [string, string] | null];
 }>();
 
 const localSearchQuery = computed({
