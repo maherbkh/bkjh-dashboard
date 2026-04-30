@@ -1,30 +1,31 @@
 /**
- * Booking-specific realtime composable.
+ * Booking real-time composable.
  *
  * Wraps useRealtimeSocket with:
  *  - Booking room subscription / unsubscription lifecycle
  *  - Typed, normalized event callbacks (onCreated, onUpdated, onDeleted)
- *  - Presence stub — wired and ready, activate once backend ships booking.presence
+ *  - Live-editing presence system via `booking.editors-changed`
+ *    — reactive `editorsMap`, `startEditing`, `stopEditing`, `isBeingEdited`, `editorsOf`
  *
  * Handlers are registered immediately on composable creation (before connect),
  * so no event is missed during the connection handshake.
  *
- * Cleanup (leave + handler removal) runs automatically on component unmount
- * via onUnmounted. The underlying socket stays alive for other consumers.
+ * On `booking:subscribe`, the server replays the full current presence state,
+ * so late joiners receive all active editors without waiting for the next change.
+ *
+ * Cleanup (unsubscribe + handler removal + presence map clear) runs automatically
+ * on component unmount via onUnmounted. The underlying socket stays alive.
  */
 
 import type { BookingApiStatus, BookingCalendarRecord } from '~/composables/useBookingCalendarView';
+import type {
+    BookingEditorInfo,
+    BookingEditorsChangedPayload,
+} from '~/types/carBookingRealtime';
 
-// ── Public types ──────────────────────────────────────────────────────────────
+export type { BookingEditorInfo };
 
-/** Viewer shape for the presence feature (backend not yet ready). */
-export type BookingPresenceViewer = {
-    userId: string;
-    displayName: string;
-    avatarUrl?: string;
-    /** ISO timestamp of when they opened the record. */
-    since: string;
-};
+// ── Public callback types ─────────────────────────────────────────────────────
 
 export type BookingRealtimeCallbacks = {
     onCreated?: (record: BookingCalendarRecord) => void;
@@ -33,10 +34,11 @@ export type BookingRealtimeCallbacks = {
     /** Called when a realtime payload cannot be parsed — use to schedule a fallback refresh. */
     onInvalidPayload?: () => void;
     /**
-     * @future — activated automatically once backend starts emitting `booking.presence`.
-     * Payload: { resourceId, viewers }
+     * Called whenever the editor set for a booking changes.
+     * The reactive `editorsMap` is always kept in sync; this callback is optional
+     * and useful when the caller wants to react to specific changes imperatively.
      */
-    onPresenceUpdate?: (resourceId: string, viewers: BookingPresenceViewer[]) => void;
+    onEditorsChanged?: (bookingId: string, editors: BookingEditorInfo[]) => void;
 };
 
 export type BookingRealtimeConfig = {
@@ -44,9 +46,7 @@ export type BookingRealtimeConfig = {
     getToken: () => string | null | undefined;
 };
 
-// ── Payload normalization ─────────────────────────────────────────────────────
-// Kept inside this composable: it is booking-specific and should not leak
-// into page components or the generic socket layer.
+// ── Internal payload types ─────────────────────────────────────────────────────
 
 type RawBookingPayload = {
     id: string;
@@ -60,12 +60,15 @@ type RawBookingPayload = {
     requesterNote?: string | null;
     adminNote?: string | null;
     groupId?: string | null;
-    safeReference?: string;
+    safeReference?: string | null;
+    safePin?: string | null;
     createdAt?: string;
     updatedAt?: string;
 };
 
 const VALID_STATUSES = new Set<string>(['PENDING', 'APPROVED', 'REJECTED', 'CANCELED']);
+
+// ── Payload normalization ─────────────────────────────────────────────────────
 
 function _unwrap(input: unknown): unknown {
     if (!input || typeof input !== 'object') return null;
@@ -99,36 +102,39 @@ function _normalizeRecord(input: unknown): BookingCalendarRecord | null {
         adminNote: typeof raw.adminNote === 'string' ? raw.adminNote : null,
         groupId: typeof raw.groupId === 'string' ? raw.groupId : null,
         safeReference: String(raw.safeReference ?? ''),
-        safePin: '',
+        safePin: typeof raw.safePin === 'string' ? raw.safePin : '',
         createdAt: String(raw.createdAt ?? new Date().toISOString()),
         updatedAt: String(raw.updatedAt ?? new Date().toISOString()),
     };
 }
 
-function _extractId(input: unknown): string | null {
+function _extractDeletedId(input: unknown): string | null {
     const raw = _unwrap(input);
     if (!raw || typeof raw !== 'object') return null;
     const id = (raw as Record<string, unknown>).id;
     return typeof id === 'string' ? id : null;
 }
 
-function _normalizePresence(input: unknown): { resourceId: string; viewers: BookingPresenceViewer[] } | null {
-    const raw = _unwrap(input);
-    if (!raw || typeof raw !== 'object') return null;
-    const r = raw as Record<string, unknown>;
-    if (typeof r.resourceId !== 'string' || !Array.isArray(r.viewers)) return null;
-    return {
-        resourceId: r.resourceId,
-        viewers: (r.viewers as unknown[]).filter(
-            (v): v is BookingPresenceViewer =>
-                typeof v === 'object' && v !== null && typeof (v as BookingPresenceViewer).userId === 'string',
-        ),
-    };
+function _normalizeEditorsChanged(input: unknown): BookingEditorsChangedPayload | null {
+    if (!input || typeof input !== 'object') return null;
+    const r = input as Record<string, unknown>;
+    if (typeof r.bookingId !== 'string') return null;
+    if (!Array.isArray(r.editors)) return null;
+
+    const editors: BookingEditorInfo[] = (r.editors as unknown[]).filter(
+        (v): v is BookingEditorInfo =>
+            typeof v === 'object'
+            && v !== null
+            && typeof (v as BookingEditorInfo).adminId === 'string'
+            && typeof (v as BookingEditorInfo).adminEmail === 'string',
+    );
+
+    return { bookingId: r.bookingId, editors };
 }
 
 // ── Composable ────────────────────────────────────────────────────────────────
 
-/** Shared pool key — all booking pages share one socket connection. */
+/** All booking pages share one socket connection via this pool key. */
 const POOL_KEY = 'dashboard-realtime';
 
 export function useBookingRealtime(config: BookingRealtimeConfig, callbacks: BookingRealtimeCallbacks = {}) {
@@ -138,21 +144,24 @@ export function useBookingRealtime(config: BookingRealtimeConfig, callbacks: Boo
         getToken: config.getToken,
     });
 
-    // ── Register all handlers immediately ──────────────────────────────────────
-    // The event bus in useRealtimeSocket stores them before the socket exists,
-    // so no events are missed during the connection handshake.
+    // Reactive presence map: bookingId → current editors
+    // shallowRef so Vue tracks Map identity changes; we swap on every update.
+    const editorsMap = shallowRef<Map<string, BookingEditorInfo[]>>(new Map());
+
+    // ── Event handlers ─────────────────────────────────────────────────────────
+    // All registered immediately — events during the handshake are never missed.
 
     const offConnect = socket.on('connect', () => {
-        console.info('[booking-realtime] emitting booking:subscribe');
+        console.info('[booking-realtime] connected — emitting booking:subscribe');
         socket.emit('booking:subscribe', {});
     });
 
     const offCreated = socket.on('booking.created', (payload) => {
-        console.info('[booking-realtime] booking.created raw payload:', payload);
+        console.info('[booking-realtime] booking.created', payload);
         const record = _normalizeRecord(payload);
         if (record) callbacks.onCreated?.(record);
         else {
-            console.warn('[booking-realtime] booking.created payload failed normalization:', payload);
+            console.warn('[booking-realtime] booking.created payload failed normalization', payload);
             callbacks.onInvalidPayload?.();
         }
     });
@@ -164,47 +173,97 @@ export function useBookingRealtime(config: BookingRealtimeConfig, callbacks: Boo
     });
 
     const offDeleted = socket.on('booking.deleted', (payload) => {
-        const id = _extractId(payload);
+        const id = _extractDeletedId(payload);
         if (id) callbacks.onDeleted?.(id);
         else callbacks.onInvalidPayload?.();
     });
 
-    // Presence — stub: handler is registered now, activates the moment
-    // the backend starts emitting `booking.presence` with no further changes needed.
-    const offPresence = socket.on('booking.presence', (payload) => {
-        const data = _normalizePresence(payload);
-        if (data) callbacks.onPresenceUpdate?.(data.resourceId, data.viewers);
+    // Presence system — `booking.editors-changed` is emitted by the server:
+    //  • on booking:edit-start / booking:edit-end
+    //  • on socket disconnect (auto-cleanup by server)
+    //  • replayed in full on booking:subscribe (initial state sync for late joiners)
+    const offEditorsChanged = socket.on('booking.editors-changed', (payload) => {
+        const data = _normalizeEditorsChanged(payload);
+        if (!data) return;
+
+        const next = new Map(editorsMap.value);
+        if (data.editors.length === 0) {
+            next.delete(data.bookingId);
+        }
+        else {
+            next.set(data.bookingId, data.editors);
+        }
+        editorsMap.value = next;
+
+        callbacks.onEditorsChanged?.(data.bookingId, data.editors);
     });
 
     // ── Public API ─────────────────────────────────────────────────────────────
 
     async function connect(): Promise<void> {
         await socket.connect();
-        // Emit subscribe immediately if the socket was already live
-        // (e.g. navigating back to this page without a reconnect)
+        // If the socket was already live (e.g. navigating back to this page),
+        // re-subscribe so the server replays the current presence state.
         if (socket.connectionState.value === 'live') {
             socket.emit('booking:subscribe', {});
         }
     }
 
-    /** Unsubscribe from the booking room and remove all handlers for this instance.
-     *  The underlying socket stays connected for other consumers. */
+    /**
+     * Notify other admins that you have opened a booking for editing.
+     * Emit on opening an edit/change-status dialog.
+     * The server broadcasts `booking.editors-changed` to all room subscribers.
+     */
+    function startEditing(bookingId: string): void {
+        socket.emit('booking:edit-start', { bookingId });
+    }
+
+    /**
+     * Notify other admins that you have closed the booking record.
+     * Emit on saving, cancelling, or navigating away from the dialog.
+     * The server broadcasts `booking.editors-changed` with an empty editors array.
+     */
+    function stopEditing(bookingId: string): void {
+        socket.emit('booking:edit-end', { bookingId });
+    }
+
+    /** Returns true if any other admin currently has this booking open. */
+    function isBeingEdited(bookingId: string): boolean {
+        return (editorsMap.value.get(bookingId)?.length ?? 0) > 0;
+    }
+
+    /** Returns the list of admins currently editing the given booking (empty if none). */
+    function editorsOf(bookingId: string): BookingEditorInfo[] {
+        return editorsMap.value.get(bookingId) ?? [];
+    }
+
+    /**
+     * Unsubscribe from the booking room and remove all event handlers for this instance.
+     * The underlying socket stays connected for other consumers.
+     * Called automatically on component unmount.
+     */
     function leave(): void {
         socket.emit('booking:unsubscribe', {});
         offConnect();
         offCreated();
         offUpdated();
         offDeleted();
-        offPresence();
+        offEditorsChanged();
+        editorsMap.value = new Map();
     }
 
-    // Auto-cleanup when the component that called this composable unmounts.
     onUnmounted(leave);
 
     return {
         connectionState: socket.connectionState,
+        /** Reactive map of bookingId → editors currently editing that booking. */
+        editorsMap: readonly(editorsMap),
         connect,
         leave,
+        startEditing,
+        stopEditing,
+        isBeingEdited,
+        editorsOf,
         /** Full socket teardown — call only on logout, never on page unmount. */
         stop: socket.stop,
     };

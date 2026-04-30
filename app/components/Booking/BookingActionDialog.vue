@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { BookingApiStatus, BookingCalendarRecord, BookingCarOption, BookingGroupOption } from '~/composables/useBookingCalendarView';
 import type { BookingActionType, BookingEditForm, BookingEmailOption, BookingStatusOption } from '~/composables/useBookingActions';
+import type { BookingEditorInfo } from '~/types/carBookingRealtime';
 import {
     Dialog,
     DialogContent,
@@ -29,10 +30,13 @@ type Props = {
     isInternalEmail: boolean;
     editForm: BookingEditForm;
     isSubmitting?: boolean;
+    /** Admins currently editing this booking (empty means nobody else has it open). */
+    editors?: BookingEditorInfo[];
 };
 
 const props = withDefaults(defineProps<Props>(), {
     isSubmitting: false,
+    editors: () => [],
 });
 const { t } = useI18n();
 const { formatDate } = useGermanDateFormat();
@@ -170,6 +174,24 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                 <DialogTitle>{{ $t(titleKey) }}</DialogTitle>
                 <DialogDescription>{{ $t(descriptionKey) }}</DialogDescription>
             </DialogHeader>
+
+            <div
+                v-if="editors && editors.length > 0"
+                class="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800 dark:border-amber-800/40 dark:bg-amber-900/20 dark:text-amber-300"
+            >
+                <Icon
+                    name="solar:users-group-two-rounded-linear"
+                    class="mt-0.5 size-4 shrink-0"
+                />
+                <span>
+                    {{ $t('booking.calendar.action_dialog.presence.being_edited_by') }}
+                    <span
+                        v-for="(editor, index) in editors"
+                        :key="editor.adminId"
+                        class="font-semibold"
+                    >{{ editor.adminEmail }}<template v-if="index < editors.length - 1">, </template></span>
+                </span>
+            </div>
 
             <div class="space-y-4 py-1">
                 <div

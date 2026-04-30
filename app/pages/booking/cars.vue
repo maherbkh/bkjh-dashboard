@@ -104,7 +104,13 @@ function scheduleFallbackRefresh() {
     }, FALLBACK_REFRESH_THROTTLE_MS);
 }
 
-const { connect: connectRealtime, stop: stopRealtime } = useBookingRealtime(
+const {
+    connect: connectRealtime,
+    stop: stopRealtime,
+    startEditing,
+    stopEditing,
+    editorsOf,
+} = useBookingRealtime(
     {
         getSocketUrl: () => {
             const raw = String(runtimeConfig.public.websocketBaseUrl || window.location.origin).replace(/\/+$/, '');
@@ -124,6 +130,43 @@ const { connect: connectRealtime, stop: stopRealtime } = useBookingRealtime(
         onInvalidPayload: scheduleFallbackRefresh,
     },
 );
+
+// Presence — editors currently viewing/editing the selected booking
+const currentEditors = computed(() => {
+    if (!selectedBooking.value) return [];
+    return editorsOf(selectedBooking.value.id);
+});
+
+// Only emit booking:edit-start for actions that involve modifying the record.
+// 'duplicate' and 'cancel' are immediate one-shot operations, not collaborative edits.
+const EDITING_ACTIONS = new Set<string>(['edit', 'change_status']);
+
+function onOpenAction(selection: Parameters<typeof openAction>[0]) {
+    openAction(selection);
+    if (EDITING_ACTIONS.has(selection.action)) {
+        startEditing(selection.bookingId);
+    }
+}
+
+function onCloseDialog() {
+    // Capture before closeDialog() resets dialog state
+    const bookingId = selectedBooking.value?.id;
+    const action = currentAction.value;
+    closeDialog();
+    if (bookingId && action && EDITING_ACTIONS.has(action)) {
+        stopEditing(bookingId);
+    }
+}
+
+async function onConfirmAction() {
+    // Capture before confirmAction() calls closeDialog() in its finally block
+    const bookingId = selectedBooking.value?.id;
+    const action = currentAction.value;
+    await confirmAction();
+    if (bookingId && action && EDITING_ACTIONS.has(action)) {
+        stopEditing(bookingId);
+    }
+}
 
 watch(
     () => userStore.accessToken,
@@ -314,7 +357,7 @@ useSeoMeta({
                 :view-mode="viewMode"
                 :get-day-cell-data="getDayCellData"
                 :get-range-cell-data="getRangeCellData"
-                @select-action="openAction"
+                @select-action="onOpenAction"
             />
 
             <div class="w-full px-4 py-3 lg:px-16">
@@ -370,7 +413,8 @@ useSeoMeta({
                 :is-internal-email="isRequesterInternalEmail"
                 :edit-form="editForm"
                 :is-submitting="isSubmitting"
-                @update:open="(value: boolean) => value ? null : closeDialog()"
+                :editors="currentEditors"
+                @update:open="(value: boolean) => value ? null : onCloseDialog()"
                 @update:pending-status="pendingStatus = $event"
                 @update:status-note="statusNote = $event"
                 @update:send-email="sendEmail = $event"
@@ -379,7 +423,7 @@ useSeoMeta({
                 @update:show-safe-fields="showSafeFields = $event"
                 @update:allow-edit-car="allowEditCar = $event"
                 @update:edit-form="editForm = $event"
-                @confirm="confirmAction"
+                @confirm="onConfirmAction"
             />
         </div>
     </div>
