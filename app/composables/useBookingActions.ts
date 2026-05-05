@@ -54,6 +54,8 @@ type UseBookingActionsOptions = {
         groupId?: string | null;
         safeReference?: string;
         safePin?: string;
+        sendEmail?: boolean;
+        email?: string;
     }) => Promise<BookingCalendarRecord | null>;
     updateBooking: (bookingId: string, patch: Partial<Omit<BookingCalendarRecord, 'id'>>) => Promise<BookingCalendarRecord | null>;
     changeBookingStatus: (
@@ -301,6 +303,28 @@ export function useBookingActions(options: UseBookingActionsOptions) {
 
         try {
             if (currentAction.value === 'create') {
+                let createEmail: string | undefined;
+
+                if (sendEmail.value) {
+                    if (emailOption.value === 'other') {
+                        if (!validateEmails(customEmails.value)) {
+                            emailError.value = t('booking.calendar.action_dialog.email.invalid');
+                            return null;
+                        }
+                        createEmail = customEmails.value
+                            .split(',')
+                            .map(e => e.trim().toLowerCase())
+                            .join(',');
+                    }
+                    else {
+                        createEmail = editForm.value.requesterEmail.trim() || undefined;
+                        if (!createEmail) {
+                            emailError.value = t('booking.calendar.action_dialog.email.required');
+                            return null;
+                        }
+                    }
+                }
+
                 return options.createBooking({
                     carId: editForm.value.carId,
                     startsAt: editForm.value.startsAt,
@@ -314,6 +338,8 @@ export function useBookingActions(options: UseBookingActionsOptions) {
                     groupId: editForm.value.groupId || null,
                     safeReference: editForm.value.safeReference || undefined,
                     safePin: editForm.value.safePin || undefined,
+                    sendEmail: sendEmail.value,
+                    email: createEmail,
                 });
             }
 

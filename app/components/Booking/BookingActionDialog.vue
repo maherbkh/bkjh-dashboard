@@ -100,7 +100,8 @@ const statusSelectItems = computed(() => {
 const emailRecipientOptions = computed(() => ([
     {
         value: 'requester' as BookingEmailOption,
-        label: props.booking?.requesterEmail || t('booking.calendar.action_dialog.email.requester'),
+        // In create mode there is no saved booking yet — use the form's requester email as the label.
+        label: props.booking?.requesterEmail || props.editForm.requesterEmail || t('booking.calendar.action_dialog.email.requester'),
         description: t('booking.calendar.action_dialog.email.requester_description'),
         icon: 'solar:user-circle-line-duotone',
     },
@@ -440,6 +441,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                     id="booking-action-status-safe-reference"
                                     :model-value="editForm.safeReference"
                                     :title="$t('booking.calendar.action_dialog.fields.safe_reference')"
+                                    :placeholder="$t('booking.calendar.action_dialog.fields.safe_reference_placeholder')"
                                     icon="solar:folder-open-linear"
                                     @update:model-value="updateField('safeReference', String($event ?? ''))"
                                 />
@@ -447,6 +449,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                     id="booking-action-status-safe-pin"
                                     :model-value="editForm.safePin"
                                     :title="$t('booking.calendar.action_dialog.fields.safe_pin')"
+                                    :placeholder="$t('booking.calendar.action_dialog.fields.safe_pin_placeholder')"
                                     icon="solar:key-linear"
                                     @update:model-value="updateField('safePin', String($event ?? ''))"
                                 />
@@ -515,6 +518,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                         id="booking-create-requester-name"
                                         :model-value="editForm.requesterName"
                                         :title="$t('booking.calendar.action_dialog.fields.requester_name')"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.requester_name_placeholder')"
                                         icon="solar:user-linear"
                                         @update:model-value="updateField('requesterName', String($event ?? ''))"
                                     />
@@ -523,6 +527,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                         type="email"
                                         :model-value="editForm.requesterEmail"
                                         :title="$t('booking.calendar.action_dialog.fields.requester_email')"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.requester_email_placeholder')"
                                         icon="solar:letter-linear"
                                         @update:model-value="updateField('requesterEmail', String($event ?? ''))"
                                     />
@@ -531,6 +536,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                         type="number"
                                         :model-value="editForm.distance"
                                         :title="$t('booking.calendar.action_dialog.fields.distance')"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.distance_placeholder')"
                                         icon="solar:map-point-wave-linear"
                                         @update:model-value="updateField('distance', String($event ?? ''))"
                                     />
@@ -550,6 +556,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                         class="md:col-span-2"
                                         :model-value="editForm.requesterNote"
                                         :title="$t('booking.calendar.action_dialog.fields.requester_note')"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.requester_note_placeholder')"
                                         :rows="3"
                                         @update:model-value="updateField('requesterNote', String($event ?? ''))"
                                     />
@@ -564,6 +571,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                         id="booking-create-safe-reference"
                                         :model-value="editForm.safeReference"
                                         :title="$t('booking.calendar.action_dialog.fields.safe_reference')"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.safe_reference_placeholder')"
                                         icon="solar:folder-open-linear"
                                         @update:model-value="updateField('safeReference', String($event ?? ''))"
                                     />
@@ -571,6 +579,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                         id="booking-create-safe-pin"
                                         :model-value="editForm.safePin"
                                         :title="$t('booking.calendar.action_dialog.fields.safe_pin')"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.safe_pin_placeholder')"
                                         icon="solar:key-linear"
                                         @update:model-value="updateField('safePin', String($event ?? ''))"
                                     />
@@ -579,8 +588,67 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                         class="md:col-span-2"
                                         :model-value="editForm.adminNote"
                                         :title="$t('booking.calendar.action_dialog.fields.backhaus_note')"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.backhaus_note_placeholder')"
                                         :rows="3"
                                         @update:model-value="updateField('adminNote', String($event ?? ''))"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Email notification -->
+                            <div class="rounded-md border bg-muted/50 p-3 space-y-3">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                    {{ $t('booking.calendar.action_dialog.sections.notification') }}
+                                </p>
+                                <FormItemSwitch
+                                    id="booking-create-send-email"
+                                    :model-value="sendEmail"
+                                    flex-row
+                                    :show-side-label="false"
+                                    :title="$t('booking.calendar.action_dialog.fields.send_email')"
+                                    @update:model-value="emit('update:send-email', Boolean($event))"
+                                />
+
+                                <div
+                                    v-if="sendEmail"
+                                    class="space-y-3"
+                                >
+                                    <div
+                                        :class="[
+                                            'rounded-md px-3 py-2 text-sm border',
+                                            isInternalEmail
+                                                ? 'bg-success/10 border-success/25 text-success'
+                                                : 'bg-warning/10 border-warning/25 text-warning',
+                                        ]"
+                                    >
+                                        <div class="flex items-center gap-2">
+                                            <Icon
+                                                :name="isInternalEmail ? 'solar:shield-check-outline' : 'solar:shield-cross-outline'"
+                                                class="size-4 shrink-0"
+                                            />
+                                            <span>
+                                                {{ isInternalEmail ? $t('booking.calendar.action_dialog.email.internal') : $t('booking.calendar.action_dialog.email.external') }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <FormItemRadioGroup
+                                        id="booking-create-email-option"
+                                        :model-value="emailOption"
+                                        :options="emailRecipientOptions"
+                                        variant="box"
+                                        @update:model-value="emit('update:email-option', $event as BookingEmailOption)"
+                                    />
+
+                                    <FormItemInput
+                                        v-if="emailOption === 'other'"
+                                        id="booking-create-custom-emails"
+                                        :model-value="customEmails"
+                                        :title="$t('booking.calendar.action_dialog.email.custom_emails')"
+                                        :placeholder="$t('booking.calendar.action_dialog.email.custom_emails_placeholder')"
+                                        :errors="emailError ? [emailError] : []"
+                                        icon="solar:letter-linear"
+                                        @update:model-value="emit('update:custom-emails', String($event ?? ''))"
                                     />
                                 </div>
                             </div>
@@ -658,6 +726,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                         id="booking-action-requester-name"
                                         :model-value="editForm.requesterName"
                                         :title="$t('booking.calendar.action_dialog.fields.requester_name')"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.requester_name_placeholder')"
                                         icon="solar:user-linear"
                                         @update:model-value="updateField('requesterName', String($event ?? ''))"
                                     />
@@ -666,6 +735,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                         type="email"
                                         :model-value="editForm.requesterEmail"
                                         :title="$t('booking.calendar.action_dialog.fields.requester_email')"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.requester_email_placeholder')"
                                         icon="solar:letter-linear"
                                         @update:model-value="updateField('requesterEmail', String($event ?? ''))"
                                     />
@@ -674,6 +744,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                         type="number"
                                         :model-value="editForm.distance"
                                         :title="$t('booking.calendar.action_dialog.fields.distance')"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.distance_placeholder')"
                                         icon="solar:map-point-wave-linear"
                                         @update:model-value="updateField('distance', String($event ?? ''))"
                                     />
@@ -693,6 +764,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                         class="md:col-span-2"
                                         :model-value="editForm.requesterNote"
                                         :title="$t('booking.calendar.action_dialog.fields.requester_note')"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.requester_note_placeholder')"
                                         :rows="3"
                                         @update:model-value="updateField('requesterNote', String($event ?? ''))"
                                     />
@@ -707,6 +779,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                         id="booking-action-safe-reference"
                                         :model-value="editForm.safeReference"
                                         :title="$t('booking.calendar.action_dialog.fields.safe_reference')"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.safe_reference_placeholder')"
                                         icon="solar:folder-open-linear"
                                         @update:model-value="updateField('safeReference', String($event ?? ''))"
                                     />
@@ -714,6 +787,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                         id="booking-action-safe-pin"
                                         :model-value="editForm.safePin"
                                         :title="$t('booking.calendar.action_dialog.fields.safe_pin')"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.safe_pin_placeholder')"
                                         icon="solar:key-linear"
                                         @update:model-value="updateField('safePin', String($event ?? ''))"
                                     />
@@ -722,6 +796,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                         class="md:col-span-2"
                                         :model-value="editForm.adminNote"
                                         :title="$t('booking.calendar.action_dialog.fields.backhaus_note')"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.backhaus_note_placeholder')"
                                         :rows="3"
                                         @update:model-value="updateField('adminNote', String($event ?? ''))"
                                     />

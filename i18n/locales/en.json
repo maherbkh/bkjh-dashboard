@@ -148,6 +148,13 @@
           "safe_pin": "Safe PIN",
           "note": "Note",
           "note_placeholder": "Add an optional note...",
+          "requester_name_placeholder": "Enter requester name",
+          "requester_email_placeholder": "Enter requester email",
+          "distance_placeholder": "Enter distance in km",
+          "requester_note_placeholder": "Add a note from the requester...",
+          "safe_reference_placeholder": "Enter safe reference",
+          "safe_pin_placeholder": "Enter safe PIN",
+          "backhaus_note_placeholder": "Add an internal note...",
           "send_email": "Send email",
           "show_safe_fields": "Add safe ref and PIN"
         },
@@ -166,7 +173,8 @@
         "sections": {
           "car_booking": "Car Booking",
           "request_details": "Request Details",
-          "admin_details": "Admin Details"
+          "admin_details": "Admin Details",
+          "notification": "Notification"
         },
         "presence": {
           "being_edited_by": "Currently being edited by"
@@ -206,6 +214,23 @@
       "diesel": "Diesel",
       "electric": "Electric",
       "hybrid": "Hybrid"
+    },
+    "maintenance": {
+      "title": "Maintenance",
+      "dialog_title": "Car Maintenance",
+      "dialog_description": "Manage maintenance windows for this car. Active windows block booking requests.",
+      "no_records": "No maintenance records for this car.",
+      "add": "Add Maintenance Window",
+      "edit": "Edit Maintenance Window",
+      "starts_at": "Starts At",
+      "ends_at": "Ends At",
+      "note": "Note",
+      "note_placeholder": "Optional maintenance note...",
+      "errors": {
+        "starts_at_required": "Start date is required",
+        "ends_at_required": "End date is required",
+        "invalid_range": "End date must be after start date"
+      }
     }
   },
   "action": {

@@ -116,6 +116,13 @@ const resolvedFormat = computed(() => {
     return props.format ? props.format : props.timePicker ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd';
 });
 
+// auto-apply is only safe when the time picker is disabled. When the time picker is
+// enabled, vue-datepicker v12 routes auto-apply through checkRangeAutoApply which
+// requires both range start and end, so it never fires for single-date selections. The
+// selection would be silently dropped when the user closes the popover. Forcing
+// auto-apply off lets the action row ("Select" / "Cancel") appear instead.
+const resolvedAutoApply = computed(() => props.autoApply && !props.timePicker);
+
 function valueToComparable(input) {
     if (input instanceof Date) {
         return input.getTime();
@@ -209,7 +216,7 @@ function formatDisplayValue(inputValue) {
             :teleport="true"
             :enable-time-picker="timePicker"
             :time-picker="onlyTime"
-            :auto-apply="autoApply"
+            :auto-apply="resolvedAutoApply"
             :locale="resolvedLocale"
             :week-start="resolvedWeekStart"
             :format="resolvedFormat"

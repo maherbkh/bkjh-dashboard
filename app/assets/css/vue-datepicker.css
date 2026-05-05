@@ -1251,6 +1251,10 @@
     position: absolute;
     z-index: 99999;
     inset: auto auto auto 0; /* allow library inline top/left styles to take effect */
+    /* reka-ui modal sets body { pointer-events: none } to block interaction outside the dialog.
+       The teleported calendar is appended to <body> and inherits that value, making it visually
+       present but completely non-interactive. Restoring pointer-events here fixes it. */
+    pointer-events: auto;
 }
 
 .dp__menu {

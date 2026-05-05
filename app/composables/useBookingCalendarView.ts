@@ -259,8 +259,8 @@ export function useBookingCalendarView() {
     const customRange = ref<[Date, Date] | null>(null);
     const viewMode = ref<BookingCalendarViewMode>('day');
     const searchQuery = ref('');
-    const showRejected = ref(true);
-    const showCanceled = ref(true);
+    const showRejected = ref(false);
+    const showCanceled = ref(false);
 
     const bookingRecords = shallowRef<CarBookingListItem[]>([]);
     const isBookingsRefreshInFlight = ref(false);
@@ -459,6 +459,8 @@ export function useBookingCalendarView() {
         groupId?: string | null;
         safeReference?: string;
         safePin?: string;
+        sendEmail?: boolean;
+        email?: string;
     }): Promise<BookingCalendarRecord | null> {
         const response = await fetchDashboardApi<BookingCalendarRecord>('/booking/car-bookings', {
             method: 'POST',

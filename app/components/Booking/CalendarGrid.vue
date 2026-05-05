@@ -372,7 +372,10 @@ function shouldHighlightToday(): boolean {
                                                                     <p class="text-muted-foreground">
                                                                         {{ $t('booking.calendar.tooltip.end') }}: {{ formatDateTime(segment.endsAt) }}
                                                                     </p>
-                                                                    <p class="text-muted-foreground">
+                                                                    <p
+                                                                        v-if="segment.safeReference"
+                                                                        class="text-muted-foreground"
+                                                                    >
                                                                         {{ $t('booking.calendar.tooltip.safe_reference') }}: {{ segment.safeReference }}
                                                                     </p>
                                                                     <p
@@ -382,7 +385,7 @@ function shouldHighlightToday(): boolean {
                                                                         {{ $t('booking.calendar.tooltip.group_id') }}: {{ segment.groupName || segment.groupId }}
                                                                     </p>
                                                                     <p
-                                                                        v-if="segment.safePinAvailable"
+                                                                        v-if="segment.safePinAvailable && segment.safePin"
                                                                         class="text-primary font-medium"
                                                                     >
                                                                         {{ $t('booking.calendar.safe_pin_available') }}: {{ segment.safePin }}
@@ -453,7 +456,10 @@ function shouldHighlightToday(): boolean {
                                                                 <p class="text-muted-foreground">
                                                                     {{ $t('booking.calendar.tooltip.end') }}: {{ formatDateTime(segment.endsAt) }}
                                                                 </p>
-                                                                <p class="text-muted-foreground">
+                                                                <p
+                                                                    v-if="segment.safeReference"
+                                                                    class="text-muted-foreground"
+                                                                >
                                                                     {{ $t('booking.calendar.tooltip.safe_reference') }}: {{ segment.safeReference }}
                                                                 </p>
                                                                 <p
@@ -463,7 +469,7 @@ function shouldHighlightToday(): boolean {
                                                                     {{ $t('booking.calendar.tooltip.group_id') }}: {{ segment.groupName || segment.groupId }}
                                                                 </p>
                                                                 <p
-                                                                    v-if="segment.safePinAvailable"
+                                                                    v-if="segment.safePinAvailable && segment.safePin"
                                                                     class="text-primary font-medium"
                                                                 >
                                                                     {{ $t('booking.calendar.safe_pin_available') }}: {{ segment.safePin }}

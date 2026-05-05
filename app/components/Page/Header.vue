@@ -17,7 +17,7 @@ const displayTitle = computed(() => props.title || t('page.page_title'));
     <div class="flex md:flex-row flex-col gap-2 items-start justify-between">
         <div class="flex items-center gap-2">
             <Icon
-                class="!size-5"
+                class="size-5!"
                 :name="icon"
             />
             <div class="text-h4">

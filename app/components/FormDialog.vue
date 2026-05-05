@@ -30,7 +30,11 @@ const handleOpenChange = (value: boolean) => {
         :open="open"
         @update:open="handleOpenChange"
     >
-        <DialogContent class="sm:max-w-6xl">
+        <DialogContent
+            class="sm:max-w-6xl"
+            @pointer-down-outside="(e: any) => { if ((e.detail?.originalEvent?.target as Element)?.closest?.('.dp__menu, .dp--menu-wrapper')) e.preventDefault(); }"
+            @focus-outside="(e: any) => { if ((e.detail?.originalEvent?.target as Element)?.closest?.('.dp__menu, .dp--menu-wrapper')) e.preventDefault(); }"
+        >
             <DialogHeader>
                 <DialogTitle>{{ title }}</DialogTitle>
                 <DialogDescription v-if="description">

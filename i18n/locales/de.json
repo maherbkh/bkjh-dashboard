@@ -148,6 +148,13 @@
           "safe_pin": "Safe-PIN",
           "note": "Notiz",
           "note_placeholder": "Optionale Notiz hinzufugen...",
+          "requester_name_placeholder": "Name der anfragenden Person eingeben",
+          "requester_email_placeholder": "E-Mail der anfragenden Person eingeben",
+          "distance_placeholder": "Strecke in km eingeben",
+          "requester_note_placeholder": "Notiz der anfragenden Person hinzufugen...",
+          "safe_reference_placeholder": "Safe-Referenz eingeben",
+          "safe_pin_placeholder": "Safe-PIN eingeben",
+          "backhaus_note_placeholder": "Interne Notiz hinzufugen...",
           "send_email": "E-Mail senden",
           "show_safe_fields": "Safe-Ref. und PIN angeben"
         },
@@ -166,7 +173,8 @@
         "sections": {
           "car_booking": "Auto-Buchung",
           "request_details": "Anfragedetails",
-          "admin_details": "Backhaus-Details"
+          "admin_details": "Backhaus-Details",
+          "notification": "Benachrichtigung"
         },
         "presence": {
           "being_edited_by": "Wird gerade bearbeitet von"
@@ -206,6 +214,23 @@
       "diesel": "Diesel",
       "electric": "Elektro",
       "hybrid": "Hybrid"
+    },
+    "maintenance": {
+      "title": "Wartung",
+      "dialog_title": "Fahrzeugwartung",
+      "dialog_description": "Wartungsfenster für dieses Fahrzeug verwalten. Aktive Fenster blockieren Buchungsanfragen.",
+      "no_records": "Keine Wartungseinträge für dieses Fahrzeug.",
+      "add": "Wartungsfenster hinzufügen",
+      "edit": "Wartungsfenster bearbeiten",
+      "starts_at": "Beginnt am",
+      "ends_at": "Endet am",
+      "note": "Notiz",
+      "note_placeholder": "Optionale Wartungsnotiz...",
+      "errors": {
+        "starts_at_required": "Startdatum ist erforderlich",
+        "ends_at_required": "Enddatum ist erforderlich",
+        "invalid_range": "Enddatum muss nach dem Startdatum liegen"
+      }
     }
   },
   "action": {

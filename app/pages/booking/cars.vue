@@ -85,7 +85,9 @@ const {
 
 const isRequesterInternalEmail = computed(() => {
     if (typeof checkInternalEmail !== 'function') return false;
-    return checkInternalEmail(selectedBooking.value?.requesterEmail);
+    // In create mode there is no saved booking — check the email being entered in the form.
+    const email = selectedBooking.value?.requesterEmail ?? editForm.value.requesterEmail;
+    return checkInternalEmail(email);
 });
 
 const isSyncingQuery = ref(false);
@@ -261,8 +263,8 @@ function hydrateCalendarStateFromQuery() {
         else {
             setSelectedDateRangeFromQuery(start, end);
         }
-        showRejected.value = parseBooleanQuery(rejected, true);
-        showCanceled.value = parseBooleanQuery(canceled, true);
+        showRejected.value = parseBooleanQuery(rejected, false);
+        showCanceled.value = parseBooleanQuery(canceled, false);
     }
     finally {
         isSyncingQuery.value = false;
@@ -308,8 +310,8 @@ async function syncCalendarStateToQuery() {
     if (nextQuery.view === currentView
         && (nextQuery.start ?? null) === currentStart
         && (nextQuery.end ?? null) === currentEnd
-        && nextQuery.rejected === (currentRejected ?? '1')
-        && nextQuery.canceled === (currentCanceled ?? '1')) {
+        && nextQuery.rejected === (currentRejected ?? '0')
+        && nextQuery.canceled === (currentCanceled ?? '0')) {
         return;
     }
 

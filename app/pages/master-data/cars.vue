@@ -86,6 +86,14 @@ const dialogMode = ref<'add' | 'edit'>('add');
 const editingCar = ref<Car | null>(null);
 const isSubmitting = ref(false);
 
+const isMaintenanceDialogOpen = ref(false);
+const selectedCarForMaintenance = ref<Car | null>(null);
+
+const handleMaintenance = (car: Car) => {
+    selectedCarForMaintenance.value = car;
+    isMaintenanceDialogOpen.value = true;
+};
+
 const openAddDialog = () => {
     dialogMode.value = 'add';
     resetForm();
@@ -371,6 +379,18 @@ const handleRowSelected = (id: string, checked: boolean) => {
                     <template #cell-actions="{ row }">
                         <div class="flex justify-end gap-2">
                             <LazyButton
+                                :title="$t('car.maintenance.title')"
+                                variant="ghost"
+                                size="icon"
+                                hydrate-on-interaction="mouseover"
+                                @click="handleMaintenance(row)"
+                            >
+                                <Icon
+                                    name="carbon:license-maintenance"
+                                    class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-warning"
+                                />
+                            </LazyButton>
+                            <LazyButton
                                 :title="$t('action.edit')"
                                 variant="ghost"
                                 size="icon"
@@ -420,6 +440,11 @@ const handleRowSelected = (id: string, checked: boolean) => {
             @submit-and-close="onSubmitAndClose"
             @submit-and-add-new="onSubmitAndAddNew"
             @close-dialog="handleDialogClose"
+        />
+
+        <LazyCarMaintenanceDialog
+            v-model:open="isMaintenanceDialogOpen"
+            :car="selectedCarForMaintenance"
         />
     </div>
 </template>
