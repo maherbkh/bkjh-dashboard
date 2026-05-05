@@ -360,7 +360,7 @@ export function useBookingCalendarView() {
         bookingRecords.value = bookingRecords.value.filter(item => item.id !== bookingId);
     }
 
-    async function updateBooking(bookingId: string, patch: Partial<Omit<BookingCalendarRecord, 'id'>>): Promise<BookingCalendarRecord | null> {
+    async function updateBooking(bookingId: string, patch: Partial<Omit<BookingCalendarRecord, 'id'>> & { sendEmail?: boolean; email?: string }): Promise<BookingCalendarRecord | null> {
         const index = bookingRecords.value.findIndex(item => item.id === bookingId);
         if (index === -1) return null;
 
@@ -400,6 +400,8 @@ export function useBookingCalendarView() {
             adminNote: context?.note,
             safeReference: context?.safeReference,
             safePin: context?.safePin,
+            sendEmail: context?.sendEmail,
+            email: context?.email,
         });
     }
 

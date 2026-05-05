@@ -44,7 +44,7 @@ export const createAdminSchema = (t: (key: string, params?: Record<string, strin
             .nullable()
             .optional(),
 
-        apps: z.array(z.enum(['dashboard', 'support', 'academy']))
+        apps: z.array(z.enum(['dashboard', 'support', 'academy', 'booking']))
             .default(['dashboard'])
             .refine(apps => apps.length > 0, {
                 message: t('validation.required'),
@@ -77,6 +77,7 @@ export const AVAILABLE_APPS = [
     { value: 'dashboard', label: 'Dashboard' },
     { value: 'support', label: 'IT Support' },
     { value: 'academy', label: 'Academy' },
+    { value: 'booking', label: 'Booking' },
 ] as const;
 
 export type AdminSchemaType = z.infer<ReturnType<typeof createAdminSchema>>;

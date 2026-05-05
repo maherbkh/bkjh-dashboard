@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Admin, AdminForm, TableHeaderItem, ServerParamsTypes } from '~/types';
+import type { Admin, AdminForm, Occupation, TableHeaderItem, ServerParamsTypes } from '~/types';
 import { createAdminSchema } from '~/composables/adminSchema';
 import { useResourcesStore } from '~/stores/resources';
 import { useUserStore } from '~/stores/user';
@@ -94,16 +94,28 @@ const perPage = ref(25);
 const sortBy = ref('createdAt');
 const sortDir = ref<'asc' | 'desc'>('desc');
 
+function buildAdminListParams() {
+    return {
+        search: searchQuery.value,
+        sort_by: sortBy.value,
+        sort_dir: sortDir.value,
+    };
+}
+
+async function refreshAdminsList() {
+    await fetchItems(
+        currentPage.value,
+        perPage.value,
+        buildAdminListParams(),
+        Date.now(),
+    );
+}
+
 const headerItems = computed(() => [
     {
         as: 'th',
         name: t('global.name'),
         id: 'firstName',
-    },
-    {
-        as: 'th',
-        name: t('form.email'),
-        id: 'email',
     },
     {
         as: 'th',
@@ -126,10 +138,7 @@ const headerItems = computed(() => [
 ]);
 
 // Initialize data
-await fetchItems(currentPage.value, perPage.value, {
-    sort_by: sortBy.value,
-    sort_dir: sortDir.value,
-});
+await refreshAdminsList();
 
 // Dialog state management
 const isDialogOpen = ref(false);
@@ -139,6 +148,7 @@ const isSubmitting = ref(false);
 
 // Resources store for occupations
 const resourcesStore = useResourcesStore();
+const adminDialogOccupations = computed<Occupation[]>(() => resourcesStore.occupations as unknown as Occupation[]);
 
 const openAddDialog = async () => {
     dialogMode.value = 'add';
@@ -175,6 +185,7 @@ const onSubmitAndClose = async (values: AdminForm) => {
             await createItem(values);
         }
         selectedRows.value = [];
+        await refreshAdminsList();
 
         // Close dialog on success
         isDialogOpen.value = false;
@@ -210,6 +221,7 @@ const onSubmitAndAddNew = async (values: AdminForm) => {
             dialogMode.value = 'add';
         }
         selectedRows.value = [];
+        await refreshAdminsList();
 
         // Reset form but keep the dialog open for adding new item
         resetForm();
@@ -238,11 +250,7 @@ async function handleDelete(adminId: string) {
     if (!confirmed) return;
     try {
         await deleteItem(adminId);
-        await fetchItems(currentPage.value, perPage.value, {
-            search: searchQuery.value,
-            sort_by: sortBy.value,
-            sort_dir: sortDir.value,
-        });
+        await refreshAdminsList();
     }
     catch (error) {
         console.error('Error deleting admin:', error);
@@ -258,11 +266,7 @@ async function handleBulkDelete() {
     try {
         await deleteManyItems(selectedRows.value);
         selectedRows.value = [];
-        await fetchItems(currentPage.value, perPage.value, {
-            search: searchQuery.value,
-            sort_by: sortBy.value,
-            sort_dir: sortDir.value,
-        });
+        await refreshAdminsList();
     }
     catch (error) {
         console.error('Error deleting admins:', error);
@@ -275,31 +279,19 @@ const handleReset = async () => {
     currentPage.value = 1;
     sortBy.value = 'createdAt';
     sortDir.value = 'desc';
-    await fetchItems(currentPage.value, perPage.value, {
-        search: searchQuery.value,
-        sort_by: sortBy.value,
-        sort_dir: sortDir.value,
-    });
+    await refreshAdminsList();
     selectedRows.value = [];
 };
 
 const handleSearchSubmit = async () => {
     currentPage.value = 1;
-    await fetchItems(currentPage.value, perPage.value, {
-        search: searchQuery.value,
-        sort_by: sortBy.value,
-        sort_dir: sortDir.value,
-    });
+    await refreshAdminsList();
     selectedRows.value = [];
 };
 
 const handlePageChange = async (page: number) => {
     currentPage.value = page;
-    await fetchItems(currentPage.value, perPage.value, {
-        search: searchQuery.value,
-        sort_by: sortBy.value,
-        sort_dir: sortDir.value,
-    });
+    await refreshAdminsList();
     selectedRows.value = [];
 };
 
@@ -307,11 +299,7 @@ async function handleSortChange(dir: 'asc' | 'desc', id: string) {
     sortDir.value = dir;
     sortBy.value = id;
     currentPage.value = 1;
-    await fetchItems(currentPage.value, perPage.value, {
-        search: searchQuery.value,
-        sort_by: sortBy.value,
-        sort_dir: sortDir.value,
-    });
+    await refreshAdminsList();
     selectedRows.value = [];
 }
 
@@ -406,7 +394,7 @@ const isOnline = (lastActiveAt: string | null) => {
                     >
                         <template #cell-firstName="{ row }">
                             <div>
-                                <div class="font-medium flex items-center gap-2">
+                                <div class="flex items-center gap-2 font-medium font-sm">
                                     <div>{{ `${row.firstName} ${row.lastName}` }}</div>
                                     <Icon
                                         v-if="row.lastActiveAt"
@@ -414,7 +402,7 @@ const isOnline = (lastActiveAt: string | null) => {
                                         name="solar:user-circle-outline"
                                         :class="[
                                             isOnline(row.lastActiveAt) ? 'text-success' : 'text-muted-foreground',
-                                            '!size-4 rounded-full shrink-0 hover:scale-110 ease-in-out duration-300',
+                                            'size-4! rounded-full shrink-0 hover:scale-110 ease-in-out duration-300',
                                         ]"
                                     />
                                 </div>
@@ -424,12 +412,9 @@ const isOnline = (lastActiveAt: string | null) => {
                                 >
                                     {{ row.occupation?.name || '-' }}
                                 </div>
-                            </div>
-                        </template>
-
-                        <template #cell-email="{ row }">
-                            <div class="text-sm">
-                                {{ row.email }}
+                                <div class="text-xs text-muted-foreground mt-1">
+                                    {{ row.email }}
+                                </div>
                             </div>
                         </template>
                         <template #cell-isActive="{ row }">
@@ -473,7 +458,7 @@ const isOnline = (lastActiveAt: string | null) => {
                                 >
                                     <Icon
                                         name="solar:pen-new-square-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                                     />
                                 </LazyButton>
                                 <LazyButton
@@ -484,7 +469,7 @@ const isOnline = (lastActiveAt: string | null) => {
                                 >
                                     <Icon
                                         name="solar:trash-bin-trash-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-destructive"
                                     />
                                 </LazyButton>
                             </div>
@@ -511,11 +496,10 @@ const isOnline = (lastActiveAt: string | null) => {
             v-model:dialog-mode="dialogMode"
             v-model:editing-admin="editingAdmin"
             :is-submitting="isSubmitting"
-            :occupations="resourcesStore.occupations"
+            :occupations="adminDialogOccupations"
             @submit-and-close="onSubmitAndClose"
             @submit-and-add-new="onSubmitAndAddNew"
             @close-dialog="handleDialogClose"
         />
-        <MediaExample />
     </div>
 </template>
