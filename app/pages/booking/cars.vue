@@ -12,6 +12,12 @@ const isCalendarFullscreen = ref(false);
 const userStore = useUserStore();
 const runtimeConfig = useRuntimeConfig();
 
+/** Mirrors AdminGuard: super admin always allowed, or admin with 'booking' app. */
+const canCreateBooking = computed(
+    () => userStore.user?.isSuperAdmin === true
+        || (userStore.user?.apps ?? []).includes('booking'),
+);
+
 const FALLBACK_REFRESH_THROTTLE_MS = 2000;
 let fallbackRefreshTimeout: ReturnType<typeof setTimeout> | null = null;
 const {
@@ -350,7 +356,7 @@ useSeoMeta({
         <PageHeaderActions
             :page-title="pageTitle"
             :page-icon="pageIcon || 'mingcute:car-3-line'"
-            :has-add-new="true"
+            :has-add-new="canCreateBooking"
             :has-deleted-items="false"
             @add-new="onAddNew"
         />
