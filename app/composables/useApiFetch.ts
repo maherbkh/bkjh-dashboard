@@ -78,12 +78,34 @@ function buildMergedFetchOptions<T>(
         ...defaultHeaders,
         ...(opts.headers as Record<string, string>),
     };
+    const originalOnResponse = opts.onResponse;
+
+    function sanitizeBookingSuccessMessage(payload: unknown): void {
+        if (!relativePath.includes('/booking/car-bookings')) return;
+        if (!payload || typeof payload !== 'object') return;
+
+        const maybeMessage = (payload as { message?: unknown }).message;
+        if (typeof maybeMessage !== 'string') return;
+
+        const cleaned = maybeMessage
+            .replace(/\s*(?:,|-)?\s*(?:Buchungsreferenz|Booking reference)\s*:\s*[0-9a-fA-F-]{8,}\s*/gi, ' ')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
+
+        (payload as { message?: string }).message = cleaned;
+    }
 
     const mergedForUseFetch: ApiFetchOptions<T> = {
         ...opts,
         method: method as ApiFetchOptions<T>['method'],
         headers: finalHeaders,
         credentials: 'include',
+        onResponse(context) {
+            sanitizeBookingSuccessMessage(context.response?._data);
+            if (typeof originalOnResponse === 'function') {
+                originalOnResponse(context);
+            }
+        },
 
         onResponseError({ response }) {
             try {
