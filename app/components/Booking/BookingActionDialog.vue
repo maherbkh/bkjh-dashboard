@@ -32,11 +32,14 @@ type Props = {
     isSubmitting?: boolean;
     /** Admins currently editing this booking (empty means nobody else has it open). */
     editors?: BookingEditorInfo[];
+    /** The logged-in admin's ID — used to suppress the presence banner for self. */
+    currentAdminId?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
     isSubmitting: false,
     editors: () => [],
+    currentAdminId: undefined,
 });
 const { t } = useI18n();
 const { formatDate } = useGermanDateFormat();
@@ -67,6 +70,23 @@ const descriptionKey = computed(() => {
 const confirmLabelKey = computed(() => {
     if (!props.action) return 'booking.calendar.action_dialog.confirm.edit';
     return `booking.calendar.action_dialog.confirm.${props.action}`;
+});
+
+const confirmButtonVariant = computed<'default' | 'destructive'>(() =>
+    props.action === 'delete' ? 'destructive' : 'default',
+);
+
+// Editors who are NOT the current admin — the only ones that should trigger warnings.
+const otherEditors = computed(() =>
+    props.editors.filter(e => e.adminId !== props.currentAdminId),
+);
+
+// When another admin has this booking open for editing, go read-only.
+// Applies only to actions that involve modifying the record; delete/create are unaffected.
+const isLockedByOther = computed(() => {
+    if (!props.action) return false;
+    return otherEditors.value.length > 0
+        && (props.action === 'edit' || props.action === 'change_status');
 });
 
 const statusSelectItems = computed(() => {
@@ -169,31 +189,40 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
         :open="open"
         @update:open="emit('update:open', $event)"
     >
-        <DialogContent class="sm:max-w-2xl">
+        <DialogContent class="sm:max-w-3xl">
             <DialogHeader>
                 <DialogTitle>{{ $t(titleKey) }}</DialogTitle>
                 <DialogDescription>{{ $t(descriptionKey) }}</DialogDescription>
             </DialogHeader>
 
-            <div
-                v-if="editors && editors.length > 0"
-                class="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800 dark:border-amber-800/40 dark:bg-amber-900/20 dark:text-amber-300"
-            >
-                <Icon
-                    name="solar:users-group-two-rounded-linear"
-                    class="mt-0.5 size-4 shrink-0"
-                />
-                <span>
-                    {{ $t('booking.calendar.action_dialog.presence.being_edited_by') }}
-                    <span
-                        v-for="(editor, index) in editors"
-                        :key="editor.adminId"
-                        class="font-semibold"
-                    >{{ editor.adminEmail }}<template v-if="index < editors.length - 1">, </template></span>
-                </span>
-            </div>
+            <!--
+                Single second child — this is the scrollable zone per DialogContent's nth-child selector.
+                The presence banner uses sticky top-0 so it pins to the top of this scroll container
+                and is never scrolled out of view.
+            -->
+            <div class="flex flex-col gap-4 py-1 scroll-app px-5">
+                <!-- Presence banner — only visible when a DIFFERENT admin has this record open -->
+                <div
+                    v-if="otherEditors.length > 0"
+                    class="sticky top-0 z-10 bg-background pb-1"
+                >
+                    <div class="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800 dark:border-amber-800/50 dark:bg-amber-950 dark:text-amber-300">
+                        <Icon
+                            name="solar:users-group-two-rounded-linear"
+                            class="mt-0.5 size-4 shrink-0"
+                        />
+                        <span>
+                            {{ $t('booking.calendar.action_dialog.presence.being_edited_by') }}
+                            <span
+                                v-for="(editor, index) in otherEditors"
+                                :key="editor.adminId"
+                                class="font-semibold"
+                            >{{ editor.adminEmail }}<template v-if="index < otherEditors.length - 1">, </template></span>
+                        </span>
+                    </div>
+                </div>
 
-            <div class="space-y-4 py-1">
+                <!-- Booking info summary (always visible when a booking is selected) -->
                 <div
                     v-if="booking"
                     class="rounded-md border bg-muted/50 p-3 text-sm divide-y divide-dashed divide-muted-foreground/30"
@@ -218,7 +247,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                         </span>
                         <span class="font-semibold ml-3">{{ booking.requesterEmail }}</span>
                     </p>
-                    <p class="py-2 flex items-center">
+                    <div class="py-2 flex items-center">
                         <span class="font-light inline-flex items-center">
                             <Icon
                                 name="solar:users-group-rounded-linear"
@@ -230,13 +259,13 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                             :class="[
                                 'ml-3',
                                 groupDisplayName.isFallback
-                                    ? 'italic text-muted-foreground font-light text-xs'
+                                    ? 'italic text-muted-foreground font-light text-xs pt-0.5'
                                     : 'font-semibold',
                             ]"
                         >
                             {{ groupDisplayName.value }}
                         </span>
-                    </p>
+                    </div>
                     <p class="py-2 flex items-center">
                         <span class="font-light inline-flex items-center">
                             <Icon
@@ -275,27 +304,27 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                             />
                             {{ $t('booking.calendar.action_dialog.fields.distance') }}:
                         </span>
-                        <span class="font-semibold ml-3">{{ booking.distance }}</span>
+                        <span class="font-semibold ml-3">{{ booking.distance }}</span><span class="text-muted-foreground ml-1.5">km</span>
                     </p>
-                    <p class="py-2 flex items-center">
-                        <span class="font-light inline-flex items-center">
+                    <div class="py-2 flex flex-col gap-3 items-start">
+                        <div class="font-light inline-flex items-center">
                             <Icon
                                 name="solar:notes-linear"
                                 class="size-4 mr-1.5 opacity-75"
                             />
                             {{ $t('booking.calendar.action_dialog.fields.requester_note') }}:
-                        </span>
-                        <span
+                        </div>
+                        <div
                             :class="[
-                                'ml-3',
+                                'ml-5',
                                 requesterNoteDisplay.isFallback
                                     ? 'italic text-muted-foreground font-light text-xs'
                                     : 'font-semibold',
                             ]"
                         >
                             {{ requesterNoteDisplay.value }}
-                        </span>
-                    </p>
+                        </div>
+                    </div>
                     <p class="pt-2 pb-0 flex items-center">
                         <span class="font-light inline-flex items-center">
                             <Icon
@@ -313,249 +342,398 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                     </p>
                 </div>
 
-                <template v-if="action === 'change_status'">
-                    <div class="space-y-3">
-                        <FormItemSelect
-                            id="booking-action-status"
-                            :model-value="pendingStatus"
-                            :title="$t('booking.calendar.action_dialog.fields.status')"
-                            :placeholder="$t('action.select') + ' ' + $t('booking.calendar.action_dialog.fields.status')"
-                            :data="statusSelectItems"
-                            key-value="id"
-                            name-value="name"
-                            @update:model-value="emit('update:pending-status', $event as BookingApiStatus)"
-                        />
-
-                        <FormItemTextarea
-                            id="booking-action-status-note"
-                            :model-value="statusNote"
-                            :title="$t('booking.calendar.action_dialog.fields.note')"
-                            :placeholder="$t('booking.calendar.action_dialog.fields.note_placeholder')"
-                            :rows="4"
-                            @update:model-value="emit('update:status-note', String($event ?? ''))"
-                        />
-
-                        <FormItemSwitch
-                            id="booking-action-send-email"
-                            :model-value="sendEmail"
-                            flex-row
-                            :show-side-label="false"
-                            :title="$t('booking.calendar.action_dialog.fields.send_email')"
-                            @update:model-value="emit('update:send-email', Boolean($event))"
-                        />
-
-                        <div
-                            v-if="sendEmail"
-                            class="space-y-3"
-                        >
-                            <div
-                                :class="[
-                                    'rounded-md px-3 py-2 text-sm border',
-                                    isInternalEmail
-                                        ? 'bg-success/10 border-success/25 text-success'
-                                        : 'bg-warning/10 border-warning/25 text-warning',
-                                ]"
-                            >
-                                <div class="flex items-center gap-2">
-                                    <Icon
-                                        :name="isInternalEmail ? 'solar:shield-check-outline' : 'solar:shield-cross-outline'"
-                                        class="size-4 shrink-0"
-                                    />
-                                    <span>
-                                        {{ isInternalEmail ? $t('booking.calendar.action_dialog.email.internal') : $t('booking.calendar.action_dialog.email.external') }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <FormItemRadioGroup
-                                id="booking-action-email-option"
-                                :model-value="emailOption"
-                                :options="emailRecipientOptions"
-                                variant="box"
-                                @update:model-value="emit('update:email-option', $event as BookingEmailOption)"
+                <!-- Form sections — hidden entirely when another admin is editing this record -->
+                <template v-if="!isLockedByOther">
+                    <template v-if="action === 'change_status'">
+                        <div class="space-y-3">
+                            <FormItemSelect
+                                id="booking-action-status"
+                                :model-value="pendingStatus"
+                                :title="$t('booking.calendar.action_dialog.fields.status')"
+                                :placeholder="$t('action.select') + ' ' + $t('booking.calendar.action_dialog.fields.status')"
+                                :data="statusSelectItems"
+                                key-value="id"
+                                name-value="name"
+                                @update:model-value="emit('update:pending-status', $event as BookingApiStatus)"
                             />
 
-                            <FormItemInput
-                                v-if="emailOption === 'other'"
-                                id="booking-action-custom-emails"
-                                :model-value="customEmails"
-                                :title="$t('booking.calendar.action_dialog.email.custom_emails')"
-                                :placeholder="$t('booking.calendar.action_dialog.email.custom_emails_placeholder')"
-                                :errors="emailError ? [emailError] : []"
-                                icon="solar:letter-linear"
-                                @update:model-value="emit('update:custom-emails', String($event ?? ''))"
+                            <FormItemTextarea
+                                id="booking-action-status-note"
+                                :model-value="statusNote"
+                                :title="$t('booking.calendar.action_dialog.fields.note')"
+                                :placeholder="$t('booking.calendar.action_dialog.fields.note_placeholder')"
+                                :rows="4"
+                                @update:model-value="emit('update:status-note', String($event ?? ''))"
                             />
-                        </div>
 
-                        <div
-                            v-if="pendingStatus === 'APPROVED' && !shouldAutoShowSafeFields"
-                            class="pt-1"
-                        >
                             <FormItemSwitch
-                                id="booking-action-show-safe-fields"
-                                :model-value="showSafeFields"
+                                id="booking-action-send-email"
+                                :model-value="sendEmail"
                                 flex-row
                                 :show-side-label="false"
-                                :title="$t('booking.calendar.action_dialog.fields.show_safe_fields')"
-                                @update:model-value="emit('update:show-safe-fields', Boolean($event))"
+                                :title="$t('booking.calendar.action_dialog.fields.send_email')"
+                                @update:model-value="emit('update:send-email', Boolean($event))"
                             />
-                        </div>
 
-                        <div
-                            v-if="pendingStatus === 'APPROVED' && (shouldAutoShowSafeFields || showSafeFields)"
-                            class="grid grid-cols-1 md:grid-cols-2 gap-3"
-                        >
-                            <FormItemInput
-                                id="booking-action-status-safe-reference"
-                                :model-value="editForm.safeReference"
-                                :title="$t('booking.calendar.action_dialog.fields.safe_reference')"
-                                icon="solar:folder-open-linear"
-                                @update:model-value="updateField('safeReference', String($event ?? ''))"
-                            />
-                            <FormItemInput
-                                id="booking-action-status-safe-pin"
-                                :model-value="editForm.safePin"
-                                :title="$t('booking.calendar.action_dialog.fields.safe_pin')"
-                                icon="solar:key-linear"
-                                @update:model-value="updateField('safePin', String($event ?? ''))"
-                            />
-                        </div>
-                    </div>
-                </template>
+                            <div
+                                v-if="sendEmail"
+                                class="space-y-3"
+                            >
+                                <div
+                                    :class="[
+                                        'rounded-md px-3 py-2 text-sm border',
+                                        isInternalEmail
+                                            ? 'bg-success/10 border-success/25 text-success'
+                                            : 'bg-warning/10 border-warning/25 text-warning',
+                                    ]"
+                                >
+                                    <div class="flex items-center gap-2">
+                                        <Icon
+                                            :name="isInternalEmail ? 'solar:shield-check-outline' : 'solar:shield-cross-outline'"
+                                            class="size-4 shrink-0"
+                                        />
+                                        <span>
+                                            {{ isInternalEmail ? $t('booking.calendar.action_dialog.email.internal') : $t('booking.calendar.action_dialog.email.external') }}
+                                        </span>
+                                    </div>
+                                </div>
 
-                <template v-else-if="action === 'edit'">
-                    <div class="space-y-4">
-                        <div class="rounded-md border bg-muted/50 p-3 space-y-3">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                {{ $t('booking.calendar.action_dialog.sections.car_booking') }}
-                            </p>
-                            <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-center">
-                                <FormItemSelect
-                                    id="booking-action-car-id"
-                                    :model-value="editForm.carId"
-                                    :title="$t('booking.calendar.action_dialog.fields.car')"
-                                    :placeholder="$t('action.select') + ' ' + $t('booking.calendar.action_dialog.fields.car')"
-                                    :data="carOptions"
-                                    key-value="id"
-                                    name-value="name"
-                                    :searchable="true"
-                                    :disabled="!allowEditCar"
-                                    @update:model-value="updateField('carId', String($event ?? ''))"
+                                <FormItemRadioGroup
+                                    id="booking-action-email-option"
+                                    :model-value="emailOption"
+                                    :options="emailRecipientOptions"
+                                    variant="box"
+                                    @update:model-value="emit('update:email-option', $event as BookingEmailOption)"
                                 />
-                                <FormItemSwitch
-                                    id="booking-action-allow-edit-car"
-                                    :model-value="allowEditCar"
-                                    :show-side-label="false"
-                                    :title="$t('booking.calendar.action_dialog.fields.allow_edit_car')"
-                                    @update:model-value="emit('update:allow-edit-car', Boolean($event))"
-                                />
-                            </div>
-                        </div>
-                        <div class="rounded-md border bg-muted/50 p-3 space-y-3">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                {{ $t('booking.calendar.action_dialog.sections.request_details') }}
-                            </p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <FormItemDatePicker
-                                    name="booking-action-starts-at"
-                                    :label="$t('booking.calendar.action_dialog.fields.starts_at')"
-                                    :model-value="editForm.startsAt"
-                                    format="yyyy-MM-dd HH:mm"
-                                    :time-picker="true"
-                                    :auto-apply="true"
-                                    icon="solar:calendar-linear"
-                                    :placeholder="$t('booking.calendar.action_dialog.fields.starts_at')"
-                                    @update:model-value="updateField('startsAt', String($event ?? ''))"
-                                />
-                                <FormItemDatePicker
-                                    name="booking-action-ends-at"
-                                    :label="$t('booking.calendar.action_dialog.fields.ends_at')"
-                                    :model-value="editForm.endsAt"
-                                    format="yyyy-MM-dd HH:mm"
-                                    :time-picker="true"
-                                    :auto-apply="true"
-                                    icon="solar:calendar-linear"
-                                    :placeholder="$t('booking.calendar.action_dialog.fields.ends_at')"
-                                    @update:model-value="updateField('endsAt', String($event ?? ''))"
-                                />
+
                                 <FormItemInput
-                                    id="booking-action-requester-name"
-                                    :model-value="editForm.requesterName"
-                                    :title="$t('booking.calendar.action_dialog.fields.requester_name')"
-                                    icon="solar:user-linear"
-                                    @update:model-value="updateField('requesterName', String($event ?? ''))"
-                                />
-                                <FormItemInput
-                                    id="booking-action-requester-email"
-                                    type="email"
-                                    :model-value="editForm.requesterEmail"
-                                    :title="$t('booking.calendar.action_dialog.fields.requester_email')"
+                                    v-if="emailOption === 'other'"
+                                    id="booking-action-custom-emails"
+                                    :model-value="customEmails"
+                                    :title="$t('booking.calendar.action_dialog.email.custom_emails')"
+                                    :placeholder="$t('booking.calendar.action_dialog.email.custom_emails_placeholder')"
+                                    :errors="emailError ? [emailError] : []"
                                     icon="solar:letter-linear"
-                                    @update:model-value="updateField('requesterEmail', String($event ?? ''))"
-                                />
-                                <FormItemInput
-                                    id="booking-action-distance"
-                                    type="number"
-                                    :model-value="editForm.distance"
-                                    :title="$t('booking.calendar.action_dialog.fields.distance')"
-                                    icon="solar:map-point-wave-linear"
-                                    @update:model-value="updateField('distance', String($event ?? ''))"
-                                />
-                                <FormItemSelect
-                                    id="booking-action-group-id"
-                                    :model-value="editForm.groupId"
-                                    :title="$t('booking.calendar.action_dialog.fields.group_name')"
-                                    :placeholder="$t('action.select') + ' ' + $t('booking.calendar.action_dialog.fields.group_name')"
-                                    :data="groupOptions"
-                                    key-value="id"
-                                    name-value="name"
-                                    :searchable="true"
-                                    @update:model-value="updateField('groupId', String($event ?? ''))"
-                                />
-                                <FormItemTextarea
-                                    id="booking-action-requester-note"
-                                    class="md:col-span-2"
-                                    :model-value="editForm.requesterNote"
-                                    :title="$t('booking.calendar.action_dialog.fields.requester_note')"
-                                    :rows="3"
-                                    @update:model-value="updateField('requesterNote', String($event ?? ''))"
+                                    @update:model-value="emit('update:custom-emails', String($event ?? ''))"
                                 />
                             </div>
-                        </div>
-                        <div class="rounded-md border bg-muted/50 p-3 space-y-3">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                {{ $t('booking.calendar.action_dialog.sections.admin_details') }}
-                            </p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+                            <div
+                                v-if="pendingStatus === 'APPROVED' && !shouldAutoShowSafeFields"
+                                class="pt-1"
+                            >
+                                <FormItemSwitch
+                                    id="booking-action-show-safe-fields"
+                                    :model-value="showSafeFields"
+                                    flex-row
+                                    :show-side-label="false"
+                                    :title="$t('booking.calendar.action_dialog.fields.show_safe_fields')"
+                                    @update:model-value="emit('update:show-safe-fields', Boolean($event))"
+                                />
+                            </div>
+
+                            <div
+                                v-if="pendingStatus === 'APPROVED' && (shouldAutoShowSafeFields || showSafeFields)"
+                                class="grid grid-cols-1 md:grid-cols-2 gap-3"
+                            >
                                 <FormItemInput
-                                    id="booking-action-safe-reference"
+                                    id="booking-action-status-safe-reference"
                                     :model-value="editForm.safeReference"
                                     :title="$t('booking.calendar.action_dialog.fields.safe_reference')"
                                     icon="solar:folder-open-linear"
                                     @update:model-value="updateField('safeReference', String($event ?? ''))"
                                 />
                                 <FormItemInput
-                                    id="booking-action-safe-pin"
+                                    id="booking-action-status-safe-pin"
                                     :model-value="editForm.safePin"
                                     :title="$t('booking.calendar.action_dialog.fields.safe_pin')"
                                     icon="solar:key-linear"
                                     @update:model-value="updateField('safePin', String($event ?? ''))"
                                 />
-                                <FormItemTextarea
-                                    id="booking-action-admin-note"
-                                    class="md:col-span-2"
-                                    :model-value="editForm.adminNote"
-                                    :title="$t('booking.calendar.action_dialog.fields.backhaus_note')"
-                                    :rows="3"
-                                    @update:model-value="updateField('adminNote', String($event ?? ''))"
-                                />
                             </div>
                         </div>
-                    </div>
+                    </template>
+
+                    <template v-else-if="action === 'create'">
+                        <div class="space-y-4">
+                            <div class="rounded-md border bg-muted/50 p-3 space-y-3">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                    {{ $t('booking.calendar.action_dialog.sections.car_booking') }}
+                                </p>
+                                <div class="grid grid-cols-1 gap-3">
+                                    <FormItemSelect
+                                        id="booking-create-car-id"
+                                        :model-value="editForm.carId"
+                                        :title="$t('booking.calendar.action_dialog.fields.car')"
+                                        :placeholder="$t('action.select') + ' ' + $t('booking.calendar.action_dialog.fields.car')"
+                                        :data="carOptions"
+                                        key-value="id"
+                                        name-value="name"
+                                        :searchable="true"
+                                        @update:model-value="updateField('carId', String($event ?? ''))"
+                                    />
+                                    <FormItemSelect
+                                        id="booking-create-status"
+                                        :model-value="pendingStatus"
+                                        :title="$t('booking.calendar.action_dialog.fields.status')"
+                                        :placeholder="$t('action.select') + ' ' + $t('booking.calendar.action_dialog.fields.status')"
+                                        :data="statusSelectItems"
+                                        key-value="id"
+                                        name-value="name"
+                                        @update:model-value="emit('update:pending-status', $event as BookingApiStatus)"
+                                    />
+                                </div>
+                            </div>
+                            <div class="rounded-md border bg-muted/50 p-3 space-y-3">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                    {{ $t('booking.calendar.action_dialog.sections.request_details') }}
+                                </p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <FormItemDatePicker
+                                        name="booking-create-starts-at"
+                                        :label="$t('booking.calendar.action_dialog.fields.starts_at')"
+                                        :model-value="editForm.startsAt"
+                                        format="yyyy-MM-dd HH:mm"
+                                        :time-picker="true"
+                                        :auto-apply="true"
+                                        icon="solar:calendar-linear"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.starts_at')"
+                                        @update:model-value="updateField('startsAt', String($event ?? ''))"
+                                    />
+                                    <FormItemDatePicker
+                                        name="booking-create-ends-at"
+                                        :label="$t('booking.calendar.action_dialog.fields.ends_at')"
+                                        :model-value="editForm.endsAt"
+                                        format="yyyy-MM-dd HH:mm"
+                                        :time-picker="true"
+                                        :auto-apply="true"
+                                        icon="solar:calendar-linear"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.ends_at')"
+                                        @update:model-value="updateField('endsAt', String($event ?? ''))"
+                                    />
+                                    <FormItemInput
+                                        id="booking-create-requester-name"
+                                        :model-value="editForm.requesterName"
+                                        :title="$t('booking.calendar.action_dialog.fields.requester_name')"
+                                        icon="solar:user-linear"
+                                        @update:model-value="updateField('requesterName', String($event ?? ''))"
+                                    />
+                                    <FormItemInput
+                                        id="booking-create-requester-email"
+                                        type="email"
+                                        :model-value="editForm.requesterEmail"
+                                        :title="$t('booking.calendar.action_dialog.fields.requester_email')"
+                                        icon="solar:letter-linear"
+                                        @update:model-value="updateField('requesterEmail', String($event ?? ''))"
+                                    />
+                                    <FormItemInput
+                                        id="booking-create-distance"
+                                        type="number"
+                                        :model-value="editForm.distance"
+                                        :title="$t('booking.calendar.action_dialog.fields.distance')"
+                                        icon="solar:map-point-wave-linear"
+                                        @update:model-value="updateField('distance', String($event ?? ''))"
+                                    />
+                                    <FormItemSelect
+                                        id="booking-create-group-id"
+                                        :model-value="editForm.groupId"
+                                        :title="$t('booking.calendar.action_dialog.fields.group_name')"
+                                        :placeholder="$t('action.select') + ' ' + $t('booking.calendar.action_dialog.fields.group_name')"
+                                        :data="groupOptions"
+                                        key-value="id"
+                                        name-value="name"
+                                        :searchable="true"
+                                        @update:model-value="updateField('groupId', String($event ?? ''))"
+                                    />
+                                    <FormItemTextarea
+                                        id="booking-create-requester-note"
+                                        class="md:col-span-2"
+                                        :model-value="editForm.requesterNote"
+                                        :title="$t('booking.calendar.action_dialog.fields.requester_note')"
+                                        :rows="3"
+                                        @update:model-value="updateField('requesterNote', String($event ?? ''))"
+                                    />
+                                </div>
+                            </div>
+                            <div class="rounded-md border bg-muted/50 p-3 space-y-3">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                    {{ $t('booking.calendar.action_dialog.sections.admin_details') }}
+                                </p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <FormItemInput
+                                        id="booking-create-safe-reference"
+                                        :model-value="editForm.safeReference"
+                                        :title="$t('booking.calendar.action_dialog.fields.safe_reference')"
+                                        icon="solar:folder-open-linear"
+                                        @update:model-value="updateField('safeReference', String($event ?? ''))"
+                                    />
+                                    <FormItemInput
+                                        id="booking-create-safe-pin"
+                                        :model-value="editForm.safePin"
+                                        :title="$t('booking.calendar.action_dialog.fields.safe_pin')"
+                                        icon="solar:key-linear"
+                                        @update:model-value="updateField('safePin', String($event ?? ''))"
+                                    />
+                                    <FormItemTextarea
+                                        id="booking-create-admin-note"
+                                        class="md:col-span-2"
+                                        :model-value="editForm.adminNote"
+                                        :title="$t('booking.calendar.action_dialog.fields.backhaus_note')"
+                                        :rows="3"
+                                        @update:model-value="updateField('adminNote', String($event ?? ''))"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template v-else-if="action === 'delete'">
+                        <div
+                            class="flex items-start gap-3 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-3 text-sm text-destructive"
+                        >
+                            <Icon
+                                name="solar:trash-bin-trash-linear"
+                                class="mt-0.5 size-4 shrink-0"
+                            />
+                            <span>{{ $t('booking.calendar.action_dialog.delete_warning') }}</span>
+                        </div>
+                    </template>
+
+                    <template v-else-if="action === 'edit'">
+                        <div class="space-y-4">
+                            <div class="rounded-md border bg-muted/50 p-3 space-y-3">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                    {{ $t('booking.calendar.action_dialog.sections.car_booking') }}
+                                </p>
+                                <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-center">
+                                    <FormItemSelect
+                                        id="booking-action-car-id"
+                                        :model-value="editForm.carId"
+                                        :title="$t('booking.calendar.action_dialog.fields.car')"
+                                        :placeholder="$t('action.select') + ' ' + $t('booking.calendar.action_dialog.fields.car')"
+                                        :data="carOptions"
+                                        key-value="id"
+                                        name-value="name"
+                                        :searchable="true"
+                                        :disabled="!allowEditCar"
+                                        @update:model-value="updateField('carId', String($event ?? ''))"
+                                    />
+                                    <FormItemSwitch
+                                        id="booking-action-allow-edit-car"
+                                        :model-value="allowEditCar"
+                                        :show-side-label="false"
+                                        :title="$t('booking.calendar.action_dialog.fields.allow_edit_car')"
+                                        @update:model-value="emit('update:allow-edit-car', Boolean($event))"
+                                    />
+                                </div>
+                            </div>
+                            <div class="rounded-md border bg-muted/50 p-3 space-y-3">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                    {{ $t('booking.calendar.action_dialog.sections.request_details') }}
+                                </p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <FormItemDatePicker
+                                        name="booking-action-starts-at"
+                                        :label="$t('booking.calendar.action_dialog.fields.starts_at')"
+                                        :model-value="editForm.startsAt"
+                                        format="yyyy-MM-dd HH:mm"
+                                        :time-picker="true"
+                                        :auto-apply="true"
+                                        icon="solar:calendar-linear"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.starts_at')"
+                                        @update:model-value="updateField('startsAt', String($event ?? ''))"
+                                    />
+                                    <FormItemDatePicker
+                                        name="booking-action-ends-at"
+                                        :label="$t('booking.calendar.action_dialog.fields.ends_at')"
+                                        :model-value="editForm.endsAt"
+                                        format="yyyy-MM-dd HH:mm"
+                                        :time-picker="true"
+                                        :auto-apply="true"
+                                        icon="solar:calendar-linear"
+                                        :placeholder="$t('booking.calendar.action_dialog.fields.ends_at')"
+                                        @update:model-value="updateField('endsAt', String($event ?? ''))"
+                                    />
+                                    <FormItemInput
+                                        id="booking-action-requester-name"
+                                        :model-value="editForm.requesterName"
+                                        :title="$t('booking.calendar.action_dialog.fields.requester_name')"
+                                        icon="solar:user-linear"
+                                        @update:model-value="updateField('requesterName', String($event ?? ''))"
+                                    />
+                                    <FormItemInput
+                                        id="booking-action-requester-email"
+                                        type="email"
+                                        :model-value="editForm.requesterEmail"
+                                        :title="$t('booking.calendar.action_dialog.fields.requester_email')"
+                                        icon="solar:letter-linear"
+                                        @update:model-value="updateField('requesterEmail', String($event ?? ''))"
+                                    />
+                                    <FormItemInput
+                                        id="booking-action-distance"
+                                        type="number"
+                                        :model-value="editForm.distance"
+                                        :title="$t('booking.calendar.action_dialog.fields.distance')"
+                                        icon="solar:map-point-wave-linear"
+                                        @update:model-value="updateField('distance', String($event ?? ''))"
+                                    />
+                                    <FormItemSelect
+                                        id="booking-action-group-id"
+                                        :model-value="editForm.groupId"
+                                        :title="$t('booking.calendar.action_dialog.fields.group_name')"
+                                        :placeholder="$t('action.select') + ' ' + $t('booking.calendar.action_dialog.fields.group_name')"
+                                        :data="groupOptions"
+                                        key-value="id"
+                                        name-value="name"
+                                        :searchable="true"
+                                        @update:model-value="updateField('groupId', String($event ?? ''))"
+                                    />
+                                    <FormItemTextarea
+                                        id="booking-action-requester-note"
+                                        class="md:col-span-2"
+                                        :model-value="editForm.requesterNote"
+                                        :title="$t('booking.calendar.action_dialog.fields.requester_note')"
+                                        :rows="3"
+                                        @update:model-value="updateField('requesterNote', String($event ?? ''))"
+                                    />
+                                </div>
+                            </div>
+                            <div class="rounded-md border bg-muted/50 p-3 space-y-3">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                    {{ $t('booking.calendar.action_dialog.sections.admin_details') }}
+                                </p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <FormItemInput
+                                        id="booking-action-safe-reference"
+                                        :model-value="editForm.safeReference"
+                                        :title="$t('booking.calendar.action_dialog.fields.safe_reference')"
+                                        icon="solar:folder-open-linear"
+                                        @update:model-value="updateField('safeReference', String($event ?? ''))"
+                                    />
+                                    <FormItemInput
+                                        id="booking-action-safe-pin"
+                                        :model-value="editForm.safePin"
+                                        :title="$t('booking.calendar.action_dialog.fields.safe_pin')"
+                                        icon="solar:key-linear"
+                                        @update:model-value="updateField('safePin', String($event ?? ''))"
+                                    />
+                                    <FormItemTextarea
+                                        id="booking-action-admin-note"
+                                        class="md:col-span-2"
+                                        :model-value="editForm.adminNote"
+                                        :title="$t('booking.calendar.action_dialog.fields.backhaus_note')"
+                                        :rows="3"
+                                        @update:model-value="updateField('adminNote', String($event ?? ''))"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </template>
                 </template>
             </div>
 
-            <DialogFooter>
+            <!-- Footer is hidden in locked mode — the X icon in the header is the only exit -->
+            <DialogFooter v-if="!isLockedByOther">
                 <Button
                     variant="outline"
                     :disabled="isSubmitting"
@@ -564,6 +742,7 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                     {{ $t('ui.cancel') }}
                 </Button>
                 <Button
+                    :variant="confirmButtonVariant"
                     :disabled="isSubmitting"
                     @click="emit('confirm')"
                 >

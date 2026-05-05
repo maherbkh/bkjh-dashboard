@@ -446,6 +446,39 @@ export function useBookingCalendarView() {
         return changeBookingStatus(bookingId, 'CANCELED');
     }
 
+    async function createBooking(data: {
+        carId: string;
+        startsAt: string;
+        endsAt: string;
+        requesterName: string;
+        requesterEmail: string;
+        distance: number;
+        status?: BookingApiStatus;
+        requesterNote?: string | null;
+        adminNote?: string | null;
+        groupId?: string | null;
+        safeReference?: string;
+        safePin?: string;
+    }): Promise<BookingCalendarRecord | null> {
+        const response = await fetchDashboardApi<BookingCalendarRecord>('/booking/car-bookings', {
+            method: 'POST',
+            body: {
+                ...data,
+                startsAt: createLocalIsoLike(data.startsAt),
+                endsAt: createLocalIsoLike(data.endsAt),
+            },
+        });
+        if (!response.data) return null;
+        return upsertBookingRecord(response.data);
+    }
+
+    async function deleteBooking(bookingId: string): Promise<void> {
+        await fetchDashboardApi<{ success: boolean }>(`/booking/car-bookings/${bookingId}`, {
+            method: 'DELETE',
+        });
+        removeBookingRecord(bookingId);
+    }
+
     async function loadCarsFromIndex() {
         try {
             const aggregated: Car[] = [];
@@ -1067,10 +1100,12 @@ export function useBookingCalendarView() {
         getDayCellData,
         getRangeCellData,
         getBookingById,
+        createBooking,
         updateBooking,
         changeBookingStatus,
         duplicateBooking,
         cancelBooking,
+        deleteBooking,
         refreshBookings,
         upsertBookingRecord,
         removeBookingRecord,

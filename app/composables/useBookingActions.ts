@@ -3,11 +3,12 @@ import type {
     BookingCalendarRecord,
 } from '~/composables/useBookingCalendarView';
 
-export type BookingActionType = 'edit' | 'change_status' | 'duplicate' | 'cancel';
+export type BookingActionType = 'create' | 'edit' | 'change_status' | 'duplicate' | 'cancel' | 'delete';
 
 export type BookingActionSelection = {
     action: BookingActionType;
-    bookingId: string;
+    /** Not required when action is 'create'. */
+    bookingId?: string;
     nextStatus?: BookingApiStatus;
 };
 
@@ -40,6 +41,20 @@ type BookingStatusOptionApiItem = {
 
 type UseBookingActionsOptions = {
     getBookingById: (bookingId: string) => BookingCalendarRecord | null;
+    createBooking: (data: {
+        carId: string;
+        startsAt: string;
+        endsAt: string;
+        requesterName: string;
+        requesterEmail: string;
+        distance: number;
+        status?: BookingApiStatus;
+        requesterNote?: string | null;
+        adminNote?: string | null;
+        groupId?: string | null;
+        safeReference?: string;
+        safePin?: string;
+    }) => Promise<BookingCalendarRecord | null>;
     updateBooking: (bookingId: string, patch: Partial<Omit<BookingCalendarRecord, 'id'>>) => Promise<BookingCalendarRecord | null>;
     changeBookingStatus: (
         bookingId: string,
@@ -54,6 +69,7 @@ type UseBookingActionsOptions = {
     ) => Promise<BookingCalendarRecord | null>;
     duplicateBooking: (bookingId: string) => Promise<BookingCalendarRecord | null>;
     cancelBooking: (bookingId: string) => Promise<BookingCalendarRecord | null>;
+    deleteBooking: (bookingId: string) => Promise<void>;
 };
 
 function toDateTimeLocalValue(value: string): string {
@@ -227,20 +243,43 @@ export function useBookingActions(options: UseBookingActionsOptions) {
     }
 
     function openAction(selection: BookingActionSelection) {
-        const booking = options.getBookingById(selection.bookingId);
-        if (!booking) return;
-
-        selectedBookingId.value = selection.bookingId;
         currentAction.value = selection.action;
-        pendingStatus.value = selection.nextStatus ?? booking.status;
-        hydrateEditForm(booking);
         statusNote.value = '';
         sendEmail.value = false;
         emailOption.value = 'requester';
         customEmails.value = '';
         emailError.value = '';
         showSafeFields.value = false;
+
+        if (selection.action === 'create') {
+            selectedBookingId.value = null;
+            pendingStatus.value = 'APPROVED';
+            allowEditCar.value = true;
+            editForm.value = {
+                carId: '',
+                startsAt: '',
+                endsAt: '',
+                requesterName: '',
+                requesterEmail: '',
+                distance: '',
+                requesterNote: '',
+                adminNote: '',
+                groupId: '',
+                safeReference: '',
+                safePin: '',
+            };
+            loadStatusOptions('PENDING');
+            isDialogOpen.value = true;
+            return;
+        }
+
+        const booking = options.getBookingById(selection.bookingId ?? '');
+        if (!booking) return;
+
+        selectedBookingId.value = selection.bookingId ?? null;
+        pendingStatus.value = selection.nextStatus ?? booking.status;
         allowEditCar.value = false;
+        hydrateEditForm(booking);
         loadStatusOptions(booking.status);
         isDialogOpen.value = true;
     }
@@ -257,10 +296,34 @@ export function useBookingActions(options: UseBookingActionsOptions) {
     }
 
     async function confirmAction(): Promise<BookingCalendarRecord | null> {
-        if (!selectedBookingId.value || !currentAction.value) return null;
+        if (!currentAction.value) return null;
         isSubmitting.value = true;
 
         try {
+            if (currentAction.value === 'create') {
+                return options.createBooking({
+                    carId: editForm.value.carId,
+                    startsAt: editForm.value.startsAt,
+                    endsAt: editForm.value.endsAt,
+                    requesterName: editForm.value.requesterName,
+                    requesterEmail: editForm.value.requesterEmail,
+                    distance: Number(editForm.value.distance || 0),
+                    status: pendingStatus.value,
+                    requesterNote: editForm.value.requesterNote || null,
+                    adminNote: editForm.value.adminNote || null,
+                    groupId: editForm.value.groupId || null,
+                    safeReference: editForm.value.safeReference || undefined,
+                    safePin: editForm.value.safePin || undefined,
+                });
+            }
+
+            if (!selectedBookingId.value) return null;
+
+            if (currentAction.value === 'delete') {
+                await options.deleteBooking(selectedBookingId.value);
+                return null;
+            }
+
             if (currentAction.value === 'edit') {
                 return options.updateBooking(selectedBookingId.value, {
                     startsAt: editForm.value.startsAt,

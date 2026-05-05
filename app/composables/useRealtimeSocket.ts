@@ -95,7 +95,8 @@ export function useRealtimeSocket(config: RealtimeSocketConfig) {
      */
     async function connect(): Promise<void> {
         if (!import.meta.client || entry.connecting || entry.stopping) return;
-        if (entry.socket?.connected) return;
+        // active = connected OR Socket.IO is internally retrying — either way, don't interfere
+        if (entry.socket?.active) return;
 
         entry.connecting = true;
         entry.connectionState.value = 'connecting';
@@ -150,7 +151,6 @@ export function useRealtimeSocket(config: RealtimeSocketConfig) {
 
             // Application events → fan-out to bus
             socket.onAny((event: string, payload: unknown) => {
-                console.info(`[realtime:${config.key}] event:${event}`, payload);
                 _dispatch(entry.bus, event, payload);
             });
 
@@ -177,7 +177,9 @@ export function useRealtimeSocket(config: RealtimeSocketConfig) {
             entry.socket.disconnect();
         }
         entry.socket = null;
-        entry.bus.clear();
+        // Do NOT clear the bus — handlers are owned by feature composables (leave() does that).
+        // Clearing here would silently drop all subscriptions when a transient auth error
+        // triggers stop() while the page is still mounted, causing a dead connection on reconnect.
         entry.connectionState.value = 'stopped';
         entry.stopping = false;
         _pool.delete(config.key);

@@ -32,10 +32,12 @@ const {
     getDayCellData,
     getRangeCellData,
     getBookingById,
+    createBooking,
     updateBooking,
     changeBookingStatus,
     duplicateBooking,
     cancelBooking,
+    deleteBooking,
     refreshBookings,
     upsertBookingRecord,
     removeBookingRecord,
@@ -67,10 +69,12 @@ const {
     confirmAction,
 } = useBookingActions({
     getBookingById,
+    createBooking,
     updateBooking,
     changeBookingStatus,
     duplicateBooking,
     cancelBooking,
+    deleteBooking,
 });
 
 const isRequesterInternalEmail = computed(() => {
@@ -137,14 +141,35 @@ const currentEditors = computed(() => {
     return editorsOf(selectedBooking.value.id);
 });
 
+function onAddNew() {
+    onOpenAction({ action: 'create' });
+}
+
 // Only emit booking:edit-start for actions that involve modifying the record.
 // 'duplicate' and 'cancel' are immediate one-shot operations, not collaborative edits.
 const EDITING_ACTIONS = new Set<string>(['edit', 'change_status']);
 
+// Whether THIS admin opened the dialog while another admin already had it open.
+// Captured as a snapshot at open time — not reactive — so the first editor is never
+// locked out after a second person joins mid-session.
+const isBookingLockedByOther = ref(false);
+
 function onOpenAction(selection: Parameters<typeof openAction>[0]) {
     openAction(selection);
-    if (EDITING_ACTIONS.has(selection.action)) {
-        startEditing(selection.bookingId);
+    if (selection.bookingId && EDITING_ACTIONS.has(selection.action)) {
+        // Snapshot the editor list BEFORE emitting edit-start so we can decide
+        // whether this admin is the primary editor or a read-only viewer.
+        const otherEditorsNow = editorsOf(selection.bookingId)
+            .filter(e => e.adminId !== userStore.user?.id);
+        isBookingLockedByOther.value = otherEditorsNow.length > 0;
+        // Only claim editing presence if no one else is already editing.
+        // Read-only viewers don't emit edit-start so they don't appear in the banner.
+        if (!isBookingLockedByOther.value) {
+            startEditing(selection.bookingId);
+        }
+    }
+    else {
+        isBookingLockedByOther.value = false;
     }
 }
 
@@ -152,8 +177,10 @@ function onCloseDialog() {
     // Capture before closeDialog() resets dialog state
     const bookingId = selectedBooking.value?.id;
     const action = currentAction.value;
+    const wasEditor = !isBookingLockedByOther.value;
     closeDialog();
-    if (bookingId && action && EDITING_ACTIONS.has(action)) {
+    isBookingLockedByOther.value = false;
+    if (bookingId && action && EDITING_ACTIONS.has(action) && wasEditor) {
         stopEditing(bookingId);
     }
 }
@@ -162,8 +189,10 @@ async function onConfirmAction() {
     // Capture before confirmAction() calls closeDialog() in its finally block
     const bookingId = selectedBooking.value?.id;
     const action = currentAction.value;
+    const wasEditor = !isBookingLockedByOther.value;
     await confirmAction();
-    if (bookingId && action && EDITING_ACTIONS.has(action)) {
+    isBookingLockedByOther.value = false;
+    if (bookingId && action && EDITING_ACTIONS.has(action) && wasEditor) {
         stopEditing(bookingId);
     }
 }
@@ -321,8 +350,9 @@ useSeoMeta({
         <PageHeaderActions
             :page-title="pageTitle"
             :page-icon="pageIcon || 'mingcute:car-3-line'"
-            :has-add-new="false"
+            :has-add-new="true"
             :has-deleted-items="false"
+            @add-new="onAddNew"
         />
 
         <div
@@ -414,6 +444,7 @@ useSeoMeta({
                 :edit-form="editForm"
                 :is-submitting="isSubmitting"
                 :editors="currentEditors"
+                :current-admin-id="userStore.user?.id"
                 @update:open="(value: boolean) => value ? null : onCloseDialog()"
                 @update:pending-status="pendingStatus = $event"
                 @update:status-note="statusNote = $event"

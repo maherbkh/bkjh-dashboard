@@ -98,50 +98,58 @@
         "edit": "Edit booking",
         "duplicate": "Duplicate booking",
         "change_status": "Change status",
-        "cancel_booking": "Cancel booking"
+        "cancel_booking": "Cancel booking",
+        "delete_booking": "Delete booking"
       },
       "action_dialog": {
         "title": {
+          "create": "Create booking",
           "edit": "Edit booking",
-          "change_status": "Change booking status",
+          "change_status": "Change status",
           "duplicate": "Duplicate booking",
-          "cancel": "Cancel booking"
+          "cancel": "Cancel booking",
+          "delete": "Delete booking"
         },
         "description": {
+          "create": "Create a new vehicle booking.",
           "edit": "Update booking details and keep the timeline in sync.",
           "change_status": "Select the new booking status to apply.",
           "duplicate": "Create a new booking by duplicating this one.",
-          "cancel": "Mark this booking as canceled."
+          "cancel": "Mark this booking as canceled.",
+          "delete": "This action cannot be undone."
         },
         "confirm": {
+          "create": "Create booking",
           "edit": "Save changes",
           "change_status": "Update status",
           "duplicate": "Create duplicate",
-          "cancel": "Confirm cancel"
+          "cancel": "Confirm cancel",
+          "delete": "Delete permanently"
         },
+        "delete_warning": "This booking will be permanently deleted and cannot be recovered.",
         "fields": {
           "status": "Status",
-          "starts_at": "Starts at",
-          "ends_at": "Ends at",
-          "requester_name": "Requester name",
+          "starts_at": "Start",
+          "ends_at": "End",
+          "requester_name": "Requester",
           "requester_email": "Requester email",
           "distance": "Distance",
           "requester_note": "Requester note",
-          "requester_note_empty": "No requester note",
+          "requester_note_empty": "No note",
           "car": "Car",
-          "allow_edit_car": "Allow Edit Car",
+          "allow_edit_car": "Allow car edit",
           "admin_note": "Admin note",
-          "backhaus_note": "Backhaus Note",
+          "backhaus_note": "Backhaus note",
           "group_name": "Group",
-          "not_defined": "Not Defined",
+          "not_defined": "Not set",
           "group_id": "Group ID",
           "duration": "Duration",
-          "safe_reference": "Safe reference",
+          "safe_reference": "Safe ref",
           "safe_pin": "Safe PIN",
           "note": "Note",
-          "note_placeholder": "Add an optional note for this status change...",
-          "send_email": "Send email notification",
-          "show_safe_fields": "Provide Safe reference and PIN"
+          "note_placeholder": "Add an optional note...",
+          "send_email": "Send email",
+          "show_safe_fields": "Add safe ref and PIN"
         },
         "email": {
           "requester": "Requester email",
@@ -159,6 +167,9 @@
           "car_booking": "Car Booking",
           "request_details": "Request Details",
           "admin_details": "Admin Details"
+        },
+        "presence": {
+          "being_edited_by": "Currently being edited by"
         }
       },
       "status_options": {

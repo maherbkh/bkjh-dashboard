@@ -98,50 +98,58 @@
         "edit": "Buchung bearbeiten",
         "duplicate": "Buchung duplizieren",
         "change_status": "Status andern",
-        "cancel_booking": "Buchung stornieren"
+        "cancel_booking": "Buchung stornieren",
+        "delete_booking": "Buchung loschen"
       },
       "action_dialog": {
         "title": {
+          "create": "Buchung erstellen",
           "edit": "Buchung bearbeiten",
-          "change_status": "Buchungsstatus andern",
+          "change_status": "Status andern",
           "duplicate": "Buchung duplizieren",
-          "cancel": "Buchung stornieren"
+          "cancel": "Buchung stornieren",
+          "delete": "Buchung loschen"
         },
         "description": {
+          "create": "Erstelle eine neue Buchung fur ein Fahrzeug.",
           "edit": "Aktualisiere die Buchungsdetails und halte die Timeline konsistent.",
           "change_status": "Wahle den neuen Buchungsstatus aus.",
           "duplicate": "Erstelle eine neue Buchung als Duplikat dieser Buchung.",
-          "cancel": "Markiere diese Buchung als storniert."
+          "cancel": "Markiere diese Buchung als storniert.",
+          "delete": "Diese Aktion kann nicht ruckgangig gemacht werden."
         },
         "confirm": {
+          "create": "Buchung erstellen",
           "edit": "Anderungen speichern",
           "change_status": "Status aktualisieren",
           "duplicate": "Duplikat erstellen",
-          "cancel": "Stornierung bestatigen"
+          "cancel": "Stornierung bestatigen",
+          "delete": "Endgultig loschen"
         },
+        "delete_warning": "Diese Buchung wird dauerhaft geloscht und kann nicht wiederhergestellt werden.",
         "fields": {
           "status": "Status",
-          "starts_at": "Startet am",
-          "ends_at": "Endet am",
-          "requester_name": "Name der anfragenden Person",
-          "requester_email": "E-Mail der anfragenden Person",
+          "starts_at": "Start",
+          "ends_at": "Ende",
+          "requester_name": "Anfragende Person",
+          "requester_email": "E-Mail",
           "distance": "Strecke",
-          "requester_note": "Notiz der anfragenden Person",
-          "requester_note_empty": "Keine Notiz der anfragenden Person",
+          "requester_note": "Notiz",
+          "requester_note_empty": "Keine Notiz",
           "car": "Auto",
-          "allow_edit_car": "Auto bearbeiten erlauben",
+          "allow_edit_car": "Auto bearbeitbar",
           "admin_note": "Admin-Notiz",
           "backhaus_note": "Backhaus-Notiz",
           "group_name": "Gruppe",
-          "not_defined": "Nicht definiert",
+          "not_defined": "Nicht gesetzt",
           "group_id": "Gruppen-ID",
           "duration": "Dauer",
-          "safe_reference": "Safe-Referenz",
+          "safe_reference": "Safe-Ref.",
           "safe_pin": "Safe-PIN",
           "note": "Notiz",
-          "note_placeholder": "Fuge eine optionale Notiz zu dieser Statusanderung hinzu...",
-          "send_email": "E-Mail-Benachrichtigung senden",
-          "show_safe_fields": "Safe-Referenz und PIN ausfullen"
+          "note_placeholder": "Optionale Notiz hinzufugen...",
+          "send_email": "E-Mail senden",
+          "show_safe_fields": "Safe-Ref. und PIN angeben"
         },
         "email": {
           "requester": "E-Mail der anfragenden Person",
@@ -159,6 +167,9 @@
           "car_booking": "Auto-Buchung",
           "request_details": "Anfragedetails",
           "admin_details": "Backhaus-Details"
+        },
+        "presence": {
+          "being_edited_by": "Wird gerade bearbeitet von"
         }
       },
       "status_options": {

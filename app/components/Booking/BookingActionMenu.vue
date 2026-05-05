@@ -76,10 +76,6 @@ function emitAction(
                 <Icon name="solar:pen-linear" />
                 {{ $t('booking.calendar.action_menu.edit') }}
             </ContextMenuItem>
-            <ContextMenuItem @select="emitAction('duplicate')">
-                <Icon name="solar:copy-outline" />
-                {{ $t('booking.calendar.action_menu.duplicate') }}
-            </ContextMenuItem>
 
             <ContextMenuSub>
                 <ContextMenuSubTrigger class="gap-2">
@@ -112,10 +108,10 @@ function emitAction(
             <ContextMenuSeparator />
             <ContextMenuItem
                 variant="destructive"
-                @select="emitAction('cancel', 'CANCELED')"
+                @select="emitAction('delete')"
             >
-                <Icon name="solar:close-circle-outline" />
-                {{ $t('booking.calendar.action_menu.cancel_booking') }}
+                <Icon name="solar:trash-bin-trash-linear" />
+                {{ $t('booking.calendar.action_menu.delete_booking') }}
             </ContextMenuItem>
         </ContextMenuContent>
     </ContextMenu>
