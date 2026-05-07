@@ -8,7 +8,7 @@ import type { SettingValueType } from './settings';
 /**
  * Application domain types
  */
-export type AppDomainType = 'SHARED' | 'DASHBOARD' | 'SUPPORT' | 'ACADEMY' | 'SIGNATURE';
+export type AppDomainType = 'SHARED' | 'DASHBOARD' | 'SUPPORT' | 'ACADEMY' | 'SIGNATURE' | 'BOOKING' | 'HAUSMEISTER';
 
 /**
  * Setting section with children

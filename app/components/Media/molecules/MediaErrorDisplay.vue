@@ -9,7 +9,10 @@
             :variant="getAlertVariant(error)"
             class="border-destructive/50 text-destructive dark:border-destructive"
         >
-            <AlertCircle class="h-4 w-4" />
+            <Icon
+                name="solar:danger-triangle-outline"
+                class="h-4 w-4"
+            />
             <AlertTitle>{{ getErrorTitle(error) }}</AlertTitle>
             <AlertDescription>
                 {{ getUserFriendlyMessage(error) }}
@@ -63,7 +66,6 @@
 </template>
 
 <script setup lang="ts">
-import { AlertCircle } from 'lucide-vue-next';
 import type { MediaError } from '~/types/media/index';
 import { ValidationError, UploadError, PermissionError } from '~/types/media/index';
 

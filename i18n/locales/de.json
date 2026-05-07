@@ -965,6 +965,12 @@
     "singular": "IT-Support",
     "description": "Tickets effizient verwalten."
   },
+  "hausmeister": {
+    "plural": "Hausmeister",
+    "singular": "Hausmeister",
+    "description": "Gebäudebetrieb verwalten.",
+    "overview": "Übersicht"
+  },
   "language": {
     "description": "Wählen Sie Ihre bevorzugte Sprache für die Anwendung",
     "plural": "Sprachen",

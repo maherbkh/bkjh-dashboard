@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { useSidebar } from '~/components/ui/sidebar';
 import { useAppStore } from '~/stores/app';
-
-type AppSlugType = 'support' | 'academy' | 'booking' | 'dashboard';
+import { APP_SLUGS } from '~/types/app';
+import type { AppSlug } from '~/types/app';
 
 const props = defineProps<{
     apps: {
         name: string;
         logo: string;
-        slug: string;
+        slug: AppSlug;
         description: string;
     }[];
 }>();
@@ -29,8 +29,8 @@ const activeApp = computed(() => {
 
 // Handle app switching
 const handleAppClick = (app: typeof props.apps[0]) => {
-    if (app.slug === 'support' || app.slug === 'academy' || app.slug === 'booking' || app.slug === 'dashboard') {
-        appStore.setAppSlug(app.slug as AppSlugType);
+    if (APP_SLUGS.includes(app.slug)) {
+        appStore.setAppSlug(app.slug);
         // Navigate to home dashboard page when app is switched
         navigateTo('/');
     }

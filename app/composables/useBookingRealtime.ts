@@ -23,8 +23,6 @@ import type {
     BookingEditorsChangedPayload,
 } from '~/types/carBookingRealtime';
 
-export type { BookingEditorInfo };
-
 // ── Public callback types ─────────────────────────────────────────────────────
 
 export type BookingRealtimeCallbacks = {
@@ -38,7 +36,7 @@ export type BookingRealtimeCallbacks = {
      * The reactive `editorsMap` is always kept in sync; this callback is optional
      * and useful when the caller wants to react to specific changes imperatively.
      */
-    onEditorsChanged?: (bookingId: string, editors: BookingEditorInfo[]) => void;
+    onEditorsChanged?: (bookingId: string, editors: readonly BookingEditorInfo[]) => void;
 };
 
 export type BookingRealtimeConfig = {
@@ -146,7 +144,7 @@ export function useBookingRealtime(config: BookingRealtimeConfig, callbacks: Boo
 
     // Reactive presence map: bookingId → current editors
     // shallowRef so Vue tracks Map identity changes; we swap on every update.
-    const editorsMap = shallowRef<Map<string, BookingEditorInfo[]>>(new Map());
+    const editorsMap = shallowRef<Map<string, readonly BookingEditorInfo[]>>(new Map());
 
     // ── Event handlers ─────────────────────────────────────────────────────────
     // All registered immediately — events during the handshake are never missed.
@@ -233,7 +231,7 @@ export function useBookingRealtime(config: BookingRealtimeConfig, callbacks: Boo
     }
 
     /** Returns the list of admins currently editing the given booking (empty if none). */
-    function editorsOf(bookingId: string): BookingEditorInfo[] {
+    function editorsOf(bookingId: string): readonly BookingEditorInfo[] {
         return editorsMap.value.get(bookingId) ?? [];
     }
 

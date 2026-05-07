@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { PrimitiveProps } from 'reka-ui';
-import { Minus } from 'lucide-vue-next';
 import { Primitive, useForwardProps } from 'reka-ui';
 
 const props = defineProps<PrimitiveProps>();
@@ -13,7 +12,10 @@ const forwardedProps = useForwardProps(props);
         v-bind="forwardedProps"
     >
         <slot>
-            <Minus />
+            <Icon
+                name="solar:minus-circle-linear"
+                class="size-4"
+            />
         </slot>
     </Primitive>
 </template>

@@ -672,10 +672,7 @@ export type PublicDataResponse = {
 export type PublicData = PublicDataResponse['data'];
 
 // App related types
-export enum AppSlug {
-    SUPPORT = 'support',
-    ACADEMY = 'academy',
-}
+export type { AppSlug } from './app';
 
 export type Permission = {
     id: number;

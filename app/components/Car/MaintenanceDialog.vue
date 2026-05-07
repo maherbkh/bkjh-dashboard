@@ -212,7 +212,6 @@ async function handleDelete(record: CarMaintenance) {
     >
         <template #content>
             <div class="flex flex-col gap-4">
-
                 <!-- Add button (hidden while form is open) -->
                 <div
                     v-if="!showForm"

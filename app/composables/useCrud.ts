@@ -3,10 +3,11 @@ import { toTypedSchema } from '@vee-validate/zod';
 import type { ZodSchema } from 'zod';
 import { toast } from 'vue-sonner';
 import type { CrudItem, PaginatedResponse, Category } from '~/types';
+import type { TenantSlug } from '~/types/app';
 
 type CrudOptions = {
     crudPath: string;
-    tenant: 'shared' | 'academy' | 'support' | 'dashboard' | 'booking';
+    tenant: TenantSlug;
     translations?: {
         add_success?: string;
         edit_success?: string;

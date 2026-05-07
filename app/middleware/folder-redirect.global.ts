@@ -1,7 +1,5 @@
-import { useAppStore } from '~/stores/app';
-
 export default defineNuxtRouteMiddleware((to) => {
-    const appStore = useAppStore();
+    const { isBooking } = useApp();
 
     // Define folder redirects mapping
     const folderRedirects: Record<string, string> = {
@@ -17,7 +15,7 @@ export default defineNuxtRouteMiddleware((to) => {
         : to.path;
 
     if (normalizedPath === '/master-data') {
-        if (appStore.appSlug === 'booking') {
+        if (isBooking.value) {
             return navigateTo('/master-data/cars');
         }
         return navigateTo('/master-data/companies');

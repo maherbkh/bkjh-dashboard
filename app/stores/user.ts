@@ -1,6 +1,7 @@
 import { toast } from 'vue-sonner';
 import type { LocationQueryValue } from '#vue-router';
 import type { Credentials, LoginData, LoginResponse, ResetPasswordForm, User } from '~/types/index';
+import type { AppSlug } from '~/types/app';
 import { useResourcesStore } from '~/stores/resources';
 import { useAppStore } from '~/stores/app';
 
@@ -76,7 +77,7 @@ export const useUserStore = defineStore('user', () => {
             else if (userApps.length > 0) {
                 // Use first app from user's available apps
                 const firstUserApp = userApps[0];
-                appStore.setAppSlug(firstUserApp as 'support' | 'academy' | 'booking' | 'dashboard');
+                appStore.setAppSlug(firstUserApp as AppSlug);
             }
             else {
                 // Fallback to dashboard if user has no apps

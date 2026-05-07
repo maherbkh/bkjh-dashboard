@@ -93,13 +93,13 @@ const showPassword = ref(false);
             >
                 <Icon
                     v-if="showPassword"
-                    name="i-lucide-eye"
+                    name="solar:eye-outline"
                     class="size-4 shrink-0"
                     aria-hidden="true"
                 />
                 <Icon
                     v-else
-                    name="i-lucide-eye-off"
+                    name="solar:eye-closed-outline"
                     class="shrink-0 size-4"
                     aria-hidden="true"
                 />

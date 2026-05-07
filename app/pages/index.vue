@@ -5,18 +5,17 @@
                 {{ $t('auth.welcome_back') }}, {{ userStore.user?.firstName || userStore.user?.name || 'User' }}
             </h1>
         </div>
-        <!--    <DashboardTicketingOverview v-if="appStore.isSupport" /> -->
-        <DashboardAcademy v-if="appStore.isAcademy" />
+        <!--    <DashboardTicketingOverview v-if="isSupport" /> -->
+        <DashboardAcademy v-if="isAcademy" />
     </div>
 </template>
 
 <script setup lang="ts">
 import { useUserStore } from '~/stores/user';
-import { useAppStore } from '~/stores/app';
 
 const { t } = useI18n();
 const userStore = useUserStore();
-const appStore = useAppStore();
+const { isSupport, isAcademy } = useApp();
 
 // Set page title with translation
 useHead({

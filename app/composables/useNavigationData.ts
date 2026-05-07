@@ -1,4 +1,5 @@
 // Using global types from types/index.d.ts
+import type { AppSlug } from '~/types/app';
 import { useAppStore } from '~/stores/app';
 import { useUserStore } from '~/stores/user';
 
@@ -6,20 +7,20 @@ export const useNavigationData = (): ComputedRef<{
     apps: Array<{
         name: string;
         logo: string;
-        slug: string;
+        slug: AppSlug;
     }>;
     navMain: Array<{
         title: string;
         url: string;
         icon: string;
         isActive?: boolean;
-        apps: ('support' | 'academy' | 'dashboard' | 'booking')[];
+        apps: AppSlug[];
         requireSuperAdmin?: boolean;
         items: Array<{
             title: string;
             url: string;
             icon: string;
-            apps: ('support' | 'academy' | 'dashboard' | 'booking')[];
+            apps: AppSlug[];
             requireSuperAdmin?: boolean;
         }>;
     }>;
@@ -31,7 +32,15 @@ export const useNavigationData = (): ComputedRef<{
         const userStore = useUserStore();
         const isSuperAdmin = userStore.user?.isSuperAdmin || false;
 
-        const allNavigation = {
+        const allNavigation: {
+            apps: Array<{
+                name: string;
+                logo: string;
+                slug: AppSlug;
+                description: string;
+            }>;
+            navMain: any[];
+        } = {
             apps: [
                 {
                     name: t('it_support.singular'),
@@ -50,6 +59,12 @@ export const useNavigationData = (): ComputedRef<{
                     logo: 'solar:calendar-add-outline',
                     slug: 'booking',
                     description: t('booking.description'),
+                },
+                {
+                    name: t('hausmeister.plural'),
+                    logo: 'solar:home-smile-outline',
+                    slug: 'hausmeister',
+                    description: t('hausmeister.description'),
                 },
             ],
             navMain: [
@@ -184,6 +199,21 @@ export const useNavigationData = (): ComputedRef<{
                     ],
                 },
                 {
+                    title: t('hausmeister.plural'),
+                    url: '#',
+                    icon: 'solar:home-smile-outline',
+                    isActive: false,
+                    apps: ['hausmeister'],
+                    items: [
+                        {
+                            title: t('hausmeister.overview'),
+                            url: '/hausmeister',
+                            icon: 'solar:home-2-outline',
+                            apps: ['hausmeister'],
+                        },
+                    ],
+                },
+                {
                     title: t('setting.plural'),
                     url: '#',
                     icon: 'solar:settings-outline',
@@ -236,7 +266,7 @@ export const useNavigationData = (): ComputedRef<{
                 return true;
             }
             // Check if item is for current app
-            return item.apps && item.apps.includes(appStore.appSlug as 'support' | 'academy' | 'dashboard' | 'booking');
+            return item.apps && item.apps.includes(appStore.appSlug as AppSlug);
         }).map((item: any) => ({
             ...item,
             items: item.items.filter((subItem: any) => {
@@ -249,7 +279,7 @@ export const useNavigationData = (): ComputedRef<{
                     return true;
                 }
                 // Check if sub-item is for current app
-                return subItem.apps && subItem.apps.includes(appStore.appSlug as 'support' | 'academy' | 'dashboard' | 'booking');
+                return subItem.apps && subItem.apps.includes(appStore.appSlug as AppSlug);
             }),
         }));
 

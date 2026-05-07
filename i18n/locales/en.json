@@ -965,6 +965,12 @@
     "singular": "IT Support",
     "description": "Manage support tickets."
   },
+  "hausmeister": {
+    "plural": "Hausmeister",
+    "singular": "Hausmeister",
+    "description": "Manage facility operations.",
+    "overview": "Overview"
+  },
   "language": {
     "description": "Choose your preferred language for the application",
     "plural": "Languages",

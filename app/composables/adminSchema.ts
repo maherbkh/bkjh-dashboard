@@ -1,5 +1,13 @@
 import { z } from 'zod';
-import type { AdminForm } from '~/types';
+import { APP_SLUGS } from '~/types/app';
+
+const APP_LABELS: Record<(typeof APP_SLUGS)[number], string> = {
+    support: 'IT Support',
+    academy: 'Academy',
+    dashboard: 'Dashboard',
+    booking: 'Booking',
+    hausmeister: 'Hausmeister',
+};
 
 export const createAdminSchema = (t: (key: string, params?: Record<string, string | number>) => string) => {
     return z.object({
@@ -44,7 +52,7 @@ export const createAdminSchema = (t: (key: string, params?: Record<string, strin
             .nullable()
             .optional(),
 
-        apps: z.array(z.enum(['dashboard', 'support', 'academy', 'booking']))
+        apps: z.array(z.enum(APP_SLUGS))
             .default(['dashboard'])
             .refine(apps => apps.length > 0, {
                 message: t('validation.required'),
@@ -74,10 +82,10 @@ export const createAdminUpdateSchema = (t: (key: string, params?: Record<string,
 
 // Available apps options
 export const AVAILABLE_APPS = [
-    { value: 'dashboard', label: 'Dashboard' },
-    { value: 'support', label: 'IT Support' },
-    { value: 'academy', label: 'Academy' },
-    { value: 'booking', label: 'Booking' },
+    ...APP_SLUGS.map(value => ({
+        value,
+        label: APP_LABELS[value],
+    })),
 ] as const;
 
 export type AdminSchemaType = z.infer<ReturnType<typeof createAdminSchema>>;

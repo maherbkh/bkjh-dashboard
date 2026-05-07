@@ -16,4 +16,6 @@ export enum AppDomain {
     SUPPORT = 'SUPPORT',
     SHARED = 'SHARED',
     SIGNATURE = 'SIGNATURE',
+    BOOKING = 'BOOKING',
+    HAUSMEISTER = 'HAUSMEISTER',
 }
