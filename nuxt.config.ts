@@ -181,6 +181,7 @@ export default defineNuxtConfig({
                 '@unovis/vue',
                 'zod',
                 '@vee-validate/zod',
+                'socket.io-client',
             ],
         },
         build: {

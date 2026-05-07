@@ -71,6 +71,11 @@ function handleLegendItemClick(d: BulletLegendItemInterface, i: number) {
 const VisBarComponent = computed(() => props.type === 'grouped' ? VisGroupedBar : VisStackedBar);
 const selectorsBar = computed(() => props.type === 'grouped' ? GroupedBar.selectors.bar : StackedBar.selectors.bar);
 
+const isCategoryInactive = (category: string): boolean => {
+    const match = legendItems.value.find(item => (item as { originalName?: string }).originalName === category || item.name === category);
+    return Boolean(match?.inactive);
+};
+
 // Get muted foreground color from CSS variable
 const mutedForegroundColor = computed(() => {
     if (typeof window === 'undefined') {
@@ -116,7 +121,8 @@ const mutedForegroundColor = computed(() => {
                     [selectorsBar]: {
                         opacity: (d: Data, i:number) => {
                             const pos = i % categories.length
-                            return legendItems[pos]?.inactive ? filterOpacity : 1
+                            const category = categories[pos];
+                            return category && isCategoryInactive(category) ? filterOpacity : 1
                         },
                     },
                 }"

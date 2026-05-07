@@ -62,6 +62,11 @@ const legendItems = ref<BulletLegendItemInterface[]>(props.categories.map((categ
     originalName: category, // Keep original for data lookup
 })));
 
+const isCategoryInactive = (category: string): boolean => {
+    const match = legendItems.value.find(item => (item as { originalName?: string }).originalName === category || item.name === category);
+    return Boolean(match?.inactive);
+};
+
 const isMounted = useMounted();
 
 function handleLegendItemClick(d: BulletLegendItemInterface, i: number) {
@@ -111,7 +116,7 @@ const mutedForegroundColor = computed(() => {
                     :color="colors[i]"
                     :attributes="{
                         [Line.selectors.line]: {
-                            opacity: legendItems.find(item => item.name === category)?.inactive ? filterOpacity : 1,
+                            opacity: isCategoryInactive(category) ? filterOpacity : 1,
                         },
                     }"
                 />

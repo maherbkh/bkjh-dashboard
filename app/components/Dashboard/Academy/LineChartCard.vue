@@ -157,7 +157,15 @@ const emit = defineEmits<{
     legendItemClick: [d: BulletLegendItemInterface, i: number];
 }>();
 
-const chartData = computed(() => props.data);
+const chartData = computed(() => {
+    return props.data.filter((item) => {
+        return props.categories.some((category) => {
+            const raw = item[category];
+            const value = typeof raw === 'number' ? raw : Number(raw);
+            return Number.isFinite(value);
+        });
+    });
+});
 
 const handleLegendItemClick = (d: BulletLegendItemInterface, i: number) => {
     emit('legendItemClick', d, i);

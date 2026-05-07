@@ -46,18 +46,27 @@ const valueFormatter = props.valueFormatter ?? ((tick: number) => `${tick}`);
 const category = computed(() => props.category as KeyOfT);
 const index = computed(() => props.index as KeyOfT);
 
+function toFiniteNumber(value: unknown): number {
+    const numeric = typeof value === 'number' ? value : Number(value);
+    return Number.isFinite(numeric) ? numeric : 0;
+}
+
 const isMounted = useMounted();
 const activeSegmentKey = ref<string>();
-const colors = computed(() => props.colors?.length ? props.colors : defaultColors(props.data.filter(d => d[props.category]).filter(Boolean).length));
-const legendItems = computed(() => props.data.map((item, i) => ({
-    name: item[props.index],
+const sanitizedData = computed(() => {
+    return props.data.filter((entry) => {
+        const value = toFiniteNumber(entry[category.value]);
+        return value > 0;
+    });
+});
+const colors = computed(() => props.colors?.length ? props.colors : defaultColors(sanitizedData.value.length));
+const legendItems = computed(() => sanitizedData.value.map((item, i) => ({
+    name: String(item[index.value] ?? `series-${i + 1}`),
     color: colors.value[i],
     inactive: false,
 })));
 
-const totalValue = computed(() => props.data.reduce((prev, curr) => {
-    return prev + curr[props.category];
-}, 0));
+const totalValue = computed(() => sanitizedData.value.reduce((prev, curr) => prev + toFiniteNumber(curr[category.value]), 0));
 </script>
 
 <template>
@@ -65,7 +74,7 @@ const totalValue = computed(() => props.data.reduce((prev, curr) => {
         <VisSingleContainer
             :style="{ height: isMounted ? '100%' : 'auto' }"
             :margin="{ left: 20, right: 20 }"
-            :data="data"
+            :data="sanitizedData"
         >
             <ChartSingleTooltip
                 :selector="Donut.selectors.segment"
@@ -76,12 +85,12 @@ const totalValue = computed(() => props.data.reduce((prev, curr) => {
             />
 
             <VisDonut
-                :value="(d: Data) => d[category]"
+                :value="(d: Data) => toFiniteNumber(d[category])"
                 :sort-function="sortFunction"
                 :color="colors"
                 :arc-width="type === 'donut' ? 20 : 0"
                 :show-background="false"
-                :central-label="type === 'donut' ? valueFormatter(totalValue) : ''"
+                :central-label="type === 'donut' && totalValue > 0 ? valueFormatter(totalValue) : ''"
                 :events="{
                     [Donut.selectors.segment]: {
                         click: (d: Data, ev: PointerEvent, i: number, elements: HTMLElement[]) => {

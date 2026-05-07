@@ -19,6 +19,19 @@ const props = withDefaults(defineProps<{
 
 // Use weakmap to store reference to each datapoint for Tooltip
 const wm = new WeakMap();
+const toFiniteNumber = (value: unknown): number => {
+    const numeric = typeof value === 'number' ? value : Number(value);
+    return Number.isFinite(numeric) ? numeric : 0;
+};
+
+const toSafeTitle = (value: unknown): string => {
+    if (typeof value === 'string')
+        return value;
+    if (typeof value === 'number')
+        return Number.isFinite(value) ? value.toString() : '';
+    return value == null ? '' : String(value);
+};
+
 function template(d: any) {
     if (wm.has(d)) {
         return wm.get(d);
@@ -32,10 +45,10 @@ function template(d: any) {
             );
             // Use the display name from legend if available, otherwise use the key
             const displayName = legendReference?.name || key;
-            return { ...legendReference, name: displayName, value };
+            return { ...legendReference, name: displayName, value: toFiniteNumber(value) };
         });
         const TooltipComponent = props.customTooltip ?? ChartTooltip;
-        createApp(TooltipComponent, { title: d[props.index].toString(), data: omittedData, titleSize: props.tooltipTitleSize }).mount(componentDiv);
+        createApp(TooltipComponent, { title: toSafeTitle(d?.[props.index]), data: omittedData, titleSize: props.tooltipTitleSize }).mount(componentDiv);
         wm.set(d, componentDiv.innerHTML);
         return componentDiv.innerHTML;
     }

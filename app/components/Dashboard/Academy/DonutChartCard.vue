@@ -131,5 +131,11 @@ const props = withDefaults(defineProps<Props>(), {
     sortFunction: () => undefined,
 });
 
-const chartData = computed(() => props.data);
+const chartData = computed(() => {
+    return props.data.filter((item) => {
+        const raw = item[props.categoryKey];
+        const value = typeof raw === 'number' ? raw : Number(raw);
+        return Number.isFinite(value) && value > 0;
+    });
+});
 </script>

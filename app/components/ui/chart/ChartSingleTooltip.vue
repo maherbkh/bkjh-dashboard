@@ -16,6 +16,19 @@ const props = defineProps<{
 
 // Use weakmap to store reference to each datapoint for Tooltip
 const wm = new WeakMap();
+const toFiniteNumber = (value: unknown): number => {
+    const numeric = typeof value === 'number' ? value : Number(value);
+    return Number.isFinite(numeric) ? numeric : 0;
+};
+
+const toSafeTitle = (value: unknown): string => {
+    if (typeof value === 'string')
+        return value;
+    if (typeof value === 'number')
+        return Number.isFinite(value) ? value.toString() : '';
+    return value == null ? '' : String(value);
+};
+
 function template(d: any, i: number, elements: (HTMLElement | SVGElement)[]) {
     const valueFormatter = props.valueFormatter ?? ((tick: number) => `${tick}`);
     if (props.index in d) {
@@ -26,10 +39,10 @@ function template(d: any, i: number, elements: (HTMLElement | SVGElement)[]) {
             const componentDiv = document.createElement('div');
             const omittedData = Object.entries(omit(d, [props.index])).map(([key, value]) => {
                 const legendReference = props.items?.find(i => i.name === key);
-                return { ...legendReference, value: valueFormatter(value) };
+                return { ...legendReference, value: valueFormatter(toFiniteNumber(value)) };
             });
             const TooltipComponent = props.customTooltip ?? ChartTooltip;
-            createApp(TooltipComponent, { title: d[props.index], data: omittedData }).mount(componentDiv);
+            createApp(TooltipComponent, { title: toSafeTitle(d[props.index]), data: omittedData }).mount(componentDiv);
             wm.set(d, componentDiv.innerHTML);
             return componentDiv.innerHTML;
         }
@@ -43,10 +56,10 @@ function template(d: any, i: number, elements: (HTMLElement | SVGElement)[]) {
         }
         else {
             const style = getComputedStyle(elements[i]);
-            const omittedData = [{ name: data.name, value: valueFormatter(data[props.index]), color: style.fill }];
+            const omittedData = [{ name: toSafeTitle(data.name), value: valueFormatter(toFiniteNumber(data[props.index])), color: style.fill }];
             const componentDiv = document.createElement('div');
             const TooltipComponent = props.customTooltip ?? ChartTooltip;
-            createApp(TooltipComponent, { title: d[props.index], data: omittedData }).mount(componentDiv);
+            createApp(TooltipComponent, { title: toSafeTitle(d[props.index]), data: omittedData }).mount(componentDiv);
             wm.set(d, componentDiv.innerHTML);
             return componentDiv.innerHTML;
         }

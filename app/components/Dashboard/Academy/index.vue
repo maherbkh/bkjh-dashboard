@@ -130,6 +130,20 @@ const { data, pending, error } = useApiFetch<OverviewStatsResponse>('/academy/ov
 
 const statsData = computed(() => data.value?.data as OverviewStatsData | undefined);
 
+const normalizeColorForUnovis = (value: string, fallback: string): string => {
+    if (typeof window === 'undefined') {
+        return fallback;
+    }
+
+    const probe = document.createElement('div');
+    probe.style.color = value;
+    document.body.appendChild(probe);
+    const normalized = getComputedStyle(probe).color;
+    probe.remove();
+
+    return normalized && normalized !== '' ? normalized : fallback;
+};
+
 // Helper function to get CSS variable color value (resolves nested variables recursively)
 const getCssVarColor = (varName: string, fallback: string, visited = new Set<string>()): string => {
     if (typeof window === 'undefined') {
@@ -159,7 +173,7 @@ const getCssVarColor = (varName: string, fallback: string, visited = new Set<str
         }
     }
 
-    return value || fallback;
+    return normalizeColorForUnovis(value || fallback, fallback);
 };
 
 // Chart colors - reading from chart CSS variables
