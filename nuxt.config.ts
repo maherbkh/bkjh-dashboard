@@ -137,15 +137,50 @@ export default defineNuxtConfig({
         },
     },
     vite: {
+        resolve: {
+            dedupe: [
+                'vue',
+                '@vue/runtime-core',
+                '@vue/runtime-dom',
+                '@vue/shared',
+            ],
+        },
         plugins: [
             tailwindcss() as any,
         ],
         optimizeDeps: {
             include: [
-                'vue',
-                'vue-router',
-                'pinia',
+                '@vuepic/vue-datepicker',
+                'date-fns/locale',
+                '@tiptap/vue-3',
+                '@tiptap/starter-kit',
+                '@tiptap/extension-underline',
+                '@tiptap/extension-image',
+                '@tiptap/extension-text-align',
+                '@tiptap/extension-text-style',
+                '@tiptap/extension-color',
+                '@tiptap/extension-link',
+                '@tiptap/extension-character-count',
+                '@vue/devtools-core',
+                '@vue/devtools-kit',
+                'dayjs', // CJS
+                'dayjs/plugin/updateLocale', // CJS
+                'dayjs/locale/en', // CJS
+                'dayjs/locale/de', // CJS
+                'dayjs/plugin/relativeTime', // CJS
+                'dayjs/plugin/utc', // CJS
+                'dayjs/plugin/timezone', // CJS
+                'dayjs/plugin/customParseFormat', // CJS
+                'dayjs/plugin/advancedFormat', // CJS
                 '@vueuse/core',
+                '@unovis/ts',
+                'reka-ui',
+                'class-variance-authority',
+                'clsx',
+                'tailwind-merge',
+                '@unovis/vue',
+                'zod',
+                '@vee-validate/zod',
             ],
         },
         build: {
