@@ -87,11 +87,12 @@ const parentOptions = computed(() => {
 });
 
 // Available app domain options
-const appDomainOptions = computed(() => [
-    { id: AppDomain.DASHBOARD, name: AppDomain.DASHBOARD },
-    { id: AppDomain.ACADEMY, name: AppDomain.ACADEMY },
-    { id: AppDomain.SUPPORT, name: AppDomain.SUPPORT },
-]);
+const appDomainOptions = computed(() =>
+    Object.values(AppDomain).map(domain => ({
+        id: domain,
+        name: domain,
+    })),
+);
 
 type Props = {
     isDialogOpen: boolean;
