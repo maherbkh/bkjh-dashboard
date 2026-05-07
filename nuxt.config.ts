@@ -51,7 +51,6 @@ export default defineNuxtConfig({
     colorMode: {
         preference: 'system', // default value of $colorMode.preference
         fallback: 'dark', // fallback value if not system preference found
-        hid: 'bkjh-erp-color-mode-script',
         globalName: '__BKJH_ERP_COLOR_MODE__',
         componentName: 'ColorScheme',
         classPrefix: '',
@@ -86,6 +85,9 @@ export default defineNuxtConfig({
             // Disable all caching at route level
             prerender: false,
         },
+    },
+    experimental: {
+        viteEnvironmentApi: true,
     },
     compatibilityDate: '2025-07-15',
     // Reduce development warnings
