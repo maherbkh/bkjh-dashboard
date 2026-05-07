@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(node -e \"const p=require\\('./node_modules/nuxt/package.json'\\); console.log\\('nuxt:', p.version\\)\")",
+      "Bash(node -e \"const p=require\\('./node_modules/typescript/package.json'\\); console.log\\('typescript:', p.version\\)\")",
+      "Bash(ls .nuxt/)"
     ]
   }
 }
