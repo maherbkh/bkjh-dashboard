@@ -11,7 +11,7 @@
             <div class="flex flex-col gap-2">
                 <div class="flex flex-wrap gap-2">
                     <Button
-                        v-for="app in apps"
+                        v-for="app in appDomains"
                         :key="app"
                         :variant="selectedApp === app ? 'default' : 'outline'"
                         size="sm"
@@ -367,26 +367,20 @@ definePageMeta({
     middleware: 'auth',
 });
 
-/**
- * Available application domains
- */
-const APPS: readonly AppDomainType[] = ['SHARED', 'DASHBOARD', 'SUPPORT', 'ACADEMY', 'SIGNATURE'] as const;
-const DEFAULT_APP: AppDomainType = 'SHARED';
+const { domains: appDomains, defaultDomain: DEFAULT_APP, isValidAppDomain } = useAppDomains();
 
 /**
  * Fixed section ID for External Data (custom content, not from API)
  */
 const EXTERNAL_DATA_SECTION_ID = 'external-data';
 
-const apps = ref<readonly AppDomainType[]>(APPS);
-
 /**
  * Get app from query params with validation
  */
 const getAppFromQuery = (): AppDomainType => {
     const appQuery = route.query.app;
-    if (typeof appQuery === 'string' && APPS.includes(appQuery as AppDomainType)) {
-        return appQuery as AppDomainType;
+    if (typeof appQuery === 'string' && isValidAppDomain(appQuery)) {
+        return appQuery;
     }
     return DEFAULT_APP;
 };
@@ -483,7 +477,7 @@ const sectionsWithExternalData = computed<readonly SettingSectionWithChildren[]>
  * Select application domain
  */
 const selectApp = async (app: AppDomainType): Promise<void> => {
-    if (!APPS.includes(app)) {
+    if (!isValidAppDomain(app)) {
         console.warn(`Invalid app selected: ${app}`);
         return;
     }
@@ -686,8 +680,9 @@ const handleSettingsSubmit = async (updatedSettings: readonly Setting[]): Promis
             return;
         }
 
-        // Validate response data
-        const response = responseData.value as SettingsUpdateResponse | null;
+        // Validate response data (useApiFetch wraps payloads as ApiResponse<T>)
+        const apiEnvelope = responseData.value;
+        const response = apiEnvelope?.data;
         if (!response?.data) {
             toast.error(t('global.messages.error') || 'Error', {
                 description: 'Invalid response from server',
@@ -934,7 +929,8 @@ const checkCurrentHolidays = async (): Promise<void> => {
         });
         return;
     }
-    const payload = data.value?.data;
+    const envelope = data.value?.data;
+    const payload = envelope?.data;
     if (payload && typeof payload === 'object' && Array.isArray(payload.existDuplications) && Array.isArray(payload.missingInApi) && Array.isArray(payload.missingInDb)) {
         compareResult.value = payload;
     }
@@ -970,8 +966,9 @@ const bulkUpsertMissingInDb = async (): Promise<void> => {
             });
             return;
         }
-        const counts = responseData.value?.data;
-        if (responseData.value?.success && counts !== undefined) {
+        const envelope = responseData.value?.data;
+        const counts = envelope?.data;
+        if (envelope?.success && counts !== undefined) {
             toast.success(t('pages.settings.update_settings.bulk_upsert_success'), {
                 description: t('pages.settings.update_settings.bulk_upsert_result', { created: counts.created, updated: counts.updated }),
                 duration: 5000,
