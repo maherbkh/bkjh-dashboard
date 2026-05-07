@@ -16,7 +16,7 @@ withDefaults(defineProps<{
 
 <template>
     <Card
-        class="text-sm !bg-card shadow-lg backdrop-blur-none"
+        class="text-sm bg-card! shadow-lg backdrop-blur-none"
         style="opacity: 1 !important; background-color: var(--card) !important;"
     >
         <CardHeader
@@ -24,7 +24,7 @@ withDefaults(defineProps<{
             class="p-3 border-b"
         >
             <CardTitle :class="[(titleSize === 'xs' ? 'text-xs font-medium' : 'text-sm font-medium'), '']">
-                <div class="max-w-[180px] truncate !text-sm">
+                <div class="max-w-[180px] truncate text-sm!">
                     {{ title }}
                 </div>
             </CardTitle>

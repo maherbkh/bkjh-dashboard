@@ -29,7 +29,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
             <slot>
                 <Icon
                     name="material-symbols:check"
-                    class="!size-3.5"
+                    class="size-3.5!"
                 />
             </slot>
         </CheckboxIndicator>

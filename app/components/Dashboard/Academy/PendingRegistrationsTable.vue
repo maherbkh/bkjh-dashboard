@@ -18,6 +18,7 @@ import {
 
 const { t } = useI18n();
 const { formatDateParts, formatDateShort } = useGermanDateFormat();
+const getInitials = (name: string) => useInitials(name);
 
 interface PendingRegistration {
     id: string;
@@ -189,8 +190,8 @@ const getStatusClass = (status: string, rowStatus: string) => {
     const conditionalClasses = [];
 
     if (status === 'PENDING') conditionalClasses.push('text-muted-foreground');
-    if (status === 'APPROVED') conditionalClasses.push('hover:!bg-success/10 hover:!text-success');
-    if (status === 'REJECTED') conditionalClasses.push('hover:!bg-destructive/10 hover:!text-destructive');
+    if (status === 'APPROVED') conditionalClasses.push('hover:bg-success/10! hover:text-success!');
+    if (status === 'REJECTED') conditionalClasses.push('hover:bg-destructive/10! hover:text-destructive!');
     if (status === rowStatus) conditionalClasses.push('font-medium');
     if (rowStatus === status && status === 'APPROVED') conditionalClasses.push('text-success');
     if (rowStatus === status && status === 'REJECTED') conditionalClasses.push('text-destructive');
@@ -234,7 +235,7 @@ const getStatusLabel = (status: string): string => {
             <div class="flex items-center gap-3">
                 <Icon
                     name="solar:clock-circle-bold"
-                    class="!size-5 shrink-0 text-muted-foreground"
+                    class="size-5! shrink-0 text-muted-foreground"
                 />
                 <h3 class="text-base font-medium">
                     {{ t('academy.dashboard.recent_registrations') }}
@@ -272,7 +273,7 @@ const getStatusLabel = (status: string): string => {
 
         <!-- Empty State -->
         <PageEmptyState
-            v-else-if="!registrations || registrations.length === 0"
+            v-else-if="registrations.length === 0"
             :search-query="''"
             :add-new-text="t('academy.dashboard.recent_registrations')"
             :no-add-new-text="true"
@@ -331,7 +332,7 @@ const getStatusLabel = (status: string): string => {
                                         :alt="getFullName(row.attendee) || 'User'"
                                     />
                                     <AvatarFallback class="rounded-full bg-background">
-                                        {{ useInitials(getFullName(row.attendee)) }}
+                                        {{ getInitials(getFullName(row.attendee)) }}
                                     </AvatarFallback>
                                 </Avatar>
                             </div>
@@ -346,7 +347,7 @@ const getStatusLabel = (status: string): string => {
                                         <TooltipTrigger as-child>
                                             <Icon
                                                 name="solar:chat-line-linear"
-                                                class="!size-4 shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                                                class="size-4! shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
                                                 @click="openNoteModal(row.notes)"
                                             />
                                         </TooltipTrigger>
@@ -397,7 +398,7 @@ const getStatusLabel = (status: string): string => {
                         <div class="flex items-start gap-1.5">
                             <Icon
                                 name="solar:calendar-mark-line-duotone"
-                                class="opacity-50 !size-4"
+                                class="opacity-50 size-4!"
                             />
                             {{ formatDateParts(row.registeredAt).date }}
                         </div>
@@ -408,7 +409,7 @@ const getStatusLabel = (status: string): string => {
                         <div class="flex items-start gap-1.5">
                             <Icon
                                 name="solar:watch-square-line-duotone"
-                                class="opacity-50 !size-4"
+                                class="opacity-50 size-4!"
                             />
                             {{ formatDateParts(row.registeredAt).time }}
                         </div>
@@ -434,7 +435,7 @@ const getStatusLabel = (status: string): string => {
                         >
                             <Icon
                                 name="solar:eye-outline"
-                                class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                             />
                         </Button>
                     </NuxtLink>
@@ -446,7 +447,7 @@ const getStatusLabel = (status: string): string => {
                         >
                             <Icon
                                 name="solar:user-outline"
-                                class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                             />
                         </Button>
                     </NuxtLink>

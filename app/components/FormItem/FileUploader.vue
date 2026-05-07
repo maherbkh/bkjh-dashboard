@@ -76,11 +76,13 @@ const acceptString: ComputedRef<string> = computed(() => {
             // Already a MIME type
             acceptTypes.push(type);
         }
-        else if (typeMapping[type]) {
-            // Map generic type to specific MIME types/extensions
-            acceptTypes.push(...typeMapping[type]);
-        }
         else {
+            const mappedTypes = typeMapping[type];
+            if (mappedTypes) {
+                // Map generic type to specific MIME types/extensions
+                acceptTypes.push(...mappedTypes);
+                return;
+            }
             // Fallback: treat as MIME type prefix
             acceptTypes.push(`${type}/*`);
         }
@@ -132,9 +134,14 @@ function addFiles(fileList: File[]): void {
                 // Direct MIME type comparison
                 return file.type === type;
             }
-            else if (typeMapping[type]) {
+            else {
+                const mappedTypes = typeMapping[type];
+                if (!mappedTypes) {
+                    // Fallback to prefix matching
+                    return file.type.startsWith(type);
+                }
                 // Check against mapped types
-                return typeMapping[type].some((mappedType) => {
+                return mappedTypes.some((mappedType) => {
                     if (mappedType.startsWith('.')) {
                         // File extension check
                         return file.name.toLowerCase().endsWith(mappedType.toLowerCase());
@@ -149,10 +156,6 @@ function addFiles(fileList: File[]): void {
                         return file.type === mappedType;
                     }
                 });
-            }
-            else {
-                // Fallback to prefix matching
-                return file.type.startsWith(type);
             }
         });
         if (!isValidType) {
@@ -239,6 +242,9 @@ async function uploadAll(): Promise<FilePreview[]> {
                 body: formData,
             });
             if (error.value) throw error.value;
+            if (!data.value?.data) {
+                throw new Error(t('file_uploader.upload_failed'));
+            }
             // Check if response has data.uploaded array (for multiple upload)
             const uploadedArray = data.value.data?.uploaded || data.value.data || [];
             uploadedFiles = uploadedArray.map((obj: any) => ({
@@ -264,6 +270,9 @@ async function uploadAll(): Promise<FilePreview[]> {
                 body: formData,
             });
             if (error.value) throw error.value;
+            if (!data.value?.data) {
+                throw new Error(t('file_uploader.upload_failed'));
+            }
             const obj = data.value.data;
             uploadedFiles = [{
                 id: obj.id,
@@ -342,7 +351,7 @@ defineExpose({
             <div class="flex flex-col items-center gap-0.5">
                 <Icon
                     name="solar:cloud-upload-line-duotone"
-                    class="!size-8 shrink-0"
+                    class="size-8! shrink-0"
                 />
                 <span class="font-medium text-primary">{{ t('file_uploader.click_to_upload') }}</span>
                 <span class="text-muted-foreground">{{ t('file_uploader.or_drag_drop') }}</span>
@@ -379,7 +388,7 @@ defineExpose({
                     <Icon
                         v-if="getFileIcon(file.type, file.name)"
                         :name="getFileIcon(file.type, file.name)"
-                        class="shrink-0 !size-8 text-muted-foreground/50"
+                        class="shrink-0 size-8! text-muted-foreground/50"
                     />
                 </div>
                 <div class="grow text-xs flex flex-col gap-0.5">
@@ -399,7 +408,7 @@ defineExpose({
                 >
                     <Icon
                         name="solar:trash-bin-minimalistic-outline"
-                        class="shrink-0 !size-4 text-red-400"
+                        class="shrink-0 size-4! text-red-400"
                     />
                 </Button>
             </li>

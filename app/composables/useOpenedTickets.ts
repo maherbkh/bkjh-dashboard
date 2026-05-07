@@ -36,11 +36,11 @@ export const useOpenedTickets = () => {
     // Add or update a ticket in the opened tickets list
     const addOpenedTicket = (uuid: string, number: string) => {
         const tickets = getOpenedTickets();
-        const existingIndex = tickets.findIndex(ticket => ticket.uuid === uuid);
+        const existing = tickets.find(ticket => ticket.uuid === uuid);
 
-        if (existingIndex >= 0) {
+        if (existing) {
             // Update existing ticket number if it changed
-            tickets[existingIndex]!.number = number;
+            existing.number = number;
         }
         else {
             // Add new ticket

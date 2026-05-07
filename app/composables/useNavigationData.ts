@@ -8,6 +8,7 @@ export const useNavigationData = (): ComputedRef<{
         name: string;
         logo: string;
         slug: AppSlug;
+        description: string;
     }>;
     navMain: Array<{
         title: string;

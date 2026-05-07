@@ -41,34 +41,34 @@
             >
                 <Icon
                     :name="fileIcon"
-                    class="!size-6 text-muted-foreground"
+                    class="size-6! text-muted-foreground"
                 />
             </div>
         </div>
 
         <!-- File Info -->
-        <div class="flex-grow min-w-0">
+        <div class="grow min-w-0">
             <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-foreground truncate">
                     {{ attachment.filename }}
                 </span>
-                <span class="text-xs text-muted-foreground ml-2 flex-shrink-0">
+                <span class="text-xs text-muted-foreground ml-2 shrink-0">
                     {{ formatFileSize(attachment.size) }}
                 </span>
             </div>
         </div>
 
         <!-- Action Icon -->
-        <div class="flex-shrink-0">
+        <div class="shrink-0">
             <Icon
                 v-if="!isDownloading"
                 :name="actionIcon"
-                class="!size-5 shrink-0 text-muted-foreground"
+                class="size-5! shrink-0 text-muted-foreground"
             />
             <Icon
                 v-else
                 name="solar:refresh-linear"
-                class="!size-5 shrink-0 text-muted-foreground animate-spin"
+                class="size-5! shrink-0 text-muted-foreground animate-spin"
             />
         </div>
     </li>

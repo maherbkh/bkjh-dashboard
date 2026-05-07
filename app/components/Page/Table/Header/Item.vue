@@ -58,7 +58,7 @@ const newDir = computed<SortDirection>(() => {
                     :name="iconName"
                     :class="[
                         activeDirColumn === item.id ? 'text-primary' : '',
-                        '!size-5 shrink-0',
+                        'size-5! shrink-0',
                     ]"
                 />
             </button>

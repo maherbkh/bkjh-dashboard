@@ -27,8 +27,8 @@ export const buttonVariants = cva(
                 'default': 'h-9 px-4 py-2 has-[>svg]:px-4',
                 'sm': 'h-8 rounded-full gap-2 px-2 has-[>svg]:px-2.5',
                 'lg': 'h-10 rounded-full px-6 has-[>svg]:px-4',
-                'icon': 'size-8 !rounded-lg',
-                'icon-sm': 'size-6 !rounded-md',
+                'icon': 'size-8 rounded-lg!',
+                'icon-sm': 'size-6 rounded-md!',
             },
         },
         defaultVariants: {

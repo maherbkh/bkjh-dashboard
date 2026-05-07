@@ -208,7 +208,7 @@ onMounted(() => {
                 >
                     <Icon
                         name="solar:trash-bin-minimalistic-outline"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
             </div>

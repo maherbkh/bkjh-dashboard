@@ -41,7 +41,7 @@ watch(() => props.attendee.registrations, (registrations) => {
             <div class="flex items-center justify-center size-20 rounded-full bg-muted mb-6">
                 <Icon
                     name="solar:user-cross-outline"
-                    class="!size-10 text-muted-foreground"
+                    class="size-10! text-muted-foreground"
                 />
             </div>
             <h2 class="text-2xl font-semibold text-foreground mb-2">
@@ -153,7 +153,7 @@ watch(() => props.attendee.registrations, (registrations) => {
                             <CardTitle class="flex items-center gap-2">
                                 <Icon
                                     name="solar:calendar-line-duotone"
-                                    class="!size-5 opacity-75 shrink-0"
+                                    class="size-5! opacity-75 shrink-0"
                                 />
                                 {{ $t("academy.plural") }}
                             </CardTitle>
@@ -172,7 +172,7 @@ watch(() => props.attendee.registrations, (registrations) => {
                             <CardTitle class="flex items-center gap-2">
                                 <Icon
                                     name="solar:clipboard-list-line-duotone"
-                                    class="!size-5 opacity-75 shrink-0"
+                                    class="size-5! opacity-75 shrink-0"
                                 />
                                 {{ $t("attendee.registrations") }}
                             </CardTitle>
@@ -190,7 +190,7 @@ watch(() => props.attendee.registrations, (registrations) => {
                             <CardTitle>
                                 <Icon
                                     name="solar:documents-minimalistic-outline"
-                                    class="!size-5 opacity-75 shrink-0"
+                                    class="size-5! opacity-75 shrink-0"
                                 />
                                 {{ $t("global.information") }}
                             </CardTitle>

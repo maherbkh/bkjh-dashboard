@@ -21,7 +21,7 @@
             <CardTitle class="flex items-center gap-2">
                 <Icon
                     name="solar:chat-round-outline"
-                    class="!size-5 opacity-75 shrink-0"
+                    class="size-5! opacity-75 shrink-0"
                 />
                 {{ $t("global.message") }}
             </CardTitle>

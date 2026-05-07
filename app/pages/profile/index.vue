@@ -170,7 +170,7 @@ useSeoMeta({
                 >
                     <Icon
                         name="solar:pen-new-round-outline"
-                        class="mr-2 !size-4 shrink-0"
+                        class="mr-2 size-4! shrink-0"
                     />
                     {{ t('profile.singular') }}
                 </TabsTrigger>
@@ -180,7 +180,7 @@ useSeoMeta({
                 >
                     <Icon
                         name="solar:lock-password-outline"
-                        class="mr-2 !size-4 shrink-0"
+                        class="mr-2 size-4! shrink-0"
                     />
                     {{ t('form.password') }}
                 </TabsTrigger>
@@ -190,7 +190,7 @@ useSeoMeta({
                 >
                     <Icon
                         name="solar:settings-outline"
-                        class="mr-2 !size-4 shrink-0"
+                        class="mr-2 size-4! shrink-0"
                     />
                     {{ t('preference.singular') }}
                 </TabsTrigger>

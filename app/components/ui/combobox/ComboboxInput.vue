@@ -26,7 +26,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
 <template>
     <div
         data-slot="command-input-wrapper"
-        class="flex h-9 items-center gap-2 px-3 !bg-mutted rounded-full"
+        class="flex h-9 items-center gap-2 px-3 bg-mutted! rounded-full"
     >
         <Icon
             name="solar:magnifer-linear"

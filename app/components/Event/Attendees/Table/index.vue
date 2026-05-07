@@ -184,8 +184,9 @@ const changeStatus = useDebounceFn(async (id: string, status: 'PENDING' | 'APPRO
             toast.success(data.value.message as string);
             // Optimistic update - find and update the item in the data array
             const itemIndex = props.data.findIndex(item => item.id === id);
-            if (itemIndex !== -1 && props.data[itemIndex]) {
-                props.data[itemIndex]!.status = status;
+            const attendee = itemIndex !== -1 ? props.data[itemIndex] : undefined;
+            if (attendee) {
+                attendee.status = status;
             }
             // Emit reload event to parent
             emit('reload');
@@ -222,8 +223,9 @@ const confirmRejection = async () => {
             toast.success(data.value.message as string);
             // Optimistic update - find and update the item in the data array
             const itemIndex = props.data.findIndex(item => item.id === id);
-            if (itemIndex !== -1 && props.data[itemIndex]) {
-                props.data[itemIndex]!.status = 'REJECTED';
+            const attendee = itemIndex !== -1 ? props.data[itemIndex] : undefined;
+            if (attendee) {
+                attendee.status = 'REJECTED';
             }
             // Emit reload event to parent
             emit('reload');
@@ -332,8 +334,8 @@ const getStatusClass = (status: string, rowStatus: string) => {
     const baseClasses = 'cursor-pointer hover:bg-accent';
     const conditionalClasses = [];
     if (status === 'PENDING') conditionalClasses.push('text-muted-foreground');
-    if (status === 'APPROVED') conditionalClasses.push('hover:!bg-success/10 hover:!text-success');
-    if (status === 'REJECTED') conditionalClasses.push('hover:!bg-destructive/10 hover:!text-destructive');
+    if (status === 'APPROVED') conditionalClasses.push('hover:bg-success/10! hover:text-success!');
+    if (status === 'REJECTED') conditionalClasses.push('hover:bg-destructive/10! hover:text-destructive!');
     return [baseClasses, ...conditionalClasses];
 };
 
@@ -538,7 +540,7 @@ const updateAttendance = async (hasAttended: boolean) => {
                     >
                         <Icon
                             name="solar:check-circle-line-duotone"
-                            class="!size-5 shrink-0"
+                            class="size-5! shrink-0"
                         />
                         {{ $t('attendee.has_attended') }}
                     </Button>
@@ -550,7 +552,7 @@ const updateAttendance = async (hasAttended: boolean) => {
                     >
                         <Icon
                             name="solar:close-circle-line-duotone"
-                            class="!size-5 shrink-0"
+                            class="size-5! shrink-0"
                         />
                         {{ $t('attendee.has_not_attended') }}
                     </Button>
@@ -594,7 +596,7 @@ const updateAttendance = async (hasAttended: boolean) => {
                                     <Icon
                                         :name="row.hasAttended ? 'solar:check-circle-line-duotone' : 'solar:close-circle-line-duotone'"
                                         :class="[
-                                            '!size-9 shrink-0',
+                                            'size-9! shrink-0',
                                             row.hasAttended ? 'text-success' : 'text-muted-foreground',
                                         ]"
                                         :title="row.hasAttended ? $t('attendee.has_attended') : $t('attendee.has_not_attended')"
@@ -611,7 +613,7 @@ const updateAttendance = async (hasAttended: boolean) => {
                                             <TooltipTrigger as-child>
                                                 <Icon
                                                     name="solar:chat-line-linear"
-                                                    class="!size-4 shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                                                    class="size-4! shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
                                                     @click="openNoteModal(row.notes)"
                                                 />
                                             </TooltipTrigger>
@@ -645,7 +647,7 @@ const updateAttendance = async (hasAttended: boolean) => {
                                 >
                                     <Icon
                                         name="solar:clipboard-list-linear"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                                     />
                                 </Button>
                             </TooltipTrigger>
@@ -662,7 +664,7 @@ const updateAttendance = async (hasAttended: boolean) => {
                             >
                                 <Icon
                                     name="solar:eye-outline"
-                                    class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                    class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                                 />
                             </LazyButton>
                         </NuxtLink>
@@ -687,7 +689,7 @@ const updateAttendance = async (hasAttended: boolean) => {
                             <Icon
                                 name="solar:diploma-outline"
                                 :class="[
-                                    'group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 shrink-0',
+                                    'group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! shrink-0',
                                     row.hasAttended && row.certificate
                                         ? 'opacity-80 group-hover:text-primary'
                                         : 'opacity-40 cursor-not-allowed',
@@ -761,7 +763,7 @@ const updateAttendance = async (hasAttended: boolean) => {
                             <div class="flex items-start gap-1.5">
                                 <Icon
                                     name="solar:calendar-mark-line-duotone"
-                                    class="opacity-50 !size-4"
+                                    class="opacity-50 size-4!"
                                 />
                                 {{ formatDateParts(row.registrationDate).date }}
                             </div>
@@ -772,7 +774,7 @@ const updateAttendance = async (hasAttended: boolean) => {
                             <div class="flex items-start gap-1.5">
                                 <Icon
                                     name="solar:watch-square-line-duotone"
-                                    class="opacity-50 !size-4"
+                                    class="opacity-50 size-4!"
                                 />
                                 {{ formatDateParts(row.registrationDate).time }}
                             </div>

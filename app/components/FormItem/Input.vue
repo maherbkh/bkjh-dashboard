@@ -75,7 +75,7 @@ const showPassword = ref(false);
             />
             <span
                 v-if="icon"
-                class="absolute start-0 inset-y-0 flex items-center justify-center px-2"
+                class="absolute inset-s-0 inset-y-0 flex items-center justify-center px-2"
             >
                 <Icon
                     :name="icon"
@@ -87,7 +87,7 @@ const showPassword = ref(false);
                 type="button"
                 variant="ghost"
                 size="icon"
-                class="absolute right-0 top-0 h-full px-2 py-1 hover:bg-transparent !rounded-full"
+                class="absolute right-0 top-0 h-full px-2 py-1 hover:bg-transparent rounded-full!"
                 :disabled="props?.disabled"
                 @click="showPassword = !showPassword"
             >

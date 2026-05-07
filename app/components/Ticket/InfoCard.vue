@@ -13,7 +13,7 @@
             <CardTitle class="flex items-center gap-2">
                 <Icon
                     name="solar:info-circle-outline"
-                    class="!size-5 opacity-75 shrink-0"
+                    class="size-5! opacity-75 shrink-0"
                 />
                 {{ $t("common.information") }}
             </CardTitle>

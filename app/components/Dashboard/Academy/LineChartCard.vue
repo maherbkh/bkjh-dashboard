@@ -11,7 +11,7 @@
                 <Icon
                     v-if="titleIcon"
                     :name="titleIcon"
-                    class="!size-5 shrink-0 text-muted-foreground"
+                    class="size-5! shrink-0 text-muted-foreground"
                 />
                 <CardTitle
                     v-if="title"

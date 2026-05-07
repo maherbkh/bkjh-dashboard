@@ -338,7 +338,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                         v-if="row.emailVerifiedAt"
                                         :title="$t('attendee.email_verified') + ' ' + $t('common.at') + ' ' + formatDate(row.emailVerifiedAt)"
                                         name="solar:verified-check-bold-duotone"
-                                        class="cursor-pointer hover:scale-110 ease-in-out duration-300 !size-4 shrink-0 text-success"
+                                        class="cursor-pointer hover:scale-110 ease-in-out duration-300 size-4! shrink-0 text-success"
                                     />
                                 </div>
                                 <div class="text-xs text-muted-foreground mt-0.5">
@@ -405,12 +405,12 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                     <Icon
                                         v-if="isSendingVerificationEmail"
                                         name="solar:refresh-linear"
-                                        class="!size-5 animate-spin"
+                                        class="size-5! animate-spin"
                                     />
                                     <Icon
                                         v-else
                                         name="solar:letter-unread-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                                     />
                                 </LazyButton>
                                 <!-- View Button - Keep visible -->
@@ -423,7 +423,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                     >
                                         <Icon
                                             name="solar:eye-outline"
-                                            class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                            class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                                         />
                                     </LazyButton>
                                 </NuxtLink>
@@ -436,7 +436,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                 >
                                     <Icon
                                         name="solar:pen-new-square-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                                     />
                                 </LazyButton>
                                 <LazyButton
@@ -448,7 +448,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                 >
                                     <Icon
                                         name="solar:trash-bin-trash-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-destructive"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-destructive"
                                     />
                                 </LazyButton>
                             </div>

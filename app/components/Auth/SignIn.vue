@@ -120,7 +120,7 @@ const handleEnterKey = () => {
         >
             <Icon
                 :name="isLoading ? 'eos-icons:three-dots-loading' : 'solar:plain-3-outline'"
-                :class="[(!isLoading && 'group-hover:rotate-45 ease-in-out duration-300 group-hover:mr-4'), 'mr-2 !size-5']"
+                :class="[(!isLoading && 'group-hover:rotate-45 ease-in-out duration-300 group-hover:mr-4'), 'mr-2 size-5!']"
             />
             {{ $t('auth.login') }}
         </Button>

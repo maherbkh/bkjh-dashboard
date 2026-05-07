@@ -102,7 +102,7 @@ const formattedPath = computed(() => {
                 </NuxtLink>
                 <BreadcrumbSeparator v-if="route.fullPath !== '/'">
                     <Icon
-                        class="!size-4 opacity-100 shrink-0 mt-1.5"
+                        class="size-4! opacity-100 shrink-0 mt-1.5"
                         name="solar:double-alt-arrow-right-line-duotone"
                     />
                 </BreadcrumbSeparator>
@@ -129,7 +129,7 @@ const formattedPath = computed(() => {
                             </NuxtLink>
                             <BreadcrumbSeparator>
                                 <Icon
-                                    class="!size-4 opacity-50 shrink-0 mt-1.5"
+                                    class="size-4! opacity-50 shrink-0 mt-1.5"
                                     name="solar:double-alt-arrow-right-line-duotone"
                                 />
                             </BreadcrumbSeparator>

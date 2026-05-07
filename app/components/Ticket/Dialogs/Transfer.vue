@@ -40,7 +40,7 @@
                     :empty-text="$t('admin.no_admins_available')"
                     :disabled="loadingAdmins"
                     required
-                    @update:model-value="$emit('update:transferUserId', $event)"
+                    @update:model-value="onTransferUserIdChange"
                 />
                 <p
                     v-if="loadingAdmins"
@@ -48,7 +48,7 @@
                 >
                     <Icon
                         name="solar:refresh-linear"
-                        class="!size-3 animate-spin"
+                        class="size-3! animate-spin"
                     />
                     {{ $t("admin.loading") }}
                 </p>
@@ -87,9 +87,18 @@ defineProps<{
     isActionLoading: boolean;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
     'update:isOpen': [value: boolean];
     'update:transferUserId': [value: string | undefined];
     'submit': [];
 }>();
+
+function onTransferUserIdChange(value: string | number | null | undefined) {
+    if (value == null || value === '') {
+        emit('update:transferUserId', undefined);
+    }
+    else {
+        emit('update:transferUserId', String(value));
+    }
+}
 </script>

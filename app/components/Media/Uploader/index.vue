@@ -192,16 +192,17 @@ const uploadFiles = async (fileList: File[]) => {
 
         // Add successful uploads to files array
         const newFiles = result.successful as MediaEntity[];
+        const firstNew = newFiles[0];
 
         if (props.multiple) {
             files.value = [...files.value, ...newFiles];
         }
-        else if (newFiles.length > 0) {
-            files.value = [newFiles[0]!];
+        else if (firstNew) {
+            files.value = [firstNew];
         }
 
-        if (newFiles.length > 0) {
-            emit('upload:success', newFiles[0]!);
+        if (firstNew) {
+            emit('upload:success', firstNew);
         }
     }
     catch (error) {

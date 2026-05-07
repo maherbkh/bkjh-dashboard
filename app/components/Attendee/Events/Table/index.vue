@@ -71,7 +71,7 @@ const getStatusVariant = (status: string) => {
                     <div class="flex items-start gap-1.5">
                         <Icon
                             name="solar:calendar-mark-line-duotone"
-                            class="opacity-50 !size-4"
+                            class="opacity-50 size-4!"
                         />
                         {{ formatDateParts(row.registrationDate).date }}
                     </div>
@@ -82,7 +82,7 @@ const getStatusVariant = (status: string) => {
                     <div class="flex items-start gap-1.5">
                         <Icon
                             name="solar:watch-square-line-duotone"
-                            class="opacity-50 !size-4"
+                            class="opacity-50 size-4!"
                         />
                         {{ formatDateParts(row.registrationDate).time }}
                     </div>
@@ -101,7 +101,7 @@ const getStatusVariant = (status: string) => {
                     >
                         <Icon
                             name="solar:eye-outline"
-                            class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                            class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                         />
                     </LazyButton>
                 </NuxtLink>

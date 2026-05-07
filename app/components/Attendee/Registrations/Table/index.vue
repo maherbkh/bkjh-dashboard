@@ -80,7 +80,7 @@ const getStatusLabel = (status: string) => {
                     <div class="flex items-start gap-1.5">
                         <Icon
                             name="solar:calendar-mark-line-duotone"
-                            class="opacity-50 !size-4"
+                            class="opacity-50 size-4!"
                         />
                         {{ formatDateParts(row.registeredAt).date }}
                     </div>
@@ -91,7 +91,7 @@ const getStatusLabel = (status: string) => {
                     <div class="flex items-start gap-1.5">
                         <Icon
                             name="solar:watch-square-line-duotone"
-                            class="opacity-50 !size-4"
+                            class="opacity-50 size-4!"
                         />
                         {{ formatDateParts(row.registeredAt).time }}
                     </div>

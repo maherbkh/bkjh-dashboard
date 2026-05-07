@@ -132,15 +132,15 @@ const mutedForegroundColor = computed(() => {
                 :attributes="{
                     [Axis.selectors.tick]: {
                         style: 'font-size: 10px !important; max-width: 60px !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; display: inline-block !important; word-break: break-all !important;',
-                        class: '!overflow-hidden !text-ellipsis !whitespace-nowrap',
+                        class: 'overflow-hidden! text-ellipsis! whitespace-nowrap!',
                     },
                     [Axis.selectors.label]: {
                         style: 'font-size: 10px !important; max-width: 60px !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; display: inline-block !important; word-break: break-all !important;',
-                        class: '!overflow-hidden !text-ellipsis !whitespace-nowrap',
+                        class: 'overflow-hidden! text-ellipsis! whitespace-nowrap!',
                     },
                     text: {
                         style: 'font-size: 10px !important; max-width: 60px !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;',
-                        class: '!overflow-hidden !text-ellipsis !whitespace-nowrap',
+                        class: 'overflow-hidden! text-ellipsis! whitespace-nowrap!',
                     },
                 }"
             />

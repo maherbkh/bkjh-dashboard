@@ -8,7 +8,7 @@
             <Icon
                 v-if="titleIcon"
                 :name="titleIcon"
-                :class="cn(titleIconClass, '!size-5 shrink-0')"
+                :class="cn(titleIconClass, 'size-5! shrink-0')"
             />
             <div
                 v-if="title"
@@ -26,7 +26,7 @@
             <Icon
                 v-if="valueIcon"
                 :name="valueIcon"
-                :class="cn(valueIconClass, '!size-5 shrink-0')"
+                :class="cn(valueIconClass, 'size-5! shrink-0')"
             />
             <div :class="valueClass">
                 {{ formatValue(value, valueFormatter) }}
@@ -61,7 +61,7 @@
                     <Icon
                         v-if="item.icon"
                         :name="item.icon"
-                        :class="cn(itemIconClass, '!size-5 shrink-0')"
+                        :class="cn(itemIconClass, 'size-5! shrink-0')"
                     />
                     <div :class="itemNameClass">
                         {{ item.name }}
@@ -82,7 +82,7 @@
             <Icon
                 v-if="trendIcon || trend"
                 :name="trendIcon || getTrendIcon(trend)"
-                :class="cn(trendIconClass, '!size-5 shrink-0')"
+                :class="cn(trendIconClass, 'size-5! shrink-0')"
             />
             <span
                 v-if="trendText"

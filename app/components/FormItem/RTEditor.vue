@@ -26,7 +26,7 @@
                 >
                     <Icon
                         name="oui:editor-bold"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
                 <Button
@@ -40,7 +40,7 @@
                 >
                     <Icon
                         name="oui:editor-italic"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
                 <Button
@@ -54,7 +54,7 @@
                 >
                     <Icon
                         name="oui:editor-strike"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
                 <Button
@@ -68,7 +68,7 @@
                 >
                     <Icon
                         name="oui:editor-underline"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
                 <Button
@@ -82,14 +82,14 @@
                 >
                     <Icon
                         name="oui:editor-code-block"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
 
                 <!-- Color Picker -->
                 <input
                     type="color"
-                    class="flex place-content-center items-center border border-border cursor-pointer size-8 !p-0"
+                    class="flex place-content-center items-center border border-border cursor-pointer size-8 p-0!"
                     :value="editor.getAttributes('textStyle').color"
                     @input="handleColorChange"
                 >
@@ -176,7 +176,7 @@
                 >
                     <Icon
                         name="oui:editor-align-left"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
                 <Button
@@ -189,7 +189,7 @@
                 >
                     <Icon
                         name="oui:editor-align-center"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
                 <Button
@@ -202,7 +202,7 @@
                 >
                     <Icon
                         name="oui:editor-align-right"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
                 <Button
@@ -215,7 +215,7 @@
                 >
                     <Icon
                         name="solar:hamburger-menu-outline"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
                 <Button
@@ -227,7 +227,7 @@
                 >
                     <Icon
                         name="solar:list-cross-minimalistic-bold"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
 
@@ -242,7 +242,7 @@
                 >
                     <Icon
                         name="solar:link-bold"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
                 <Button
@@ -255,7 +255,7 @@
                 >
                     <Icon
                         name="solar:link-broken-linear"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
 
@@ -270,7 +270,7 @@
                 >
                     <Icon
                         name="oui:editor-unordered-list"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
                 <Button
@@ -283,7 +283,7 @@
                 >
                     <Icon
                         name="oui:editor-ordered-list"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
 
@@ -298,7 +298,7 @@
                 >
                     <Icon
                         name="oui:editor-code-block"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
                 <Button
@@ -311,7 +311,7 @@
                 >
                     <Icon
                         name="oui:quote"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
                 <Button
@@ -323,7 +323,7 @@
                 >
                     <Icon
                         name="solar:eraser-linear"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
                 <Button
@@ -335,7 +335,7 @@
                 >
                     <Icon
                         name="octicon:horizontal-rule-24"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
                 <Button
@@ -347,7 +347,7 @@
                 >
                     <Icon
                         name="carbon:text-new-line"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
 
@@ -362,7 +362,7 @@
                 >
                     <Icon
                         name="oui:editor-undo"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
                 <Button
@@ -375,7 +375,7 @@
                 >
                     <Icon
                         name="oui:editor-redo"
-                        class="!size-4 shrink-0"
+                        class="size-4! shrink-0"
                     />
                 </Button>
             </div>

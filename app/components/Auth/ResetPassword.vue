@@ -8,7 +8,7 @@ const userStore = useUserStore();
 const route = useRoute();
 
 const email = computed(() => route.query.email as string || '');
-const code = ref('');
+const code = ref<string[]>([]);
 const newPassword = ref('');
 const confirmPassword = ref('');
 const isLoading = ref(false);
@@ -43,7 +43,9 @@ function startResendCountdown() {
     countdownInterval = setInterval(() => {
         resendCountdown.value--;
         if (resendCountdown.value <= 0) {
-            clearInterval(countdownInterval!);
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
             countdownInterval = null;
         }
     }, 1000);
@@ -131,7 +133,7 @@ async function onSubmit(event: Event) {
                     v-model="code"
                     class="w-full grow"
                     :length="6"
-                    type="numeric"
+                    type="text"
                     :disabled="isLoading"
                 >
                     <PinInputGroup>

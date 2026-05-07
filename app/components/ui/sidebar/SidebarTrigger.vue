@@ -21,7 +21,7 @@ const { toggleSidebar } = useSidebar();
     >
         <Icon
             name="solar:list-bold"
-            class="!size-6 shrink-0"
+            class="size-6! shrink-0"
         />
         <span class="sr-only">{{ $t('global.toggle_sidebar') }}</span>
     </Button>

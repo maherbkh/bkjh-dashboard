@@ -97,9 +97,9 @@ const normalizedOptions = computed<MultiSelectOption[]>(() => {
     const arr = props.data;
     if (!Array.isArray(arr) || arr.length === 0) return [];
 
-    const key = props.itemKey!;
-    const lab = props.itemLabel!;
-    const dis = props.itemDisabled!;
+    const key = props.itemKey;
+    const lab = props.itemLabel;
+    const dis = props.itemDisabled;
 
     // Early return for empty data
     if (arr.length === 0) return [];

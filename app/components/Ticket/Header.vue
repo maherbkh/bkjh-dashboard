@@ -18,7 +18,7 @@
         <div class="flex items-start gap-4">
             <Icon
                 :name="pageIcon || 'solar:ticket-outline'"
-                class="!size-5 shrink-0 opacity-75 mt-1"
+                class="size-5! shrink-0 opacity-75 mt-1"
             />
             <div>
                 <div class="text-lg font-bold flex items-center gap-4">
@@ -44,7 +44,7 @@
                     <template v-if="ticket.group">
                         <Icon
                             name="solar:arrow-right-line-duotone"
-                            class="!size-5 shrink-0 opacity-75"
+                            class="size-5! shrink-0 opacity-75"
                         />
                         <Badge variant="outline">
                             {{ ticket.group?.name }}
@@ -53,7 +53,7 @@
                     <template v-else>
                         <Icon
                             name="solar:arrow-right-line-duotone"
-                            class="!size-5 shrink-0 opacity-75"
+                            class="size-5! shrink-0 opacity-75"
                         />
                         <Badge variant="outline">
                             no group

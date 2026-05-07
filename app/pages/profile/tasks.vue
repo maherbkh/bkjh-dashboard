@@ -31,7 +31,10 @@ const { data: tasksData, pending: isLoading, refresh } = await useApiFetch<{
     data: SupportTicket[];
 }>('/auth/profile/tasks');
 
-const tasks = computed(() => tasksData.value?.data || []);
+const tasks = computed((): SupportTicket[] => {
+    const payload = tasksData.value?.data;
+    return payload?.data ?? [];
+});
 
 // Table headers
 const headerItems = computed(() => [
@@ -118,7 +121,7 @@ const getStatusVariant = (status: string) => {
             >
                 <Icon
                     name="solar:refresh-linear"
-                    class="!size-8 shrink-0 animate-spin"
+                    class="size-8! shrink-0 animate-spin"
                 />
                 <span class="ml-2">{{ $t("global.loading") }}</span>
             </div>
@@ -157,7 +160,7 @@ const getStatusVariant = (status: string) => {
                                 v-if="row.attachments && row.attachments.length > 0"
                                 title="Has Attachments"
                                 name="solar:folder-favourite-bookmark-bold-duotone"
-                                class="!size-4 text-success shrink-0 ml-1.5"
+                                class="size-4! text-success shrink-0 ml-1.5"
                             />
                         </div>
                         <div class="text-muted-foreground text-sm">
@@ -221,7 +224,7 @@ const getStatusVariant = (status: string) => {
                                 >
                                     <Icon
                                         name="solar:eye-outline"
-                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                        class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                                     />
                                 </LazyButton>
                             </NuxtLink>

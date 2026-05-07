@@ -51,7 +51,7 @@ const hasActiveSubItem = (items?: { url: string }[]) => {
                     >
                         <Icon
                             v-if="item.icon"
-                            class="!size-5 opacity-75 shrink-0"
+                            class="size-5! opacity-75 shrink-0"
                             :name="item.icon"
                         />
                         <span>{{ item.title }}</span>
@@ -70,7 +70,7 @@ const hasActiveSubItem = (items?: { url: string }[]) => {
                                 >
                                     <Icon
                                         v-if="item.icon"
-                                        class="!size-5 opacity-75 shrink-0"
+                                        class="size-5! opacity-75 shrink-0"
                                         :name="item.icon"
                                     />
                                     <span>{{ item.title }}</span>
@@ -92,7 +92,7 @@ const hasActiveSubItem = (items?: { url: string }[]) => {
                                     >
                                         <Icon
                                             v-if="subItem.icon"
-                                            class="!size-5 opacity-75"
+                                            class="size-5! opacity-75"
                                             :name="subItem.icon"
                                         />
                                         <span>{{ subItem.title }}</span>
@@ -118,7 +118,7 @@ const hasActiveSubItem = (items?: { url: string }[]) => {
                             >
                                 <Icon
                                     v-if="item.icon"
-                                    class="!size-5 opacity-75 shrink-0"
+                                    class="size-5! opacity-75 shrink-0"
                                     :name="item.icon"
                                 />
                                 <span>{{ item.title }}</span>
@@ -146,7 +146,7 @@ const hasActiveSubItem = (items?: { url: string }[]) => {
                                         >
                                             <Icon
                                                 v-if="subItem.icon"
-                                                class="!size-5 opacity-75"
+                                                class="size-5! opacity-75"
                                                 :name="subItem.icon"
                                             />
                                             <span>{{ subItem.title }}</span>

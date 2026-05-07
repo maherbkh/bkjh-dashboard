@@ -51,8 +51,8 @@ const sortBy = ref('queuedAt');
 const sortDir = ref<'asc' | 'desc'>('desc');
 const selectedQueueName = ref<QueueName | ''>('');
 const selectedStatus = ref<QueueJobStatus | ''>('');
-const startDate = ref<string | null>(null);
-const endDate = ref<string | null>(null);
+const startDate = ref<string | undefined>(undefined);
+const endDate = ref<string | undefined>(undefined);
 
 // Queue name options
 const queueNameOptions = computed(() => [
@@ -164,8 +164,8 @@ const handleReset = async () => {
     searchQuery.value = '';
     selectedQueueName.value = '';
     selectedStatus.value = '';
-    startDate.value = null;
-    endDate.value = null;
+    startDate.value = undefined;
+    endDate.value = undefined;
     currentPage.value = 1;
     sortBy.value = 'queuedAt';
     sortDir.value = 'desc';
@@ -416,7 +416,7 @@ const handleView = (job: QueueJob) => {
                             >
                                 <Icon
                                     name="solar:eye-outline"
-                                    class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 !size-5 opacity-80 shrink-0 group-hover:text-primary"
+                                    class="group-hover:opacity-100 group-hover:scale-110 ease-in-out duration-300 size-5! opacity-80 shrink-0 group-hover:text-primary"
                                 />
                             </LazyButton>
                         </div>

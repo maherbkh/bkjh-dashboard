@@ -13,7 +13,7 @@
             <CardTitle>
                 <Icon
                     name="solar:user-outline"
-                    class="!size-5 opacity-75 shrink-0"
+                    class="size-5! opacity-75 shrink-0"
                 />
                 {{ $t("form.contact_information") }}
             </CardTitle>

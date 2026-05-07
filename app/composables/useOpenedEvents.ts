@@ -34,7 +34,7 @@ export const useOpenedEvents = () => {
     function addOpenedEvent(uuid: string, title: string) {
         const events = getOpenedEvents();
         const idx = events.findIndex(e => e.uuid === uuid);
-        if (idx >= 0) events[idx]!.title = title;
+        if (idx >= 0) !events[idx].title = title;
         else events.push({ uuid, title });
         saveOpenedEvents(events);
         version.value++;

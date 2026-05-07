@@ -87,12 +87,9 @@ const updateOption = (index: number, field: 'label' | 'value', value: string): v
     updated[index] = {
         ...currentOption,
         [field]: value,
+        // Value is derived from label: lowercase, spaces -> underscore (snake_case), no special chars
+        ...(field === 'label' ? { value: labelToOptionValue(value) } : {}),
     };
-
-    // Value is derived from label: lowercase, spaces → underscore (snake_case), no special chars
-    if (field === 'label') {
-        updated[index]!.value = labelToOptionValue(value);
-    }
 
     options.value = updated;
 };
@@ -121,7 +118,7 @@ const maxOptions = 50;
                 <div class="flex-1 grid grid-cols-2 gap-2">
                     <FormItemInput
                         :id="`option-${index}-label`"
-                        v-model="options[index].label"
+                        v-model="option.label"
                         :title="t('event.questions.form.option_n_label', { n: index + 1 })"
                         :placeholder="t('event.questions.form.enter_option_label')"
                         :required="true"
@@ -132,7 +129,7 @@ const maxOptions = 50;
                     />
                     <FormItemInput
                         :id="`option-${index}-value`"
-                        :model-value="options[index].value"
+                        :model-value="option.value"
                         :title="t('event.questions.form.option_n_value', { n: index + 1 })"
                         :placeholder="t('event.questions.form.derived_from_label')"
                         :disabled="true"

@@ -215,12 +215,12 @@ const formattedPayload = computed(() => {
                     <Icon
                         v-if="isRetrying"
                         name="solar:refresh-outline"
-                        class="!size-4 animate-spin"
+                        class="size-4! animate-spin"
                     />
                     <Icon
                         v-else
                         name="solar:refresh-outline"
-                        class="!size-4"
+                        class="size-4!"
                     />
                     {{ t('queue_job.retry') }}
                 </LazyButton>
@@ -235,7 +235,7 @@ const formattedPayload = computed(() => {
             <div class="text-center">
                 <Icon
                     name="solar:refresh-outline"
-                    class="!size-8 animate-spin mx-auto mb-2 text-muted-foreground"
+                    class="size-8! animate-spin mx-auto mb-2 text-muted-foreground"
                 />
                 <p class="text-sm text-muted-foreground">
                     {{ t('global.loading') }}
@@ -251,7 +251,7 @@ const formattedPayload = computed(() => {
             <div class="text-center">
                 <Icon
                     name="solar:file-remove-outline"
-                    class="!size-12 mx-auto mb-4 text-muted-foreground"
+                    class="size-12! mx-auto mb-4 text-muted-foreground"
                 />
                 <h2 class="text-xl font-semibold mb-2">
                     {{ t('action.message.not_found_title', { model: t('queue_job.singular') }) }}
@@ -279,7 +279,7 @@ const formattedPayload = computed(() => {
                     <CardTitle class="flex items-center gap-2">
                         <Icon
                             name="solar:info-circle-outline"
-                            class="!size-5 opacity-75 shrink-0"
+                            class="size-5! opacity-75 shrink-0"
                         />
                         {{ t('queue_job.basic_info') }}
                     </CardTitle>
@@ -340,7 +340,7 @@ const formattedPayload = computed(() => {
                     <CardTitle class="flex items-center gap-2">
                         <Icon
                             name="solar:clock-circle-outline"
-                            class="!size-5 opacity-75 shrink-0"
+                            class="size-5! opacity-75 shrink-0"
                         />
                         {{ t('queue_job.timing') }}
                     </CardTitle>
@@ -395,7 +395,7 @@ const formattedPayload = computed(() => {
                     <CardTitle class="flex items-center gap-2">
                         <Icon
                             name="solar:refresh-outline"
-                            class="!size-5 opacity-75 shrink-0"
+                            class="size-5! opacity-75 shrink-0"
                         />
                         {{ t('queue_job.attempts_info') }}
                     </CardTitle>
@@ -430,14 +430,14 @@ const formattedPayload = computed(() => {
                     <CardTitle class="flex items-center gap-2">
                         <Icon
                             name="solar:document-text-outline"
-                            class="!size-5 opacity-75 shrink-0"
+                            class="size-5! opacity-75 shrink-0"
                         />
                         {{ t('queue_job.payload') }}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div class="bg-muted rounded-lg p-4 max-h-[400px] overflow-auto">
-                        <pre class="text-xs font-mono whitespace-pre-wrap break-words">{{ formattedPayload || t('queue_job.not_available') }}</pre>
+                        <pre class="text-xs font-mono whitespace-pre-wrap wrap-break-word">{{ formattedPayload || t('queue_job.not_available') }}</pre>
                     </div>
                 </CardContent>
             </Card>
@@ -451,7 +451,7 @@ const formattedPayload = computed(() => {
                     <CardTitle class="flex items-center gap-2 text-destructive">
                         <Icon
                             name="solar:danger-triangle-outline"
-                            class="!size-5 opacity-75 shrink-0"
+                            class="size-5! opacity-75 shrink-0"
                         />
                         {{ t('queue_job.error_info') }}
                     </CardTitle>
@@ -478,7 +478,7 @@ const formattedPayload = computed(() => {
                             {{ t('queue_job.error_stack') }}
                         </div>
                         <div class="bg-muted rounded-lg p-4 max-h-[300px] overflow-auto">
-                            <pre class="text-xs font-mono whitespace-pre-wrap break-words text-destructive">{{ job.errorStack }}</pre>
+                            <pre class="text-xs font-mono whitespace-pre-wrap wrap-break-word text-destructive">{{ job.errorStack }}</pre>
                         </div>
                     </div>
                 </CardContent>

@@ -34,7 +34,7 @@ const valueClasses = computed(() => {
                 <Icon
                     v-if="props.icon"
                     :name="props.icon"
-                    class="!size-5 shrink-0"
+                    class="size-5! shrink-0"
                     aria-hidden="true"
                 />
                 <span>{{ props.title }}</span>

@@ -128,8 +128,9 @@ const questionErrors = computed(() => {
                 }
                 positionErrors.forEach((err) => {
                     const pos = typeof err === 'string' ? null : err.params?.position;
-                    if (pos === question.position && errors[index]) {
-                        errors[index]!.push(err);
+                    const bucket = errors[index];
+                    if (pos === question.position && bucket) {
+                        bucket.push(err);
                     }
                 });
             }

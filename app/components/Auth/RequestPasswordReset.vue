@@ -69,7 +69,7 @@ async function onSubmit(event: Event) {
         >
             <Icon
                 :name="isLoading ? 'eos-icons:three-dots-loading' : 'solar:letter-outline'"
-                :class="[(!isLoading && 'group-hover:scale-110 ease-in-out duration-300'), 'mr-2 !size-5']"
+                :class="[(!isLoading && 'group-hover:scale-110 ease-in-out duration-300'), 'mr-2 size-5!']"
             />
             {{ $t('auth.send_reset_link') }}
         </Button>

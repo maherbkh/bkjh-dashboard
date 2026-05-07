@@ -32,7 +32,7 @@ function toggleMode() {
                     >
                         <Icon
                             :name="currentOption.icon"
-                            class="!size-5 opacity-80 transition-all"
+                            class="size-5! opacity-80 transition-all"
                         />
                     </button>
                 </TooltipTrigger>

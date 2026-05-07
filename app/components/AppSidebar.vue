@@ -16,7 +16,7 @@ const data = useNavigationData();
         </SidebarHeader>
         <SidebarContent class="flex flex-col justify-between">
             <NavMain :items="data.navMain" />
-            <!--            <NavProjects class="!text-xs" :projects="data.projects"/> -->
+            <!--            <NavProjects class="text-xs!" :projects="data.projects"/> -->
         </SidebarContent>
         <SidebarFooter>
             <NavUser />

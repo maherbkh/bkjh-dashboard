@@ -4,7 +4,7 @@
         <div class="flex items-center gap-2 mt-3 border-t pt-3 border-dashed">
             <Icon
                 name="solar:cloud-upload-line-duotone"
-                class="!size-5 opacity-75 shrink-0"
+                class="size-5! opacity-75 shrink-0"
             />
             <span class="text-sm text-muted-foreground">
                 <span class="font-bold">{{ attachments.length }}</span> Attachments

@@ -61,7 +61,7 @@ export function useMediaSelection(multiple = false, maxSelection = Infinity) {
    */
     const setSelection = (items: MediaEntity[]) => {
         if (!multiple && items.length > 0) {
-            selected.value = [items[0]!];
+            selected.value = [items[0] as MediaEntity];
         }
         else {
             selected.value = items.slice(0, maxSelection);

@@ -224,7 +224,7 @@ const handleReset = () => {
             >
                 <Icon
                     name="solar:restart-line-duotone"
-                    class="!size-4 mr-2 shrink-0"
+                    class="size-4! mr-2 shrink-0"
                 />
             </Button>
             <Button
@@ -235,7 +235,7 @@ const handleReset = () => {
             >
                 <Icon
                     name="solar:magnifer-outline"
-                    class="!size-4 shrink-0"
+                    class="size-4! shrink-0"
                 />
             </Button>
         </form>
