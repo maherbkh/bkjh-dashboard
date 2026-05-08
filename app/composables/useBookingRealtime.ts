@@ -10,6 +10,12 @@
  * Handlers are registered immediately on composable creation (before connect),
  * so no event is missed during the connection handshake.
  *
+ * Room subscription is triggered by the server's `auth:ready` event (emitted
+ * after the async handleConnection auth completes) rather than the socket's
+ * `connect` event. This avoids a race where the client sends `booking:subscribe`
+ * while the server is still awaiting its DB token lookup, causing the subscription
+ * to be rejected with WsException before `client.data.admin` is populated.
+ *
  * On `booking:subscribe`, the server replays the full current presence state,
  * so late joiners receive all active editors without waiting for the next change.
  *
@@ -149,8 +155,12 @@ export function useBookingRealtime(config: BookingRealtimeConfig, callbacks: Boo
     // ── Event handlers ─────────────────────────────────────────────────────────
     // All registered immediately — events during the handshake are never missed.
 
-    const offConnect = socket.on('connect', () => {
-        console.info('[booking-realtime] connected — emitting booking:subscribe');
+    // Subscribe only after the server signals that handleConnection's async auth
+    // is complete. The socket.io CONNECT ack arrives before handleConnection
+    // awaits its DB lookup, so subscribing on 'connect' races client.data.admin
+    // being set → requireBookingAccess throws WsException → client not in room.
+    const offAuthReady = socket.on('auth:ready', () => {
+        console.info('[booking-realtime] auth:ready — emitting booking:subscribe');
         socket.emit('booking:subscribe', {});
     });
 
@@ -242,7 +252,7 @@ export function useBookingRealtime(config: BookingRealtimeConfig, callbacks: Boo
      */
     function leave(): void {
         socket.emit('booking:unsubscribe', {});
-        offConnect();
+        offAuthReady();
         offCreated();
         offUpdated();
         offDeleted();
