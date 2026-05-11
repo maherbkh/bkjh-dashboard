@@ -5,6 +5,11 @@ import { toRaw, watch } from 'vue';
 import { useUserStore } from '~/stores/user';
 import { useGlobalErrorHandler } from '~/composables/useGlobalErrorHandler';
 
+/**
+ * Backend contract: `x-app-lang` accepts `de` or `en`; unsupported values fall back to `de`.
+ * We read the active Nuxt i18n locale and normalize it once for request headers.
+ */
+
 export interface ApiResponse<T = any> {
     data: T;
     message?: string;
@@ -20,13 +25,20 @@ type ApiFetchDeps = {
     handleError: ReturnType<typeof useGlobalErrorHandler>['handleError'];
     userStore: ReturnType<typeof useUserStore>;
     runtimeConfig: ReturnType<typeof useRuntimeConfig>;
+    appLang: 'de' | 'en';
 };
 
 function createDashboardFetchContext(): ApiFetchDeps {
+    const { $i18n } = useNuxtApp();
+    const rawLocale = typeof $i18n?.locale === 'string'
+        ? $i18n.locale
+        : String($i18n?.locale?.value ?? '');
+    const normalizedLocale = rawLocale.trim().toLowerCase();
     return {
         handleError: useGlobalErrorHandler().handleError,
         userStore: useUserStore(),
         runtimeConfig: useRuntimeConfig(),
+        appLang: normalizedLocale === 'en' ? 'en' : 'de',
     };
 }
 
@@ -35,7 +47,7 @@ function buildMergedFetchOptions<T>(
     opts: ApiFetchOptions<T>,
     deps: ApiFetchDeps,
 ) {
-    const { handleError, userStore, runtimeConfig } = deps;
+    const { handleError, userStore, runtimeConfig, appLang } = deps;
     const method = (opts.method ?? 'GET').toString().toUpperCase();
     const skipAuth = opts.skipAuth ?? false;
 
@@ -50,6 +62,7 @@ function buildMergedFetchOptions<T>(
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0',
+        'x-app-lang': appLang,
     };
 
     const isMediaAPI = relativePath.includes('/shared/media/');
@@ -74,9 +87,10 @@ function buildMergedFetchOptions<T>(
         }
     }
 
-    const finalHeaders = {
+    const finalHeaders: Record<string, string> = {
         ...defaultHeaders,
-        ...(opts.headers as Record<string, string>),
+        ...((opts.headers as Record<string, string> | undefined) ?? {}),
+        'x-app-lang': appLang,
     };
     const originalOnResponse = opts.onResponse;
 
@@ -213,4 +227,48 @@ export function useApiFetch<T = any>(
     }
 
     return fetchResult;
+}
+
+/**
+ * Standard headers for manual `fetch` to `/backend/...` when `useApiFetch`/`$fetch` is not used (e.g. blob downloads).
+ * Must be called from a Nuxt/Vue setup context (`useI18n`, stores, runtime config available).
+ */
+export function buildDashboardApiFetchHeaders(overrides: Record<string, string> = {}): Record<string, string> {
+    const deps = createDashboardFetchContext();
+    const { userStore, runtimeConfig, appLang } = deps;
+
+    const originUrl = runtimeConfig.public.appUrl
+        || (import.meta.client ? window.location.origin : '');
+
+    let token: string | undefined;
+    if (typeof userStore.accessToken === 'string') {
+        token = userStore.accessToken;
+    }
+    else {
+        token = (userStore.accessToken as unknown as { value?: string })?.value;
+    }
+
+    const restOverrides = { ...overrides };
+    delete restOverrides['x-app-lang'];
+    const acceptOverride = restOverrides.accept ?? restOverrides.Accept;
+    delete restOverrides.accept;
+    delete restOverrides.Accept;
+
+    const headers: Record<string, string> = {
+        'accept': acceptOverride ?? 'application/json',
+        'x-requested-with': 'XMLHttpRequest',
+        'referer': originUrl,
+        'origin': originUrl,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        ...restOverrides,
+        'x-app-lang': appLang,
+    };
+
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
+
+    return headers;
 }
