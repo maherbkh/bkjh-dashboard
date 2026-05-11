@@ -34,13 +34,11 @@ export function createTicketSchema(t: (key: string, params?: Record<string, stri
                 .nullable()
                 .optional(),
         }),
-        groupId: z
-            .string({
-                error: (issue: { input?: unknown }) =>
-                    issue.input === undefined
-                        ? t('group.singular') + ' ' + t('validation.required')
-                        : t('group.singular') + ' ' + t('validation.invalid'),
-            }),
+        /** Select may emit `null` when cleared; optional strings only allow `undefined`. */
+        groupId: z.preprocess(
+            val => (val === null || val === undefined || val === '' ? undefined : val),
+            z.string().optional(),
+        ),
         ticketCategoryId: z
             .string({
                 error: (issue: { input?: unknown }) =>
@@ -64,13 +62,10 @@ export function createTicketSchema(t: (key: string, params?: Record<string, stri
                         ? t('type.singular') + ' ' + t('validation.required')
                         : t('type.singular') + ' ' + t('validation.invalid'),
             }),
-        adminId: z
-            .string({
-                error: (issue: { input?: unknown }) =>
-                    issue.input === undefined
-                        ? t('admin.singular') + ' ' + t('validation.required')
-                        : t('admin.singular') + ' ' + t('validation.invalid'),
-            }),
+        adminId: z.preprocess(
+            val => (val === null || val === undefined || val === '' ? undefined : val),
+            z.string().optional(),
+        ),
         deviceId: z
             .string()
             .optional(),

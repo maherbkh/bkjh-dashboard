@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import type { SupportTicket } from '~/types';
+import type { Admin, SupportTicket } from '~/types';
 import { storeToRefs } from 'pinia';
 import { useResourcesStore } from '~/stores/resources';
+
+function adminDisplayName(admin: Admin): string {
+    const combined = [admin.firstName, admin.lastName].filter(Boolean).join(' ').trim();
+    return admin.name?.trim() || combined || admin.email;
+}
 
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm } = useCrud<
@@ -75,7 +80,23 @@ const ticketCategorySelectData = computed(() =>
     ticketCategories.value.filter(c => c.isActive !== false),
 );
 
-// Admins (and devices) are not part of `/auth/admin-data` today — replace when API exposes them.
+// Same source as ticket transfer dialog (`/shared/select-lists/admins`).
+// `showSelf: true` so the current user can be selected as assignee (transfer excludes self).
+const {
+    admins: adminsForTicketForm,
+    loadingAdmins,
+    refreshAdmins,
+} = useAdminsList({
+    showSelf: true,
+    immediate: false,
+});
+
+const adminSelectData = computed(() =>
+    adminsForTicketForm.value
+        .filter(a => a.isActive !== false)
+        .map(a => ({ id: a.id, name: adminDisplayName(a) })),
+);
+
 watch(
     () => isOpen.value,
     (open) => {
@@ -86,6 +107,9 @@ watch(
         const needCategories = resourcesStore.ticketCategories.length === 0;
         if (needGroups || needCategories) {
             void resourcesStore.fetchAdminData(true);
+        }
+        if (adminsForTicketForm.value.length === 0) {
+            void refreshAdmins();
         }
     },
 );
@@ -177,13 +201,6 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
     })();
 };
 
-// Mock admins — not in `/auth/admin-data` today; use id/name for FormItemSelect.
-const adminSelectData = ref([
-    { id: 'admin-1', name: 'Jane Smith' },
-    { id: 'admin-2', name: 'John Doe' },
-    { id: 'admin-3', name: 'Alice Johnson' },
-]);
-
 const typeSelectData = computed(() => [
     { id: 'TICKET', name: t('ticket.type.ticket') },
     { id: 'TASK', name: t('ticket.type.task') },
@@ -204,7 +221,7 @@ const typeSelectData = computed(() => [
                         <h3 class="text-lg font-medium">
                             {{ $t("requester.information") }}
                         </h3>
-                        <div class="grid grid-cols-12 gap-4 items-start">
+                        <div class="grid grid-cols-12 gap-4 items-start p-5 bg-muted border-2 border-dashed rounded-md">
                             <FormItemInput
                                 id="requesterName"
                                 v-model="requesterName"
@@ -253,7 +270,7 @@ const typeSelectData = computed(() => [
                         <h3 class="text-lg font-medium">
                             {{ $t("ticket.information") }}
                         </h3>
-                        <div class="grid grid-cols-12 gap-4 items-start">
+                        <div class="grid grid-cols-12 gap-4 items-start  p-5 bg-muted border-2 border-dashed rounded-md">
                             <FormItemSelect
                                 id="groupId"
                                 v-model="groupId"
@@ -263,7 +280,6 @@ const typeSelectData = computed(() => [
                                 :errors="errors.groupId ? [errors.groupId] : []"
                                 v-bind="groupIdAttrs"
                                 :data="groupSelectData"
-                                required
                             />
                             <FormItemSelect
                                 id="ticketCategoryId"
@@ -287,17 +303,30 @@ const typeSelectData = computed(() => [
                                 :data="typeSelectData"
                                 required
                             />
-                            <FormItemSelect
-                                id="adminId"
-                                v-model="adminId"
-                                :title="$t('admin.singular')"
-                                :placeholder="$t('admin.select')"
-                                class="col-span-6"
-                                :errors="errors.adminId ? [errors.adminId] : []"
-                                v-bind="adminIdAttrs"
-                                :data="adminSelectData"
-                                required
-                            />
+                            <div class="col-span-6 grid gap-2">
+                                <FormItemSelect
+                                    id="adminId"
+                                    v-model="adminId"
+                                    :title="$t('admin.singular')"
+                                    :placeholder="$t('admin.select')"
+                                    class="w-full"
+                                    :errors="errors.adminId ? [errors.adminId] : []"
+                                    v-bind="adminIdAttrs"
+                                    :data="adminSelectData"
+                                    :empty-text="$t('admin.no_admins_available')"
+                                    :disabled="loadingAdmins"
+                                />
+                                <p
+                                    v-if="loadingAdmins"
+                                    class="text-xs text-muted-foreground flex items-center gap-1"
+                                >
+                                    <Icon
+                                        name="solar:refresh-linear"
+                                        class="size-3! animate-spin"
+                                    />
+                                    {{ $t('admin.loading') }}
+                                </p>
+                            </div>
                             <FormItemTextarea
                                 id="message"
                                 v-model="message"
