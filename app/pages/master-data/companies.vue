@@ -343,31 +343,25 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         @update:model-value="handleSelectAll"
                     >
                         <template #cell-name="{ row }">
-                            <div>
-                                <div class="font-medium">
+                            <div class="flex flex-col gap-1 text-sm">
+                                <div class="font-normal">
                                     {{ row.name }}
                                 </div>
-                                <div class="text-muted-foreground text-xs font-light">
+                                <div class="text-xs text-muted-foreground font-light">
                                     {{ row.management }}
                                 </div>
-                            </div>
-                        </template>
-
-                        <template #cell-location="{ row }">
-                            <div class="text-sm">
-                                {{ row.location }}
                             </div>
                         </template>
 
                         <template #cell-address="{ row }">
                             <div
                                 v-if="row.address"
-                                class="text-sm"
+                                class="flex flex-col gap-1 text-sm"
                             >
-                                <div class="font-medium">
+                                <div class="font-normal">
                                     {{ row.address.streetName }} {{ row.address.buildingNumber }}
                                 </div>
-                                <div class="text-muted-foreground text-xs">
+                                <div class="text-xs text-muted-foreground font-light">
                                     {{ row.address.postalCode }} {{ row.address.city }}
                                 </div>
                             </div>
