@@ -9,7 +9,7 @@ function adminDisplayName(admin: Admin): string {
 }
 
 const { t } = useI18n();
-const { defineField, errors, setValues, handleSubmit, resetForm } = useCrud<
+const { defineField, errors, errorBag, values, validate, setValues, handleSubmit, resetForm } = useCrud<
     SupportTicket,
     TicketForm
 >({
@@ -195,11 +195,63 @@ watch(
 );
 
 // Handle form submission with validation
-const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
-    handleSubmit((values) => {
+const submitForm = async (action: 'submitAndClose' | 'submitAndAddNew') => {
+    if (import.meta.dev) {
+        const validationResult = await validate();
+        const allValues = toRaw(values) as Record<string, unknown>;
+        const currentValues = {
+            requester: allValues.requester ?? null,
+            groupId: allValues.groupId ?? null,
+            ticketCategoryId: allValues.ticketCategoryId ?? null,
+            type: allValues.type ?? null,
+            adminId: allValues.adminId ?? null,
+            message: allValues.message ?? null,
+            deviceId: allValues.deviceId ?? null,
+        };
+        const errorsByField = Object.fromEntries(
+            Object.entries(errors.value ?? {}).filter(([, value]) => Boolean(value)),
+        );
+
+        if (!validationResult.valid) {
+            console.error(`[TicketForm] Validation failed (${action})`, {
+                action,
+                isValid: validationResult.valid,
+                errorsByField,
+                currentValues,
+                schemaIssueBag: toRaw(errorBag),
+                validationResult,
+            });
+        }
+        else {
+            console.info('[TicketForm] Validation passed', {
+                action,
+                isValid: validationResult.valid,
+                currentValues,
+            });
+        }
+    }
+
+    const onValid = (values: unknown) => {
         emit(action, values as TicketForm);
-    })();
+    };
+
+    handleSubmit(onValid)();
 };
+
+watch(
+    errors,
+    (currentErrors) => {
+        if (!import.meta.dev) {
+            return;
+        }
+
+        const activeErrors = Object.entries(currentErrors).filter(([, value]) => Boolean(value));
+        if (activeErrors.length > 0) {
+            console.debug('[TicketForm] Reactive validation errors:', Object.fromEntries(activeErrors));
+        }
+    },
+    { deep: true },
+);
 
 const typeSelectData = computed(() => [
     { id: 'TICKET', name: t('ticket.type.ticket') },
@@ -221,13 +273,13 @@ const typeSelectData = computed(() => [
                         <h3 class="text-lg font-medium">
                             {{ $t("requester.information") }}
                         </h3>
-                        <div class="grid grid-cols-12 gap-4 items-start p-5 bg-muted border-2 border-dashed rounded-md">
+                        <div class="grid lg:grid-cols-12 gap-4 items-start p-5 bg-muted border-2 border-dashed rounded-md">
                             <FormItemInput
                                 id="requesterName"
                                 v-model="requesterName"
                                 :title="$t('requester.name')"
                                 :placeholder="$t('requester.name')"
-                                class="col-span-6"
+                                class="lg:col-span-6"
                                 :errors="(errors as Record<string, string | undefined>)['requester.name'] ? [(errors as Record<string, string | undefined>)['requester.name']!] : []"
                                 v-bind="requesterNameAttrs"
                                 required
@@ -238,20 +290,18 @@ const typeSelectData = computed(() => [
                                 :title="$t('requester.email')"
                                 :placeholder="$t('requester.email')"
                                 type="email"
-                                class="col-span-6"
+                                class="lg:col-span-6"
                                 :errors="(errors as Record<string, string | undefined>)['requester.email'] ? [(errors as Record<string, string | undefined>)['requester.email']!] : []"
                                 v-bind="requesterEmailAttrs"
-                                required
                             />
                             <FormItemInput
                                 id="requesterPhone"
                                 v-model="requesterPhone"
                                 :title="$t('requester.phone')"
                                 :placeholder="$t('requester.phone')"
-                                class="col-span-6"
+                                class="lg:col-span-6"
                                 :errors="(errors as Record<string, string | undefined>)['requester.phone'] ? [(errors as Record<string, string | undefined>)['requester.phone']!] : []"
                                 v-bind="requesterPhoneAttrs"
-                                required
                             />
                             <FormItemInput
                                 id="requesterCell"
@@ -270,13 +320,13 @@ const typeSelectData = computed(() => [
                         <h3 class="text-lg font-medium">
                             {{ $t("ticket.information") }}
                         </h3>
-                        <div class="grid grid-cols-12 gap-4 items-start  p-5 bg-muted border-2 border-dashed rounded-md">
+                        <div class="grid lg:grid-cols-12 gap-4 items-start  p-5 bg-muted border-2 border-dashed rounded-md">
                             <FormItemSelect
                                 id="groupId"
                                 v-model="groupId"
                                 :title="$t('group.singular')"
                                 :placeholder="$t('group.select')"
-                                class="col-span-6"
+                                class="lg:col-span-6"
                                 :errors="errors.groupId ? [errors.groupId] : []"
                                 v-bind="groupIdAttrs"
                                 :data="groupSelectData"
@@ -286,7 +336,7 @@ const typeSelectData = computed(() => [
                                 v-model="ticketCategoryId"
                                 :title="$t('category.singular')"
                                 :placeholder="$t('category.select')"
-                                class="col-span-6"
+                                class="lg:col-span-6"
                                 :errors="errors.ticketCategoryId ? [errors.ticketCategoryId] : []"
                                 v-bind="ticketCategoryIdAttrs"
                                 :data="ticketCategorySelectData"
@@ -297,13 +347,13 @@ const typeSelectData = computed(() => [
                                 v-model="type"
                                 :title="$t('type.singular')"
                                 :placeholder="$t('type.select')"
-                                class="col-span-6"
+                                class="lg:col-span-4"
                                 :errors="errors.type ? [errors.type] : []"
                                 v-bind="typeAttrs"
                                 :data="typeSelectData"
                                 required
                             />
-                            <div class="col-span-6 grid gap-2">
+                            <div class="lg:col-span-4 grid gap-2">
                                 <FormItemSelect
                                     id="adminId"
                                     v-model="adminId"
@@ -327,6 +377,15 @@ const typeSelectData = computed(() => [
                                     {{ $t('admin.loading') }}
                                 </p>
                             </div>
+                            <FormItemInput
+                                id="deviceId"
+                                v-model="deviceId"
+                                :title="$t('form.device_id')"
+                                :placeholder="$t('form.device_id_placeholder')"
+                                class="col-span-4"
+                                :errors="errors.deviceId ? [errors.deviceId] : []"
+                                v-bind="deviceIdAttrs"
+                            />
                             <FormItemTextarea
                                 id="message"
                                 v-model="message"

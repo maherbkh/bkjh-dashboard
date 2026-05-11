@@ -1812,6 +1812,7 @@
     "password_strength": "must contain at least one lowercase letter, one uppercase letter, and one number",
     "positive": "must be a positive number",
     "regex": "Invalid format",
+    "phone_or_cell_required": "At least one of phone number or mobile number is required",
     "required": "is required",
     "slug_format": "must contain only lowercase letters, numbers, and hyphens",
     "time_format": "Invalid time format",

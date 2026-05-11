@@ -1815,6 +1815,7 @@
     "password_strength": "muss mindestens einen Kleinbuchstaben, einen Großbuchstaben und eine Zahl enthalten",
     "positive": "muss eine positive Zahl sein",
     "regex": "Ungültiges Format",
+    "phone_or_cell_required": "Mindestens eine Telefonnummer oder Handynummer ist erforderlich",
     "required": "ist erforderlich",
     "slug_format": "darf nur Kleinbuchstaben, Zahlen und Bindestriche enthalten",
     "time_format": "Ungültiges Zeitformat",

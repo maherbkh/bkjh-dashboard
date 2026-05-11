@@ -22,6 +22,7 @@ type Props = {
     emptyText?: string;
     searchable?: boolean;
     disabledKey?: string;
+    castToNumber?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -39,6 +40,7 @@ const props = withDefaults(defineProps<Props>(), {
     emptyText: undefined,
     searchable: true,
     disabledKey: 'disabled',
+    castToNumber: false,
 });
 
 const emit = defineEmits<{
@@ -48,9 +50,9 @@ const emit = defineEmits<{
 const hasErrors = computed(() => props.errors && props.errors.length > 0);
 
 const handleValueChange = (value: string) => {
-    // Convert to number if the original value was a number
-    const numValue = Number(value);
-    const finalValue = !isNaN(numValue) && value !== '' ? numValue : value;
+    const finalValue = props.castToNumber && value !== '' && !Number.isNaN(Number(value))
+        ? Number(value)
+        : value;
     emit('update:modelValue', finalValue);
 };
 

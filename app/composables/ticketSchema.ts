@@ -12,27 +12,51 @@ export function createTicketSchema(t: (key: string, params?: Record<string, stri
                 })
                 .min(2, t('requester.name') + ' ' + t('validation.min_length', { min: 2 }))
                 .max(100, t('requester.name') + ' ' + t('validation.max_length', { max: 100 })),
-            email: z
-                .string({
-                    error: (issue: { input?: unknown }) =>
-                        issue.input === undefined
-                            ? t('requester.email') + ' ' + t('validation.required')
-                            : t('requester.email') + ' ' + t('validation.invalid_email'),
-                })
-                .email(t('requester.email') + ' ' + t('validation.invalid_email')),
-            phone: z
-                .string({
-                    error: (issue: { input?: unknown }) =>
-                        issue.input === undefined
-                            ? t('requester.phone') + ' ' + t('validation.required')
-                            : t('requester.phone') + ' ' + t('validation.invalid'),
-                })
-                .min(10, t('requester.phone') + ' ' + t('validation.min_length', { min: 10 }))
-                .max(20, t('requester.phone') + ' ' + t('validation.max_length', { max: 20 })),
-            cell: z
-                .string()
-                .nullable()
-                .optional(),
+            email: z.preprocess(
+                val => (val === null || val === undefined || val === '' ? undefined : val),
+                z
+                    .string({
+                        error: () => t('requester.email') + ' ' + t('validation.invalid_email'),
+                    })
+                    .email(t('requester.email') + ' ' + t('validation.invalid_email'))
+                    .optional(),
+            ),
+            phone: z.preprocess(
+                val => (val === null || val === undefined || val === '' ? undefined : val),
+                z
+                    .string({
+                        error: () => t('requester.phone') + ' ' + t('validation.invalid'),
+                    })
+                    .min(10, t('requester.phone') + ' ' + t('validation.min_length', { min: 10 }))
+                    .max(20, t('requester.phone') + ' ' + t('validation.max_length', { max: 20 }))
+                    .optional(),
+            ),
+            cell: z.preprocess(
+                val => (val === null || val === undefined || val === '' ? undefined : val),
+                z
+                    .string({
+                        error: () => t('requester.cell') + ' ' + t('validation.invalid'),
+                    })
+                    .min(10, t('requester.cell') + ' ' + t('validation.min_length', { min: 10 }))
+                    .max(20, t('requester.cell') + ' ' + t('validation.max_length', { max: 20 }))
+                    .optional(),
+            ),
+        }).superRefine((requester, context) => {
+            if (requester.phone || requester.cell) {
+                return;
+            }
+
+            const message = t('validation.phone_or_cell_required');
+            context.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['phone'],
+                message,
+            });
+            context.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['cell'],
+                message,
+            });
         }),
         /** Select may emit `null` when cleared; optional strings only allow `undefined`. */
         groupId: z.preprocess(
@@ -66,9 +90,10 @@ export function createTicketSchema(t: (key: string, params?: Record<string, stri
             val => (val === null || val === undefined || val === '' ? undefined : val),
             z.string().optional(),
         ),
-        deviceId: z
-            .string()
-            .optional(),
+        deviceId: z.preprocess(
+            val => (val === null || val === undefined || val === '' ? undefined : val),
+            z.string().optional(),
+        ),
     });
 }
 
