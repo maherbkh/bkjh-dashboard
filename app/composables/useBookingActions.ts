@@ -97,7 +97,7 @@ export function useBookingActions(options: UseBookingActionsOptions) {
     const pendingStatus = ref<BookingApiStatus>('PENDING');
     const isSubmitting = ref(false);
     const statusNote = ref('');
-    const sendEmail = ref(false);
+    const sendEmail = ref(true);
     const emailOption = ref<BookingEmailOption>('requester');
     const customEmails = ref('');
     const emailError = ref('');
@@ -250,7 +250,7 @@ export function useBookingActions(options: UseBookingActionsOptions) {
     function openAction(selection: BookingActionSelection) {
         currentAction.value = selection.action;
         statusNote.value = '';
-        sendEmail.value = selection.action === 'create' || selection.action === 'edit';
+        sendEmail.value = true;
         emailOption.value = 'requester';
         customEmails.value = '';
         emailError.value = '';
