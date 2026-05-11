@@ -291,15 +291,22 @@ const getStatusLabel = (status: string): string => {
             :sortable="false"
         >
             <template #cell-event="{ row }">
-                <div class="flex flex-col">
-                    <div class="font-medium">
-                        {{ row.event.title }}
-                    </div>
+                <div class="flex flex-col gap-1">
+                    <Tooltip>
+                        <TooltipTrigger as-child>
+                            <div class="font-normal max-w-[200px] truncate cursor-help">
+                                {{ row.event.title }}
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent class="max-w-sm w-fit wrap-break-word text-center">
+                            <p>{{ row.event.title }}</p>
+                        </TooltipContent>
+                    </Tooltip>
                     <div
                         v-if="row.event.schedules && row.event.schedules.length > 0"
                         class="mt-1 text-muted-foreground flex items-center gap-1 whitespace-nowrap text-xs"
                     >
-                        <div class="font-medium">
+                        <div class="font-normal">
                             {{ formatDateShort(row.event.schedules[0]?.date) }}
                         </div>
                         <template v-if="row.event.schedules.length > 1">
@@ -307,7 +314,7 @@ const getStatusLabel = (status: string): string => {
                                 name="solar:arrow-right-bold-duotone"
                                 class="size-5 shrink-0 opacity-75"
                             />
-                            <div class="font-medium">
+                            <div class="font-normal">
                                 {{ formatDateShort(row.event.schedules[(row.event.schedules.length - 1)]?.date) }}
                             </div>
                         </template>
@@ -316,54 +323,59 @@ const getStatusLabel = (status: string): string => {
             </template>
 
             <template #cell-person="{ row }">
-                <div class="flex flex-col">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <div>
-                                <Avatar
-                                    class="size-9 rounded-full border
-                                           group-active:bg-sidebar-primary group-active:text-sidebar-primary-foreground
-                                           group-data-[state=open]:bg-sidebar-accent group-data-[state=open]:text-sidebar-accent-foreground"
+                <div>
+                    <div class="flex items-center gap-2">
+                        <div class="shrink-0">
+                            <Avatar
+                                class="size-8 rounded-full border
+                                        group-active:bg-sidebar-primary group-active:text-sidebar-primary-foreground
+                                        group-data-[state=open]:bg-sidebar-accent group-data-[state=open]:text-sidebar-accent-foreground"
+                            >
+                                <AvatarImage
+                                    v-if="row.attendee?.avatar"
+                                    class="bg-background"
+                                    :src="row.attendee.avatar"
+                                    :alt="getFullName(row.attendee) || 'User'"
+                                />
+                                <AvatarFallback class="rounded-full bg-background">
+                                    {{ getInitials(getFullName(row.attendee)) }}
+                                </AvatarFallback>
+                            </Avatar>
+                        </div>
+                        <div class="text-xs! flex flex-col gap-1">
+                            <div class="flex items-center gap-2">
+                                <div class="font-normal">
+                                    {{ getFullName(row.attendee) }}
+                                </div>
+                                <Tooltip
+                                    v-if="row.notes && row.notes.trim()"
                                 >
-                                    <AvatarImage
-                                        v-if="row.attendee?.avatar"
-                                        class="bg-background"
-                                        :src="row.attendee.avatar"
-                                        :alt="getFullName(row.attendee) || 'User'"
-                                    />
-                                    <AvatarFallback class="rounded-full bg-background">
-                                        {{ getInitials(getFullName(row.attendee)) }}
-                                    </AvatarFallback>
-                                </Avatar>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2">
-                                    <div class="font-medium">
-                                        {{ getFullName(row.attendee) }}
-                                    </div>
-                                    <Tooltip
-                                        v-if="row.notes && row.notes.trim()"
+                                    <TooltipTrigger as-child>
+                                        <Icon
+                                            name="solar:chat-line-linear"
+                                            class="size-3! shrink-0 cursor-pointer hover:opacity-80 transition-opacity text-primary!"
+                                            @click="openNoteModal(row.notes)"
+                                        />
+                                    </TooltipTrigger>
+                                    <TooltipContent
+                                        class="max-w-xs"
                                     >
-                                        <TooltipTrigger as-child>
-                                            <Icon
-                                                name="solar:chat-line-linear"
-                                                class="size-4! shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                                                @click="openNoteModal(row.notes)"
-                                            />
-                                        </TooltipTrigger>
-                                        <TooltipContent
-                                            class="max-w-xs"
-                                        >
-                                            <p class="whitespace-pre-wrap">
-                                                {{ row.notes }}
-                                            </p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </div>
-                                <div class="text-muted-foreground text-xs">
-                                    {{ row.attendee.email }}
-                                </div>
+                                        <p class="whitespace-pre-wrap">
+                                            {{ row.notes }}
+                                        </p>
+                                    </TooltipContent>
+                                </Tooltip>
                             </div>
+                            <Tooltip>
+                                <TooltipTrigger as-child>
+                                    <div class="text-muted-foreground text-xs truncate max-w-[150px] cursor-help">
+                                        {{ row.attendee.email }}
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent class="max-w-sm wrap-break-word">
+                                    <p>{{ row.attendee.email }}</p>
+                                </TooltipContent>
+                            </Tooltip>
                         </div>
                     </div>
                 </div>
@@ -374,13 +386,13 @@ const getStatusLabel = (status: string): string => {
                     <div class="flex flex-col max-w-[200px]">
                         <div
                             v-if="row.attendee?.occupation?.name"
-                            class="font-medium truncate"
+                            class="font-normal text-xs truncate"
                         >
                             {{ row.attendee.occupation.name }}
                         </div>
                         <div
                             v-if="row.attendee?.group?.name"
-                            class="text-muted-foreground truncate text-sm"
+                            class="text-muted-foreground truncate text-xs"
                         >
                             {{ row.attendee.group.name }}
                         </div>
@@ -394,24 +406,24 @@ const getStatusLabel = (status: string): string => {
 
             <template #cell-registration="{ row }">
                 <div class="flex flex-col">
-                    <div class="text-sm font-medium flex items-start gap-1.5">
-                        <div class="flex items-start gap-1.5">
+                    <div class="text-xs! font-normal flex items-start gap-1">
+                        <div class="flex items-center gap-1">
                             <Icon
                                 name="solar:calendar-mark-line-duotone"
                                 class="opacity-50 size-4!"
                             />
-                            {{ formatDateParts(row.registeredAt).date }}
+                            <div>{{ formatDateParts(row.registeredAt).date }}</div>
                         </div>
                         <Icon
                             name="solar:arrow-right-bold-duotone"
                             class="size-5 mt-0.5 shrink-0 opacity-50"
                         />
-                        <div class="flex items-start gap-1.5">
+                        <div class="flex items-center gap-1">
                             <Icon
                                 name="solar:watch-square-line-duotone"
                                 class="opacity-50 size-4!"
                             />
-                            {{ formatDateParts(row.registeredAt).time }}
+                            <div>{{ formatDateParts(row.registeredAt).time }}</div>
                         </div>
                     </div>
                     <div class="mt-1">
