@@ -57,7 +57,10 @@ type UseBookingActionsOptions = {
         sendEmail?: boolean;
         email?: string;
     }) => Promise<BookingCalendarRecord | null>;
-    updateBooking: (bookingId: string, patch: Partial<Omit<BookingCalendarRecord, 'id'>>) => Promise<BookingCalendarRecord | null>;
+    updateBooking: (
+        bookingId: string,
+        patch: Partial<Omit<BookingCalendarRecord, 'id'>> & { sendEmail?: boolean; email?: string },
+    ) => Promise<BookingCalendarRecord | null>;
     changeBookingStatus: (
         bookingId: string,
         status: BookingApiStatus,
@@ -247,7 +250,7 @@ export function useBookingActions(options: UseBookingActionsOptions) {
     function openAction(selection: BookingActionSelection) {
         currentAction.value = selection.action;
         statusNote.value = '';
-        sendEmail.value = false;
+        sendEmail.value = selection.action === 'create' || selection.action === 'edit';
         emailOption.value = 'requester';
         customEmails.value = '';
         emailError.value = '';
@@ -351,6 +354,28 @@ export function useBookingActions(options: UseBookingActionsOptions) {
             }
 
             if (currentAction.value === 'edit') {
+                let editEmail: string | undefined;
+
+                if (sendEmail.value) {
+                    if (emailOption.value === 'other') {
+                        if (!validateEmails(customEmails.value)) {
+                            emailError.value = t('booking.calendar.action_dialog.email.invalid');
+                            return null;
+                        }
+                        editEmail = customEmails.value
+                            .split(',')
+                            .map(e => e.trim().toLowerCase())
+                            .join(',');
+                    }
+                    else {
+                        editEmail = editForm.value.requesterEmail.trim() || undefined;
+                        if (!editEmail) {
+                            emailError.value = t('booking.calendar.action_dialog.email.required');
+                            return null;
+                        }
+                    }
+                }
+
                 return options.updateBooking(selectedBookingId.value, {
                     startsAt: editForm.value.startsAt,
                     endsAt: editForm.value.endsAt,
@@ -363,6 +388,8 @@ export function useBookingActions(options: UseBookingActionsOptions) {
                     carId: allowEditCar.value ? (editForm.value.carId || selectedBooking.value?.carId || '') : undefined,
                     safeReference: editForm.value.safeReference,
                     safePin: editForm.value.safePin,
+                    sendEmail: sendEmail.value,
+                    email: editEmail,
                 });
             }
 

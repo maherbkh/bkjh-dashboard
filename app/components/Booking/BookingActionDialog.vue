@@ -802,6 +802,64 @@ function updateField<K extends keyof BookingEditForm>(field: K, value: BookingEd
                                     />
                                 </div>
                             </div>
+
+                            <!-- Email notification -->
+                            <div class="rounded-md border bg-muted/50 p-3 space-y-3">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                    {{ $t('booking.calendar.action_dialog.sections.notification') }}
+                                </p>
+                                <FormItemSwitch
+                                    id="booking-edit-send-email"
+                                    :model-value="sendEmail"
+                                    flex-row
+                                    :show-side-label="false"
+                                    :title="$t('booking.calendar.action_dialog.fields.send_email')"
+                                    @update:model-value="emit('update:send-email', Boolean($event))"
+                                />
+
+                                <div
+                                    v-if="sendEmail"
+                                    class="space-y-3"
+                                >
+                                    <div
+                                        :class="[
+                                            'rounded-md px-3 py-2 text-sm border',
+                                            isInternalEmail
+                                                ? 'bg-success/10 border-success/25 text-success'
+                                                : 'bg-warning/10 border-warning/25 text-warning',
+                                        ]"
+                                    >
+                                        <div class="flex items-center gap-2">
+                                            <Icon
+                                                :name="isInternalEmail ? 'solar:shield-check-outline' : 'solar:shield-cross-outline'"
+                                                class="size-4 shrink-0"
+                                            />
+                                            <span>
+                                                {{ isInternalEmail ? $t('booking.calendar.action_dialog.email.internal') : $t('booking.calendar.action_dialog.email.external') }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <FormItemRadioGroup
+                                        id="booking-edit-email-option"
+                                        :model-value="emailOption"
+                                        :options="emailRecipientOptions"
+                                        variant="box"
+                                        @update:model-value="emit('update:email-option', $event as BookingEmailOption)"
+                                    />
+
+                                    <FormItemInput
+                                        v-if="emailOption === 'other'"
+                                        id="booking-edit-custom-emails"
+                                        :model-value="customEmails"
+                                        :title="$t('booking.calendar.action_dialog.email.custom_emails')"
+                                        :placeholder="$t('booking.calendar.action_dialog.email.custom_emails_placeholder')"
+                                        :errors="emailError ? [emailError] : []"
+                                        icon="solar:letter-linear"
+                                        @update:model-value="emit('update:custom-emails', String($event ?? ''))"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </template>
                 </template>

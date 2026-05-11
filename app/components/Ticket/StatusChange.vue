@@ -233,7 +233,7 @@ const statusNote = ref('');
 const isInternalLoading = ref(false);
 
 // Email notification state
-const sendEmail = ref(false);
+const sendEmail = ref(true);
 const emailOption = ref<'requester' | 'other'>('requester');
 const customEmails = ref('');
 const emailError = ref('');
