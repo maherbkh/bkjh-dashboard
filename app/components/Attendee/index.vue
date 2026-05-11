@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { AttendeeData } from '~/types';
+import type { AttendeeData, AttendeeCertificate } from '~/types';
 import { useInitials } from '~/composables/useInitials';
 
 const { formatDateShort, formatRelative } = useGermanDateFormat();
@@ -16,36 +16,32 @@ const emit = defineEmits<{
 }>();
 
 const { sendVerificationEmail, isSendingVerificationEmail } = useAttendeeActions();
+const { downloadCertificate } = useCertificateDownload();
+const { getDirectImageSrc } = useAuthenticatedImage();
 
-const confirmedCount = computed(() =>
-    props.attendee.events?.filter(e => e.registrationStatus === 'CONFIRMED').length ?? 0,
-);
+// ── Stats (all derived from registrations — events[] removed from API) ────────
 const pendingCount = computed(() =>
-    props.attendee.events?.filter(e => e.registrationStatus === 'PENDING').length ?? 0,
+    props.attendee.registrations?.filter(r => r.registrationStatus === 'PENDING').length ?? 0,
 );
-/** Registrations carry `hasAttended`; the embedded `events` list may omit `ATTENDED` status. */
-const attendedCount = computed(() => {
-    const regs = props.attendee.registrations;
-    if (regs != null) {
-        return regs.filter(r => r.hasAttended).length;
-    }
-    return props.attendee.events?.filter(e => e.registrationStatus === 'ATTENDED').length ?? 0;
-});
+const confirmedCount = computed(() =>
+    props.attendee.registrations?.filter(
+        r => r.registrationStatus === 'APPROVED' || r.registrationStatus === 'CONFIRMED',
+    ).length ?? 0,
+);
+const attendedCount = computed(() =>
+    props.attendee.registrations?.filter(r => r.hasAttended).length ?? 0,
+);
 
-const emailVerifiedLabel = computed(() => {
-    if (props.attendee.emailVerifiedAt) return t('common.yes');
-    return t('common.no');
-});
+// ── Sidebar meta ────────────────────────────────────────────────────────────────
+const emailVerifiedLabel = computed(() =>
+    props.attendee.emailVerifiedAt || props.attendee.emailVerified ? t('common.yes') : t('common.no'),
+);
 
 const metaParts = computed(() => {
     const parts: { key: string; text: string }[] = [];
     parts.push({ key: 'email', text: props.attendee.email });
-    if (props.attendee.group?.name) {
-        parts.push({ key: 'group', text: props.attendee.group.name });
-    }
-    if (props.attendee.occupation?.name) {
-        parts.push({ key: 'job', text: props.attendee.occupation.name });
-    }
+    if (props.attendee.group?.name) parts.push({ key: 'group', text: props.attendee.group.name });
+    if (props.attendee.occupation?.name) parts.push({ key: 'job', text: props.attendee.occupation.name });
     return parts;
 });
 
@@ -54,19 +50,34 @@ const lastLoginDisplay = computed(() => {
     return `${formatDateShort(props.attendee.lastLoginAt)} · ${formatRelative(props.attendee.lastLoginAt)}`;
 });
 
+// ── Certificates ────────────────────────────────────────────────────────────────
+const downloadingCertId = ref<string | null>(null);
+
+async function onDownloadCertificate(cert: AttendeeCertificate) {
+    if (!cert.media?.path) return;
+    downloadingCertId.value = cert.id;
+    try {
+        const url = getDirectImageSrc({ path: cert.media.path });
+        await downloadCertificate(
+            { certificateUrl: url, expiresAt: cert.expireAt, createdAt: cert.createdAt },
+            { attendeeName: props.attendee.fullName, eventTitle: cert.event.title },
+        );
+    }
+    finally {
+        downloadingCertId.value = null;
+    }
+}
+
+// ── Verification ────────────────────────────────────────────────────────────────
 async function onResendVerification() {
-    await sendVerificationEmail(props.attendee.id, async () => {
-        emit('refresh');
-    });
+    await sendVerificationEmail(props.attendee.id, async () => emit('refresh'));
 }
 </script>
 
 <template>
     <div class="flex flex-col gap-6">
-        <!-- Compact header (aligned with Event / Ticket detail headers) -->
-        <div
-            class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
-        >
+        <!-- Header -->
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="flex min-w-0 items-start gap-3">
                 <Avatar class="size-10 shrink-0 rounded-lg border shadow-sm sm:size-11">
                     <AvatarImage
@@ -96,17 +107,38 @@ async function onResendVerification() {
                         >
                             {{ attendee.isEmployee ? $t('attendee.employee') : $t('attendee.non_employee') }}
                         </Badge>
+                        <!-- Pending alerts inline with name -->
+                        <Badge
+                            v-if="attendee.hasPendingDeletion"
+                            variant="destructive"
+                            class="shrink-0 px-3 text-xs font-normal uppercase"
+                        >
+                            <Icon
+                                name="solar:trash-bin-minimalistic-2-outline"
+                                class="size-3 mr-1"
+                            />
+                            {{ $t('attendee.pending_deletion') }}
+                        </Badge>
+                        <Badge
+                            v-if="attendee.hasPendingEmailChange"
+                            variant="secondary"
+                            class="shrink-0 px-3 text-xs font-normal uppercase"
+                        >
+                            <Icon
+                                name="solar:letter-outline"
+                                class="size-3 mr-1"
+                            />
+                            {{ $t('attendee.pending_email_change') }}
+                        </Badge>
                     </div>
-                    <p
-                        class="text-xs text-muted-foreground sm:text-sm"
-                    >
+                    <p class="text-xs text-muted-foreground sm:text-sm">
                         <template
                             v-for="(part, i) in metaParts"
                             :key="part.key"
                         >
                             <span
                                 v-if="i > 0"
-                                class="mx-1.5 text-border select-none"
+                                class="mx-1.5 select-none text-border"
                                 aria-hidden="true"
                             >·</span>
                             <span class="break-all">{{ part.text }}</span>
@@ -114,6 +146,8 @@ async function onResendVerification() {
                     </p>
                 </div>
             </div>
+
+            <!-- Action buttons -->
             <div class="flex shrink-0 flex-wrap items-center gap-2 border-t border-border/60 pt-3 sm:border-t-0 sm:pt-0">
                 <Button
                     variant="outline"
@@ -131,7 +165,7 @@ async function onResendVerification() {
                     variant="secondary"
                     size="sm"
                     class="px-5"
-                    :disabled="isSendingVerificationEmail || attendee.emailVerifiedAt"
+                    :disabled="isSendingVerificationEmail || !!(attendee.emailVerifiedAt || attendee.emailVerified)"
                     @click="onResendVerification"
                 >
                     <Icon
@@ -139,7 +173,7 @@ async function onResendVerification() {
                         class="size-4 shrink-0"
                     />
                     <span class="max-w-40 truncate sm:max-w-none">{{
-                        attendee.emailVerifiedAt
+                        (attendee.emailVerifiedAt || attendee.emailVerified)
                             ? $t('attendee.email_verified')
                             : $t('attendee.resend_verification_email')
                     }}</span>
@@ -158,7 +192,7 @@ async function onResendVerification() {
             </div>
         </div>
 
-        <!-- KPI strip -->
+        <!-- KPI strip: Events | Pending | Attended | Certificates -->
         <div class="grid grid-cols-2 gap-2 lg:grid-cols-4">
             <EventBox
                 :title="$t('academy.plural')"
@@ -173,40 +207,28 @@ async function onResendVerification() {
                 compact
             />
             <EventBox
-                :title="$t('event.approved')"
-                icon="solar:check-circle-line-duotone"
-                :value="confirmedCount"
-                compact
-            />
-            <EventBox
                 :title="$t('attendee.visited')"
                 icon="solar:star-shine-line-duotone"
                 :value="attendedCount"
                 compact
             />
+            <EventBox
+                :title="$t('attendee.certificates_count')"
+                icon="solar:diploma-line-duotone"
+                :value="attendee.certificatesCount ?? attendee.certificates?.length ?? 0"
+                compact
+            />
         </div>
 
-        <!-- Same grid + Card pattern as Ticket detail (Ticket/index.vue) -->
+        <!-- Main content + Info sidebar -->
         <div class="grid grid-cols-1 gap-6 xl:grid-cols-12">
+            <!-- Left: tabs -->
             <div class="min-w-0 xl:col-span-8">
                 <Tabs
-                    default-value="events"
+                    default-value="registrations"
                     class="w-full"
                 >
                     <TabsList class="grid h-9 w-full max-w-md grid-cols-2 p-1">
-                        <TabsTrigger
-                            value="events"
-                            class="text-xs sm:text-sm"
-                        >
-                            {{ $t('academy.plural') }}
-                            <Badge
-                                v-if="attendee.events?.length"
-                                variant="secondary"
-                                class="ml-1.5 h-5 min-w-5 px-1 text-[10px] tabular-nums"
-                            >
-                                {{ attendee.events.length }}
-                            </Badge>
-                        </TabsTrigger>
                         <TabsTrigger
                             value="registrations"
                             class="text-xs sm:text-sm"
@@ -220,23 +242,88 @@ async function onResendVerification() {
                                 {{ attendee.registrations.length }}
                             </Badge>
                         </TabsTrigger>
+                        <TabsTrigger
+                            value="certificates"
+                            class="text-xs sm:text-sm"
+                        >
+                            {{ $t('attendee.certificates') }}
+                            <Badge
+                                v-if="attendee.certificates?.length"
+                                variant="secondary"
+                                class="ml-1.5 h-5 min-w-5 px-1 text-[10px] tabular-nums"
+                            >
+                                {{ attendee.certificates.length }}
+                            </Badge>
+                        </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent
-                        value="events"
-                        class="mt-6 outline-none focus-visible:ring-0"
-                    >
-                        <AttendeeEventsTable :data="attendee.events ?? []" />
-                    </TabsContent>
                     <TabsContent
                         value="registrations"
                         class="mt-6 outline-none focus-visible:ring-0"
                     >
                         <AttendeeRegistrationsTable :data="attendee.registrations ?? []" />
                     </TabsContent>
+
+                    <TabsContent
+                        value="certificates"
+                        class="mt-6 outline-none focus-visible:ring-0"
+                    >
+                        <div
+                            v-if="!attendee.certificates?.length"
+                            class="flex flex-col items-center justify-center gap-3 py-14 text-center text-muted-foreground"
+                        >
+                            <Icon
+                                name="solar:diploma-line-duotone"
+                                class="size-10! opacity-40"
+                            />
+                            <p class="text-sm">
+                                {{ $t('attendee.no_certificates') }}
+                            </p>
+                        </div>
+                        <div
+                            v-else
+                            class="space-y-2"
+                        >
+                            <div
+                                v-for="cert in attendee.certificates"
+                                :key="cert.id"
+                                class="flex items-center justify-between gap-4 rounded-xl border border-border/70 bg-muted/30 px-4 py-3"
+                            >
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-medium">
+                                        {{ cert.event.title }}
+                                    </p>
+                                    <p
+                                        v-if="cert.expireAt"
+                                        class="mt-0.5 text-xs text-muted-foreground"
+                                    >
+                                        {{ $t('attendee.certificate_expires') }}: {{ formatDateShort(cert.expireAt) }}
+                                    </p>
+                                    <p class="mt-0.5 text-xs text-muted-foreground">
+                                        {{ formatDateShort(cert.createdAt) }}
+                                    </p>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    :disabled="downloadingCertId === cert.id"
+                                    @click="onDownloadCertificate(cert)"
+                                >
+                                    <Icon
+                                        :name="downloadingCertId === cert.id
+                                            ? 'svg-spinners:ring-resize'
+                                            : 'solar:round-arrow-down-line-duotone'"
+                                        class="size-4 shrink-0"
+                                    />
+                                    {{ $t('event.download_certificate') }}
+                                </Button>
+                            </div>
+                        </div>
+                    </TabsContent>
                 </Tabs>
             </div>
 
+            <!-- Right: Info card (ticket style) -->
             <div class="space-y-6 xl:col-span-4">
                 <Card class="self-start xl:sticky xl:top-4">
                     <CardHeader>
@@ -257,6 +344,11 @@ async function onResendVerification() {
                         <AppListItem
                             :title="$t('attendee.last_login')"
                             :value="lastLoginDisplay"
+                        />
+                        <AppListItem
+                            v-if="attendee.hrWorksLink"
+                            :title="$t('attendee.hr_works_link')"
+                            :value="attendee.hrWorksLink"
                         />
                         <AppListItem
                             :title="$t('common.created_at')"

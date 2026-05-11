@@ -910,6 +910,7 @@ export interface AttendeeRegistration {
     id: string;
     attendeeId: string;
     eventId: string;
+    workshopId: string | null;
     registrationStatus: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CONFIRMED' | 'ATTENDED';
     registeredAt: string;
     approvedAt: string | null;
@@ -922,6 +923,26 @@ export interface AttendeeRegistration {
         title: string;
         isActive: boolean;
     };
+    workshop: { id: string; title: string } | null;
+}
+
+export interface AttendeeCertificate {
+    id: string;
+    eventId: string;
+    workshopId: string | null;
+    expireAt: string | null;
+    path: string;
+    createdAt: string;
+    event: {
+        id: string;
+        title: string;
+    };
+    workshop: { id: string; title: string } | null;
+    media: {
+        id: string;
+        path: string;
+        filename: string;
+    };
 }
 
 export type AttendeeData = {
@@ -931,6 +952,8 @@ export type AttendeeData = {
     email: string;
     /** Present when API returns verification timestamp (list view uses this field). */
     emailVerifiedAt?: string | null;
+    /** Computed boolean shorthand from the API. */
+    emailVerified?: boolean;
     groupId: string | null;
     occupationId: string | null;
     isEmployee: boolean;
@@ -940,6 +963,11 @@ export type AttendeeData = {
     updatedAt: string;
     fullName: string;
     eventsCount: number;
+    certificatesCount?: number;
+    cartItemsCount?: number;
+    hasPendingDeletion?: boolean;
+    hasPendingEmailChange?: boolean;
+    hrWorksLink?: string | null;
     avatar?: string | null;
     group?: {
         id: string;
@@ -951,6 +979,7 @@ export type AttendeeData = {
     } | null;
     events?: AttendeeEvent[];
     registrations?: AttendeeRegistration[];
+    certificates?: AttendeeCertificate[];
 };
 
 // Attachment types for ticket messages
