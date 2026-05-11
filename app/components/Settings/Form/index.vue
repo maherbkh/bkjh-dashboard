@@ -81,14 +81,14 @@
                 <FormItemTextarea
                     v-if="(jsonViewMode[index] || 'structured') === 'text'"
                     :id="`setting-${setting.id}-value`"
-                    v-model="settingValues[index]"
+                    :model-value="String(settingValues[index] ?? '')"
                     :title="''"
                     :placeholder="t('setting.value_json_placeholder') || 'Enter JSON'"
                     :disabled="disabled || readonly"
                     :readonly="readonly"
                     :rows="8"
                     :errors="settingErrors[index] || []"
-                    @update:model-value="(val) => handleJsonTextChange(index, val)"
+                    @update:model-value="(val) => handleJsonTextChange(index, String(val ?? ''))"
                 />
 
                 <!-- JSON Structured View -->
@@ -97,7 +97,7 @@
                     class="space-y-3"
                 >
                     <!-- Array View -->
-                    <template v-if="Array.isArray(parsedJsonValues[index])">
+                    <template v-if="Array.isArray(parsedJsonValues[index]) && parsedJsonValues[index]">
                         <div
                             v-for="(item, itemIndex) in parsedJsonValues[index]"
                             :key="itemIndex"
@@ -167,7 +167,7 @@
                     </template>
 
                     <!-- Object View -->
-                    <template v-else>
+                    <template v-else-if="parsedJsonValues[index] && typeof parsedJsonValues[index] === 'object' && !Array.isArray(parsedJsonValues[index])">
                         <div
                             v-for="(jsonValue, jsonKey) in parsedJsonValues[index]"
                             :key="jsonKey"
@@ -191,7 +191,7 @@
             <FormItemDatePicker
                 v-else-if="setting.type === SettingValueType.DATE"
                 :id="`setting-${setting.id}-value`"
-                :model-value="settingValues[index]"
+                :model-value="typeof settingValues[index] === 'string' ? settingValues[index] : String(settingValues[index] ?? '')"
                 :label="setting.name || keyToLabel(setting.key)"
                 :placeholder="$t('setting.value_date_placeholder') || 'Select date'"
                 :disabled="disabled || readonly"
@@ -207,18 +207,18 @@
             <FormItemTextarea
                 v-else-if="setting.type === SettingValueType.ARRAY"
                 :id="`setting-${setting.id}-value`"
-                v-model="settingValues[index]"
+                :model-value="String(settingValues[index] ?? '')"
                 :title="setting.name || keyToLabel(setting.key)"
                 :placeholder="t('setting.value_array_placeholder') || 'Enter array as JSON (e.g., [1, 2, 3])'"
                 :disabled="disabled || readonly"
                 :readonly="readonly"
                 :rows="4"
                 :errors="settingErrors[index] || []"
-                @update:model-value="(val) => handleArrayChange(index, val)"
+                @update:model-value="(val) => handleArrayChange(index, String(val ?? ''))"
             />
 
             <!-- UPLOADER Type -->
-            <div v-else-if="setting.type === SettingValueType.UPLOADER">
+            <div v-else-if="setting.type === SettingValueType.UPLOADER && uploaderFields[index]">
                 <Label class="text-base font-medium mb-4 block">
                     {{ setting.name || setting.key }}
                 </Label>
@@ -450,12 +450,14 @@ const fetchMediaById = async (index: number, mediaId: string) => {
         });
         const response = data.value as unknown as { success?: boolean; message?: string; data?: MediaEntity } | null;
         if (response?.data) {
-            uploaderFields.value[index].media = response.data;
+            const slot = uploaderFields.value[index];
+            if (slot) slot.media = response.data;
         }
     }
     catch (error) {
         console.error('Error fetching media:', error);
-        uploaderFields.value[index].media = null;
+        const slot = uploaderFields.value[index];
+        if (slot) slot.media = null;
     }
 };
 
@@ -496,9 +498,10 @@ const toggleJsonView = (index: number) => {
 };
 
 // Handle value changes
-const handleValueChange = (index: number, val: any) => {
+const handleValueChange = (index: number, val: unknown) => {
     const setting = localSettings.value[index];
-    let newValue: any = val;
+    if (!setting) return;
+    let newValue: unknown = val;
 
     // Convert based on type
     switch (setting.type) {
@@ -517,12 +520,12 @@ const handleValueChange = (index: number, val: any) => {
     }
 
     // Update local setting and form value ref
-    const updatedSetting = {
+    const updatedSetting: Setting = {
         ...setting,
         value: newValue,
     };
     localSettings.value[index] = updatedSetting;
-    settingValues.value[index] = newValue;
+    settingValues.value[index] = newValue as string | number | boolean;
 
     // Emit updates
     if (props.emitMode === 'individual' || props.emitMode === 'both') {
@@ -549,8 +552,8 @@ const handleJsonTextChange = (index: number, val: string) => {
             parsedJsonValues.value[index] = parsed;
         }
 
-        const updatedSetting = {
-            ...localSettings.value[index],
+        const updatedSetting: Setting = {
+            ...localSettings.value[index]!,
             value: parsed,
         };
         localSettings.value[index] = updatedSetting;
@@ -582,8 +585,8 @@ const handleJsonStructuredChange = (index: number) => {
             jsonValue = currentValue;
         }
 
-        const updatedSetting = {
-            ...localSettings.value[index],
+        const updatedSetting: Setting = {
+            ...localSettings.value[index]!,
             value: jsonValue,
         };
         localSettings.value[index] = updatedSetting;
@@ -647,8 +650,8 @@ const handleArrayChange = (index: number, val: string) => {
             throw new Error('Value must be an array');
         }
 
-        const updatedSetting = {
-            ...localSettings.value[index],
+        const updatedSetting: Setting = {
+            ...localSettings.value[index]!,
             value: parsed,
         };
         localSettings.value[index] = updatedSetting;
@@ -666,6 +669,7 @@ const handleArrayChange = (index: number, val: string) => {
 // Handle uploader change
 const handleUploaderChange = (index: number) => {
     const uploaderData = uploaderFields.value[index];
+    if (!uploaderData) return;
     const uploaderValue = {
         mediaId: uploaderData.media?.id || null,
         alt: uploaderData.alt || '',
@@ -673,8 +677,8 @@ const handleUploaderChange = (index: number) => {
         collection: 'default',
     };
 
-    const updatedSetting = {
-        ...localSettings.value[index],
+    const updatedSetting: Setting = {
+        ...localSettings.value[index]!,
         value: uploaderValue,
     };
     localSettings.value[index] = updatedSetting;

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Car } from '~/types';
+import FormDialogShell from '~/components/FormDialog.vue';
 
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm } = useCrud<Car, CarForm>({
@@ -128,7 +129,7 @@ const handleClose = () => {
 </script>
 
 <template>
-    <FormDialog
+    <FormDialogShell
         v-model:open="isOpen"
         :title="dialogTitle"
         :description="dialogDescription"
@@ -233,5 +234,5 @@ const handleClose = () => {
                 {{ props.dialogMode === 'add' ? t('action.save') : t('action.update') }}
             </Button>
         </template>
-    </FormDialog>
+    </FormDialogShell>
 </template>

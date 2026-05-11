@@ -17,11 +17,12 @@ const isLoading = ref(false);
 const schema = toTypedSchema(
     z.object({
         email: z
-            .string({ required_error: t('form.email') + ' ' + t('validation.required') })
+            .string()
             .min(1, t('form.email') + ' ' + t('validation.required'))
             .email(t('form.email') + ' ' + t('validation.invalid')),
         password: z
-            .string({ required_error: t('form.password') + ' ' + t('validation.required') })
+            .string()
+            .min(1, t('form.password') + ' ' + t('validation.required'))
             .min(6, t('form.password') + ' ' + t('validation.min_length', { min: 6 })),
     }),
 );

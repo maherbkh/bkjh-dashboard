@@ -15,6 +15,8 @@ export type User = {
     email: string;
     firstName: string;
     lastName: string;
+    username?: string;
+    role_id?: number | null;
     isSuperAdmin: boolean;
     isActive: boolean;
     lastLoginAt?: string; // From login response

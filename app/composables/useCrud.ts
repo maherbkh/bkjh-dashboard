@@ -6,8 +6,11 @@ import type { CrudItem, PaginatedResponse, Category } from '~/types';
 import type { TenantSlug } from '~/types/app';
 
 type CrudOptions = {
-    crudPath: string;
-    tenant: TenantSlug;
+    /** REST segment after tenant (preferred). */
+    crudPath?: string;
+    tenant?: TenantSlug;
+    /** Legacy alias for crudPath; use crudPath for new code. */
+    apiSlug?: string;
     translations?: {
         add_success?: string;
         edit_success?: string;
@@ -34,11 +37,17 @@ function toZodV4SafeSchema(zodSchema: ZodSchema) {
 
 export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(options: CrudOptions) => {
     const { t } = useI18n();
-    const { crudPath, tenant, translations, formSchema } = options;
+    const crudSegment = options.crudPath ?? options.apiSlug;
+    const tenant: TenantSlug = options.tenant ?? 'shared';
+    const { translations, formSchema } = options;
+
+    if (!crudSegment) {
+        throw new Error('useCrud: provide crudPath or apiSlug');
+    }
 
     // Build API path with tenant and crud path
     const buildApiPath = (endpoint: string = '') => {
-        return `/${tenant}/${crudPath}${endpoint}`;
+        return `/${tenant}/${crudSegment}${endpoint}`;
     };
 
     const {
@@ -91,7 +100,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
             // This prevents any caching, even for identical URLs and parameters
             const timestamp = forceRefresh || Date.now();
             const random = Math.random().toString(36).substring(2, 15);
-            const cacheKey = `${tenant}-${crudPath}-list-${page}-${perPage}-${JSON.stringify(additionalParams)}-${timestamp}-${random}`;
+            const cacheKey = `${tenant}-${crudSegment}-list-${page}-${perPage}-${JSON.stringify(additionalParams)}-${timestamp}-${random}`;
 
             const { data, status } = await useApiFetch(buildApiPath(), {
                 query: params,
@@ -139,7 +148,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
             const timestamp = Date.now();
             const random = Math.random().toString(36).substring(2, 15);
             const { data, status } = await useApiFetch(buildApiPath(`/${id}`), {
-                key: `${tenant}-${crudPath}-item-${id}-${timestamp}-${random}`,
+                key: `${tenant}-${crudSegment}-item-${id}-${timestamp}-${random}`,
             });
 
             if (status.value === 'success' && data.value) {

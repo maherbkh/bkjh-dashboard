@@ -24,8 +24,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
         if (shouldValidate) {
             try {
-                const ok = await userStore.fetchAuthUser();
-                if (ok) lastValidation.value = String(now);
+                await userStore.fetchAuthUser();
+                if (userStore.user) lastValidation.value = String(now);
             }
             catch {
                 // If hydration fails, clear broken tokens and remain on guest page

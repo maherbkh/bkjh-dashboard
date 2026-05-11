@@ -103,7 +103,7 @@ export const useTypography = () => {
         weight?: keyof typeof fontWeights,
         lineHeight?: keyof typeof lineHeights,
     ): string => {
-        const classes = [typography[type]];
+        const classes: string[] = [typography[type]];
 
         if (weight) {
             classes.push(fontWeights[weight]);

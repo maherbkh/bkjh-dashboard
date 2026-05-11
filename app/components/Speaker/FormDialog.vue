@@ -228,7 +228,7 @@ watch(
                             }
                         }
                         else {
-                            const response = data.value as { data?: MediaEntity } | null;
+                            const response = data.value as unknown as { data?: MediaEntity } | null;
                             if (response?.data) {
                                 avatarEntity = response.data;
                                 if (avatarUrl && !avatarEntity.url) {
@@ -353,7 +353,7 @@ watch(
                             }
                         }
                         else {
-                            const response = data.value as { data?: MediaEntity } | null;
+                            const response = data.value as unknown as { data?: MediaEntity } | null;
                             if (response?.data) {
                                 logoEntity = response.data;
                                 if (logoUrl && !logoEntity.url) {

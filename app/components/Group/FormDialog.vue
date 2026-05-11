@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useResourcesStore } from '~/stores/resources';
+import FormDialogShell from '~/components/FormDialog.vue';
 
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm, loading } = useCrud<
@@ -65,7 +66,7 @@ watch(
             setValues({
                 name: newGroup.name,
                 addressId: newGroup.addressId,
-                companyIds: newGroup.companies?.map(c => c.company.id) || [],
+                companyIds: newGroup.companies?.map((c: { company: { id: string } }) => c.company.id) || [],
             });
         }
     },
@@ -117,7 +118,7 @@ const handleClose = () => {
 </script>
 
 <template>
-    <FormDialog
+    <FormDialogShell
         v-model:open="isOpen"
         :title="dialogTitle"
         :description="dialogDescription"
@@ -145,7 +146,7 @@ const handleClose = () => {
                         class="col-span-12"
                         :errors="errors.addressId ? [errors.addressId] : []"
                         v-bind="addressIdAttrs"
-                        :data="addressesData"
+                        :data="[...(addressesData ?? [])]"
                         key-value="id"
                         name-value="fullAddress"
                         empty-text="No addresses found"
@@ -154,7 +155,7 @@ const handleClose = () => {
                     <!-- Company Selection -->
                     <FormItemMultiSelect
                         v-model="companyIds"
-                        :data="companiesData"
+                        :data="[...(companiesData ?? [])]"
                         item-key="id"
                         item-label="name"
                         :label="t('company.plural')"
@@ -216,5 +217,5 @@ const handleClose = () => {
                 {{ props.dialogMode === "add" ? t("action.save") : t("action.update") }}
             </Button>
         </template>
-    </FormDialog>
+    </FormDialogShell>
 </template>

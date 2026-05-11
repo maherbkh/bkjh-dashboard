@@ -365,6 +365,7 @@ export function useBookingCalendarView() {
         if (index === -1) return null;
 
         const current = bookingRecords.value[index];
+        if (!current) return null;
         const payload = {
             ...patch,
             startsAt: patch.startsAt ? createLocalIsoLike(patch.startsAt) : undefined,
@@ -581,8 +582,11 @@ export function useBookingCalendarView() {
         latestBookingsRequestId.value = requestId;
         try {
             if (visibleDates.value.length === 0) return;
-            const startsFrom = new Date(normalizeDate(visibleDates.value[0]));
-            const endsBefore = new Date(normalizeDate(visibleDates.value[visibleDates.value.length - 1]));
+            const firstVisible = visibleDates.value[0];
+            const lastVisible = visibleDates.value[visibleDates.value.length - 1];
+            if (!firstVisible || !lastVisible) return;
+            const startsFrom = new Date(normalizeDate(firstVisible));
+            const endsBefore = new Date(normalizeDate(lastVisible));
             endsBefore.setDate(endsBefore.getDate() + 1);
 
             const aggregated: BookingCalendarRecord[] = [];
@@ -645,8 +649,11 @@ export function useBookingCalendarView() {
 
     function getVisibleRangeBounds(): { startsFrom: Date; endsBefore: Date } | null {
         if (visibleDates.value.length === 0) return null;
-        const startsFrom = normalizeDate(visibleDates.value[0]);
-        const endsBefore = addDays(normalizeDate(visibleDates.value[visibleDates.value.length - 1]), 1);
+        const firstVisible = visibleDates.value[0];
+        const lastVisible = visibleDates.value[visibleDates.value.length - 1];
+        if (!firstVisible || !lastVisible) return null;
+        const startsFrom = normalizeDate(firstVisible);
+        const endsBefore = addDays(normalizeDate(lastVisible), 1);
         return { startsFrom, endsBefore };
     }
 
@@ -729,6 +736,7 @@ export function useBookingCalendarView() {
 
         const first = dates[0];
         const last = dates[dates.length - 1];
+        if (!first || !last) return '';
         if (first.getTime() === last.getTime()) {
             return formatDateOnly(first);
         }
@@ -736,18 +744,18 @@ export function useBookingCalendarView() {
     });
 
     const selectedDateRange = computed<string | [string, string] | null>({
-        get() {
+        get(): string | [string, string] | null {
             const dates = visibleDates.value;
             if (!dates.length) return null;
+            const start = dates[0];
+            const end = dates[dates.length - 1];
+            if (!start || !end) return null;
             if (viewMode.value === 'day') {
-                return formatIsoDate(dates[0]);
+                return formatIsoDate(start);
             }
-            return [
-                formatIsoDate(dates[0]),
-                formatIsoDate(dates[dates.length - 1]),
-            ];
+            return [formatIsoDate(start), formatIsoDate(end)] as [string, string];
         },
-        set(nextValue) {
+        set(nextValue: string | [string, string] | string[] | null | undefined) {
             if (viewMode.value === 'day') {
                 if (typeof nextValue === 'string' && nextValue.length > 0) {
                     const parsedDate = parseDateInput(nextValue);
@@ -924,7 +932,7 @@ export function useBookingCalendarView() {
 
         const precedence: BookingApiStatus[] = ['APPROVED', 'PENDING', 'REJECTED', 'CANCELED'];
         const dominantStatus = precedence.find(status => matchedSlots.some(item => item.status === status)) || 'PENDING';
-        const dominantBooking = matchedSlots.find(item => item.status === dominantStatus) || matchedSlots[0];
+        const dominantBooking = matchedSlots.find(item => item.status === dominantStatus) ?? matchedSlots[0]!;
         const mappedStatus = mapBookingStatusToCellStatus(dominantStatus);
         const isStart = dominantBooking.start >= slotStart && dominantBooking.start < slotEnd;
         const isEnd = dominantBooking.end > slotStart && dominantBooking.end <= slotEnd;
@@ -1021,8 +1029,14 @@ export function useBookingCalendarView() {
             return { segments: [], laneCount: 1 };
         }
 
-        const rangeStart = normalizeDate(visibleDates.value[0]);
-        const rangeEnd = new Date(normalizeDate(visibleDates.value[visibleDates.value.length - 1]));
+        const firstRange = visibleDates.value[0];
+        const lastRange = visibleDates.value[visibleDates.value.length - 1];
+        if (!firstRange || !lastRange) {
+            return { segments: [], laneCount: 1 };
+        }
+
+        const rangeStart = normalizeDate(firstRange);
+        const rangeEnd = new Date(normalizeDate(lastRange));
         rangeEnd.setDate(rangeEnd.getDate() + 1);
 
         const source = slots.value

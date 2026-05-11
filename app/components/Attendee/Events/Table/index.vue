@@ -9,10 +9,10 @@ const props = defineProps<{
 }>();
 
 const headerItems = computed(() => [
-    { as: 'th', name: t('academy.singular'), id: 'event' },
-    { as: 'th', name: t('attendee.registration_status'), id: 'status' },
-    { as: 'th', name: t('attendee.registration_date'), id: 'date' },
-    { as: 'th', name: t('common.actions'), id: 'actions' },
+    { as: 'th' as const, name: t('academy.singular'), id: 'event' },
+    { as: 'th' as const, name: t('attendee.registration_status'), id: 'status' },
+    { as: 'th' as const, name: t('attendee.registration_date'), id: 'date' },
+    { as: 'th' as const, name: t('common.actions'), id: 'actions' },
 ]);
 
 const getStatusVariant = (status: string) => {

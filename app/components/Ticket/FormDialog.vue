@@ -196,7 +196,7 @@ const typeOptions = ref([
                                 :title="$t('requester.name')"
                                 :placeholder="$t('requester.name')"
                                 class="col-span-6"
-                                :errors="errors.requester?.name ? [errors.requester.name] : []"
+                                :errors="(errors as Record<string, string | undefined>)['requester.name'] ? [(errors as Record<string, string | undefined>)['requester.name']!] : []"
                                 v-bind="requesterNameAttrs"
                                 required
                             />
@@ -207,7 +207,7 @@ const typeOptions = ref([
                                 :placeholder="$t('requester.email')"
                                 type="email"
                                 class="col-span-6"
-                                :errors="errors.requester?.email ? [errors.requester.email] : []"
+                                :errors="(errors as Record<string, string | undefined>)['requester.email'] ? [(errors as Record<string, string | undefined>)['requester.email']!] : []"
                                 v-bind="requesterEmailAttrs"
                                 required
                             />
@@ -217,7 +217,7 @@ const typeOptions = ref([
                                 :title="$t('requester.phone')"
                                 :placeholder="$t('requester.phone')"
                                 class="col-span-6"
-                                :errors="errors.requester?.phone ? [errors.requester.phone] : []"
+                                :errors="(errors as Record<string, string | undefined>)['requester.phone'] ? [(errors as Record<string, string | undefined>)['requester.phone']!] : []"
                                 v-bind="requesterPhoneAttrs"
                                 required
                             />
@@ -227,7 +227,7 @@ const typeOptions = ref([
                                 :title="$t('requester.cell')"
                                 :placeholder="$t('requester.cell')"
                                 class="col-span-6"
-                                :errors="errors.requester?.cell ? [errors.requester.cell] : []"
+                                :errors="(errors as Record<string, string | undefined>)['requester.cell'] ? [(errors as Record<string, string | undefined>)['requester.cell']!] : []"
                                 v-bind="requesterCellAttrs"
                             />
                         </div>

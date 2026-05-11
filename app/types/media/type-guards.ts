@@ -1,5 +1,5 @@
 import type { MediaEntity, User } from './entities';
-import type { AccessLevel, CollectionType, MimeTypeCategory, SortField, SortDirection } from './enums';
+import { AccessLevel, CollectionType, MimeTypeCategory, SortField, SortDirection } from './enums';
 
 /**
  * Type guard to check if a value is a MediaEntity

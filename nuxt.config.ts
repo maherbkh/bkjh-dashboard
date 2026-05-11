@@ -31,7 +31,8 @@ export default defineNuxtConfig({
     imports: {
         dirs: ['types', 'utils'],
     },
-    devtools: { enabled: true },
+    // Production: keep devtools off (smaller surface, no dev-only integration in prod).
+    devtools: { enabled: import.meta.dev },
     app: {
         rootAttrs: {
             id: '__bkjh_dashboard_app',
@@ -86,11 +87,17 @@ export default defineNuxtConfig({
             prerender: false,
         },
     },
+    // Vite 7 + Nuxt 4.4+: internal component plugins may log SOURCEMAP_BROKEN / "Sourcemap is likely to be incorrect"
+    // if the client build disables sourcemaps entirely. Use "hidden" so maps exist for the toolchain without
+    // exposing //# sourceMappingURL to browsers. See https://github.com/nuxt/nuxt/issues/34530
+    sourcemap: {
+        client: 'hidden',
+        server: false,
+    },
     experimental: {
         viteEnvironmentApi: true,
     },
-    compatibilityDate: '2025-07-15',
-    // Reduce development warnings
+    compatibilityDate: '2026-05-11',
     nitro: {
         experimental: {
             wasm: false,
@@ -137,6 +144,18 @@ export default defineNuxtConfig({
         },
     },
     vite: {
+        // Dev-only; aligns CSS tooling with source maps (Tailwind/Vite DX). Does not control prod CSS map behavior.
+        css: {
+            devSourcemap: true,
+        },
+        build: {
+            // Avoid nuxt:module-preload-polyfill transform + Rollup SOURCEMAP_BROKEN noise on Vite 7.
+            // Preload hints still apply; only the legacy polyfill for ancient browsers without rel=modulepreload is skipped.
+            // Re-enable polyfill: true if you must support very old browsers or embedded WebViews without modulepreload.
+            modulePreload: {
+                polyfill: false,
+            },
+        },
         resolve: {
             dedupe: [
                 'vue',
@@ -183,9 +202,6 @@ export default defineNuxtConfig({
                 '@vee-validate/zod',
                 'socket.io-client',
             ],
-        },
-        build: {
-            sourcemap: false, // turn off sourcemaps
         },
     },
     dayjs: {

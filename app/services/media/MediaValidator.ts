@@ -1,5 +1,6 @@
 import type { ValidationResult } from '~/types/media/index';
 import { ValidationError, MediaErrorCode } from '~/types/media/index';
+import { MimeTypeCategory } from '~/types/media/enums';
 import { MEDIA_CONSTANTS, getMimeTypeCategory, isAllowedMimeType, isDeniedMimeType } from '~/utils/media';
 
 /**
@@ -14,7 +15,8 @@ export class MediaValidator {
         const errors: string[] = [];
 
         // Check file size
-        const maxSize = MEDIA_CONSTANTS.MAX_FILE_SIZE[context.toUpperCase()];
+        const ctx = context.toUpperCase() as keyof typeof MEDIA_CONSTANTS.MAX_FILE_SIZE;
+        const maxSize = MEDIA_CONSTANTS.MAX_FILE_SIZE[ctx];
         if (file.size > maxSize) {
             errors.push(`File size exceeds ${this.formatBytes(maxSize)}`);
         }
@@ -30,19 +32,23 @@ export class MediaValidator {
             errors.push(`File type "${file.type}" is not allowed`);
         }
 
-        // Check file type specific rules
         const category = getMimeTypeCategory(file.type);
-        const typeConfig = MEDIA_CONSTANTS.FILE_TYPE_CONFIG[category];
+        if (category === MimeTypeCategory.OTHER) {
+            // No per-category rules for unknown MIME families
+        }
+        else {
+            const typeConfig = MEDIA_CONSTANTS.FILE_TYPE_CONFIG[category];
 
-        if (typeConfig) {
-            // Check type-specific size limit
-            if (file.size > typeConfig.maxSize) {
-                errors.push(`${category} files cannot exceed ${this.formatBytes(typeConfig.maxSize)}`);
-            }
+            if (typeConfig) {
+                // Check type-specific size limit
+                if (file.size > typeConfig.maxSize) {
+                    errors.push(`${category} files cannot exceed ${this.formatBytes(typeConfig.maxSize)}`);
+                }
 
-            // Check if type is in denied types for this category
-            if (typeConfig.deniedTypes.includes(file.type)) {
-                errors.push(`File type "${file.type}" is not allowed for ${category} files`);
+                // Check if type is in denied types for this category
+                if ((typeConfig.deniedTypes as readonly string[]).includes(file.type)) {
+                    errors.push(`File type "${file.type}" is not allowed for ${category} files`);
+                }
             }
         }
 
@@ -59,7 +65,8 @@ export class MediaValidator {
         const errors: string[] = [];
 
         // Check file count
-        const maxFiles = MEDIA_CONSTANTS.MAX_FILES[context.toUpperCase()];
+        const ctx = context.toUpperCase() as keyof typeof MEDIA_CONSTANTS.MAX_FILES;
+        const maxFiles = MEDIA_CONSTANTS.MAX_FILES[ctx];
         if (files.length > maxFiles) {
             errors.push(`Cannot upload more than ${maxFiles} files at once`);
         }
@@ -98,12 +105,12 @@ export class MediaValidator {
         }
 
         // Check if MIME type is allowed for this category
-        if (!typeConfig.allowedTypes.includes(file.type)) {
+        if (!(typeConfig.allowedTypes as readonly string[]).includes(file.type)) {
             errors.push(`File type "${file.type}" is not allowed for ${category} files`);
         }
 
         // Check if MIME type is denied for this category
-        if (typeConfig.deniedTypes.includes(file.type)) {
+        if ((typeConfig.deniedTypes as readonly string[]).includes(file.type)) {
             errors.push(`File type "${file.type}" is not allowed for ${category} files`);
         }
 

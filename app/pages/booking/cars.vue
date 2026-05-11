@@ -451,7 +451,7 @@ useSeoMeta({
                 :is-internal-email="isRequesterInternalEmail"
                 :edit-form="editForm"
                 :is-submitting="isSubmitting"
-                :editors="currentEditors"
+                :editors="[...currentEditors]"
                 :current-admin-id="userStore.user?.id"
                 @update:open="(value: boolean) => value ? null : onCloseDialog()"
                 @update:pending-status="pendingStatus = $event"

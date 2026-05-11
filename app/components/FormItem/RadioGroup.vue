@@ -1,5 +1,6 @@
 <script setup lang="ts" generic="T extends string | number = string | number">
 import { cn } from '@/lib/utils';
+import { RadioGroup as UiRadioGroup, RadioGroupItem as UiRadioGroupItem } from '@/components/ui/radio-group';
 
 type RadioOption<T = string | number> = {
     value: T;
@@ -71,7 +72,7 @@ const hasErrors = computed(() => props.errors && props.errors.length > 0);
         </p>
 
         <!-- Radio Group (variant-specific rendering) -->
-        <RadioGroup
+        <UiRadioGroup
             v-model="selectedValue"
             :disabled="disabled"
             :class="cn(
@@ -86,7 +87,7 @@ const hasErrors = computed(() => props.errors && props.errors.length > 0);
                     :key="String(option.value)"
                     class="flex items-center space-x-2"
                 >
-                    <RadioGroupItem
+                    <UiRadioGroupItem
                         :id="`${id}-${option.value}`"
                         :value="option.value"
                         :disabled="option.disabled || disabled"
@@ -120,7 +121,7 @@ const hasErrors = computed(() => props.errors && props.errors.length > 0);
                     :for="`${id}-${option.value}`"
                     class="relative cursor-pointer block"
                 >
-                    <RadioGroupItem
+                    <UiRadioGroupItem
                         :id="`${id}-${option.value}`"
                         :value="option.value"
                         :disabled="option.disabled || disabled"
@@ -169,7 +170,7 @@ const hasErrors = computed(() => props.errors && props.errors.length > 0);
                     </div>
                 </Label>
             </template>
-        </RadioGroup>
+        </UiRadioGroup>
 
         <!-- Error messages -->
         <div

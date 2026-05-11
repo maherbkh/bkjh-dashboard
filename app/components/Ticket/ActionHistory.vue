@@ -120,13 +120,17 @@ const formatActionNote = (note: string, actionType: string): string => {
     const match = note.match(statusChangePattern);
 
     if (match) {
-        const [, status, noteValue] = match;
+        const status = match[1];
+        const noteValue = match[2];
+        if (!status) {
+            return note;
+        }
         // Translate the status name
         const translatedStatus = t(`ticket.status.${status.toLowerCase()}`);
         // Reconstruct with translated status, keeping the note value unchanged
         return t('action.message.status_changed_with_note', {
             status: translatedStatus,
-            note: noteValue,
+            note: noteValue ?? '',
         });
     }
 
@@ -135,7 +139,10 @@ const formatActionNote = (note: string, actionType: string): string => {
     const matchWithoutNote = note.match(statusChangeWithoutNotePattern);
 
     if (matchWithoutNote) {
-        const [, status] = matchWithoutNote;
+        const status = matchWithoutNote[1];
+        if (!status) {
+            return note;
+        }
         const translatedStatus = t(`ticket.status.${status.toLowerCase()}`);
         return t('action.message.status_changed', { status: translatedStatus });
     }

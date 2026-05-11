@@ -40,13 +40,23 @@ const localShowCanceled = computed({
 });
 
 const selectedRangeModel = computed({
-    get: () => props.selectedRange,
-    set: (value: string | [string, string] | null) => emit('update:selected-range', value),
+    get: () => (props.selectedRange === null ? undefined : props.selectedRange),
+    set: (value: string | [string, string] | Date | Record<string, unknown> | undefined) => {
+        if (value === undefined) {
+            emit('update:selected-range', null);
+            return;
+        }
+        if (typeof value === 'string' || (Array.isArray(value) && value.length === 2)) {
+            emit('update:selected-range', value as string | [string, string]);
+        }
+    },
 });
 
-function onViewModeChange(value: string | string[] | undefined) {
-    if (typeof value === 'string' && value.length > 0) {
-        emit('update:view-mode', value as BookingCalendarViewMode);
+function onViewModeChange(payload: unknown) {
+    if (payload === null || payload === undefined) return;
+    const v = Array.isArray(payload) ? payload[0] : payload;
+    if (typeof v === 'string' && v.length > 0) {
+        emit('update:view-mode', v as BookingCalendarViewMode);
     }
 }
 </script>

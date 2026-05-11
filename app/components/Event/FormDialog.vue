@@ -5,6 +5,7 @@ import FormItemMultiSelect from '~/components/FormItem/MultiSelect.vue';
 import FormItemInput from '~/components/FormItem/Input.vue';
 import FormItemTextarea from '~/components/FormItem/Textarea.vue';
 import FormItemArrayInput from '~/components/FormItem/ArrayInput.vue';
+import FormDialogShell from '~/components/FormDialog.vue';
 
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm, loading } = useCrud<
@@ -148,10 +149,10 @@ const onSubmitAndClose = handleSubmit((values) => {
             .filter(t => t.length > 0);
     }
 
-    const submitValues: EventForm = {
+    const submitValues = {
         ...values,
         topics: topicsArray, // Always include as array, even if empty
-    };
+    } as EventForm;
 
     emit('submit-and-close', submitValues);
 });
@@ -164,10 +165,10 @@ const onSubmitAndAddNew = handleSubmit((values) => {
             .filter(t => t.length > 0);
     }
 
-    const submitValues: EventForm = {
+    const submitValues = {
         ...values,
         topics: topicsArray,
-    };
+    } as EventForm;
 
     emit('submit-and-add-new', submitValues);
 });
@@ -177,7 +178,7 @@ const handleClose = () => {
 </script>
 
 <template>
-    <FormDialog
+    <FormDialogShell
         v-model:open="isOpen"
         :title="dialogTitle"
         :description="dialogDescription"
@@ -274,7 +275,7 @@ const handleClose = () => {
                         class="col-span-12 sm:col-span-6"
                         :errors="errors.eventCategoryIds ? [errors.eventCategoryIds] : []"
                         v-bind="eventCategoryIdsAttrs"
-                        :data="eventCategories"
+                        :data="[...eventCategories]"
                         item-key="id"
                         item-label="name"
                         :max="10"
@@ -289,7 +290,7 @@ const handleClose = () => {
                         class="col-span-12 sm:col-span-6"
                         :errors="errors.eventTargetIds ? [errors.eventTargetIds] : []"
                         v-bind="eventTargetIdsAttrs"
-                        :data="eventTargets"
+                        :data="[...eventTargets]"
                         item-key="id"
                         item-label="name"
                         :max="10"
@@ -387,5 +388,5 @@ const handleClose = () => {
                 {{ props.dialogMode === 'add' ? t('action.save') : t('action.update') }}
             </Button>
         </template>
-    </FormDialog>
+    </FormDialogShell>
 </template>

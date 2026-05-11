@@ -95,7 +95,7 @@ watch(() => props.editingUser, (user) => {
             role_id: user.role_id || null, // Set to null if no role_id
             isActive: user.isActive ?? true,
             isSuperAdmin: user.isSuperAdmin ?? false,
-        });
+        } as UserForm);
     }
 });
 
@@ -149,15 +149,15 @@ const onSubmitAndClose = handleSubmit((values) => {
     // Remove password field if it exists in edit mode
     if (props.dialogMode === 'edit' && 'password' in values) {
         const { password, ...valuesWithoutPassword } = values;
-        emit('submitAndClose', valuesWithoutPassword);
+        emit('submitAndClose', valuesWithoutPassword as UserForm);
     }
     else {
-        emit('submitAndClose', values);
+        emit('submitAndClose', values as UserForm);
     }
 });
 
 const onSubmitAndAddNew = handleSubmit((values) => {
-    emit('submitAndAddNew', values);
+    emit('submitAndAddNew', values as UserForm);
 });
 
 const handleClose = () => {

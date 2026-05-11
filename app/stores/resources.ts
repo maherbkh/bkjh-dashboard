@@ -146,19 +146,14 @@ export const useResourcesStore = defineStore('resources', () => {
         }
 
         if (response.value) {
-            // Check different possible response structures
-            let adminData;
-            if (response.value.status && response.value.data) {
-                // Structure: { status: true, data: { ... } }
-                adminData = response.value.data;
+            // useApiFetch wraps the backend body as ApiResponse<T>: { data: T }
+            const body = response.value.data;
+            let adminData: AdminData | undefined;
+            if (body && typeof body === 'object' && 'status' in body && body.status && 'data' in body && body.data) {
+                adminData = body.data as AdminData;
             }
-            else if (response.value.data) {
-                // Structure: { data: { ... } }
-                adminData = response.value.data;
-            }
-            else {
-                // Direct structure: { ... }
-                adminData = response.value;
+            else if (body && typeof body === 'object' && 'data' in body && body.data) {
+                adminData = body.data as AdminData;
             }
 
             // Check if adminData has the expected structure

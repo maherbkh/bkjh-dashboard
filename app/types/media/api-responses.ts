@@ -1,4 +1,5 @@
-import type { MediaEntity, AccessLevel, AuthType } from './entities';
+import type { MediaEntity } from './entities';
+import type { AccessLevel, AuthType } from './enums';
 
 /**
  * Generic API response wrapper

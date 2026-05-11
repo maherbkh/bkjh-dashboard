@@ -77,7 +77,8 @@ function randomInt(min: number, max: number): number {
 }
 
 function pickOne<T>(items: readonly T[]): T {
-    return items[randomInt(0, items.length - 1)];
+    const i = randomInt(0, items.length - 1);
+    return items[i] as T;
 }
 
 function toHalfHour(date: Date): Date {
@@ -168,13 +169,19 @@ function generateDemoBookings(count: number): DemoBookingRecord[] {
 
 const demoBookings = generateDemoBookings(100);
 
+const firstCar = cars[0]!;
+const firstDemo = demoBookings[0]!;
+const secondDemo = demoBookings[1]!;
+const demoIdx = Math.min(19, demoBookings.length - 1);
+const demoEnd = demoBookings[demoIdx]!;
+
 export const carBookingsDemoPayload = {
     cars,
     requests: {
         create: {
-            carId: cars[0].id,
-            startsAt: demoBookings[0].startsAt,
-            endsAt: demoBookings[0].endsAt,
+            carId: firstCar.id,
+            startsAt: firstDemo.startsAt,
+            endsAt: firstDemo.endsAt,
             status: 'PENDING',
             requesterName: 'John Doe',
             requesterEmail: 'john@example.com',
@@ -188,15 +195,15 @@ export const carBookingsDemoPayload = {
             search: '',
             sort_by: 'startsAt',
             sort_dir: 'asc',
-            carId: cars[0].id,
+            carId: firstCar.id,
             status: 'APPROVED',
             groupId: null,
-            startsFrom: demoBookings[0].startsAt,
-            endsBefore: demoBookings[Math.min(19, demoBookings.length - 1)].endsAt,
+            startsFrom: firstDemo.startsAt,
+            endsBefore: demoEnd.endsAt,
         },
         update: {
-            startsAt: demoBookings[1].startsAt,
-            endsAt: demoBookings[1].endsAt,
+            startsAt: secondDemo.startsAt,
+            endsAt: secondDemo.endsAt,
             status: 'REJECTED',
             requesterName: 'John D.',
             requesterEmail: 'john.d@example.com',
@@ -206,8 +213,8 @@ export const carBookingsDemoPayload = {
         },
         deleteMany: {
             ids: [
-                demoBookings[0].id,
-                demoBookings[1].id,
+                firstDemo.id,
+                secondDemo.id,
             ],
         },
     },

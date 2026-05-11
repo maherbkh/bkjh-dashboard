@@ -37,7 +37,7 @@
                         :model-value="actionNote"
                         :placeholder="$t('note.placeholder')"
                         rows="3"
-                        @update:model-value="$emit('update:actionNote', $event)"
+                        @update:model-value="$emit('update:actionNote', String($event ?? ''))"
                     />
                 </div>
             </div>

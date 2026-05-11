@@ -101,7 +101,8 @@ const totalValue = computed(() => sanitizedData.value.reduce((prev, curr) => pre
                             else {
                                 activeSegmentKey = d?.data?.[index]
                                 elements.forEach(el => el.style.opacity = `${filterOpacity}`)
-                                elements[i].style.opacity = '1'
+                                const hit = elements[i]
+                                if (hit) hit.style.opacity = '1'
                             }
                         },
                     },

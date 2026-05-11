@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useResourcesStore } from '~/stores/resources';
+import type { CompanyForm } from '~/types';
 
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm } = useCrud<Company, CompanyForm>({
@@ -68,7 +69,7 @@ watch(() => props.editingCompany, (company) => {
             },
             management: company.management,
             addressId: company.address?.id || null,
-        });
+        } as CompanyForm);
     }
 });
 
@@ -119,11 +120,11 @@ watch(() => props.isDialogOpen, (isOpen) => {
 });
 
 const onSubmitAndClose = handleSubmit((values) => {
-    emit('submitAndClose', values);
+    emit('submitAndClose', values as CompanyForm);
 });
 
 const onSubmitAndAddNew = handleSubmit((values) => {
-    emit('submitAndAddNew', values);
+    emit('submitAndAddNew', values as CompanyForm);
 });
 
 const handleClose = () => {
@@ -229,7 +230,7 @@ const addresses = computed(() => resourcesStore.addresses);
                             class="md:col-span-12"
                             :errors="errors.addressId ? [errors.addressId] : []"
                             v-bind="addressIdAttrs"
-                            :data="addresses || []"
+                            :data="[...(addresses ?? [])]"
                             key-value="id"
                             name-value="fullAddress"
                             empty-text="No addresses found"

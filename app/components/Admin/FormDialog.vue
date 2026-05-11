@@ -98,7 +98,7 @@ watch(() => props.editingAdmin, (admin) => {
             isActive: admin.isActive ?? true,
             isSuperAdmin: admin.isSuperAdmin ?? false,
             apps: admin.apps || ['dashboard'],
-        });
+        } as AdminForm);
     }
 });
 
@@ -150,11 +150,11 @@ const onSubmitAndClose = handleSubmit((values) => {
         const { password, ...valuesWithoutPassword } = values;
         // Only include password if it has a meaningful value
         const finalValues = password && password.trim() !== '' ? values : valuesWithoutPassword;
-        emit('submitAndClose', finalValues);
+        emit('submitAndClose', finalValues as AdminForm);
     }
     else {
         // For create mode, password is included and required
-        emit('submitAndClose', values);
+        emit('submitAndClose', values as AdminForm);
     }
 });
 
@@ -164,11 +164,11 @@ const onSubmitAndAddNew = handleSubmit((values) => {
         const { password, ...valuesWithoutPassword } = values;
         // Only include password if it has a meaningful value
         const finalValues = password && password.trim() !== '' ? values : valuesWithoutPassword;
-        emit('submitAndAddNew', finalValues);
+        emit('submitAndAddNew', finalValues as AdminForm);
     }
     else {
         // For create mode, password is included and required
-        emit('submitAndAddNew', values);
+        emit('submitAndAddNew', values as AdminForm);
     }
 });
 

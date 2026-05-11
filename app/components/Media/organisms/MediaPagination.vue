@@ -66,8 +66,11 @@ const handleNext = () => {
     }
 };
 
-const handlePageSizeChange = (newSize: number) => {
-    emit('update:pageSize', newSize);
+const handlePageSizeChange = (value: unknown) => {
+    if (value === null || value === undefined) return;
+    const n = typeof value === 'number' ? value : Number(value);
+    if (!Number.isFinite(n)) return;
+    emit('update:pageSize', n);
 };
 
 const handlePageInput = (event: Event) => {

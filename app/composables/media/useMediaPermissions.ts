@@ -19,63 +19,63 @@ export function useMediaPermissions() {
    * Check if user can upload media
    */
     const canUpload = computed(() => {
-        return permissionChecker.canUpload(currentUser.value);
+        return permissionChecker.canUpload(currentUser.value ?? null);
     });
 
     /**
    * Check if user can delete specific media
    */
     const canDelete = (media: MediaEntity) => {
-        return permissionChecker.canDelete(currentUser.value, media);
+        return permissionChecker.canDelete(currentUser.value ?? null, media);
     };
 
     /**
    * Check if user can edit specific media
    */
     const canEdit = (media: MediaEntity) => {
-        return permissionChecker.canEdit(currentUser.value, media);
+        return permissionChecker.canEdit(currentUser.value ?? null, media);
     };
 
     /**
    * Check if user can view specific media
    */
     const canView = (media: MediaEntity) => {
-        return permissionChecker.canView(currentUser.value, media);
+        return permissionChecker.canView(currentUser.value ?? null, media);
     };
 
     /**
    * Get allowed access levels for current user
    */
     const allowedAccessLevels = computed(() => {
-        return permissionChecker.getAllowedAccessLevels(currentUser.value);
+        return permissionChecker.getAllowedAccessLevels(currentUser.value ?? null);
     });
 
     /**
    * Check if user can upload to specific collection
    */
     const canUploadToCollection = (collectionName: string) => {
-        return permissionChecker.canUploadToCollection(currentUser.value, collectionName);
+        return permissionChecker.canUploadToCollection(currentUser.value ?? null, collectionName);
     };
 
     /**
    * Check if user can access specific access level
    */
     const canAccessLevel = (accessLevel: AccessLevel) => {
-        return permissionChecker.canAccessLevel(currentUser.value, accessLevel);
+        return permissionChecker.canAccessLevel(currentUser.value ?? null, accessLevel);
     };
 
     /**
    * Check if user can upload SVG files
    */
     const canUploadSvg = computed(() => {
-        return permissionChecker.canUploadSvg(currentUser.value);
+        return permissionChecker.canUploadSvg(currentUser.value ?? null);
     });
 
     /**
    * Get user's permission summary
    */
     const userPermissions = computed(() => {
-        return permissionChecker.getUserPermissions(currentUser.value);
+        return permissionChecker.getUserPermissions(currentUser.value ?? null);
     });
 
     /**

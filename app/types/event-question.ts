@@ -39,6 +39,8 @@ export interface EventQuestion {
     placeholder?: string; // Placeholder text (max 255 characters)
     helpText?: string; // Help text (max 1000 characters)
     options?: EventQuestionOption[]; // Options for choice types (required for SINGLE_CHOICE, MULTI_CHOICE, DROPDOWN)
+    /** Extra configuration from API / editors (loosely typed). */
+    config?: Record<string, unknown>;
     /** When true (e.g. from API on update), only isRequired, position, and helpText are editable */
     hasAnswers?: boolean;
 }
