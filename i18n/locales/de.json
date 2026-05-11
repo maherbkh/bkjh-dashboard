@@ -1799,6 +1799,7 @@
     "date_format": "Ungültiges Datumsformat",
     "duplicate_item": "Dieses Element existiert bereits",
     "email": "Muss eine gültige E-Mail-Adresse sein",
+    "email_no_whitespace": "darf keine Leerzeichen enthalten",
     "employee_fields_required": "Gruppe und Beruf sind für Mitarbeiter erforderlich",
     "exact_length": "muss genau {len} Zeichen lang sein",
     "file": "Muss eine gültige Datei sein",

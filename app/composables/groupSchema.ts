@@ -19,7 +19,25 @@ export function createGroupSchema(t: (key: string, params?: Record<string, strin
             .array(z.string())
             .optional()
             .default([]),
+        email: z
+            .union([z.string(), z.null()])
+            .optional()
+            .superRefine((val, ctx) => {
+                if (val === undefined || val === null || val === '')
+                    return;
+                if (/\s/.test(val)) {
+                    ctx.addIssue({
+                        code: 'custom',
+                        message: `${t('common.email')} ${t('validation.email_no_whitespace')}`,
+                    });
+                    return;
+                }
+                if (!z.string().email().safeParse(val).success) {
+                    ctx.addIssue({
+                        code: 'custom',
+                        message: `${t('common.email')} ${t('validation.email')}`,
+                    });
+                }
+            }),
     });
 }
-
-export type GroupForm = z.infer<ReturnType<typeof createGroupSchema>>;

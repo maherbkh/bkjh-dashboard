@@ -470,15 +470,23 @@ export type Group = {
     slug?: string;
     position?: number;
     address?: Address;
-    companies?: Company[];
+    addressId?: string | null;
+    email?: string | null;
+    /** Pivot rows linking companies (API shape uses nested `company`). */
+    companies?: Array<{
+        id?: string;
+        company?: Pick<Company, 'id' | 'name'>;
+    }>;
     createdAt?: string;
     updatedAt?: string;
 };
 
+/** Payload shape for Groups create/update (camelCase, matches form output). */
 export type GroupForm = {
     name: string;
-    address_id?: number | null;
-    company_ids?: number[];
+    addressId?: string | null;
+    companyIds?: string[];
+    email?: string | null;
 };
 
 export type CarType = 'petrol' | 'diesel' | 'electric' | 'hybrid';

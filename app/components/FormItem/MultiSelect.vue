@@ -456,12 +456,11 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                         }}
                     </CommandEmpty>
 
-                    <ScrollArea
-                        class="max-h-60"
+                    <CommandList
+                        class="max-h-60 scroll-app"
                         @scroll="handleScroll"
                     >
-                        <CommandList>
-                            <CommandGroup>
+                        <CommandGroup>
                                 <!-- Select all -->
                                 <CommandItem
                                     v-if="selectAll"
@@ -535,9 +534,8 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                                         <span :class="o.disabled ? 'opacity-50' : ''">{{ o.label }}</span>
                                     </CommandItem>
                                 </template>
-                            </CommandGroup>
-                        </CommandList>
-                    </ScrollArea>
+                        </CommandGroup>
+                    </CommandList>
                 </Command>
             </PopoverContent>
         </Popover>

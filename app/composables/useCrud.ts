@@ -216,10 +216,9 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
                 return { data: data.value, status: status.value };
             }
             else if (fetchError.value) {
-                // Handle validation errors or other backend errors
+                // Handle validation errors or other backend errors (toast already shown by useApiFetch → global handler)
                 const errorMessage = fetchError.value.data?.message || fetchError.value.message || t('global.messages.something_went_wrong');
                 error.value = errorMessage;
-                toast.error(errorMessage);
                 throw new Error(errorMessage);
             }
         }
@@ -264,10 +263,9 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
                 return { data: data.value, status: status.value };
             }
             else if (fetchError.value) {
-                // Handle validation errors or other backend errors
+                // Handle validation errors or other backend errors (toast already shown by useApiFetch → global handler)
                 const errorMessage = fetchError.value.data?.message || fetchError.value.message || t('global.messages.something_went_wrong');
                 error.value = errorMessage;
-                toast.error(errorMessage);
                 throw new Error(errorMessage);
             }
         }
@@ -363,10 +361,9 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
                 return { data: data.value, status: status.value };
             }
             else if (fetchError.value) {
-                // Handle validation errors or other backend errors
+                // Handle validation errors or other backend errors (toast already shown by useApiFetch → global handler)
                 const errorMessage = fetchError.value.data?.message || fetchError.value.message || t('global.messages.something_went_wrong');
                 error.value = errorMessage;
-                toast.error(errorMessage);
                 throw new Error(errorMessage);
             }
         }

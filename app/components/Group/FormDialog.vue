@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Group, GroupForm } from '~/types';
 import { useResourcesStore } from '~/stores/resources';
 import FormDialogShell from '~/components/FormDialog.vue';
 
@@ -13,6 +14,7 @@ const { defineField, errors, setValues, handleSubmit, resetForm, loading } = use
 });
 
 const [name, nameAttrs] = defineField('name');
+const [email, emailAttrs] = defineField('email');
 const [addressId, addressIdAttrs] = defineField('addressId');
 const [companyIds, companyIdsAttrs] = defineField('companyIds');
 
@@ -65,8 +67,9 @@ watch(
         if (newGroup && props.dialogMode === 'edit') {
             setValues({
                 name: newGroup.name,
-                addressId: newGroup.addressId,
-                companyIds: newGroup.companies?.map((c: { company: { id: string } }) => c.company.id) || [],
+                email: newGroup.email ?? null,
+                addressId: newGroup.addressId ?? newGroup.address?.id ?? null,
+                companyIds: newGroup.companies?.map((row: NonNullable<Group['companies']>[number]) => row.company?.id).filter((id): id is string => Boolean(id)) || [],
             });
         }
     },
@@ -75,6 +78,7 @@ watch(
 
 const defaultGroupValues: GroupForm = {
     name: '',
+    email: null,
     addressId: null,
     companyIds: [],
 };
@@ -135,6 +139,18 @@ const handleClose = () => {
                         :errors="errors.name ? [errors.name] : []"
                         v-bind="nameAttrs"
                         required
+                    />
+
+                    <FormItemInput
+                        id="email"
+                        v-model="email"
+                        type="email"
+                        autocomplete="email"
+                        :title="t('common.email')"
+                        :placeholder="t('form.email_placeholder')"
+                        class="col-span-12"
+                        :errors="errors.email ? [errors.email] : []"
+                        v-bind="emailAttrs"
                     />
 
                     <!-- Address Selection -->

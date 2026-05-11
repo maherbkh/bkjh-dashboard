@@ -1796,6 +1796,7 @@
     "date_format": "Invalid date format",
     "duplicate_item": "This item already exists",
     "email": "Must be a valid email address",
+    "email_no_whitespace": "must not contain spaces",
     "employee_fields_required": "Group and Occupation are required for employees",
     "exact_length": "must be exactly {len} characters",
     "file": "Must be a valid file",

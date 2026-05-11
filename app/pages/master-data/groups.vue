@@ -80,6 +80,18 @@ const dialogMode = ref<'add' | 'edit'>('add');
 const editingGroup = ref<Group | null>(null);
 const isSubmitting = ref(false);
 
+/** Normalize GroupForm for API (email lowercase when set). */
+function buildGroupSubmitPayload(values: GroupForm): GroupForm {
+    const rawEmail = values.email;
+    const email = rawEmail !== undefined && rawEmail !== null && rawEmail !== ''
+        ? rawEmail.toLowerCase()
+        : null;
+    return {
+        ...values,
+        email,
+    };
+}
+
 const openAddDialog = () => {
     dialogMode.value = 'add';
     resetForm();
@@ -92,7 +104,9 @@ const handleEdit = async (group: Group) => {
     editingGroup.value = group;
     setValues({
         name: group.name,
-        addressId: group.address?.id || null,
+        email: group.email ?? null,
+        addressId: group.address?.id ?? group.addressId ?? null,
+        companyIds: group.companies?.map(row => row.company?.id).filter((id): id is string => Boolean(id)) ?? [],
     });
     isDialogOpen.value = true;
 };
@@ -100,13 +114,14 @@ const handleEdit = async (group: Group) => {
 const onSubmitAndClose = async (values: GroupForm) => {
     isSubmitting.value = true;
     try {
+        const payload = buildGroupSubmitPayload(values);
         if (editingGroup.value) {
             // Edit existing group
-            await updateItem(editingGroup.value.id, values);
+            await updateItem(editingGroup.value.id, payload);
         }
         else {
             // Add new group
-            await createItem(values);
+            await createItem(payload);
         }
         selectedRows.value = [];
 
@@ -135,16 +150,17 @@ const onSubmitAndClose = async (values: GroupForm) => {
 const onSubmitAndAddNew = async (values: GroupForm) => {
     isSubmitting.value = true;
     try {
+        const payload = buildGroupSubmitPayload(values);
         if (editingGroup.value) {
             // Edit existing group
-            await updateItem(editingGroup.value.id, values);
+            await updateItem(editingGroup.value.id, payload);
             // After update, switch to add mode
             editingGroup.value = null;
             dialogMode.value = 'add';
         }
         else {
             // Add new group
-            await createItem(values);
+            await createItem(payload);
             // Force form reset by temporarily changing dialogMode to trigger watcher
             dialogMode.value = 'edit';
             await nextTick();
@@ -389,16 +405,22 @@ const handleRowSelected = (id: string, checked: boolean) => {
                                         </span>
                                     </TooltipTrigger>
                                     <TooltipContent
-                                        class="max-w-sm"
+                                        :side-offset="8"
+                                        class="max-w-md min-w-[18rem] border-border/60 px-4 py-3 text-sm leading-snug shadow-lg"
                                     >
-                                        <ul class="list-disc list-inside space-y-0.5 text-xs">
-                                            <li
+                                        <div
+                                            class="divide-y divide-border divide-dashed"
+                                            role="list"
+                                        >
+                                            <div
                                                 v-for="(groupCompany, idx) in row.companies"
                                                 :key="groupCompany.id ?? idx"
+                                                class="py-1.5 text-sm font-normal text-foreground first:pt-0 last:pb-0"
+                                                role="listitem"
                                             >
                                                 {{ groupCompany.company?.name }}
-                                            </li>
-                                        </ul>
+                                            </div>
+                                        </div>
                                     </TooltipContent>
                                 </Tooltip>
                             </div>
