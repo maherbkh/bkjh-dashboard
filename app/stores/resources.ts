@@ -77,8 +77,10 @@ interface AdminData {
     eventTargets: EventTarget[];
 }
 
+/** Backend may use `success` (prod API) or `status` (legacy) */
 interface AdminDataResponse {
-    status: boolean;
+    success?: boolean;
+    status?: boolean;
     message: string;
     data: AdminData;
 }
@@ -118,6 +120,42 @@ export const useResourcesStore = defineStore('resources', () => {
         eventTargets: [],
     });
 
+    /** Normalize proxy / useFetch body: AdminData, { data: AdminData }, or { success|status, data: AdminData } */
+    function extractAdminDataFromPayload(payload: unknown): AdminData | undefined {
+        const asRecord = (v: unknown): Record<string, unknown> | null =>
+            v !== null && typeof v === 'object' ? (v as Record<string, unknown>) : null;
+
+        const tryAdmin = (v: unknown): AdminData | undefined => {
+            const o = asRecord(v);
+            if (o && 'categories' in o && o.categories != null && typeof o.categories === 'object') {
+                return v as AdminData;
+            }
+            return undefined;
+        };
+
+        const direct = tryAdmin(payload);
+        if (direct) {
+            return direct;
+        }
+
+        const root = asRecord(payload);
+        if (!root || !('data' in root) || root.data == null) {
+            return undefined;
+        }
+
+        const inner = tryAdmin(root.data);
+        if (inner) {
+            return inner;
+        }
+
+        const mid = asRecord(root.data);
+        if (mid && 'data' in mid) {
+            return tryAdmin(mid.data);
+        }
+
+        return undefined;
+    }
+
     // Fetch admin data from authenticated endpoint
     const fetchAdminData = async (forceRefresh = false): Promise<AdminData> => {
         if (!forceRefresh && !isStale.value && ticketCategories.value.length > 0) {
@@ -146,15 +184,8 @@ export const useResourcesStore = defineStore('resources', () => {
         }
 
         if (response.value) {
-            // useApiFetch wraps the backend body as ApiResponse<T>: { data: T }
-            const body = response.value.data;
-            let adminData: AdminData | undefined;
-            if (body && typeof body === 'object' && 'status' in body && body.status && 'data' in body && body.data) {
-                adminData = body.data as AdminData;
-            }
-            else if (body && typeof body === 'object' && 'data' in body && body.data) {
-                adminData = body.data as AdminData;
-            }
+            const raw = response.value as unknown;
+            const adminData = extractAdminDataFromPayload(raw);
 
             // Check if adminData has the expected structure
             if (adminData && adminData.categories) {
