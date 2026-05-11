@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { SupportTicket } from '~/types';
+import { storeToRefs } from 'pinia';
+import { useResourcesStore } from '~/stores/resources';
 
 const { t } = useI18n();
 const { defineField, errors, setValues, handleSubmit, resetForm } = useCrud<
@@ -62,6 +64,31 @@ const isOpen = computed({
     get: () => props.isDialogOpen,
     set: (value: boolean) => emit('update:isDialogOpen', value),
 });
+
+const resourcesStore = useResourcesStore();
+const { groups, ticketCategories } = storeToRefs(resourcesStore);
+
+/** FormItemSelect uses `data` + id/name keys, not `options` with value/label. */
+const groupSelectData = computed(() => groups.value.filter(g => g.isActive !== false));
+
+const ticketCategorySelectData = computed(() =>
+    ticketCategories.value.filter(c => c.isActive !== false),
+);
+
+// Admins (and devices) are not part of `/auth/admin-data` today — replace when API exposes them.
+watch(
+    () => isOpen.value,
+    (open) => {
+        if (!open || !import.meta.client) {
+            return;
+        }
+        const needGroups = resourcesStore.groups.length === 0;
+        const needCategories = resourcesStore.ticketCategories.length === 0;
+        if (needGroups || needCategories) {
+            void resourcesStore.fetchAdminData(true);
+        }
+    },
+);
 
 // Watch for changes to editingTicket and populate form
 watch(
@@ -150,28 +177,16 @@ const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
     })();
 };
 
-// Mock data for dropdowns - in real app, these would come from API
-const groupOptions = ref([
-    { value: 'group-1', label: 'IT Support' },
-    { value: 'group-2', label: 'HR Support' },
-    { value: 'group-3', label: 'Finance Support' },
+// Mock admins — not in `/auth/admin-data` today; use id/name for FormItemSelect.
+const adminSelectData = ref([
+    { id: 'admin-1', name: 'Jane Smith' },
+    { id: 'admin-2', name: 'John Doe' },
+    { id: 'admin-3', name: 'Alice Johnson' },
 ]);
 
-const categoryOptions = ref([
-    { value: 'cat-1', label: 'Technical Issues' },
-    { value: 'cat-2', label: 'Account Issues' },
-    { value: 'cat-3', label: 'General Inquiry' },
-]);
-
-const adminOptions = ref([
-    { value: 'admin-1', label: 'Jane Smith' },
-    { value: 'admin-2', label: 'John Doe' },
-    { value: 'admin-3', label: 'Alice Johnson' },
-]);
-
-const typeOptions = ref([
-    { value: 'TICKET', label: t('ticket.type.ticket') },
-    { value: 'TASK', label: t('ticket.type.task') },
+const typeSelectData = computed(() => [
+    { id: 'TICKET', name: t('ticket.type.ticket') },
+    { id: 'TASK', name: t('ticket.type.task') },
 ]);
 </script>
 
@@ -189,7 +204,7 @@ const typeOptions = ref([
                         <h3 class="text-lg font-medium">
                             {{ $t("requester.information") }}
                         </h3>
-                        <div class="grid grid-cols-12 gap-4">
+                        <div class="grid grid-cols-12 gap-4 items-start">
                             <FormItemInput
                                 id="requesterName"
                                 v-model="requesterName"
@@ -238,7 +253,7 @@ const typeOptions = ref([
                         <h3 class="text-lg font-medium">
                             {{ $t("ticket.information") }}
                         </h3>
-                        <div class="grid grid-cols-12 gap-4">
+                        <div class="grid grid-cols-12 gap-4 items-start">
                             <FormItemSelect
                                 id="groupId"
                                 v-model="groupId"
@@ -247,7 +262,7 @@ const typeOptions = ref([
                                 class="col-span-6"
                                 :errors="errors.groupId ? [errors.groupId] : []"
                                 v-bind="groupIdAttrs"
-                                :options="groupOptions"
+                                :data="groupSelectData"
                                 required
                             />
                             <FormItemSelect
@@ -258,7 +273,7 @@ const typeOptions = ref([
                                 class="col-span-6"
                                 :errors="errors.ticketCategoryId ? [errors.ticketCategoryId] : []"
                                 v-bind="ticketCategoryIdAttrs"
-                                :options="categoryOptions"
+                                :data="ticketCategorySelectData"
                                 required
                             />
                             <FormItemSelect
@@ -269,7 +284,7 @@ const typeOptions = ref([
                                 class="col-span-6"
                                 :errors="errors.type ? [errors.type] : []"
                                 v-bind="typeAttrs"
-                                :options="typeOptions"
+                                :data="typeSelectData"
                                 required
                             />
                             <FormItemSelect
@@ -280,7 +295,7 @@ const typeOptions = ref([
                                 class="col-span-6"
                                 :errors="errors.adminId ? [errors.adminId] : []"
                                 v-bind="adminIdAttrs"
-                                :options="adminOptions"
+                                :data="adminSelectData"
                                 required
                             />
                             <FormItemTextarea

@@ -4,6 +4,8 @@ import type { ZodSchema } from 'zod';
 import { toast } from 'vue-sonner';
 import type { CrudItem, PaginatedResponse, Category } from '~/types';
 import type { TenantSlug } from '~/types/app';
+import { useResourcesStore } from '~/stores/resources';
+import { isAdminSnapshotCrud } from '~/utils/adminSnapshotCrud';
 
 type CrudOptions = {
     /** REST segment after tenant (preferred). */
@@ -11,6 +13,11 @@ type CrudOptions = {
     tenant?: TenantSlug;
     /** Legacy alias for crudPath; use crudPath for new code. */
     apiSlug?: string;
+    /**
+     * After successful mutations, refetch `/auth/admin-data` so the resources store stays in sync.
+     * Defaults to true when (tenant, crudPath) is registered in adminSnapshotCrud.
+     */
+    syncAdminSnapshot?: boolean;
     translations?: {
         add_success?: string;
         edit_success?: string;
@@ -43,6 +50,20 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
 
     if (!crudSegment) {
         throw new Error('useCrud: provide crudPath or apiSlug');
+    }
+
+    const shouldSyncAdminSnapshot = options.syncAdminSnapshot ?? isAdminSnapshotCrud(tenant, crudSegment);
+
+    async function syncResourcesStoreAfterMutation(): Promise<void> {
+        if (!shouldSyncAdminSnapshot || !import.meta.client) {
+            return;
+        }
+        try {
+            await useResourcesStore().refetchAdminData();
+        }
+        catch (err) {
+            console.error('[useCrud] refetchAdminData failed:', err);
+        }
     }
 
     // Build API path with tenant and crud path
@@ -189,6 +210,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
 
             if (status.value === 'success') {
                 toast.success(defaultTranslations.add_success);
+                await syncResourcesStoreAfterMutation();
                 // Don't auto-refresh - let caller handle refresh with correct params
                 // await refresh();
                 return { data: data.value, status: status.value };
@@ -236,6 +258,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
 
             if (status.value === 'success') {
                 toast.success(defaultTranslations.edit_success);
+                await syncResourcesStoreAfterMutation();
                 // Don't auto-refresh - let caller handle refresh with correct params
                 // await refresh();
                 return { data: data.value, status: status.value };
@@ -283,6 +306,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
             if (status.value === 'success') {
                 toast.success(defaultTranslations.delete_success);
                 await refresh();
+                await syncResourcesStoreAfterMutation();
                 return { data: data.value, status: status.value };
             }
         }
@@ -335,6 +359,7 @@ export const useCrud = <T extends CrudItem, FormType = Record<string, any>>(opti
                 }
 
                 await refresh();
+                await syncResourcesStoreAfterMutation();
                 return { data: data.value, status: status.value };
             }
             else if (fetchError.value) {

@@ -1,4 +1,5 @@
 import type { Car } from '~/types';
+import { useResourcesStore } from '~/stores/resources';
 
 export type BookingCalendarViewMode = 'day' | '3days' | 'week' | '2weeks' | 'month';
 export type BookingApiStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELED';
@@ -129,29 +130,6 @@ type CarsIndexPayload = {
     };
 };
 
-type GroupsIndexItem = {
-    id: string | number;
-    name: string;
-};
-
-type GroupsIndexPayload = {
-    data: GroupsIndexItem[];
-    meta: {
-        total: number;
-        perPage: number;
-        currentPage: number;
-        lastPage: number;
-        from: number;
-        to: number;
-    };
-    links: {
-        first: string | null;
-        last: string | null;
-        prev: string | null;
-        next: string | null;
-    };
-};
-
 const VIEW_LENGTH: Record<Exclude<BookingCalendarViewMode, 'month'>, number> = {
     'day': 1,
     '3days': 3,
@@ -253,6 +231,7 @@ function createMockBookingId(): string {
 export function useBookingCalendarView() {
     const { t } = useI18n();
     const { formatDate, formatDateOnly, formatTimeOnly } = useGermanDateFormat();
+    const resourcesStore = useResourcesStore();
 
     const today = normalizeDate(new Date());
     const anchorDate = ref<Date>(today);
@@ -268,10 +247,16 @@ export function useBookingCalendarView() {
     const latestBookingsRequestId = ref(0);
 
     const cars = ref<BookingCalendarCar[]>([]);
-    const groupNameById = ref<Record<string, string>>({});
-    const groupOptions = computed<BookingGroupOption[]>(() => {
-        return Object.entries(groupNameById.value).map(([id, name]) => ({ id, name }));
+    const groupNameById = computed<Record<string, string>>(() => {
+        const map: Record<string, string> = {};
+        for (const g of resourcesStore.groups) {
+            map[String(g.id)] = g.name;
+        }
+        return map;
     });
+    const groupOptions = computed<BookingGroupOption[]>(() =>
+        resourcesStore.groups.map(g => ({ id: String(g.id), name: g.name })),
+    );
     const carOptions = computed<BookingCarOption[]>(() => {
         return cars.value.map(car => ({
             id: car.id,
@@ -521,43 +506,6 @@ export function useBookingCalendarView() {
         }
     }
 
-    async function loadGroupsFromIndex() {
-        try {
-            const aggregated: GroupsIndexItem[] = [];
-            let page = 1;
-            let lastPage = 1;
-
-            do {
-                const response = await fetchDashboardApi<GroupsIndexPayload>('/shared/groups', {
-                    query: {
-                        page,
-                        length: 100,
-                        sort_by: 'createdAt',
-                        sort_dir: 'desc',
-                    },
-                });
-
-                const payload = response.data;
-                if (payload?.data?.length) {
-                    aggregated.push(...payload.data);
-                }
-                lastPage = payload?.meta?.lastPage ?? 1;
-                page += 1;
-            } while (page <= lastPage);
-
-            if (aggregated.length > 0) {
-                const nextMap: Record<string, string> = {};
-                for (const group of aggregated) {
-                    nextMap[String(group.id)] = group.name;
-                }
-                groupNameById.value = nextMap;
-            }
-        }
-        catch (error) {
-            console.error('Failed to load groups index for booking calendar:', error);
-        }
-    }
-
     const visibleDates = computed<Date[]>(() => {
         if (customRange.value) {
             const [rangeStart, rangeEnd] = customRange.value;
@@ -674,7 +622,9 @@ export function useBookingCalendarView() {
 
     onMounted(() => {
         loadCarsFromIndex();
-        loadGroupsFromIndex();
+        if (import.meta.client && resourcesStore.groups.length === 0) {
+            void resourcesStore.fetchAdminData(true);
+        }
         loadBookingsFromApi();
     });
 

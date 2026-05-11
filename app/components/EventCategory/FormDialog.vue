@@ -51,10 +51,10 @@
                         <FormItemSelect
                             id="parentId"
                             v-model="parentId"
-                            :options="parentCategoryOptions"
+                            :data="parentCategorySelectData"
+                            :title="''"
                             :placeholder="$t('event_category.parent_placeholder')"
-                            :error="errors.parentId"
-                            clearable
+                            :errors="errors.parentId ? [errors.parentId] : []"
                         />
                     </div>
 
@@ -110,7 +110,9 @@
 </template>
 
 <script setup lang="ts">
-import type { EventCategory, EventCategoryForm, SelectOption } from '~/types';
+import type { EventCategory, EventCategoryForm } from '~/types';
+import { storeToRefs } from 'pinia';
+import { useResourcesStore } from '~/stores/resources';
 
 const { t } = useI18n();
 
@@ -150,32 +152,16 @@ const [position] = defineField('position');
 const [isActive] = defineField('isActive');
 const [parentId] = defineField('parentId');
 
-// Parent category options (for hierarchical structure)
-const parentCategoryOptions = ref<SelectOption[]>([]);
+const resourcesStore = useResourcesStore();
+const { eventCategories } = storeToRefs(resourcesStore);
 
-// Fetch parent categories for selection
-const fetchParentCategories = async () => {
-    try {
-        const { data } = await useApiFetch<EventCategory[]>('/academy/event-categories/active');
-
-        const list = (data.value as { data?: EventCategory[] } | null)?.data ?? [];
-        parentCategoryOptions.value = list.map(category => ({
-            value: category.id,
-            label: category.name,
-        }));
-    }
-    catch (error) {
-        console.error('Error fetching parent categories:', error);
-    }
-};
-
-// Watch for dialog open to fetch parent categories
-watch(() => props.isDialogOpen, (isOpen) => {
-    if (isOpen) {
-        fetchParentCategories();
-    }
+// Parent options from admin snapshot; exclude self in edit mode (FormItemSelect expects id/name rows).
+const parentCategorySelectData = computed(() => {
+    const editingId = props.editingEventCategory?.id;
+    return eventCategories.value
+        .filter((c) => c.isActive !== false && (!editingId || c.id !== editingId))
+        .map((c) => ({ id: c.id, name: c.name }));
 });
-
 // Watch for editing event category changes
 watch(
     () => props.editingEventCategory,
@@ -211,11 +197,16 @@ watch(
     },
 );
 
-// Clear form when dialog closes
+// Clear form when dialog closes; warm parent options from admin snapshot if needed
 watch(
     () => props.isDialogOpen,
     (isOpen) => {
-        if (!isOpen) {
+        if (isOpen) {
+            if (import.meta.client && resourcesStore.eventCategories.length === 0) {
+                void resourcesStore.fetchAdminData(true);
+            }
+        }
+        else {
             nextTick(() => {
                 resetForm({ values: defaultEventCategoryValues });
             });
