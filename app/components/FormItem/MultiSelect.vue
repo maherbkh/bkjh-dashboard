@@ -461,68 +461,47 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                         @scroll="handleScroll"
                     >
                         <CommandGroup>
-                                <!-- Select all -->
-                                <CommandItem
-                                    v-if="selectAll"
-                                    value="__select_all__"
-                                    class="gap-2"
-                                    @click="toggleSelectAll()"
-                                >
-                                    <Checkbox
-                                        :checked="isAllSelected"
-                                        class="mr-2"
-                                        @update:checked="(nv:boolean) => toggleSelectAll(nv)"
-                                    />
-                                    <span>{{ isAllSelected ? t('form.unselect_all') : t('action.select_all') }}</span>
-                                </CommandItem>
+                            <!-- Select all -->
+                            <CommandItem
+                                v-if="selectAll"
+                                value="__select_all__"
+                                class="gap-2"
+                                @click="toggleSelectAll()"
+                            >
+                                <Checkbox
+                                    :checked="isAllSelected"
+                                    class="mr-2"
+                                    @update:checked="(nv:boolean) => toggleSelectAll(nv)"
+                                />
+                                <span>{{ isAllSelected ? t('form.unselect_all') : t('action.select_all') }}</span>
+                            </CommandItem>
 
-                                <!-- Virtual scrolling container -->
+                            <!-- Virtual scrolling container -->
+                            <div
+                                v-if="shouldUseVirtualScrolling"
+                                :style="{
+                                    height: `${filtered.length * ITEM_HEIGHT}px`,
+                                    position: 'relative',
+                                }"
+                            >
                                 <div
-                                    v-if="shouldUseVirtualScrolling"
                                     :style="{
-                                        height: `${filtered.length * ITEM_HEIGHT}px`,
-                                        position: 'relative',
+                                        transform: `translateY(${
+                                            virtualScrollState.startIndex * ITEM_HEIGHT
+                                        }px)`,
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
                                     }"
                                 >
-                                    <div
-                                        :style="{
-                                            transform: `translateY(${
-                                                virtualScrollState.startIndex * ITEM_HEIGHT
-                                            }px)`,
-                                            position: 'absolute',
-                                            top: 0,
-                                            left: 0,
-                                            right: 0,
-                                        }"
-                                    >
-                                        <CommandItem
-                                            v-for="(o, index) in visibleItems"
-                                            :key="`virtual-${o.value}-${virtualScrollState.startIndex + index}`"
-                                            :value="o.label"
-                                            :disabled="o.disabled"
-                                            class="cursor-pointer"
-                                            :style="{ height: `${ITEM_HEIGHT}px` }"
-                                            @click="toggleValue(o.value)"
-                                        >
-                                            <Checkbox
-                                                :model-value="isSelected(o.value)"
-                                                class="mr-2"
-                                                :disabled="o.disabled"
-                                                @update:checked="(nv:boolean) => toggleValue(o.value, nv)"
-                                            />
-                                            <span :class="o.disabled ? 'opacity-50' : ''">{{ o.label }}</span>
-                                        </CommandItem>
-                                    </div>
-                                </div>
-
-                                <!-- Regular rendering for small datasets -->
-                                <template v-else>
                                     <CommandItem
-                                        v-for="(o, index) in filtered"
-                                        :key="`regular-${o.value}-${index}`"
+                                        v-for="(o, index) in visibleItems"
+                                        :key="`virtual-${o.value}-${virtualScrollState.startIndex + index}`"
                                         :value="o.label"
                                         :disabled="o.disabled"
                                         class="cursor-pointer"
+                                        :style="{ height: `${ITEM_HEIGHT}px` }"
                                         @click="toggleValue(o.value)"
                                     >
                                         <Checkbox
@@ -533,7 +512,28 @@ defineExpose({ focus, open: openMenu, close: closeMenu, clear, setValues, getVal
                                         />
                                         <span :class="o.disabled ? 'opacity-50' : ''">{{ o.label }}</span>
                                     </CommandItem>
-                                </template>
+                                </div>
+                            </div>
+
+                            <!-- Regular rendering for small datasets -->
+                            <template v-else>
+                                <CommandItem
+                                    v-for="(o, index) in filtered"
+                                    :key="`regular-${o.value}-${index}`"
+                                    :value="o.label"
+                                    :disabled="o.disabled"
+                                    class="cursor-pointer"
+                                    @click="toggleValue(o.value)"
+                                >
+                                    <Checkbox
+                                        :model-value="isSelected(o.value)"
+                                        class="mr-2"
+                                        :disabled="o.disabled"
+                                        @update:checked="(nv:boolean) => toggleValue(o.value, nv)"
+                                    />
+                                    <span :class="o.disabled ? 'opacity-50' : ''">{{ o.label }}</span>
+                                </CommandItem>
+                            </template>
                         </CommandGroup>
                     </CommandList>
                 </Command>

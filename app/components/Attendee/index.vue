@@ -2,7 +2,9 @@
 import type { AttendeeData } from '~/types';
 import { useInitials } from '~/composables/useInitials';
 
-const { formatDateShort, formatTimeOnly } = useGermanDateFormat();
+const { formatDateShort, formatRelative } = useGermanDateFormat();
+const { t } = useI18n();
+const router = useRouter();
 
 const props = defineProps<{
     attendee: AttendeeData;
@@ -10,226 +12,262 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     edit: [];
+    refresh: [];
 }>();
 
-const { t } = useI18n();
+const { sendVerificationEmail, isSendingVerificationEmail } = useAttendeeActions();
 
-// Calculate statistics
-const confirmedRegistrations = computed(() =>
-    props.attendee.events?.filter(event => event.registrationStatus === 'CONFIRMED').length || 0,
+const confirmedCount = computed(() =>
+    props.attendee.events?.filter(e => e.registrationStatus === 'CONFIRMED').length ?? 0,
 );
-
-const pendingRegistrations = computed(() =>
-    props.attendee.events?.filter(event => event.registrationStatus === 'PENDING').length || 0,
+const pendingCount = computed(() =>
+    props.attendee.events?.filter(e => e.registrationStatus === 'PENDING').length ?? 0,
 );
+/** Registrations carry `hasAttended`; the embedded `events` list may omit `ATTENDED` status. */
+const attendedCount = computed(() => {
+    const regs = props.attendee.registrations;
+    if (regs != null) {
+        return regs.filter(r => r.hasAttended).length;
+    }
+    return props.attendee.events?.filter(e => e.registrationStatus === 'ATTENDED').length ?? 0;
+});
 
-const router = useRouter();
+const emailVerifiedLabel = computed(() => {
+    if (props.attendee.emailVerifiedAt) return t('common.yes');
+    return t('common.no');
+});
 
-// Debug: Log registrations data
-watch(() => props.attendee.registrations, (registrations) => {
-    console.log('Attendee registrations:', registrations);
-}, { immediate: true });
+const metaParts = computed(() => {
+    const parts: { key: string; text: string }[] = [];
+    parts.push({ key: 'email', text: props.attendee.email });
+    if (props.attendee.group?.name) {
+        parts.push({ key: 'group', text: props.attendee.group.name });
+    }
+    if (props.attendee.occupation?.name) {
+        parts.push({ key: 'job', text: props.attendee.occupation.name });
+    }
+    return parts;
+});
+
+const lastLoginDisplay = computed(() => {
+    if (!props.attendee.lastLoginAt) return '—';
+    return `${formatDateShort(props.attendee.lastLoginAt)} · ${formatRelative(props.attendee.lastLoginAt)}`;
+});
+
+async function onResendVerification() {
+    await sendVerificationEmail(props.attendee.id, async () => {
+        emit('refresh');
+    });
+}
 </script>
 
 <template>
     <div class="flex flex-col gap-6">
-        <!-- Attendee Not Found State -->
+        <!-- Compact header (aligned with Event / Ticket detail headers) -->
         <div
-            v-if="!props.attendee"
-            class="flex flex-col items-center justify-center py-16 text-center"
+            class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
         >
-            <div class="flex items-center justify-center size-20 rounded-full bg-muted mb-6">
-                <Icon
-                    name="solar:user-cross-outline"
-                    class="size-10! text-muted-foreground"
-                />
+            <div class="flex min-w-0 items-start gap-3">
+                <Avatar class="size-10 shrink-0 rounded-lg border shadow-sm sm:size-11">
+                    <AvatarImage
+                        v-if="attendee.avatar"
+                        :src="attendee.avatar"
+                        :alt="attendee.fullName"
+                        class="rounded-lg object-cover"
+                    />
+                    <AvatarFallback class="rounded-lg text-sm font-normal">
+                        {{ useInitials(attendee.fullName) }}
+                    </AvatarFallback>
+                </Avatar>
+                <div class="min-w-0 space-y-1">
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <h1 class="text-base font-bold tracking-tight sm:text-lg">
+                            {{ attendee.fullName }}
+                        </h1>
+                        <Badge
+                            :variant="attendee.isActive ? 'success' : 'secondary'"
+                            class="shrink-0 px-3 text-xs font-normal uppercase"
+                        >
+                            {{ attendee.isActive ? $t('common.active') : $t('common.inactive') }}
+                        </Badge>
+                        <Badge
+                            :variant="attendee.isEmployee ? 'default' : 'outline'"
+                            class="shrink-0 px-3 text-xs font-normal uppercase"
+                        >
+                            {{ attendee.isEmployee ? $t('attendee.employee') : $t('attendee.non_employee') }}
+                        </Badge>
+                    </div>
+                    <p
+                        class="text-xs text-muted-foreground sm:text-sm"
+                    >
+                        <template
+                            v-for="(part, i) in metaParts"
+                            :key="part.key"
+                        >
+                            <span
+                                v-if="i > 0"
+                                class="mx-1.5 text-border select-none"
+                                aria-hidden="true"
+                            >·</span>
+                            <span class="break-all">{{ part.text }}</span>
+                        </template>
+                    </p>
+                </div>
             </div>
-            <h2 class="text-2xl font-semibold text-foreground mb-2">
-                {{ $t("action.message.not_found_title", { model: $t("attendee.singular") }) }}
-            </h2>
-            <p class="text-muted-foreground mb-6 max-w-md">
-                {{ $t("action.message.not_found_description", { model: $t("attendee.singular") }) }}
-            </p>
-            <div class="flex items-center gap-3">
-                <NuxtLink to="/events/attendees">
-                    <Button>
-                        <Icon
-                            name="solar:arrow-left-linear"
-                            class="mr-2 h-4 w-4"
-                        />
-                        {{ $t("action.back") + " " + $t("common.to") + " " + $t("attendee.plural") }}
-                    </Button>
-                </NuxtLink>
+            <div class="flex shrink-0 flex-wrap items-center gap-2 border-t border-border/60 pt-3 sm:border-t-0 sm:pt-0">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    class="px-5"
+                    @click="router.back()"
+                >
+                    <Icon
+                        name="solar:arrow-left-outline"
+                        class="size-4"
+                    />
+                    {{ $t('action.back') }}
+                </Button>
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    class="px-5"
+                    :disabled="isSendingVerificationEmail || attendee.emailVerifiedAt"
+                    @click="onResendVerification"
+                >
+                    <Icon
+                        :name="isSendingVerificationEmail ? 'svg-spinners:ring-resize' : 'solar:letter-outline'"
+                        class="size-4 shrink-0"
+                    />
+                    <span class="max-w-40 truncate sm:max-w-none">{{
+                        attendee.emailVerifiedAt
+                            ? $t('attendee.email_verified')
+                            : $t('attendee.resend_verification_email')
+                    }}</span>
+                </Button>
+                <Button
+                    size="sm"
+                    class="px-5 hover:opacity-75! ease-in-out duration-300"
+                    @click="emit('edit')"
+                >
+                    <Icon
+                        name="solar:pen-outline"
+                        class="size-4"
+                    />
+                    {{ $t('action.edit') }}
+                </Button>
             </div>
         </div>
-        <!-- Attendee Content -->
-        <div
-            v-else-if="props.attendee"
-            class="space-y-6"
-        >
-            <!-- Header -->
-            <div class="flex lg:flex-row flex-col gap-5 lg:items-center justify-between">
-                <div class="flex items-start gap-4">
-                    <Avatar
-                        class="size-16 rounded-full border
-                           group-active:bg-sidebar-primary group-active:text-sidebar-primary-foreground
-                           group-data-[state=open]:bg-sidebar-accent group-data-[state=open]:text-sidebar-accent-foreground"
-                    >
-                        <AvatarImage
-                            v-if="props.attendee.avatar"
-                            class="bg-background"
-                            :src="props.attendee.avatar"
-                            :alt="props.attendee.fullName"
-                        />
-                        <AvatarFallback class="rounded-full bg-background text-lg">
-                            {{ useInitials(props.attendee.fullName) }}
-                        </AvatarFallback>
-                    </Avatar>
-                    <div>
-                        <div class="text-lg font-bold flex items-center gap-4">
-                            <div>{{ props.attendee.fullName }}</div>
-                            <Icon
-                                :title="props.attendee.isActive ? 'Attendee is Active' : 'Attendee is not active'"
-                                :name="props.attendee.isActive ? 'solar:check-circle-bold' : 'solar:close-circle-bold'"
-                                :class="[(props.attendee.isActive ? 'text-success' : 'text-muted-foreground'), 'shrink-0 size-5']"
-                            />
-                        </div>
-                        <div class="mt-1 text-muted-foreground flex items-center gap-2">
-                            <div class="text-sm">
-                                {{ props.attendee.email }}
-                            </div>
-                            <div
-                                v-if="props.attendee.isEmployee"
-                                class="text-sm"
+
+        <!-- KPI strip -->
+        <div class="grid grid-cols-2 gap-2 lg:grid-cols-4">
+            <EventBox
+                :title="$t('academy.plural')"
+                icon="solar:calendar-line-duotone"
+                :value="attendee.eventsCount"
+                compact
+            />
+            <EventBox
+                :title="$t('academy.pending')"
+                icon="solar:clock-circle-line-duotone"
+                :value="pendingCount"
+                compact
+            />
+            <EventBox
+                :title="$t('event.approved')"
+                icon="solar:check-circle-line-duotone"
+                :value="confirmedCount"
+                compact
+            />
+            <EventBox
+                :title="$t('attendee.visited')"
+                icon="solar:star-shine-line-duotone"
+                :value="attendedCount"
+                compact
+            />
+        </div>
+
+        <!-- Same grid + Card pattern as Ticket detail (Ticket/index.vue) -->
+        <div class="grid grid-cols-1 gap-6 xl:grid-cols-12">
+            <div class="min-w-0 xl:col-span-8">
+                <Tabs
+                    default-value="events"
+                    class="w-full"
+                >
+                    <TabsList class="grid h-9 w-full max-w-md grid-cols-2 p-1">
+                        <TabsTrigger
+                            value="events"
+                            class="text-xs sm:text-sm"
+                        >
+                            {{ $t('academy.plural') }}
+                            <Badge
+                                v-if="attendee.events?.length"
+                                variant="secondary"
+                                class="ml-1.5 h-5 min-w-5 px-1 text-[10px] tabular-nums"
                             >
-                                • {{ $t('attendee.employee') }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        @click="router.back()"
+                                {{ attendee.events.length }}
+                            </Badge>
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="registrations"
+                            class="text-xs sm:text-sm"
+                        >
+                            {{ $t('attendee.registrations') }}
+                            <Badge
+                                v-if="attendee.registrations?.length"
+                                variant="secondary"
+                                class="ml-1.5 h-5 min-w-5 px-1 text-[10px] tabular-nums"
+                            >
+                                {{ attendee.registrations.length }}
+                            </Badge>
+                        </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent
+                        value="events"
+                        class="mt-6 outline-none focus-visible:ring-0"
                     >
-                        <Icon name="solar:arrow-left-outline" />
-                        {{ $t("action.back") }}
-                    </Button>
-                    <Button
-                        size="sm"
-                        @click="emit('edit')"
+                        <AttendeeEventsTable :data="attendee.events ?? []" />
+                    </TabsContent>
+                    <TabsContent
+                        value="registrations"
+                        class="mt-6 outline-none focus-visible:ring-0"
                     >
-                        <Icon name="solar:pen-outline" />
-                        {{ $t("action.edit") }}
-                    </Button>
-                </div>
+                        <AttendeeRegistrationsTable :data="attendee.registrations ?? []" />
+                    </TabsContent>
+                </Tabs>
             </div>
-            <!-- Statistics Grid -->
-            <div class="grid lg:grid-cols-3 gap-4">
-                <EventBox
-                    title="Total Events"
-                    icon="solar:calendar-line-duotone"
-                    :value="props.attendee.eventsCount"
-                />
-                <EventBox
-                    title="Confirmed Registrations"
-                    icon="solar:check-circle-line-duotone"
-                    :value="confirmedRegistrations"
-                />
-                <EventBox
-                    title="Pending Registrations"
-                    icon="solar:clock-circle-line-duotone"
-                    :value="pendingRegistrations"
-                />
-            </div>
-            <!-- Attendee Details Grid -->
-            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-                <!-- Main Content -->
-                <div class="xl:col-span-8 space-y-6">
-                    <!-- Events Table -->
-                    <Card>
-                        <CardHeader>
-                            <CardTitle class="flex items-center gap-2">
-                                <Icon
-                                    name="solar:calendar-line-duotone"
-                                    class="size-5! opacity-75 shrink-0"
-                                />
-                                {{ $t("academy.plural") }}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div>
-                                <EventsTable
-                                    :data="props.attendee.events || []"
-                                />
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <!-- Registrations Table -->
-                    <Card>
-                        <CardHeader>
-                            <CardTitle class="flex items-center gap-2">
-                                <Icon
-                                    name="solar:clipboard-list-line-duotone"
-                                    class="size-5! opacity-75 shrink-0"
-                                />
-                                {{ $t("attendee.registrations") }}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <AttendeeRegistrationsTable
-                                :data="props.attendee.registrations || []"
+
+            <div class="space-y-6 xl:col-span-4">
+                <Card class="self-start xl:sticky xl:top-4">
+                    <CardHeader>
+                        <CardTitle class="flex items-center gap-2">
+                            <Icon
+                                name="solar:info-circle-outline"
+                                class="size-5! shrink-0 opacity-75"
+                                aria-hidden="true"
                             />
-                        </CardContent>
-                    </Card>
-                </div>
-                <div class="xl:col-span-4 space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>
-                                <Icon
-                                    name="solar:documents-minimalistic-outline"
-                                    class="size-5! opacity-75 shrink-0"
-                                />
-                                {{ $t("global.information") }}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent class="flex flex-col divide-y divide-dashed">
-                            <AppListItem
-                                :title="$t('attendee.email')"
-                                :value="props.attendee.email"
-                            />
-                            <AppListItem
-                                :title="$t('attendee.employee_status')"
-                                :value="props.attendee.isEmployee ? $t('common.yes') : $t('common.no')"
-                            />
-                            <AppListItem
-                                v-if="props.attendee.group?.name"
-                                :title="$t('group.singular')"
-                                :value="props.attendee.group.name"
-                            />
-                            <AppListItem
-                                v-if="props.attendee.occupation?.name"
-                                :title="$t('occupation.singular')"
-                                :value="props.attendee.occupation.name"
-                            />
-                            <AppListItem
-                                v-if="props.attendee.lastLoginAt"
-                                :title="$t('attendee.last_login')"
-                                :value="formatDateShort(props.attendee.lastLoginAt)"
-                            />
-                            <AppListItem
-                                :title="$t('common.created_at')"
-                                :value="formatDateShort(props.attendee.createdAt)"
-                            />
-                            <AppListItem
-                                :title="$t('common.updated_at')"
-                                :value="formatDateShort(props.attendee.updatedAt)"
-                            />
-                        </CardContent>
-                    </Card>
-                </div>
+                            {{ $t('common.information') }}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent class="flex flex-col divide-y divide-dashed">
+                        <AppListItem
+                            :title="$t('attendee.email_verified')"
+                            :value="emailVerifiedLabel"
+                        />
+                        <AppListItem
+                            :title="$t('attendee.last_login')"
+                            :value="lastLoginDisplay"
+                        />
+                        <AppListItem
+                            :title="$t('common.created_at')"
+                            :value="formatDateShort(attendee.createdAt)"
+                        />
+                        <AppListItem
+                            :title="$t('common.updated_at')"
+                            :value="formatDateShort(attendee.updatedAt)"
+                        />
+                    </CardContent>
+                </Card>
             </div>
         </div>
     </div>

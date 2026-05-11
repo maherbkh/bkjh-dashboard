@@ -173,6 +173,7 @@ export type Attendee = {
     firstName: string;
     lastName: string;
     email: string;
+    emailVerifiedAt?: string | null;
     groupId: string | null;
     occupationId: string | null;
     isEmployee: boolean;
@@ -928,6 +929,8 @@ export type AttendeeData = {
     firstName: string;
     lastName: string;
     email: string;
+    /** Present when API returns verification timestamp (list view uses this field). */
+    emailVerifiedAt?: string | null;
     groupId: string | null;
     occupationId: string | null;
     isEmployee: boolean;

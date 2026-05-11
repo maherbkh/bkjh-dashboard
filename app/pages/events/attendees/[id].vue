@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { AttendeeData, Attendee, AttendeeForm } from '~/types';
-import { computed } from 'vue';
 
 const route = useRoute();
 const { t } = useI18n();
@@ -62,7 +61,6 @@ const onSubmitAndClose = async (values: AttendeeForm) => {
     try {
         if (editingAttendee.value) {
             await updateItem(editingAttendee.value.id, values);
-            // Refresh the attendee data after successful update
             await refresh();
         }
         isDialogOpen.value = false;
@@ -83,11 +81,55 @@ const handleDialogClose = () => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-4">
+        <!-- Loading skeleton (matches compact attendee layout) -->
+        <template v-if="status === 'pending'">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="flex items-start gap-3">
+                    <Skeleton class="size-10 shrink-0 rounded-lg sm:size-11" />
+                    <div class="flex-1 space-y-2">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <Skeleton class="h-5 w-40 sm:h-6 sm:w-48" />
+                            <Skeleton class="h-5 w-14 rounded-full" />
+                            <Skeleton class="h-5 w-20 rounded-full" />
+                        </div>
+                        <Skeleton class="h-3 w-full max-w-md" />
+                        <Skeleton class="h-3 w-full max-w-lg" />
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <Skeleton class="h-8 w-16 rounded-md" />
+                    <Skeleton class="h-8 w-36 rounded-md" />
+                    <Skeleton class="h-8 w-16 rounded-md" />
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 lg:grid-cols-4">
+                <Skeleton
+                    v-for="i in 4"
+                    :key="i"
+                    class="h-17 rounded-xl"
+                />
+            </div>
+            <div class="space-y-3">
+                <Skeleton class="h-9 w-full max-w-md rounded-lg" />
+                <Card class="overflow-hidden">
+                    <CardContent class="space-y-2 p-3">
+                        <Skeleton
+                            v-for="i in 5"
+                            :key="i"
+                            class="h-9 w-full"
+                        />
+                    </CardContent>
+                </Card>
+            </div>
+        </template>
+
+        <!-- Attendee content -->
         <Attendee
-            v-if="attendeeData && status !== 'pending'"
-            :attendee="attendeeData as AttendeeData"
+            v-else-if="attendeeData"
+            :attendee="attendeeData"
             @edit="openEditDialog"
+            @refresh="refresh"
         />
 
         <LazyAttendeeFormDialog

@@ -159,8 +159,8 @@ const { eventCategories } = storeToRefs(resourcesStore);
 const parentCategorySelectData = computed(() => {
     const editingId = props.editingEventCategory?.id;
     return eventCategories.value
-        .filter((c) => c.isActive !== false && (!editingId || c.id !== editingId))
-        .map((c) => ({ id: c.id, name: c.name }));
+        .filter(c => c.isActive !== false && (!editingId || c.id !== editingId))
+        .map(c => ({ id: c.id, name: c.name }));
 });
 // Watch for editing event category changes
 watch(

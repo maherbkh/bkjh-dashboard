@@ -29,6 +29,21 @@ const getStatusVariant = (status: string) => {
             return 'default';
     }
 };
+
+const getStatusLabel = (status: string) => {
+    switch (status) {
+        case 'CONFIRMED':
+            return t('event.approved');
+        case 'PENDING':
+            return t('academy.pending');
+        case 'ATTENDED':
+            return t('attendee.registration_status_attended');
+        case 'REJECTED':
+            return t('event.rejected');
+        default:
+            return status;
+    }
+};
 </script>
 
 <template>
@@ -40,6 +55,7 @@ const getStatusVariant = (status: string) => {
         :skeleton-rows="3"
         :selectable="false"
         :sortable="false"
+        :has-actions-slot="false"
     >
         <template #cell-event="{ row }">
             <div class="flex flex-col">
@@ -48,7 +64,7 @@ const getStatusVariant = (status: string) => {
                         {{ row.title }}
                     </div>
                     <Icon
-                        :title="row.isActive ? 'Event is Active' : 'Event is not active'"
+                        :title="row.isActive ? t('event.currently_active') : t('event.not_active')"
                         :name="row.isActive ? 'solar:check-circle-bold' : 'solar:close-circle-bold'"
                         :class="[(row.isActive ? 'text-success' : 'text-muted-foreground'), 'shrink-0 size-4']"
                     />
@@ -61,7 +77,7 @@ const getStatusVariant = (status: string) => {
                 :variant="getStatusVariant(row.registrationStatus)"
                 class="w-fit"
             >
-                {{ row.registrationStatus }}
+                {{ getStatusLabel(row.registrationStatus) }}
             </Badge>
         </template>
 

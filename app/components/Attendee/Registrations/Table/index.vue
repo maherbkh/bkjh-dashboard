@@ -58,26 +58,20 @@ const getStatusLabel = (status: string) => {
         :skeleton-rows="3"
         :selectable="false"
         :sortable="false"
+        :has-actions-slot="false"
     >
         <template #cell-event="{ row }">
-            <div class="flex flex-col">
-                <div class="flex items-center gap-2">
-                    <div class="font-medium">
-                        {{ row.event?.title }}
-                    </div>
-                    <Icon
-                        :title="row.event?.isActive ? 'Event is Active' : 'Event is not active'"
-                        :name="row.event?.isActive ? 'solar:check-circle-bold' : 'solar:close-circle-bold'"
-                        :class="[(row.event?.isActive ? 'text-success' : 'text-muted-foreground'), 'shrink-0 size-4']"
-                    />
+            <div class="flex items-center gap-2">
+                <div class="font-normal line-clamp-1 leading-normal">
+                    {{ row.event?.title }}
                 </div>
             </div>
         </template>
 
         <template #cell-date="{ row }">
-            <div class="flex flex-col">
-                <div class="text-sm font-medium flex items-start gap-1.5">
-                    <div class="flex items-start gap-1.5">
+            <div class="flex flex-col text-xs">
+                <div class="text-sm font-normal flex items-center gap-1.5">
+                    <div class="flex items-center gap-1.5">
                         <Icon
                             name="solar:calendar-mark-line-duotone"
                             class="opacity-50 size-4!"
@@ -88,7 +82,7 @@ const getStatusLabel = (status: string) => {
                         name="solar:arrow-right-bold-duotone"
                         class="size-5 mt-0.5 shrink-0 opacity-50"
                     />
-                    <div class="flex items-start gap-1.5">
+                    <div class="flex items-center gap-1.5">
                         <Icon
                             name="solar:watch-square-line-duotone"
                             class="opacity-50 size-4!"
@@ -108,9 +102,24 @@ const getStatusLabel = (status: string) => {
             </Badge>
         </template>
 
-        <template #cell-actions>
+        <template #cell-actions="{ row }">
             <div class="flex justify-end gap-2">
-                <!-- Actions column left empty for now -->
+                <NuxtLink
+                    v-if="row.event?.id"
+                    :to="`/events/${row.event.id}/show`"
+                >
+                    <LazyButton
+                        :title="$t('action.view')"
+                        variant="ghost"
+                        size="icon"
+                        hydrate-on-interaction="mouseover"
+                    >
+                        <Icon
+                            name="solar:eye-outline"
+                            class="size-5! shrink-0 opacity-80 transition duration-200 ease-in-out group-hover:scale-110 group-hover:text-primary group-hover:opacity-100"
+                        />
+                    </LazyButton>
+                </NuxtLink>
             </div>
         </template>
     </PageTable>
