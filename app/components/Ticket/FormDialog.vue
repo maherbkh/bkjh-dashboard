@@ -9,7 +9,7 @@ function adminDisplayName(admin: Admin): string {
 }
 
 const { t } = useI18n();
-const { defineField, errors, errorBag, values, validate, setValues, handleSubmit, resetForm } = useCrud<
+const { defineField, errors, setValues, handleSubmit, resetForm } = useCrud<
     SupportTicket,
     TicketForm
 >({
@@ -195,63 +195,13 @@ watch(
 );
 
 // Handle form submission with validation
-const submitForm = async (action: 'submitAndClose' | 'submitAndAddNew') => {
-    if (import.meta.dev) {
-        const validationResult = await validate();
-        const allValues = toRaw(values) as Record<string, unknown>;
-        const currentValues = {
-            requester: allValues.requester ?? null,
-            groupId: allValues.groupId ?? null,
-            ticketCategoryId: allValues.ticketCategoryId ?? null,
-            type: allValues.type ?? null,
-            adminId: allValues.adminId ?? null,
-            message: allValues.message ?? null,
-            deviceId: allValues.deviceId ?? null,
-        };
-        const errorsByField = Object.fromEntries(
-            Object.entries(errors.value ?? {}).filter(([, value]) => Boolean(value)),
-        );
-
-        if (!validationResult.valid) {
-            console.error(`[TicketForm] Validation failed (${action})`, {
-                action,
-                isValid: validationResult.valid,
-                errorsByField,
-                currentValues,
-                schemaIssueBag: toRaw(errorBag),
-                validationResult,
-            });
-        }
-        else {
-            console.info('[TicketForm] Validation passed', {
-                action,
-                isValid: validationResult.valid,
-                currentValues,
-            });
-        }
-    }
-
+const submitForm = (action: 'submitAndClose' | 'submitAndAddNew') => {
     const onValid = (values: unknown) => {
         emit(action, values as TicketForm);
     };
 
     handleSubmit(onValid)();
 };
-
-watch(
-    errors,
-    (currentErrors) => {
-        if (!import.meta.dev) {
-            return;
-        }
-
-        const activeErrors = Object.entries(currentErrors).filter(([, value]) => Boolean(value));
-        if (activeErrors.length > 0) {
-            console.debug('[TicketForm] Reactive validation errors:', Object.fromEntries(activeErrors));
-        }
-    },
-    { deep: true },
-);
 
 const typeSelectData = computed(() => [
     { id: 'TICKET', name: t('ticket.type.ticket') },

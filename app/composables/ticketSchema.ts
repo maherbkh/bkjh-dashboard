@@ -41,22 +41,6 @@ export function createTicketSchema(t: (key: string, params?: Record<string, stri
                     .max(20, t('requester.cell') + ' ' + t('validation.max_length', { max: 20 }))
                     .optional(),
             ),
-        }).superRefine((requester, context) => {
-            if (requester.phone || requester.cell) {
-                return;
-            }
-
-            const message = t('validation.phone_or_cell_required');
-            context.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: ['phone'],
-                message,
-            });
-            context.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: ['cell'],
-                message,
-            });
         }),
         /** Select may emit `null` when cleared; optional strings only allow `undefined`. */
         groupId: z.preprocess(
@@ -94,6 +78,22 @@ export function createTicketSchema(t: (key: string, params?: Record<string, stri
             val => (val === null || val === undefined || val === '' ? undefined : val),
             z.string().optional(),
         ),
+    }).superRefine((formData, context) => {
+        if (formData.requester.phone || formData.requester.cell) {
+            return;
+        }
+
+        const message = t('validation.phone_or_cell_required');
+        context.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['requester', 'phone'],
+            message,
+        });
+        context.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['requester', 'cell'],
+            message,
+        });
     });
 }
 
