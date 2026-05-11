@@ -352,7 +352,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         @update:model-value="handleSelectAll"
                     >
                         <template #cell-name="{ row }">
-                            <div class="font-medium">
+                            <div class="text-sm font-normal">
                                 {{ row.name }}
                             </div>
                         </template>
@@ -372,13 +372,13 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         <template #cell-parent="{ row }">
                             <div
                                 v-if="row.parent"
-                                class="text-sm"
+                                class="text-sm font-normal"
                             >
                                 {{ row.parent.name }}
                             </div>
                             <div
                                 v-else
-                                class="text-muted-foreground text-sm"
+                                class="text-xs text-muted-foreground font-light"
                             >
                                 —
                             </div>

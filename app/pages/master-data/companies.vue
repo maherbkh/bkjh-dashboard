@@ -367,7 +367,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                             </div>
                             <div
                                 v-else
-                                class="text-muted-foreground text-sm"
+                                class="text-xs text-muted-foreground font-light"
                             >
                                 {{ $t('address.no_address_found') }}
                             </div>

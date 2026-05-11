@@ -353,14 +353,16 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         @update:model-value="handleSelectAll"
                     >
                         <template #cell-name="{ row }">
-                            <div class="font-medium">
-                                {{ row.name }}
-                            </div>
-                            <div
-                                v-if="row.parent"
-                                class="text-muted-foreground text-sm"
-                            >
-                                {{ $t("parent.singular") }}: {{ row.parent.name }}
+                            <div class="flex flex-col gap-1 text-sm">
+                                <div class="font-normal">
+                                    {{ row.name }}
+                                </div>
+                                <div
+                                    v-if="row.parent"
+                                    class="text-xs text-muted-foreground font-light"
+                                >
+                                    {{ $t("parent.singular") }}: {{ row.parent.name }}
+                                </div>
                             </div>
                         </template>
 

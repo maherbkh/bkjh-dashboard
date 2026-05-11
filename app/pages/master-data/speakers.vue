@@ -384,8 +384,8 @@ const getAvatarImageSrc = (speaker: Speaker) => {
                                         />
                                     </div>
                                 </div>
-                                <div>
-                                    <div class="font-medium">
+                                <div class="flex min-w-0 flex-col gap-1 text-sm">
+                                    <div class="font-normal">
                                         {{ row.name }}
                                     </div>
                                     <Tooltip
@@ -393,7 +393,7 @@ const getAvatarImageSrc = (speaker: Speaker) => {
                                     >
                                         <TooltipTrigger as-child>
                                             <div
-                                                class="text-xs font-light text-muted-foreground truncate line-clamp-1 max-w-64 cursor-default"
+                                                class="line-clamp-1 max-w-64 cursor-default truncate text-xs font-light text-muted-foreground"
                                             >
                                                 {{ row.qualification }}
                                             </div>
@@ -406,13 +406,13 @@ const getAvatarImageSrc = (speaker: Speaker) => {
                                     </Tooltip>
                                     <div
                                         v-else-if="row.qualification"
-                                        class="text-xs font-light text-muted-foreground truncate line-clamp-1 max-w-64"
+                                        class="line-clamp-1 max-w-64 truncate text-xs font-light text-muted-foreground"
                                     >
                                         {{ row.qualification }}
                                     </div>
                                     <div
                                         v-else
-                                        class="text-muted-foreground text-sm"
+                                        class="text-xs font-light text-muted-foreground"
                                     >
                                         {{ $t("common.not_specified") }}
                                     </div>
@@ -426,9 +426,10 @@ const getAvatarImageSrc = (speaker: Speaker) => {
                         </template>
 
                         <template #cell-eventsCount="{ row }">
-                            <span class="text-sm text-muted-foreground">
-                                <span class="font-medium">{{ row.eventsCount || 0 }}</span> {{ $t("academy.plural") }}
-                            </span>
+                            <div class="text-sm">
+                                <span class="font-normal">{{ row.eventsCount || 0 }}</span>
+                                <span class="text-xs text-muted-foreground font-light"> {{ $t("academy.plural") }}</span>
+                            </div>
                         </template>
 
                         <template #cell-actions="{ row }">

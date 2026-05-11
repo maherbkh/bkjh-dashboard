@@ -343,14 +343,19 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         @update:model-value="handleSelectAll"
                     >
                         <template #cell-street="{ row }">
-                            <div class="font-medium">
+                            <div class="text-sm font-normal">
                                 <span>{{ row.streetName }} {{ row.buildingNumber }}</span>
                             </div>
                         </template>
 
                         <template #cell-city="{ row }">
-                            <div class="font-medium">
-                                <span class="text-muted-foreground">{{ row.postalCode }} </span> <span>{{ row.city }}</span>
+                            <div class="flex flex-col gap-1 text-sm">
+                                <div class="font-normal">
+                                    {{ row.city }}
+                                </div>
+                                <div class="text-xs text-muted-foreground font-light">
+                                    {{ row.postalCode }}
+                                </div>
                             </div>
                         </template>
 

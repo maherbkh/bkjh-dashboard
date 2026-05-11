@@ -351,7 +351,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         @update:model-value="handleSelectAll"
                     >
                         <template #cell-name="{ row }">
-                            <div class="font-medium">
+                            <div class="text-sm font-normal">
                                 {{ row.name }}
                             </div>
                         </template>

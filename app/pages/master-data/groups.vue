@@ -339,12 +339,15 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         @update:model-value="handleSelectAll"
                     >
                         <template #cell-name="{ row }">
-                            <div>
-                                <div class="font-medium">
+                            <div class="flex flex-col gap-1 text-sm">
+                                <div class="font-normal">
                                     {{ row.name }}
                                 </div>
-                                <div class="text-muted-foreground text-xs font-light">
-                                    {{ row.address?.fullAddress }}
+                                <div
+                                    v-if="row.address?.fullAddress"
+                                    class="text-xs text-muted-foreground font-light"
+                                >
+                                    {{ row.address.fullAddress }}
                                 </div>
                             </div>
                         </template>
@@ -352,18 +355,18 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         <template #cell-address="{ row }">
                             <div
                                 v-if="row.address"
-                                class="text-sm"
+                                class="flex flex-col gap-1 text-sm"
                             >
-                                <div class="font-medium">
+                                <div class="font-normal">
                                     {{ row.address.streetName }} {{ row.address.buildingNumber }}
                                 </div>
-                                <div class="text-muted-foreground">
+                                <div class="text-xs text-muted-foreground font-light">
                                     {{ row.address.postalCode }} {{ row.address.city }}
                                 </div>
                             </div>
                             <div
                                 v-else
-                                class="text-muted-foreground text-sm"
+                                class="text-xs text-muted-foreground font-light"
                             >
                                 {{ $t('address.no_address_found') }}
                             </div>
@@ -372,9 +375,9 @@ const handleRowSelected = (id: string, checked: boolean) => {
                         <template #cell-companies="{ row }">
                             <div
                                 v-if="row.companies && row.companies.length > 0"
-                                class="text-xs font-medium inline-flex items-baseline gap-1 flex-wrap"
+                                class="inline-flex items-baseline gap-1 flex-wrap text-sm"
                             >
-                                <span>{{ row.companies[0].company?.name }}</span>
+                                <span class="font-normal">{{ row.companies[0].company?.name }}</span>
                                 <Tooltip
                                     v-if="row.companies.length > 1"
                                 >
@@ -401,7 +404,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                             </div>
                             <span
                                 v-else
-                                class="text-muted-foreground"
+                                class="text-xs text-muted-foreground font-light"
                             >{{ $t('global.common.no_companies') }}</span>
                         </template>
 

@@ -332,7 +332,7 @@ const handleRowSelected = (id: string, checked: boolean) => {
                     @update:model-value="handleSelectAll"
                 >
                     <template #cell-model="{ row }">
-                        <div class="font-medium">
+                        <div class="text-sm font-normal">
                             {{ row.model }}
                         </div>
                     </template>
@@ -358,13 +358,13 @@ const handleRowSelected = (id: string, checked: boolean) => {
                     <template #cell-max="{ row }">
                         <span
                             v-if="row.max !== null"
-                            class="font-medium"
+                            class="text-sm font-normal"
                         >
                             {{ row.max }}
                         </span>
                         <span
                             v-else
-                            class="text-muted-foreground"
+                            class="text-xs text-muted-foreground font-light"
                         >
                             —
                         </span>
