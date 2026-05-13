@@ -23,6 +23,8 @@ type Props = {
     searchable?: boolean;
     disabledKey?: string;
     castToNumber?: boolean;
+    /** When true, show a control to clear the selection (emits empty string, or null when castToNumber). */
+    clearable?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -41,6 +43,7 @@ const props = withDefaults(defineProps<Props>(), {
     searchable: true,
     disabledKey: 'disabled',
     castToNumber: false,
+    clearable: false,
 });
 
 const emit = defineEmits<{
@@ -72,6 +75,18 @@ const handleSelect = (value: string) => {
     open.value = false;
 };
 
+const stopClearTriggerPropagation = (event: Event) => {
+    event.stopPropagation();
+};
+
+const handleClear = (event: Event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    open.value = false;
+    const empty = props.castToNumber ? null : '';
+    emit('update:modelValue', empty as string | number | null);
+};
+
 const isItemDisabled = (item: SelectOption) => Boolean(item?.[props.disabledKey]);
 </script>
 
@@ -97,16 +112,34 @@ const isItemDisabled = (item: SelectOption) => Boolean(item?.[props.disabledKey]
                     :aria-expanded="open"
                     :disabled="disabled"
                     :class="cn(
-                        'w-full min-w-0 justify-between bg-background! font-normal h-8 text-base md:text-sm',
+                        'relative w-full min-w-0 justify-between gap-2 bg-background! font-normal h-8 text-base md:text-sm',
                         hasErrors && 'border-destructive! focus:ring-destructive!',
                         !selectedItem && 'text-muted-foreground',
                     )"
                 >
-                    <span class="truncate min-w-0">{{ selectedItem ? selectedItem[nameValue] : placeholder }}</span>
-                    <Icon
-                        name="solar:double-alt-arrow-down-line-duotone"
-                        class="ml-2 h-4 w-4 shrink-0 opacity-50"
-                    />
+                    <span class="truncate min-w-0 flex-1 text-left">{{ selectedItem ? selectedItem[nameValue] : placeholder }}</span>
+                    <span class="flex shrink-0 items-center gap-0.5">
+                        <span
+                            v-if="props.clearable && selectedItem && !disabled"
+                            role="button"
+                            tabindex="0"
+                            class="inline-flex size-7 items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            :aria-label="t('media.clear_selection')"
+                            @pointerdown.stop="stopClearTriggerPropagation"
+                            @click.stop.prevent="handleClear"
+                            @keydown.enter.prevent.stop="handleClear"
+                            @keydown.space.prevent.stop="handleClear"
+                        >
+                            <Icon
+                                name="solar:close-circle-line-duotone"
+                                class="size-4 shrink-0"
+                            />
+                        </span>
+                        <Icon
+                            name="solar:double-alt-arrow-down-line-duotone"
+                            class="h-4 w-4 shrink-0 opacity-50"
+                        />
+                    </span>
                 </Button>
             </PopoverTrigger>
             <PopoverContent

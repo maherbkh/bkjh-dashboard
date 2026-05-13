@@ -310,6 +310,7 @@ const typeSelectData = computed(() => [
                                     :title="$t('admin.singular')"
                                     :placeholder="$t('admin.select')"
                                     class="w-full"
+                                    :clearable="true"
                                     :errors="errors.adminId ? [errors.adminId] : []"
                                     v-bind="adminIdAttrs"
                                     :data="adminSelectData"

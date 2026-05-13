@@ -70,9 +70,10 @@ export function createTicketSchema(t: (key: string, params?: Record<string, stri
                         ? t('type.singular') + ' ' + t('validation.required')
                         : t('type.singular') + ' ' + t('validation.invalid'),
             }),
+        /** Use `null` (not `undefined`) when unassigned so PATCH/POST JSON includes the key for the API. */
         adminId: z.preprocess(
-            val => (val === null || val === undefined || val === '' ? undefined : val),
-            z.string().optional(),
+            val => (val === null || val === undefined || val === '' ? null : val),
+            z.union([z.string(), z.null()]),
         ),
         deviceId: z.preprocess(
             val => (val === null || val === undefined || val === '' ? undefined : val),
